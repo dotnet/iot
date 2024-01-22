@@ -115,6 +115,67 @@ internal sealed class LibGpiodDriverFactory
         return new VersionedLibgpiodDriver(driverVersion, CreateInternal(driverVersion, chipNumber));
     }
 
+    private static IEnumerable<string> GetInstalledLibraries()
+    {
+        HashSet<string> foundLibrariesFileName = new();
+
+        foreach (string searchPath in _librarySearchPaths)
+        {
+            var files = GetFiles(new DirectoryInfo(searchPath), LibrarySearchPattern);
+            var fileNames = files.Select(file => file.Name);
+            foundLibrariesFileName.UnionWith(fileNames);
+        }
+
+        HashSet<string> supportedLibraryVersions = new();
+
+        foreach (string libraryFileName in foundLibrariesFileName)
+        {
+            foreach (string knownLibraryName in _libraryToDriverVersionMap.Keys)
+            {
+                if (libraryFileName.Contains(knownLibraryName))
+                {
+                    supportedLibraryVersions.Add(knownLibraryName);
+                    break;
+                }
+            }
+        }
+
+        return supportedLibraryVersions;
+    }
+
+    private static IEnumerable<FileInfo> GetFiles(DirectoryInfo rootDirectory, string searchPattern)
+    {
+        List<FileInfo> files = new();
+        Stack<DirectoryInfo> directoriesToProcess = new();
+
+        directoriesToProcess.Push(rootDirectory);
+
+        while (directoriesToProcess.Count > 0)
+        {
+            DirectoryInfo currentDirectory = directoriesToProcess.Pop();
+
+            try
+            {
+                if (currentDirectory.Exists)
+                {
+                    files.AddRange(currentDirectory.GetFiles(searchPattern));
+
+                    DirectoryInfo[] subdirectories = currentDirectory.GetDirectories();
+                    foreach (var subdirectory in subdirectories)
+                    {
+                        directoriesToProcess.Push(subdirectory);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // unauthorized access or any other exception is only to be skipped and not to be handled
+            }
+        }
+
+        return files;
+    }
+
     private VersionedLibgpiodDriver CreateAutomaticallyChosenDriver(int chipNumber)
     {
         if (_automaticallySelectedDriverVersion == null)
@@ -146,37 +207,6 @@ internal sealed class LibGpiodDriverFactory
             LibGpiodDriverVersion.V2 => new LibGpiodV2Driver(LibGpiodProxyFactory.CreateChip(chipNumber)),
             _ => throw new ArgumentOutOfRangeException(nameof(version), version, null)
         };
-    }
-
-    private IEnumerable<string> GetInstalledLibraries()
-    {
-        HashSet<string> foundLibrariesFileName = new();
-
-        foreach (string searchPath in _librarySearchPaths)
-        {
-            if (!Directory.Exists(searchPath))
-            {
-                continue;
-            }
-
-            foundLibrariesFileName.UnionWith(Directory.GetFiles(searchPath, LibrarySearchPattern));
-        }
-
-        HashSet<string> supportedLibraryVersions = new();
-
-        foreach (string libraryFileName in foundLibrariesFileName)
-        {
-            foreach (string knownLibraryName in _libraryToDriverVersionMap.Keys)
-            {
-                if (libraryFileName.Contains(knownLibraryName))
-                {
-                    supportedLibraryVersions.Add(knownLibraryName);
-                    break;
-                }
-            }
-        }
-
-        return supportedLibraryVersions;
     }
 
     private LibGpiodDriverVersion[] GetDriverCandidates()
