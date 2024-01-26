@@ -9,12 +9,12 @@ namespace System.Device.Gpio.Drivers;
 public enum LibGpiodDriverVersion
 {
     /// <summary>
-    /// Version 1 of the libgpiod driver. Supports libgpiod v0 to v1 (libgpiod.so.1.x to libgpiod.so.2.x).
+    /// Version 1 of the libgpiod driver. Supports libgpiod v0 to v1 (libgpiod.so.1.x to libgpiod.so.2.x)
     /// </summary>
     V1,
 
     /// <summary>
-    /// Version 2 of the libgpiod driver. Supports libgpiod (libgpiod.so.3.x).
+    /// Version 2 of the libgpiod driver. Supports libgpiod v2 (libgpiod.so.3.x)
     /// </summary>
     V2
 }

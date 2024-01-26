@@ -14,10 +14,13 @@ public class LibGpiodDriver : UnixDriver
     private readonly GpioDriver _driver;
 
     /// <summary>
-    /// Creates an instance of the LibGpiodDriver.
+    /// Creates an instance of the LibGpiodDriver
     /// </summary>
-    /// <param name="gpioChip">The number of the GPIO chip to drive.</param>
-    /// <remarks>The driver version is chosen based on the available libgpiod version.</remarks>
+    /// <param name="gpioChip">The number of the GPIO chip to drive</param>
+    /// <remarks>
+    /// The driver version is chosen based on the installed libgpiod version on the system. To select a specific library version use the
+    /// other constructor or specify the environment variable DOTNET_IOT_LIBGPIOD_DRIVER_VERSION, see documentation
+    /// </remarks>
     public LibGpiodDriver(int gpioChip = 0)
     {
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip);
@@ -26,13 +29,13 @@ public class LibGpiodDriver : UnixDriver
     }
 
     /// <summary>
-    /// Creates an instance of the LigGpiodDriver that targets specific version/s of libgpiod.
+    /// Creates an instance of the LigGpiodDriver that targets specific version/s of libgpiod
     /// <see cref="LibGpiodDriverVersion.V1"/> supports libgpiod.so.1.x to libgpiod.so.2.x
     /// and <see cref="LibGpiodDriverVersion.V2"/> supports libgpiod.so.3.x
-    /// For more information see documentation.
     /// </summary>
-    /// <param name="gpioChip">The number of the GPIO chip to drive.</param>
-    /// <param name="driverVersion">Version of the libgpiod driver to create.</param>
+    /// <param name="gpioChip">The number of the GPIO chip to drive</param>
+    /// <param name="driverVersion">Version of the libgpiod driver to create</param>
+    /// <remarks>Alternatively, specify the environment variable DOTNET_IOT_LIBGPIOD_DRIVER_VERSION, see documentation</remarks>
     public LibGpiodDriver(int gpioChip, LibGpiodDriverVersion driverVersion)
     {
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip, driverVersion);
