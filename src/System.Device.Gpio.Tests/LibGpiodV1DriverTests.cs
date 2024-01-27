@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
+using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,14 +12,14 @@ namespace System.Device.Gpio.Tests;
 [Trait("feature", "gpio")]
 [Trait("feature", "gpio-libgpiod")]
 [Trait("SkipOnTestRun", "Windows_NT")]
-public class LibGpiodDriverTests : GpioControllerTestBase
+public class LibGpiodV1DriverTests : GpioControllerTestBase
 {
-    public LibGpiodDriverTests(ITestOutputHelper testOutputHelper)
+    public LibGpiodV1DriverTests(ITestOutputHelper testOutputHelper)
         : base(testOutputHelper)
     {
     }
 
-    protected override GpioDriver GetTestDriver() => new LibGpiodDriver();
+    protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0, LibGpiodDriverVersion.V1);
 
     protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 

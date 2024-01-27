@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Buffers.Binary;
+using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -627,7 +628,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
     {
         try
         {
-            _interruptDriver = new LibGpiodDriver(0);
+            _interruptDriver = new LibGpiodV1Driver(0);
         }
         catch (PlatformNotSupportedException)
         {
@@ -721,7 +722,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             {
                 if (File.Exists(ModelFilePath))
                 {
-                    string model = File.ReadAllText(ModelFilePath, Text.Encoding.ASCII);
+                    string model = File.ReadAllText(ModelFilePath, Encoding.ASCII);
                     if (model.Contains("Raspberry Pi 4") || model.Contains("Raspberry Pi Compute Module 4"))
                     {
                         IsPi4 = true;
