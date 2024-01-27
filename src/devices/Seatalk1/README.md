@@ -66,4 +66,7 @@ When connecting to a default RS-232 interface (e.g. using an USB-to-RS-232 conve
 ## References
 
 Many tanks to Thomas Knauf for his extensive Seatalk protocol analysis. See [here](http://www.thomasknauf.de/seatalk.htm)
-OpenCPN Seatalk Support [here](https://opencpn.org/wiki/dokuwiki/doku.php?id=opencpn:supplementary_software:seatalk). The OpenCPN plugin "Raymarine Autopilot" can send the required keypress sentences for remote-controlling an autopilot, but needs an NMEA-0183 to Seatalk1 bridge, which can be built using this binding.
+
+OpenCPN Seatalk Support [here](https://opencpn.org/wiki/dokuwiki/doku.php?id=opencpn:supplementary_software:seatalk).
+
+The OpenCPN plugin "Raymarine Autopilot" can send the required keypress sentences for remote-controlling an autopilot, but needs an NMEA-0183 to Seatalk1 bridge, which can be built using this binding.
