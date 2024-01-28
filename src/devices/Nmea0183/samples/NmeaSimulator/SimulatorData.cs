@@ -14,10 +14,17 @@ namespace Nmea.Simulator
     {
         public SimulatorData()
         {
-            Position = new GeographicPosition(47.45, 9.59, 451.2);
+            Position = new GeographicPosition(47.49, 9.50, 451.2);
             Course = Angle.FromDegrees(350);
-            Speed = Speed.FromKnots(4.8);
+            SpeedOverGround = Speed.FromKnots(4.8);
+            WindSpeedRelative = Speed.FromKnots(10.2);
+            WindDirectionRelative = Angle.FromDegrees(-10.0);
+            SpeedTroughWater = Speed.FromKnots(5.2);
         }
+
+        public Angle WindDirectionRelative { get; set; }
+
+        public Speed WindSpeedRelative { get; set; }
 
         public GeographicPosition Position
         {
@@ -31,11 +38,13 @@ namespace Nmea.Simulator
             set;
         }
 
-        public Speed Speed
+        public Speed SpeedOverGround
         {
             get;
             set;
         }
+
+        public Speed SpeedTroughWater { get; set; }
 
         object ICloneable.Clone()
         {

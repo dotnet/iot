@@ -129,6 +129,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.Sentences.WaterSpeedAndAngle.#ctor(UnitsNet.Angle,UnitsNet.Angle,UnitsNet.Speed)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Ssd13xx.Ssd1306.#ctor(System.Device.I2c.I2cDevice)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
@@ -263,6 +270,13 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Nmea0183.Sentences.SeaSmartEngineDetail.#ctor(System.Boolean,System.TimeSpan,UnitsNet.Temperature,System.Int32)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.Sentences.WaterSpeedAndAngle.#ctor(UnitsNet.Angle,UnitsNet.Angle,UnitsNet.Speed)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
