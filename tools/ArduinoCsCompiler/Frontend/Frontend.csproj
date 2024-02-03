@@ -12,6 +12,8 @@
     <Description>A translation compiler that retargets C# applications so they can run on a microcontroller using the unnamed firmware.</Description>
     <Authors>The .NET Foundation community</Authors>
     <NeutralLanguage>en</NeutralLanguage>
+    <PackAsTool>True</PackAsTool>
+    <ToolCommandName>dotnet-acs</ToolCommandName>
   </PropertyGroup>
 
   <ItemGroup>
