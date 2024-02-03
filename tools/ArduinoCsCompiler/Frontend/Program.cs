@@ -15,9 +15,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using CommandLine;
 using Iot.Device.Arduino;
-using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using UnitsNet;
 
 namespace ArduinoCsCompiler

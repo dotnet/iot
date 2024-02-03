@@ -254,7 +254,7 @@ namespace Iot.Device.Display
                     break;
                 case 5 when value[2] != ':':
 #pragma warning disable CA2208 // False positive because the message uses the parameter name "value"
-                    throw new ArgumentException("value[2] must be a ':'", nameof(value));
+                    throw new ArgumentException($"{nameof(value)}[2] must be a ':'", nameof(value));
 #pragma warning restore CA2208
                 case 5:
                     Dots |= Dot.CenterColon;

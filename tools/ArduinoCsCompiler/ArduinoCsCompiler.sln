@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino", "..\..\src\device
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5CB033D9-6A39-40DE-8336-6F78F5EC252C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.Tests", "..\..\src\devices\Arduino\tests\Arduino.Tests.csproj", "{B2D44322-066B-4900-A1EE-7096645A0474}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board", "..\..\src\devices\Board\Board.csproj", "{2087A5D8-FE61-4F04-A0F6-E2A5D2D1475E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\..\src\devices\Common\Common.csproj", "{93266917-C265-4F8C-B326-429486FC7C3C}"
@@ -39,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button", "..\..\src\devices
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlinkingLed", "samples\BlinkingLed\BlinkingLed.csproj", "{072A16C3-61D5-429D-85BC-09EF4A8CEE8D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iot.Device.Bindings", "..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj", "{AD276307-C242-45FE-AAC4-E6713E8C9AC3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,10 +57,6 @@ Global
 		{C2EFFAA8-4EAE-4EDD-897E-9DA16EC1AFCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2EFFAA8-4EAE-4EDD-897E-9DA16EC1AFCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2EFFAA8-4EAE-4EDD-897E-9DA16EC1AFCE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2D44322-066B-4900-A1EE-7096645A0474}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2D44322-066B-4900-A1EE-7096645A0474}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2D44322-066B-4900-A1EE-7096645A0474}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2D44322-066B-4900-A1EE-7096645A0474}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2087A5D8-FE61-4F04-A0F6-E2A5D2D1475E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2087A5D8-FE61-4F04-A0F6-E2A5D2D1475E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2087A5D8-FE61-4F04-A0F6-E2A5D2D1475E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -105,12 +101,15 @@ Global
 		{072A16C3-61D5-429D-85BC-09EF4A8CEE8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{072A16C3-61D5-429D-85BC-09EF4A8CEE8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{072A16C3-61D5-429D-85BC-09EF4A8CEE8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD276307-C242-45FE-AAC4-E6713E8C9AC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD276307-C242-45FE-AAC4-E6713E8C9AC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD276307-C242-45FE-AAC4-E6713E8C9AC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD276307-C242-45FE-AAC4-E6713E8C9AC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{B2D44322-066B-4900-A1EE-7096645A0474} = {5CB033D9-6A39-40DE-8336-6F78F5EC252C}
 		{890DD31D-87C6-45B2-99E8-B0BEA7FAB5A3} = {5CB033D9-6A39-40DE-8336-6F78F5EC252C}
 		{B7E2C0EA-0FFD-4D8B-A72C-DDAC435021FC} = {C6CD3E82-87F2-45D6-86BE-1898D57B8819}
 		{599172D6-F472-4D53-BA77-044C0A32A2B3} = {B096B0AC-B255-42CD-A935-8AF6734B0B8D}

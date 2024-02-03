@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.8.0" />
-    <ProjectReference Include="..\..\src\devices\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
     <ProjectReference Include="..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
 
