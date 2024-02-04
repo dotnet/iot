@@ -12,12 +12,15 @@
     <Compile Include="Program.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="false">
     <ProjectReference Include="..\..\..\..\src\devices\Arduino\Arduino.csproj" />
     <ProjectReference Include="..\..\..\..\src\devices\Common\Common.csproj" />
     <ProjectReference Include="..\..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
-
+  <ItemGroup Condition="true">
+    <PackageReference Include="System.Device.Gpio" Version="3.1.0"/>
+    <PackageReference Include="Iot.Device.Bindings" Version="3.1.0"/>
+  </ItemGroup>
  
   
 

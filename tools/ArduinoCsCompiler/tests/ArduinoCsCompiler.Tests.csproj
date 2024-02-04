@@ -11,17 +11,23 @@
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\..\src\devices\Arduino\tests\FirmataTestFixture.cs" Link="FirmataTestFixture.cs" />
+  <ItemGroup Condition="$(Configuration)=='Debug'">
+    <ProjectReference Include="..\..\..\src\devices\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Arduino\tests\Arduino.Tests.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Board\Board.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\CharacterLcd\CharacterLcd.csproj" />
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
-
+  <ItemGroup Condition="$(Configuration)!='Debug'">
+    <PackageReference Include="System.Device.Gpio" Version="3.1.0"/>
+    <PackageReference Include="Iot.Device.Bindings" Version="3.1.0"/>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArduinoCsCompiler.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
-    <ProjectReference Include="..\..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
-    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>
