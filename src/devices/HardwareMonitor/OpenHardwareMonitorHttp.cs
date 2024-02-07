@@ -96,6 +96,7 @@ namespace Iot.Device.HardwareMonitor
             try
             {
                 string fullJson = _httpClient.GetStringAsync(_uri + "api/rootnode").Result;
+                fullJson = fullJson.Replace("\"Value\": NaN", "\"Value\": 0"); // this fixes an error I encounter where a sensors value is NaN causing the entire thing to crash.
                 lock (_lock)
                 {
                     ComputerJson? rootNode = JsonSerializer.Deserialize<ComputerJson>(fullJson);

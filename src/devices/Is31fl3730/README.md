@@ -10,7 +10,7 @@ It is demonstrated in [samples/Program.cs](samples/Program.cs).
 
 The [Micro Dot pHat](https://shop.pimoroni.com/products/microdot-phat) is an unashamedly old school LED matrix display board, made up of six LED matrices each 5x7 pixels (for an effective display area of 30x7) plus a decimal point, using the beautiful little Lite-On LTP-305 matrices.
 
-<img src="https://cdn.shopify.com/s/files/1/0174/1800/products/Microdot_pHAT_1_of_7_768x768.JPG" width="250px" title="Micro Dot pHat" />
+<img src="https://cdn.shopify.com/s/files/1/0174/1800/products/Microdot_pHAT_1_of_7_768x768.JPG" width="250px" title="Micro Dot pHat" alt="A picture of a LED matrix" />
 
 The following code demonstrates how to control the Micro Dot pHAT.
 
@@ -38,7 +38,7 @@ matrix.Fill(0);
 
 The [LED Dot Matrix Breakout](https://shop.pimoroni.com/products/led-dot-matrix-breakout) is perfect for readouts that involve two numbers or letters - like countdown timers, percentage readouts, or country codes.
 
-<img src="https://cdn.shopify.com/s/files/1/0174/1800/products/Microdotbreakout_6of6_768x768.jpg?" width="250px" title="LED Dot Matrix Breakout" />
+<img src="https://cdn.shopify.com/s/files/1/0174/1800/products/Microdotbreakout_6of6_768x768.jpg?" width="250px" title="LED Dot Matrix Breakout" alt="A picture of a LED Dot Matrix display" />
 
 The following code demonstrates how to control the LED Dot Matrix Breakout.
 
@@ -62,7 +62,7 @@ matrix.Fill(0);
 
 The [LED Dot Matrix Breakout](https://shop.pimoroni.com/products/led-dot-matrix-breakout) includes two matrices and supports using up to three of the breakouts together giving you six matrices to drive. It's straightforward to tie them all together into a single logical matrix. You can do with that with the [`DotMatrix`](DotMatrix.cs) class, as demonstrated in the following sample. Alternatively, you can use [`MicroDotPhat30x7`](MicroDotPhat30x7.cs) class if you have three breakouts and follow the same ordering of I2C addresses.
 
-<img src="https://user-images.githubusercontent.com/2608468/208778976-7a18932e-a83f-4d6e-b655-3585903393d4.png" width="250px" title="Three LED Dot Matrix Breakouts" />
+<img src="https://user-images.githubusercontent.com/2608468/208778976-7a18932e-a83f-4d6e-b655-3585903393d4.png" width="250px" title="Three LED Dot Matrix Breakouts" alt="A picture of several breakout boards with Dot Matrix displays" />
 
 ```csharp
 using I2cDevice firstI2c = I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x61));

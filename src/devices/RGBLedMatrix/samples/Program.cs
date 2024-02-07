@@ -63,7 +63,7 @@ RGBLedMatrix matrix = new RGBLedMatrix(mapping, 32, 32);
 
 // If you chain 4 32x32 panels having 2 rows chaining (2 panels in first row an d2 panels in second row).
 // RGBLedMatrix matrix = new RGBLedMatrix(mapping, 64, 64, 2, 2);
-Task.Run(() =>
+_ = Task.Run(() =>
 {
     matrix.StartRendering();
 

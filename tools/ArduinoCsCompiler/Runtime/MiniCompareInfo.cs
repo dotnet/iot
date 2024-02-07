@@ -11,11 +11,6 @@ namespace ArduinoCsCompiler.Runtime
     internal class MiniCompareInfo
     {
         [ArduinoImplementation]
-        public void IcuInitSortHandle()
-        {
-        }
-
-        [ArduinoImplementation]
         public int IcuCompareString(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2, CompareOptions options)
         {
             throw new NotImplementedException();

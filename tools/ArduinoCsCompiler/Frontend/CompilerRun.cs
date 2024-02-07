@@ -67,7 +67,7 @@ namespace ArduinoCsCompiler
                 Logger.LogInformation($"Recommended minimum values are 512 kB of flash and 100 kB of RAM. Some microcontrollers (e.g. ESP32) may allow configuration of the amount of flash " +
                                       $"available for code.");
 
-                if (!caps.IntSize.Equals(Information.FromBytes(4), 0, ComparisonType.Absolute) || !caps.PointerSize.Equals(Information.FromBytes(4), 0, ComparisonType.Absolute))
+                if (!caps.IntSize.Equals(Information.FromBytes(4), Information.Zero) || !caps.PointerSize.Equals(Information.FromBytes(4), Information.Zero))
                 {
                     Logger.LogWarning("Board pointer and/or integer size is not 32 bits. This is untested and may lead to unpredictable behavior.");
                 }
@@ -141,7 +141,9 @@ namespace ArduinoCsCompiler
                 CreateKernelForFlashing = false,
                 ForceFlashWrite = !CommandLineOptions.DoNotWriteFlashIfAlreadyCurrent,
                 LaunchProgramFromFlash = true,
-                UseFlashForProgram = true
+                UseFlashForProgram = true,
+                UsePreviewFeatures = CommandLineOptions.UsePreviewFeatures,
+                AdditionalSuppressions = CommandLineOptions.Suppressions,
             };
 
             Logger.LogInformation("Collecting method information and metadata...");
@@ -180,7 +182,16 @@ namespace ArduinoCsCompiler
                     {
                         _compiler.ExecuteStaticCtors(set);
                         var remoteMain = set.MainEntryPoint;
-                        remoteMain.InvokeAsync();
+                        if (set.MainEntryPointMethod != null && set.MainEntryPointMethod.GetParameters().Length > 0)
+                        {
+                            // If we're calling a real "main" method, we have to provide an empty string array as argument.
+                            remoteMain.InvokeAsync(new object[] { Array.Empty<string>() });
+                        }
+                        else
+                        {
+                            remoteMain.InvokeAsync();
+                        }
+
                         Logger.LogInformation("Program upload successful. Main method invoked. The program is now running.");
                         return;
                     }
@@ -264,9 +275,19 @@ namespace ArduinoCsCompiler
                 }
                 catch (Exception x)
                 {
-                    Logger.LogError($"Code execution caused an exception of type {x.GetType().FullName} on the microcontroller.");
-                    Logger.LogError(x.Message);
-                    Abort();
+                    // Check whether the source of the exception is the compiler itself or really the remote code
+                    if (x.StackTrace != null && x.StackTrace.Contains(nameof(ArduinoTask.GetMethodResults)))
+                    {
+                        Logger.LogError($"Code execution caused an exception of type {x.GetType().FullName} on the microcontroller.");
+                        Logger.LogError(x.Message);
+                        Abort();
+                    }
+                    else
+                    {
+                        Logger.LogError($"Internal error in compiler: {x.Message}");
+                        Logger.LogError(x.ToString());
+                        Abort();
+                    }
                 }
             }
         }

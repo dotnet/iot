@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Iot.Device.Arduino;
 
-#pragma warning disable CA2208 // Use arguments for ArgumentExceptions
+#pragma warning disable CA2208 // ArgumentException should be used with proper parameters (No: Saves memory)
 namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(System.Array), false, IncludingPrivates = true)]

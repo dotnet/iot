@@ -68,6 +68,7 @@ Currently the full test suite requires following components, if you don't have o
 | BME280 (I2C) | `-notrait feature=i2c` |
 | Pins 5 and 6 connected | `-notrait feature=gpio` |
 | libgpiod | `-notrait feature=gpio-libgpiod` |
+| libgpiodV2 | `-notrait feature=gpio-libgpiod2` |
 | sysfs access (i.e. sudo or permissions) | `-notrait feature=gpio-sysfs` |
 | configured PWM (overlaps with MCP3008 setting) | `-notrait feature=pwm` |
 | root access (overlaps, assumes you use default permissions) | `-notrait requirement=root` |

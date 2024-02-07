@@ -41,5 +41,40 @@ namespace Iot.Device.Mcp23xxx.Tests
                 Assert.Equal(PinValue.Low, testDevice.Controller.Read(pin));
             }
         }
+
+        [Theory]
+        [MemberData(nameof(TestDevices))]
+        public void Read_GoodPinPullUp(TestDevice testDevice)
+        {
+            Mcp23xxx device = testDevice.Device;
+            for (int pin = 0; pin < testDevice.Controller.PinCount; pin++)
+            {
+                bool first = pin < 8;
+                int register = testDevice.Controller.PinCount == 16
+                    ? (first ? 0x12 : 0x13)
+                    : 0x09;
+
+                testDevice.Controller.OpenPin(pin, PinMode.InputPullUp);
+
+                // Flip the bit on (set the backing buffer directly to simulate incoming data)
+                testDevice.ChipMock.Registers[register] = (byte)(1 << (first ? pin : pin - 8));
+                Assert.Equal(PinValue.High, testDevice.Controller.Read(pin));
+
+                // Clear the register
+                testDevice.ChipMock.Registers[register] = 0x00;
+                Assert.Equal(PinValue.Low, testDevice.Controller.Read(pin));
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TestDevices))]
+        public void Read_InvalidMode(TestDevice testDevice)
+        {
+            Mcp23xxx device = testDevice.Device;
+            for (int pin = 0; pin < testDevice.Controller.PinCount; pin++)
+            {
+                Assert.Throws<InvalidOperationException>(() => testDevice.Controller.OpenPin(pin, PinMode.InputPullDown));
+            }
+        }
     }
 }

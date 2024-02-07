@@ -25,7 +25,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Constructs a new MWV sentence
         /// </summary>
-        public WaterSpeedAndAngle(Angle headingTrue, Angle headingMagnetic, Speed speed)
+        public WaterSpeedAndAngle(Angle? headingTrue, Angle? headingMagnetic, Speed speed)
             : base(OwnTalkerId, Id, DateTimeOffset.UtcNow)
         {
             Speed = speed;

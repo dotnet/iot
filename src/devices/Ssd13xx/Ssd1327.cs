@@ -18,12 +18,15 @@ namespace Iot.Device.Ssd13xx
         private const int CleaningBufferSize = 48 * 96;
 
         /// <summary>
-        /// Initializes new instance of Ssd1327 device that will communicate using I2C bus.
+        /// Initializes new instance of Ssd1327 device that will communicate using I2C bus. The default size is 96x96 pixels
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
-        public Ssd1327(I2cDevice i2cDevice)
-            : base(i2cDevice)
+        /// <param name="width">Screen width in pixels</param>
+        /// <param name="height">Screen height in pixels</param>
+        public Ssd1327(I2cDevice i2cDevice, int width = 96, int height = 96)
+            : base(i2cDevice, width, height)
         {
+            Initialize();
         }
 
         /// <summary>
@@ -43,7 +46,7 @@ namespace Iot.Device.Ssd13xx
         /// <summary>
         /// Clears the display
         /// </summary>
-        public void ClearDisplay()
+        public override void ClearScreen()
         {
             SendCommand(new SetDisplayOff());
             SetColumnAddress();
@@ -51,6 +54,38 @@ namespace Iot.Device.Ssd13xx
             byte[] data = new byte[CleaningBufferSize];
             SendData(data);
             SendCommand(new SetDisplayOn());
+        }
+
+        /// <inheritdoc />
+        protected override void SetStartAddress()
+        {
+            SetColumnAddress();
+            SetRowAddress();
+        }
+
+        private void Initialize()
+        {
+            SendCommand(new Ssd1327Cmnds.SetUnlockDriver(true));
+            SendCommand(new SetDisplayOff());
+            SendCommand(new SetMultiplexRatio(0x5F));
+            SendCommand(new Ssd1327Cmnds.SetDisplayStartLine());
+            SendCommand(new Ssd1327Cmnds.SetDisplayOffset(0x5F));
+            SendCommand(new Ssd1327Cmnds.SetReMap());
+            SendCommand(new Ssd1327Cmnds.SetInternalVddRegulator(true));
+            SendCommand(new SetContrastControlForBank0(0x53));
+            SendCommand(new Ssd1327Cmnds.SetPhaseLength(0X51));
+            SendCommand(new Ssd1327Cmnds.SetDisplayClockDivideRatioOscillatorFrequency(0x01, 0x00));
+            SendCommand(new Ssd1327Cmnds.SelectDefaultLinearGrayScaleTable());
+            SendCommand(new Ssd1327Cmnds.SetPreChargeVoltage(0x08));
+            SendCommand(new Ssd1327Cmnds.SetComDeselectVoltageLevel(0X07));
+            SendCommand(new Ssd1327Cmnds.SetSecondPreChargePeriod(0x01));
+            SendCommand(new Ssd1327Cmnds.SetSecondPreChargeVsl(true));
+            SendCommand(new Ssd1327Cmnds.SetNormalDisplay());
+            SendCommand(new DeactivateScroll());
+            SendCommand(new SetDisplayOn());
+            SendCommand(new Ssd1327Cmnds.SetRowAddress());
+            SendCommand(new Ssd1327Cmnds.SetColumnAddress());
+            ClearScreen();
         }
 
         /// <summary>
@@ -75,17 +110,6 @@ namespace Iot.Device.Ssd13xx
         /// </summary>
         /// <param name="command">Command being send</param>
         public override void SendCommand(ISharedCommand command) => SendCommand(command);
-
-        /// <summary>
-        /// Send data to the display controller.
-        /// </summary>
-        /// <param name="data">The data to send to the display controller.</param>
-        public void SendData(byte data)
-        {
-            Span<byte> writeBuffer = new byte[] { Data_Mode, data };
-
-            _i2cDevice.Write(writeBuffer);
-        }
 
         private void SendCommand(ICommand command)
         {

@@ -205,7 +205,7 @@ namespace Iot.Device.Nmea0183.Sentences
                 return string.Empty;
             }
 
-            return field.Current;
+            return field.Current ?? string.Empty;
         }
 
         /// <summary>

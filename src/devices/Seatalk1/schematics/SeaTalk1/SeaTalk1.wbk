@@ -1,0 +1,14 @@
+version 2
+1
+9
+.tran 10u 20m{return}.kicad adjustpaths{return}.save all{return}.probe alli
+3
+1
+V(Net-_J1-GPIO15/RXD_)
+ 
+1
+V(SEATALK)
+ 
+1
+V(TXD)
+ 

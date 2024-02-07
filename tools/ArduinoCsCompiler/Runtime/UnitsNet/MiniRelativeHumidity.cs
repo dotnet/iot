@@ -11,7 +11,7 @@ namespace ArduinoCsCompiler.Runtime.UnitsNet
     internal struct MiniRelativeHumidity
     {
         private double _value;
-        private RelativeHumidityUnit _unit;
+        private RelativeHumidityUnit? _unit;
 
         private MiniRelativeHumidity(double value, RelativeHumidityUnit unit)
         {
@@ -38,6 +38,30 @@ namespace ArduinoCsCompiler.Runtime.UnitsNet
         {
             double v = (double)value;
             return new RelativeHumidity(v, RelativeHumidityUnit.Percent);
+        }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public static bool operator <(MiniRelativeHumidity left, MiniRelativeHumidity right)
+        {
+            return left._value < right._value;
+        }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public static bool operator >(MiniRelativeHumidity left, MiniRelativeHumidity right)
+        {
+            return left._value > right._value;
+        }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public static bool operator <=(MiniRelativeHumidity left, MiniRelativeHumidity right)
+        {
+            return left._value <= right._value;
+        }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public static bool operator >=(MiniRelativeHumidity left, MiniRelativeHumidity right)
+        {
+            return left._value >= right._value;
         }
     }
 }
