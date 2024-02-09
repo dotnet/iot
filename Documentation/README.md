@@ -71,6 +71,7 @@ While contributing, you should read the [coding guidelines section](https://gith
 
 * [Enable SPI on Raspberry Pi](./raspi-spi.md)
 * [Enable I2C on Raspberry Pi](./raspi-i2c.md)
+* [Control GPIO pins within rootless Docker container on Raspberry Pi](./raspi-Docker-GPIO.md)
 * [Enable Hardware PWM on Raspberry Pi](./raspi-pwm.md)
 * [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
 * [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)
