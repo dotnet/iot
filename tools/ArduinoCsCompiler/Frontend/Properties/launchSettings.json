@@ -10,7 +10,7 @@
     },
     "BlinkingLed": {
       "commandName": "Project",
-      "commandLineArgs": "compile --run --debug ..\\..\\..\\..\\samples\\BlinkingLed\\bin\\debug\\net6.0\\BlinkingLed.exe --network localhost"
+      "commandLineArgs": "compile --run --debug ..\\..\\..\\..\\samples\\BlinkingLed\\bin\\debug\\net6.0\\BlinkingLed.exe --network localhost --verbose --mapfile ..\\..\\..\\..\\samples\\BlinkingLed\\bin\\debug\\net6.0\\BlinkingLed-tokenmap.txt"
     }
   }
 }
