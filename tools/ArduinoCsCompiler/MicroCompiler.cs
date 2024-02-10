@@ -3054,7 +3054,9 @@ namespace ArduinoCsCompiler
             if (_commandHandler != null)
             {
                 _commandHandler.Dispose();
+#if DEBUG // TODO: Re-enable (method is not yet available in the released package)
                 _board?.RemoveCommandHandler(_commandHandler);
+#endif
             }
 
             _commandHandler = null!;
