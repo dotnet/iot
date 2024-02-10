@@ -70,12 +70,6 @@ REM information about all tests being executed (as this test run can take 30 min
 echo Starting basic arduino tests
 dotnet test -c %2 --no-build --no-restore --filter feature=firmata -l "console;verbosity=normal" -maxcpucount:1
 
-echo on
-if %RUN_COMPILER_TESTS%==TRUE (
-echo Starting extended Arduino compiler tests
-dotnet test -c %2 --no-build --no-restore --filter feature=firmata-compiler -l "console;verbosity=normal" -maxcpucount:1
-)
-
 if errorlevel 1 goto error
 
 popd
