@@ -119,7 +119,6 @@
 * [TCA954X - TCA954X Low-Voltage Multi-Channel I2C Switch with Reset](Tca954x/README.md)
 * [TCS3472x Sensors](Tcs3472x/README.md)
 * [TLC1543 - 10-bit ADC with 11 input channels](Tlc1543/README.md)
-* [TM1637 - Segment Display](Tm16xx/README.md)
 * [TSL256x - Illuminance sensor](Tsl256x/README.md)
 * [VL53L0X - distance sensor](Vl53L0X/README.md)
 * [VL53L1X - distance sensor](Vl53L1X/README.md)
