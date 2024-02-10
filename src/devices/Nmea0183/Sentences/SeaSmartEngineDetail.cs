@@ -203,9 +203,13 @@ namespace Iot.Device.Nmea0183.Sentences
                 string swappedString = operatingTimeString.Substring(6, 2) + operatingTimeString.Substring(4, 2) +
                                        operatingTimeString.Substring(2, 2) + operatingTimeString.Substring(0, 2);
 
-                // Status = 0 is ok, anything else seems to indicate a fault
-                uint status = (uint)Status;
-                string statusString = status.ToString("X4", CultureInfo.InvariantCulture);
+                // Lower 16 bits of status
+                uint status1 = ((uint)Status & 0xFFFF);
+                string status1String = status1.ToString("X4", CultureInfo.InvariantCulture);
+
+                uint status2 = ((uint)Status & 0xFFFF0000) >> 16;
+                string status2String = status2.ToString("X4", CultureInfo.InvariantCulture);
+
                 int engineTempKelvin;
                 if (Temperature.HasValue)
                 {
@@ -219,7 +223,7 @@ namespace Iot.Device.Nmea0183.Sentences
                 string engineTempString = engineTempKelvin.ToString("X4", CultureInfo.InvariantCulture);
                 // Seems to require a little endian conversion as well
                 engineTempString = engineTempString.Substring(2, 2) + engineTempString.Substring(0, 2);
-                return "01F201," + timeStampText + ",02," + engineNoText + "0000FFFF" + engineTempString + "00050000" + swappedString + "FFFF000000" + statusString + "00007F7F";
+                return "01F201," + timeStampText + ",02," + engineNoText + "0000FFFF" + engineTempString + "00050000" + swappedString + "FFFF000000" + status1String + status2String + "7F7F";
 
             }
 
