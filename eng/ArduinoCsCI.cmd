@@ -5,7 +5,7 @@ REM Second argument is either "Debug" or "Release"
 if %1!==! goto :usage
 
 REM Defines the revision to check out in the ExtendedConfigurableFirmata repo
-set FIRMATA_SIMULATOR_CHECKOUT_REVISION=4a3b895c062c8e48685b9018d642d2c5ea84c354
+set FIRMATA_SIMULATOR_CHECKOUT_REVISION=66b1863f3a4b0999f2c1cb7133332cbd25730252
 set RUN_COMPILER_TESTS=FALSE
 
 choco install -y --no-progress arduino-cli
@@ -76,6 +76,8 @@ echo on
 echo Run full compiler against simple example
 REM The current directory is tools/ArduinoCsCompiler
 %acspath% compile --run samples\BlinkingLed\bin\%2\net6.0\BlinkingLed.exe --network localhost --mapfile BlinkingLed-tokenmap.txt
+if errorlevel 1 goto error
+
 REM copy token map to output (so we have something to compare the history of sizes, if something changes unexpectedly)
 type BlinkingLed-tokenmap.txt
 
