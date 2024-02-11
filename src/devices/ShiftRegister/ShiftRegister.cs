@@ -120,7 +120,7 @@ namespace Iot.Device.Multiplexing
         {
             if (_controller is null || _pinMapping.SerialDataInput < 0)
             {
-                throw new ArgumentNullException(nameof(ShiftBit), "GpioController was not provided or {nameof(_pinMapping.SerialDataInput)} not mapped to pin");
+                throw new ArgumentNullException(nameof(value), "GpioController was not provided or {nameof(_pinMapping.SerialDataInput)} not mapped to pin");
             }
 
             // writes value to serial data pin
