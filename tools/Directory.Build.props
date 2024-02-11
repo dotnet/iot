@@ -2,6 +2,7 @@
 <Project>
   <Import Project="../eng/Compilers.props" />
   <Import Project="../eng/Versions.props" />
+  <Import Project="../eng/Versions.external.props" />
   <PropertyGroup>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
