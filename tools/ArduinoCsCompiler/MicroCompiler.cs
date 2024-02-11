@@ -3093,10 +3093,15 @@ namespace ArduinoCsCompiler
             _commandHandler.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
         }
 
-        public bool QueryBoardCapabilities(
+        public bool QueryBoardCapabilities(bool force,
             [NotNullWhen(true)]
             out IlCapabilities ilCapabilities)
         {
+            if (force)
+            {
+                _commandHandler.IlCapabilities = null;
+            }
+
             ilCapabilities = null!;
             _commandHandler.QueryCapabilities();
 

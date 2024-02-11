@@ -25,7 +25,7 @@ internal class ExecRun : Run<ExecOptions>
 
         var compiler = new MicroCompiler(_board, true);
 
-        if (!compiler.QueryBoardCapabilities(out var caps))
+        if (!compiler.QueryBoardCapabilities(true, out var caps))
         {
             Logger.LogError("Couldn't query board capabilities. Possibly incompatible firmware");
             return false;
