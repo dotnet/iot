@@ -72,6 +72,14 @@ dotnet test -c %2 --no-build --no-restore --filter feature=firmata -l "console;v
 
 if errorlevel 1 goto error
 
+echo on
+echo Run full compiler against simple example
+REM The current directory is tools/ArduinoCsCompiler
+%acspath% compile --run samples\BlinkingLed\bin\%2\net6.0\BlinkingLed.exe --network localhost --mapfile BlinkingLed-tokenmap.txt
+REM copy token map to output (so we have something to compare the history of sizes, if something changes unexpectedly)
+type BlinkingLed-tokenmap.txt
+
+
 popd
 taskkill /im ExtendedConfigurableFirmataSim.exe /f
 
