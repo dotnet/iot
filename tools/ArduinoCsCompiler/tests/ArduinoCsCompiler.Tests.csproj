@@ -8,8 +8,11 @@
     <!-- We don't want to run hardware test by default -->
     <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>
     <RootNamespace>ArduinoCsCompiler.Tests</RootNamespace>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <!-- Import the test assemblies -->
+  <Import Project="../../../eng/Versions.external.props" />
 
   <ItemGroup Condition="$(Configuration)=='Debug'">
     <ProjectReference Include="..\..\..\src\devices\Arduino\Arduino.csproj" />
