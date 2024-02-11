@@ -297,6 +297,11 @@ namespace ArduinoCsCompiler
 
         private void WriteTokenMap(ExecutionSet set)
         {
+            if (_compiler == null)
+            {
+                return;
+            }
+
             if (!string.IsNullOrEmpty(CommandLineOptions.TokenMapFile))
             {
                 if (!_compiler.QueryBoardCapabilities(true, out var caps))
