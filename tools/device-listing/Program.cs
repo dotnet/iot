@@ -28,6 +28,7 @@ string[] categoriesToDisplay = new string[]
     "motor",
     "imu",
     "magnetometer",
+    "multiplexer",
     "hygrometer",
     "clock",
     "sonar",
@@ -114,7 +115,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "gopigo3", null },
     { "grovepi", null },
     { "i2c", null },
-    { "multiplexer", null },
+    { "multiplexer", "Bus and GPIO multiplexers" },
 };
 
 HashSet<string> ignoredDeviceDirectories = new()
