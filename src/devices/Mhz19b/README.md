@@ -37,6 +37,7 @@ The MH-Z19B gas module provides a serial communication interface (UART) which ca
 |GND  |6 (GND)  |7 (GND)     |
 |UART  |8 (TXD0)  |2 (RXD)     |
 |UART  |10 (RXD0)  |3 (TXD)     |
+
 Table: MH-Z19B to RPi 3 connection
 
 The binding supports the connection through an UART interface (e.g. ```/dev/serial0```) or (serial port) stream.

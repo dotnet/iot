@@ -207,7 +207,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [SkiaSharp graphics library adapter](SkiaSharpAdapter/README.md)
 * [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
 * [Solomon Systech SSD13xx OLED display family](Ssd13xx/README.md)
-* [TM1637 - Segment Display](Tm1637/README.md)
 * [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
 
 ### GPIO Expanders
