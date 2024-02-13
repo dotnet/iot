@@ -61,6 +61,7 @@ Time Elapsed 00:00:00.88
 ```
 
 The .NET SDK has built-in support for containerizing a .NET app ([see here][3]). All we have to do is to add a NuGet package reference to `Microsoft.NET.Build.Containers` so that the necessary build components are available (note: this step won't be necessary from .NET `8.0.200` on or when working with ASP.NET Core):
+
 ```shell
 dotnet add package Microsoft.NET.Build.Containers
 ```
