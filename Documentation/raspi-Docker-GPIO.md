@@ -142,6 +142,7 @@ docker run --rm -u "1654:997" --device=/dev/gpiomem --name blinkled blinkledsamp
 Now you should see the console output `Blinking LED. Press Ctrl+C to end.` and a blinking LED - congratulations! 🎉
 
 ## `root` vs. `app`
+
 Starting with .NET 8, the Docker images for Linux come with a non-root user. There is [this excellent blog article][1] about the topic, but it's worth spending a word on the rootless nature of the described containerization.
 
 Without configuring anything manually, the created Docker image uses the new rootless `app` user. That happened automatically since we used the .NET SDK Container Building Tools.  
