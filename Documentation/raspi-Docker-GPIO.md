@@ -29,6 +29,7 @@ while (true)
 ```
 
 The project file `BlinkLedSample\BlinkLedSample.csproj` looks like this:
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
