@@ -152,6 +152,7 @@ In case of using a dedicated `Dockerfile` and building the image via `docker bui
 ```dockerfile
 USER $APP_UID
 ```
+
 This way, the user ID can be controlled via the environment variable `APP_UID` and uses `1654` by default.  
 Not adding the line and omit using `-u "1654:997"` when starting the Docker container will result in using the `root` user, i. e. there will still be a blinking LED, but the app will have more privileges due to the root permissions.
 
