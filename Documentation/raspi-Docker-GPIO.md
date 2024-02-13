@@ -159,6 +159,7 @@ Not adding the line and omit using `-u "1654:997"` when starting the Docker cont
 ## Additional information
 
 The following issues and articles provide more in-depth details:
+
 - dotnet/iot#2169
 - [Secure your .NET cloud apps with rootless Linux Containers][1]
 - [Blink an LED][2]
