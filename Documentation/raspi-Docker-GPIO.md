@@ -77,7 +77,9 @@ MSBuild version 17.8.3+195e7f5a3 for .NET
   Building image 'blinkledsample' with tags 'latest' on top of base image 'mcr.microsoft.com/dotnet/runtime:8.0'.
   Pushed image 'blinkledsample:latest' to local registry via 'docker'.
 ```
+
 This does the following:
+
 - `dotnet publish` is instructed to publish a Docker image which targets Linux and Raspi's `arm64` architecture.
 - The project is restored and built using the `Release` configuration.
 - The Docker base image `mcr.microsoft.com/dotnet/runtime:8.0` is resolved automatically by taking the type of app (console, ASP.NET Core, worker, etc.) and target framework (`7.0`, `8.0`, etc.) into account.
