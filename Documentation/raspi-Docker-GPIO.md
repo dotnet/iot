@@ -42,6 +42,7 @@ The project file `BlinkLedSample\BlinkLedSample.csproj` looks like this:
   </ItemGroup>
 </Project>
 ```
+
 As you can see, it is a .NET 8 console app which references the NuGet package `System.Device.Gpio`.
 
 First of all, let's make sure that this compiles nicely by running `dotnet build`:
