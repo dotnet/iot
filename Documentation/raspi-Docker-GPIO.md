@@ -148,6 +148,7 @@ Starting with .NET 8, the Docker images for Linux come with a non-root user. The
 Without configuring anything manually, the created Docker image uses the new rootless `app` user. That happened automatically since we used the .NET SDK Container Building Tools.  
 
 In case of using a dedicated `Dockerfile` and building the image via `docker build`, the following line would have to be added:
+
 ```dockerfile
 USER $APP_UID
 ```
