@@ -67,6 +67,7 @@ dotnet add package Microsoft.NET.Build.Containers
 ```
 
 Now we can create a Docker image of our app by calling `dotnet publish --os linux --arch arm64 /t:PublishContainer -c Release`:
+
 ```shell
 MSBuild version 17.8.3+195e7f5a3 for .NET
   Determining projects to restore...
