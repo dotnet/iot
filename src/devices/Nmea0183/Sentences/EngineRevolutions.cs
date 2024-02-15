@@ -23,8 +23,12 @@ namespace Iot.Device.Nmea0183.Sentences
         private static bool Matches(TalkerSentence sentence) => Matches(sentence.Id);
 
         /// <summary>
-        /// Constructs a new MWV sentence
+        /// Constructs a new RPM sentence
         /// </summary>
+        /// <param name="source">RPM source, typically <see cref="RotationSource.Engine"/></param>
+        /// <param name="speed">Engine rotational speed</param>
+        /// <param name="engineNumber">Engine Number, counting from 1</param>
+        /// <param name="pitch">Propeller pitch, if applicable</param>
         public EngineRevolutions(RotationSource source, RotationalSpeed speed, int engineNumber, Ratio pitch)
             : base(OwnTalkerId, Id, DateTimeOffset.UtcNow)
         {
@@ -36,8 +40,13 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <summary>
-        /// Constructs a new MWV sentence
+        /// Constructs a new RPM sentence
         /// </summary>
+        /// <param name="talker">Custom talker Id</param>
+        /// <param name="source">RPM source, typically <see cref="RotationSource.Engine"/></param>
+        /// <param name="speed">Engine rotational speed</param>
+        /// <param name="engineNumber">Engine Number, counting from 1</param>
+        /// <param name="pitch">Propeller pitch, if applicable</param>
         public EngineRevolutions(TalkerId talker, RotationSource source, RotationalSpeed speed, int engineNumber, Ratio pitch)
             : base(talker, Id, DateTimeOffset.UtcNow)
         {
@@ -45,6 +54,21 @@ namespace Iot.Device.Nmea0183.Sentences
             RotationSource = source;
             EngineNumber = engineNumber;
             PropellerPitch = pitch;
+            Valid = true;
+        }
+
+        /// <summary>
+        /// Constructs an RPM sentence from an <see cref="EngineData"/> instance
+        /// </summary>
+        /// <param name="talker">Custom talker Id</param>
+        /// <param name="engineData">Engine data set</param>
+        public EngineRevolutions(TalkerId talker, EngineData engineData)
+            : base(talker, Id, DateTimeOffset.UtcNow)
+        {
+            RotationSource = RotationSource.Engine;
+            RotationalSpeed = engineData.Revolutions;
+            EngineNumber = engineData.EngineNo + 1;
+            PropellerPitch = engineData.Pitch;
             Valid = true;
         }
 

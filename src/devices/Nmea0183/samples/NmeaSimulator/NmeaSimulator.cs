@@ -197,6 +197,14 @@ namespace Nmea.Simulator
                 WaterSpeedAndAngle vhw = new WaterSpeedAndAngle(null, null, data.SpeedTroughWater);
                 SendSentence(vhw);
 
+                var engineData = new EngineData(10000, EngineStatus.None | EngineStatus.MaintenanceNeeded | EngineStatus.LowCoolantLevel, 0, RotationalSpeed.FromRevolutionsPerMinute(2000), Ratio.FromPercent(20), TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(60.6));
+                // EngineRevolutions rv = new EngineRevolutions(TalkerId.ElectronicChartDisplayAndInformationSystem, engineData);
+                // SendSentence(rv);
+                SeaSmartEngineFast fast = new SeaSmartEngineFast(engineData);
+                SendSentence(fast);
+                SeaSmartEngineDetail detail = new SeaSmartEngineDetail(engineData);
+                SendSentence(detail);
+
                 // Test Seatalk message (understood by some OpenCPN plugins)
                 ////RawSentence sentence = new RawSentence(new TalkerId('S', 'T'), new SentenceId("ALK"), new string[]
                 ////{
