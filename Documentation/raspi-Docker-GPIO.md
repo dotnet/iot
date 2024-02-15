@@ -10,6 +10,7 @@ In order to follow the instructions below, Docker must be installed on the Raspb
 ## Containerizing the app
 
 Let's use the following sample code to blink an LED ([taken from the official documentation][2]) and save it under `BlinkLedSample\Program.cs`:
+
 ```csharp
 using System;
 using System.Device.Gpio;
