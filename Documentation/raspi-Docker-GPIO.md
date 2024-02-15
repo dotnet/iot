@@ -47,6 +47,7 @@ The project file `BlinkLedSample\BlinkLedSample.csproj` looks like this:
 As you can see, it is a .NET 8 console app which references the NuGet package `System.Device.Gpio`.
 
 First of all, let's make sure that this compiles nicely by running `dotnet build`:
+
 ```shell
 MSBuild version 17.8.3+195e7f5a3 for .NET
   Determining projects to restore...
@@ -90,18 +91,21 @@ This image can now be transferred onto the Raspberry Pi, e. g. via using a Docke
 ## Running the app in Docker
 
 Assuming we're on a Raspberry Pi, we could now create a container from the previously created image like this:
+
 ```shell
 docker run --rm --name blinkled blinkledsample:latest
 ```
 
 However, this will fail as the app has no access to the GPIO pins inside the container. As with every other resource necessary for running a container, it must be mounted from the host into the container. In case of GPIO, the device `/dev/gpiomem` is needed.  
 The complete command to run the container therefore is:
+
 ```shell
 docker run --rm --device=/dev/gpiomem --name blinkled blinkledsample:latest
 ```
 
 But executing the command leads to the following error:
-```
+
+```text
 Unhandled exception. System.IO.IOException: Error 13 initializing the Gpio driver.
    at System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.Initialize()
    at System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.OpenPin(Int32 pinNumber)
@@ -112,17 +116,21 @@ Unhandled exception. System.IO.IOException: Error 13 initializing the Gpio drive
 ```
 
 This piece is a bit more tricky: first of all, let's check the permissions inside the container for the device:
+
 ```shell
 myUser@myRaspi:~ $ docker run -it --rm --entrypoint /bin/bash blinkledsample:latest
 app@18c678710307:/app$ ls -lh /dev/gpiomem
 crw-rw---- 1 root 997 245, 0 Jan 28 18:45 /dev/gpiomem
 ```
+
 Now we know the following about `/dev/gpiomem`:
+
 - It is user-owned by `root` with read and write permissions.
 - It is group-owned by the group with ID `997` with read and write permissions.
 - All others have no access.
 
 So let's test if our container can access the device:
+
 ```shell
 app@18c678710307:/app$ test -r /dev/gpiomem; echo "$?"
 1
@@ -131,10 +139,12 @@ app@18c678710307:/app$ test -w /dev/gpiomem; echo "$?"
 app@18c678710307:/app$ id
 uid=1654(app) gid=1654(app) groups=1654(app)
 ```
+
 We see that the current user `app` can neither read nor write `/dev/gpiomem`, and that the current user  has the group ID `gid=1654`.  
 That perfectly explains the error we're seeing in our app: our app runs as user `app` which belongs to the group `1654`, but only members of the group `997` can access the GPIO device.
 
 Luckily, the desired group ID can be set when running a Docker container:
+
 ```shell
 docker run --rm -u "1654:997" --device=/dev/gpiomem --name blinkled blinkledsample:latest
 ```
