@@ -9,9 +9,10 @@
     <AssemblyName>acs</AssemblyName>
     <RootNamespace>ArduinoCsCompiler</RootNamespace>
     <Product>Arduino CS Compiler</Product>
-    <Description>A translation compiler that retargets C# applications so they can run on a microcontroller using the unnamed firmware.</Description>
+    <Description>A translation compiler that retargets C# applications so they can run on a microcontroller using a special firmware. See Readme for further information.</Description>
     <Authors>The .NET Foundation community</Authors>
     <NeutralLanguage>en</NeutralLanguage>
+    <IsPackable>True</IsPackable>
     <PackAsTool>True</PackAsTool>
     <ToolCommandName>dotnet-acs</ToolCommandName>
     <PackageOutputPath>..\..\..\artifacts\packages\$(Configuration)\Shipping</PackageOutputPath>
