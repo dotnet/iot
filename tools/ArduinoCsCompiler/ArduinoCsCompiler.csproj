@@ -31,8 +31,8 @@
     <ProjectReference Include="..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
   <ItemGroup Condition="$(Configuration)!='Debug'">
-    <PackageReference Include="System.Device.Gpio" Version="3.1.0"/>
-    <PackageReference Include="Iot.Device.Bindings" Version="3.1.0"/>
+    <ProjectReference Include="..\..\src\System.Device.Gpio\System.Device.Gpio.csproj"/>
+    <ProjectReference Include="..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
