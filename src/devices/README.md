@@ -360,7 +360,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ## Binding Distribution
 
-These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) NuGet package.  Daily builds with the latest bindings are available on [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings). You can also consume the bindings as source.
+These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) NuGet package.  Daily builds with the latest bindings are available on [Azure DevOps](https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json). Just add the URL as a new nuget feed. You can also consume the bindings as source.
 
 ## Contributing a binding
 

@@ -28,5 +28,6 @@
   <ItemGroup>
     <!-- Include license and third party files to packages -->
     <Content Include="$(RepoRoot)THIRD-PARTY-NOTICES.TXT" Pack="true" PackagePath="\" />
+    <Content Include="$(RepoRoot)README-nuget.md" Pack="true" PackagePath="\README.md" />
   </ItemGroup>
 </Project>
