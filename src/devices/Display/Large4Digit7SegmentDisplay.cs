@@ -253,7 +253,9 @@ namespace Iot.Device.Display
                     value = " " + value[0] + value.Substring(2, 2);
                     break;
                 case 5 when value[2] != ':':
-                    throw new ArgumentException($"{nameof(value)}[2] must be a ':'", nameof(value));
+#pragma warning disable CA2208 // False positive because the message uses the parameter name "value"
+                    throw new ArgumentException("value[2] must be a ':'", nameof(value));
+#pragma warning restore CA2208
                 case 5:
                     Dots |= Dot.CenterColon;
                     value = value.Substring(0, 2) + value.Substring(3, 2);

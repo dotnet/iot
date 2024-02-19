@@ -11,11 +11,10 @@ namespace ArduinoCsCompiler.Runtime
     internal class MiniType
     {
         public static readonly Type[] EmptyTypes = new Type[0];
-#pragma warning disable 414, SX1309
+#pragma warning disable SX1309
         // This is used by firmware code directly. Do not reorder the members without checking the firmware
         // The member contains the token of the class declaration
         private Int32 m_handle;
-#pragma warning restore 414
 
         [ArduinoImplementation("TypeCtor", 0x50)]
         protected MiniType()
@@ -29,6 +28,18 @@ namespace ArduinoCsCompiler.Runtime
             get
             {
                 // All types that have some generics return true here, whether they're open or closed. Nullable also returns true
+                return (m_handle & ExecutionSet.GenericTokenMask) != 0;
+            }
+        }
+
+        /// <summary>
+        /// This returns true for an open generic type only
+        /// </summary>
+        public virtual bool IsGenericTypeDefinition
+        {
+            [ArduinoImplementation("TypeIsGenericTypeDefinition", 235)]
+            get
+            {
                 return (m_handle & ExecutionSet.GenericTokenMask) != 0;
             }
         }
@@ -99,6 +110,23 @@ namespace ArduinoCsCompiler.Runtime
             get
             {
                 return "Namespace";
+            }
+        }
+
+        public virtual Type[] GenericTypeArguments
+        {
+            get
+            {
+                return (IsGenericType && !IsGenericTypeDefinition) ? GetGenericArguments() : Type.EmptyTypes;
+            }
+        }
+
+        public virtual Type[] GenericTypeParameters
+        {
+            [ArduinoImplementation("TypeGetGenericTypeParameters", 233)]
+            get
+            {
+                return new Type[0];
             }
         }
 
@@ -280,6 +308,34 @@ namespace ArduinoCsCompiler.Runtime
         public virtual bool IsEquivalentTo(Type other)
         {
             return Equals(other);
+        }
+
+        [ArduinoImplementation("TypeGetArrayRank", 234)]
+        public virtual int GetArrayRank()
+        {
+            return 1;
+        }
+
+        public MethodInfo? GetMethod(string name, Type[] types)
+        {
+            throw new PlatformNotSupportedException(name);
+        }
+
+        public MethodInfo? GetMethod(string name, BindingFlags bindingAttr)
+        {
+            throw new PlatformNotSupportedException(name);
+        }
+
+        [ArduinoImplementation("TypeGetFields")]
+        public FieldInfo[]? GetFields(BindingFlags bindingAttr)
+        {
+            return null;
+        }
+
+        [ArduinoImplementation("TypeGetProperties")]
+        public virtual PropertyInfo[]? GetProperties(BindingFlags bindingFlags)
+        {
+            return null;
         }
 
         public virtual Array GetEnumValues()

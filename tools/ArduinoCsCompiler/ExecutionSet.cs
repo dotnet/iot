@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
+using System.Threading;
 using ArduinoCsCompiler.Runtime;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
@@ -78,6 +80,7 @@ namespace ArduinoCsCompiler
             KnownTypeTokensMap.Add(typeof(Array), KnownTypeTokens.Array);
             KnownTypeTokensMap.Add(typeof(MiniArray), KnownTypeTokens.Array);
             KnownTypeTokensMap.Add(typeof(Exception), KnownTypeTokens.Exception);
+            KnownTypeTokensMap.Add(typeof(Thread), KnownTypeTokens.Thread);
             KnownTypeTokensMap.Add(typeof(ArithmeticException), KnownTypeTokens.ArithmeticException);
             KnownTypeTokensMap.Add(typeof(DivideByZeroException), KnownTypeTokens.DivideByZeroException);
             KnownTypeTokensMap.Add(typeof(NullReferenceException), KnownTypeTokens.NullReferenceException);
@@ -688,7 +691,20 @@ namespace ArduinoCsCompiler
                 return GetOrAddMethodToken(replacement, callingMethod);
             }
 
-            token = _nextToken++;
+            if (methodBase.DeclaringType == typeof(Thread) && methodBase.Name == "StartCallback")
+            {
+                // We need to be able to recognize this method in the backend
+                token = (int)KnownTypeTokens.ThreadStartCallback;
+            }
+            else if (methodBase.DeclaringType != null && methodBase.DeclaringType.FullName == "System.Threading.TimerQueue" && methodBase.Name == "AppDomainTimerCallback")
+            {
+                token = (int)KnownTypeTokens.AppDomainTimerCallback;
+            }
+            else
+            {
+                token = _nextToken++;
+            }
+
             _patchedMethodTokens.Add(methodBase, token);
             _inversePatchedMethodTokens.Add(token, methodBase);
             return token;
@@ -884,6 +900,12 @@ namespace ArduinoCsCompiler
                 return false;
             }
 
+            // Unless this compiler setting is enabled, we automatically suppress all preview features (in .NET 6.0 for instance the INumber<T> interfaces)
+            if (!_compilerSettings.UsePreviewFeatures && type.TheType.GetCustomAttributes(typeof(RequiresPreviewFeaturesAttribute), true).Any())
+            {
+                return false;
+            }
+
             if (_classes.Any(x => x.TheType == type.TheType))
             {
                 return false;
@@ -897,6 +919,7 @@ namespace ArduinoCsCompiler
             ClearStatistics();
             _classes.Add(type);
             _logger.LogDebug($"Class {type.TheType.MemberInfoSignature(true)} added to the execution set with token 0x{type.NewToken:X}");
+            PrintProgress();
             return true;
         }
 
@@ -920,8 +943,9 @@ namespace ArduinoCsCompiler
             return false;
         }
 
-        internal bool HasMethod(EquatableMethod m, EquatableMethod callingMethod, out IlCode? found)
+        internal bool HasMethod(EquatableMethod m, EquatableMethod callingMethod, out IlCode? found, out int newToken)
         {
+            newToken = 0;
             if (_classesToSuppress.Contains(m.DeclaringType!))
             {
                 found = null;
@@ -935,8 +959,15 @@ namespace ArduinoCsCompiler
             }
 
             var find = _methods.FirstOrDefault(x => EquatableMethod.AreMethodsIdentical(x.MethodBase, m.Method));
-            found = find?.Code;
-            return find != null;
+            if (find != null)
+            {
+                found = find.Code;
+                newToken = find.Token;
+                return true;
+            }
+
+            found = null;
+            return false;
         }
 
         internal bool AddMethod(ArduinoMethodDeclaration method)
@@ -991,6 +1022,8 @@ namespace ArduinoCsCompiler
             {
                 _logger.LogDebug($"Method {method.MethodBase.MethodSignature(false)} added to the execution set with token 0x{method.Token:X}");
             }
+
+            PrintProgress();
 
             return true;
         }
@@ -1122,6 +1155,34 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            // If the replacement has a static ctor, also replace it
+            foreach (var methoda in replacement.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                // Replace these only if explicitly requested (would need testing of impact otherwise)
+                if (!EquatableMethod.HasArduinoImplementationAttribute(methoda, out _))
+                {
+                    continue;
+                }
+
+                bool found = false;
+                // Above, we only check the public methods, here we also look at the private ones
+                foreach (var methodb in typeToReplace.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                {
+                    if (EquatableMethod.MethodsHaveSameSignature(methoda, methodb))
+                    {
+                        // Method A shall replace Method B
+                        AddReplacementMethod(methodb, methoda);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    ErrorManager.AddWarning("ACS0008", $"{replacement.FullName} specifies a static ctor to replace, but the original class has none");
+                }
+            }
+
             foreach (var m in ctorsNeedingReplacement)
             {
                 AddReplacementMethod(m, null);
@@ -1190,8 +1251,9 @@ namespace ArduinoCsCompiler
                     return null;
                 }
 
-                throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}. " +
+                ErrorManager.AddError("ACS0007", $"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}. " +
                                                     $"Original implementation is in {original.DeclaringType!.AssemblyQualifiedName}");
+                return null;
             }
 
             return elem.Item2;
@@ -1488,7 +1550,7 @@ namespace ArduinoCsCompiler
                 var pm = _patchedMethodTokens.FirstOrDefault(x => (uint)x.Value == token);
                 if (pm.Value != 0)
                 {
-                    w.WriteLine($"0x{token:X8} (Method, not loaded or no implementation present) {pm.Key.Name}");
+                    w.WriteLine($"0x{token:X8} (Method, not loaded or no implementation present) {pm.Key.MemberInfoSignature()}");
                     continue;
                 }
 
@@ -1590,6 +1652,14 @@ namespace ArduinoCsCompiler
             Statistics = null;
         }
 
+        private void PrintProgress()
+        {
+            if ((_methods.Count + _classes.Count) % 100 == 0)
+            {
+                _logger.LogInformation($"Collected {_classes.Count} classes and {_methods.Count} methods. And counting...");
+            }
+        }
+
         /// <summary>
         /// Remove initializer fields (in PrivateImplementationDetails) that are unused.
         /// We initialize the class as a whole, but only in the end we know which fields are actually used.
@@ -1613,6 +1683,32 @@ namespace ArduinoCsCompiler
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Create a table that allows fast lookups for ResolveClassFromFieldToken and ResolveClassFromCtorToken
+        /// </summary>
+        public void AddReverseFieldLookupTable()
+        {
+            Dictionary<int, ClassDeclaration> fieldOrCtorTokenToClass = new Dictionary<int, ClassDeclaration>();
+            foreach (var c in Classes)
+            {
+                foreach (var f in c.Members)
+                {
+                    // Tokens might be found in multiple classes, due to class replacements (fields in replacement classes shadow the original counterpart)
+                    if (f.Field != null)
+                    {
+                        fieldOrCtorTokenToClass[f.Token] = c;
+                    }
+
+                    if (f.Method is ConstructorInfo)
+                    {
+                        fieldOrCtorTokenToClass[f.Token] = c;
+                    }
+                }
+            }
+
+            _logger.LogDebug($"Got {fieldOrCtorTokenToClass.Count} members in reverse lookup index");
         }
     }
 }

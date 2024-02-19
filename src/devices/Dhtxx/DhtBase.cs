@@ -280,7 +280,7 @@ namespace Iot.Device.DHTxx
 
             if ((newBuf[4] == ((newBuf[0] + newBuf[1] + newBuf[2] + newBuf[3]) & 0xFF)))
             {
-                _isLastReadSuccessful = (newBuf[0] != 0) || (newBuf[2] != 0);
+                _isLastReadSuccessful = !((newBuf[0] == 0) && (newBuf[1] == 0) && (newBuf[2] == 0) && (newBuf[3] == 0));
             }
             else
             {

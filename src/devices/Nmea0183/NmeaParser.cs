@@ -226,6 +226,11 @@ namespace Iot.Device.Nmea0183
                         }
                     }
 
+                    if (sentenceToSend.Valid == false)
+                    {
+                        continue;
+                    }
+
                     TalkerSentence ts = new TalkerSentence(sentenceToSend);
                     string dataToSend = ts.ToString() + "\r\n";
                     byte[] buffer = _encoding.GetBytes(dataToSend);

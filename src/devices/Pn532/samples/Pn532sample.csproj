@@ -8,6 +8,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Card\CreditCard\CreditCardProcessing.csproj" />
+    <ProjectReference Include="..\..\Card\EmulatedTag\EmulatedTag.csproj" />
     <ProjectReference Include="..\..\Card\Mifare\Mifare.csproj" />
     <ProjectReference Include="..\..\Card\Ndef\Ndef.csproj" />
     <ProjectReference Include="..\..\Card\Ultralight\Ultralight.csproj" />

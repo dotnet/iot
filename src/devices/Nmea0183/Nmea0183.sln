@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleParser", "samples\SimpleParser\SimpleParser.csproj", "{C66E7575-9ECA-4329-A145-1DCADE028DDC}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seatalk1", "..\Seatalk1\Seatalk1.csproj", "{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{C66E7575-9ECA-4329-A145-1DCADE028DDC}.Windows-Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C66E7575-9ECA-4329-A145-1DCADE028DDC}.Windows-Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C66E7575-9ECA-4329-A145-1DCADE028DDC}.Windows-Release|Any CPU.Build.0 = Release|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Linux-Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Linux-Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Linux-Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Linux-Release|Any CPU.Build.0 = Release|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Windows-Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Windows-Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Windows-Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C6A3828-5AC7-42AD-BE8A-111DF1D46C8E}.Windows-Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

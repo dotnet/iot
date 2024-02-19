@@ -30,7 +30,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void OldImplementation()
         {
             _sinkMock.Setup(x => x.SendSentence(It.IsAny<NmeaSinkAndSource>(), It.IsAny<NmeaSentence>())).Callback<NmeaSinkAndSource, NmeaSentence>((a, t) => _sb.AppendLine(t.ToNmeaMessage()));
-            var testData = new EngineData(10000, 0, RotationalSpeed.Zero, Ratio.Zero, TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(21));
+            var testData = new EngineData(10000, EngineStatus.None, 0, RotationalSpeed.Zero, Ratio.Zero, TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(21));
             OldImpl(testData);
 
             Assert.Equal(@"$ECRPM,E,1,0,0,A*50
@@ -39,7 +39,7 @@ $PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000000100007F7F*5
 ", _sb.ToString());
 
             _sb.Clear();
-            testData = new EngineData(11000, 0, RotationalSpeed.FromRevolutionsPerMinute(3600), Ratio.FromPercent(100), TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(45));
+            testData = new EngineData(11000, EngineStatus.None, 0, RotationalSpeed.FromRevolutionsPerMinute(3600), Ratio.FromPercent(100), TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(45));
             OldImpl(testData);
 
             Assert.Equal(@"$ECRPM,E,1,3600,100,A*64
@@ -52,22 +52,35 @@ $PCDIN,01F201,00002AF8,02,000000FFFF477C0005000018150000FFFF000000000000007F7F*5
         public void NewImplementation()
         {
             _sinkMock.Setup(x => x.SendSentence(It.IsAny<NmeaSinkAndSource>(), It.IsAny<NmeaSentence>())).Callback<NmeaSinkAndSource, NmeaSentence>((a, t) => _sb.AppendLine(t.ToNmeaMessage()));
-            var testData = new EngineData(10000, 0, RotationalSpeed.Zero, Ratio.Zero, TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(21));
+            var testData = new EngineData(10000, EngineStatus.CheckEngine, 0, RotationalSpeed.Zero, Ratio.Zero, TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(21));
             NewImpl(testData);
 
             Assert.Equal(@"$ECRPM,E,1,0,0,A*50
 $PCDIN,01F200,00002710,02,000000FFFF00FFFF*23
-$PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000000100007F7F*5C
+$PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000010000007F7F*5C
 ", _sb.ToString());
 
             _sb.Clear();
-            testData = new EngineData(11000, 0, RotationalSpeed.FromRevolutionsPerMinute(3600), Ratio.FromPercent(100), TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(45));
+            testData = new EngineData(11000, EngineStatus.None, 0, RotationalSpeed.FromRevolutionsPerMinute(3600), Ratio.FromPercent(100), TimeSpan.FromHours(1.5), Temperature.FromDegreesCelsius(45));
             NewImpl(testData);
 
             Assert.Equal(@"$ECRPM,E,1,3600,100,A*64
-$PCDIN,01F200,00002AF8,02,000038FFFF64FFFF*23
+$PCDIN,01F200,00002AF8,02,00003CFFFF64FFFF*58
 $PCDIN,01F201,00002AF8,02,000000FFFF477C0005000018150000FFFF000000000000007F7F*54
 ", _sb.ToString());
+        }
+
+        [Fact]
+        public void DecodeEngineDetail()
+        {
+            string data = "$PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000010000007F7F*5C";
+            var ts = TalkerSentence.FromSentenceString(data, TalkerId.Any, out _);
+            Assert.NotNull(ts);
+            DateTimeOffset time = DateTimeOffset.Now;
+            var decoded = ts.TryGetTypedValue(ref time) as SeaSmartEngineDetail;
+            Assert.NotNull(decoded);
+            Assert.Equal(0, decoded.EngineNumber);
+            Assert.Equal(EngineStatus.CheckEngine, decoded.Status);
         }
 
         private void NewImpl(EngineData engineData)
@@ -153,8 +166,8 @@ $PCDIN,01F201,00002AF8,02,000000FFFF477C0005000018150000FFFF000000000000007F7F*5
         public void EngineEncodeDecode()
         {
             NmeaSentence.OwnTalkerId = TalkerId.GlobalPositioningSystem;
-            var engineData = new EngineData(1000, 0,
-                RotationalSpeed.FromRevolutionsPerMinute(2240), // Value must be dividable by 64 to be round-trip capable
+            var engineData = new EngineData(1000, EngineStatus.ChargeIndicator | EngineStatus.LowOilLevel, 0,
+                RotationalSpeed.FromRevolutionsPerSecond(30),
                 Ratio.FromPercent(100),
                 TimeSpan.FromDays(20), Temperature.FromDegreesCelsius(35));
 

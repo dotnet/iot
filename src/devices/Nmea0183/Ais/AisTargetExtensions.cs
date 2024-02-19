@@ -111,8 +111,9 @@ namespace Iot.Device.Nmea0183.Ais
                         relativeDirection = (direction - self1.TrueHeading.Value).Normalize(false);
                     }
 
-                    // The other is not a ship - Assume static position
-                    if (distance < parameters.WarningDistance)
+                    // The other is not a ship - Assume static position (but make sure a lost target doesn't become a
+                    // dangerous target - we warn about lost targets separately)
+                    if (distance < parameters.WarningDistance && state != AisSafetyState.Lost)
                     {
                         state = AisSafetyState.Dangerous;
                     }
@@ -159,7 +160,7 @@ namespace Iot.Device.Nmea0183.Ais
                     // if the closest point is the first or the last element, we assume it's more than that, and leave the fields empty
                     if (usedIndex == 0 || usedIndex == thisTrack.Count - 1)
                     {
-                        retList.Add(new ShipRelativePosition(self, other, distance, direction, AisSafetyState.Unknown, now)
+                        retList.Add(new ShipRelativePosition(self, other, distance, direction, AisSafetyState.FarAway, now)
                         {
                             RelativeDirection = relativeDirection,
                             ClosestPointOfApproach = null,
@@ -171,7 +172,7 @@ namespace Iot.Device.Nmea0183.Ais
                         var pos = new ShipRelativePosition(self, other, distance, direction, state, now)
                         {
                             RelativeDirection = relativeDirection,
-                            // Todo: Should subtract the size of both ships here (idealy considering the direction of the ships hulls)
+                            // Todo: Should subtract the size of both ships here (ideally considering the direction of the ships hulls)
                             ClosestPointOfApproach = minimumDistance,
                             TimeOfClosestPointOfApproach = timeOfMinimumDistance,
                         };

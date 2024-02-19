@@ -366,8 +366,21 @@ namespace ArduinoCsCompiler
 
                         fieldsUsed.Add((FieldInfo)set.InverseResolveToken(patchValue)!);
 
-                        // Add the fields' class to the list of used classes, or that one will be missing if the class consists of only fields (rare, but happens)
-                        typesUsed.Add(mb.DeclaringType!.GetTypeInfo());
+                        if (MicroCompiler.HasReplacementAttribute(mb.DeclaringType!, out var attribute) && attribute.ReplaceEntireType == false)
+                        {
+                            // If this _is_ the replacement class already, and we're not replacing the full type, add the original type, or we end up with
+                            // both the original and the replacement types in the execution set.
+                            if (attribute.TypeToReplace != null)
+                            {
+                                typesUsed.Add(attribute.TypeToReplace.GetTypeInfo());
+                            }
+                        }
+                        else
+                        {
+                            // Add the fields' class to the list of used classes, or that one will be missing if the class consists of only fields (rare, but happens)
+                            typesUsed.Add(mb.DeclaringType!.GetTypeInfo());
+                        }
+
                         break;
                     }
 

@@ -1062,7 +1062,7 @@ namespace Iot.Device.FtCommon
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing && _ftHandle != null)
             {
                 _ftHandle.Dispose();
                 _ftHandle = null!;

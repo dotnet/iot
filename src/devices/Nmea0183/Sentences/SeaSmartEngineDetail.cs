@@ -26,7 +26,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Constructs a new sentence
         /// </summary>
-        public SeaSmartEngineDetail(bool status, TimeSpan operatingTime, Temperature temperature, int engineNumber)
+        public SeaSmartEngineDetail(EngineStatus status, TimeSpan operatingTime, Temperature temperature, int engineNumber)
             : base()
         {
             Status = status;
@@ -42,7 +42,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public SeaSmartEngineDetail(EngineData data)
         {
-            Status = !data.Revolutions.Equals(RotationalSpeed.Zero, 0, ComparisonType.Absolute);
+            Status = data.Status;
             OperatingTime = data.OperatingTime;
             Temperature = data.EngineTemperature;
             EngineNumber = data.EngineNo;
@@ -111,9 +111,9 @@ namespace Iot.Device.Nmea0183.Sentences
                 OperatingTime = TimeSpan.FromSeconds(operatingTime);
             }
 
-            if (ReadFromHexString(data, 40, 4, true, out int status))
+            if (ReadFromHexString(data, 40, 4, false, out int status))
             {
-                Status = status == 0;
+                Status = (EngineStatus)status;
             }
 
             Valid = true;
@@ -136,7 +136,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Engine status: True for running, false for not running/error.
         /// </summary>
-        public bool Status
+        public EngineStatus Status
         {
             get;
             private set;
@@ -203,9 +203,13 @@ namespace Iot.Device.Nmea0183.Sentences
                 string swappedString = operatingTimeString.Substring(6, 2) + operatingTimeString.Substring(4, 2) +
                                        operatingTimeString.Substring(2, 2) + operatingTimeString.Substring(0, 2);
 
-                // Status = 0 is ok, anything else seems to indicate a fault
-                int status = Status ? 0 : 1;
-                string statusString = status.ToString("X4", CultureInfo.InvariantCulture);
+                // Lower 16 bits of status
+                uint status1 = ((uint)Status & 0xFFFF);
+                string status1String = status1.ToString("X4", CultureInfo.InvariantCulture);
+
+                uint status2 = ((uint)Status & 0xFFFF0000) >> 16;
+                string status2String = status2.ToString("X4", CultureInfo.InvariantCulture);
+
                 int engineTempKelvin;
                 if (Temperature.HasValue)
                 {
@@ -219,7 +223,7 @@ namespace Iot.Device.Nmea0183.Sentences
                 string engineTempString = engineTempKelvin.ToString("X4", CultureInfo.InvariantCulture);
                 // Seems to require a little endian conversion as well
                 engineTempString = engineTempString.Substring(2, 2) + engineTempString.Substring(0, 2);
-                return "01F201," + timeStampText + ",02," + engineNoText + "0000FFFF" + engineTempString + "00050000" + swappedString + "FFFF000000" + statusString + "00007F7F";
+                return "01F201," + timeStampText + ",02," + engineNoText + "0000FFFF" + engineTempString + "00050000" + swappedString + "FFFF000000" + status1String + status2String + "7F7F";
 
             }
 
@@ -231,7 +235,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                return $"Engine {EngineNumber} Status: {(Status ? "Running" : "Off")} Temperature {Temperature.GetValueOrDefault(UnitsNet.Temperature.Zero).DegreesCelsius} °C";
+                return $"Engine {EngineNumber} Status: {Status} Temperature {Temperature.GetValueOrDefault(UnitsNet.Temperature.Zero).DegreesCelsius} °C";
             }
 
             return "No valid data (or engine off)";

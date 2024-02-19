@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
-using WinGpio = global::Windows.Devices.Gpio;
+using WinGpio = Windows.Devices.Gpio;
 
 namespace System.Device.Gpio.Drivers;
 

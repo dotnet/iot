@@ -1,18 +1,19 @@
 <Project>
   <!-- These references to third-party libraries are included in all projects except System.Device.Gpio and the build wrapper project -->
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'System.Device.Gpio' And '$(MSBuildProjectName)' != 'build'">
-    <PackageReference Include="UnitsNet" Version="5.1.0" />
+    <PackageReference Include="UnitsNet" Version="5.31.0" />
   </ItemGroup>
 
   <!-- Automatically include these assemblies in all test projects -->
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
      <PackageReference Include="Moq" Version="4.16.1" />
-     <PackageReference Include="xunit" Version="2.4.1" />
-     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+     <PackageReference Include="xunit" Version="2.6.3" />
+     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.5">
        <PrivateAssets>all</PrivateAssets>
        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="xunit.runner.utility" Version="2.6.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
   </ItemGroup>
 </Project>

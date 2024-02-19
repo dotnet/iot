@@ -57,18 +57,26 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// This uses an implementation in the EE to get rid of all type tests (and all possible casts)
         /// </summary>
-        [ArduinoImplementation("RuntimeHelpersEnumEquals")]
+        [ArduinoImplementation("RuntimeHelpersEnumEquals", IgnoreGenericTypes = true)]
         public static bool EnumEquals<T>(T x, T y)
             where T : struct, Enum
         {
-            return x.Equals(y);
+            // return x.Equals(y);
+            throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("RuntimeHelpersEnumCompareTo")]
+        [ArduinoImplementation("RuntimeHelpersEnumEqualsInternal")]
+        public static bool EnumEqualsInternal(object x, object y)
+        {
+            throw new NotSupportedException();
+        }
+
+        [ArduinoImplementation("RuntimeHelpersEnumCompareTo", IgnoreGenericTypes = true)]
         internal static int EnumCompareTo<T>(T x, T y)
             where T : struct, Enum
         {
-            return x.CompareTo((object)y);
+            // return x.CompareTo((object)y);
+            throw new NotImplementedException();
         }
 
         internal static bool IsBitwiseEquatable<T>()

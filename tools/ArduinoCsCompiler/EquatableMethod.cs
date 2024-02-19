@@ -516,5 +516,10 @@ namespace ArduinoCsCompiler
         {
             return this.MethodSignature(false);
         }
+
+        public MethodImplAttributes GetMethodImplementationFlags()
+        {
+            return Method.GetMethodImplementationFlags();
+        }
     }
 }

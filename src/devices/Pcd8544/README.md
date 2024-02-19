@@ -76,54 +76,21 @@ Also you should `Refresh` the screen once you'll finish your drawing. All drawin
 
 ### Displaying raw images
 
-The function SetByteMap allows you to draw anything, you'll just need to provide the raw buffer. Size is 504 bytes representing from the top left part columns of 8 pixels up to the right up to the next raw. A total of 6 raws are available with 84 columns each.
+The function DrawBitmap allows you to draw anything, you'll just need to provide the raw bitmap. Size is 504 bytes representing from the top left part columns of 8 pixels up to the right up to the next raw. A total of 6 raws are available with 84 columns each.
 
 Here is an example on how you can convert an existing image to extract the raw data:
 
 ```csharp
-using Image<Rgba32> bitmapNokia = Image.Load<Rgba32>(Path.Combine("nokia_bw.bmp"));
-var bitmap2 = BitmapToByteArray(bitmapNokia);
-lcd.SetByteMap(bitmap2);
-lcd.Draw();
-
-byte[] BitmapToByteArray(Image<Rgba32> bitmap)
-{
-    if (bitmap is not object)
-    {
-        throw new ArgumentNullException(nameof(bitmap));
-    }
-
-    if ((bitmap.Width != Pcd8544.PixelScreenSize.Width) || (bitmap.Height != Pcd8544.PixelScreenSize.Height))
-    {
-        throw new ArgumentException($"{nameof(bitmap)} should be same size as the screen {Pcd8544.PixelScreenSize.Width}x{Pcd8544.PixelScreenSize.Height}");
-    }
-
-    byte[] toReturn = new byte[Pcd8544.ScreenBufferByteSize];
-    int width = Pcd8544.PixelScreenSize.Width;
-    Rgba32 colWhite = new(255, 255, 255);
-    for (int position = 0; position < Pcd8544.ScreenBufferByteSize; position++)
-    {
-        byte toStore = 0;
-        for (int bit = 0; bit < 8; bit++)
-        {
-            toStore = (byte)(toStore | ((bitmap[position % width, position / width * 8 + bit] == colWhite ? 0 : 1) << bit));
-        }
-
-        toReturn[position] = toStore;
-    }
-
-    return toReturn;
-}
+using BitmapImage bitmapNokia = BitmapImage.CreateFromFile(Path.Combine("nokia_bw.bmp"));
+lcd.DrawBitmap(bitmap2);
 ```
 
-In case you want to convert existing images which have a different size than the 84x48 screen size, you have to resize the picture like this using ImageSharp and convert it to Black and White:
+In case you want to convert existing images which have a different size than the 84x48 screen size, you have to resize the picture like this using SkiaSharp:
 
 ```csharp
 // Open a non bitmap and resize it
-using Image<Rgba32> bitmapLarge = Image.Load<Rgba32>(Path.Combine("nonbmp.jpg"));
-bitmapLarge.Mutate(x => x.Resize(Pcd8544.PixelScreenSize));
-bitmapLarge.Mutate(x => x.BlackWhite());
-var bitmap3 = BitmapToByteArray(bitmapLarge);
+using BitmapImage bitmapLarge = BitmapImage.CreateFromFile("nonbmp.jpg"));
+var bitmap2 = bitmapLarge.Resize(Pcd8544.PixelScreenSize);
 ```
 
 Note: you may want to reverse the colors first depending on what you want.

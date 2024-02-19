@@ -456,7 +456,7 @@ public class SysFsDriver : UnixDriver
         }
 
         // Ignore first time because it will always return the current state.
-        while (Interop.epoll_wait(pollFileDescriptor, out _, 1, 0) == -1)
+        while (Interop.epoll_wait(pollFileDescriptor, UnmanagedArray<epoll_event>.Empty, 1, 0) == -1)
         {
             var errorCode = Marshal.GetLastWin32Error();
             if (errorCode != ERROR_CODE_EINTR)
@@ -469,14 +469,13 @@ public class SysFsDriver : UnixDriver
 
     private unsafe bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
     {
-        char buf;
-        IntPtr bufPtr = new IntPtr(&buf);
         pinNumber = -1;
 
         while (!cancellationToken.IsCancellationRequested)
         {
             // Wait until something happens
-            int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, PollingTimeout);
+            using var eventBuffer = new UnmanagedArray<epoll_event>(1);
+            int waitResult = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 1, PollingTimeout);
             if (waitResult == -1)
             {
                 var errorCode = Marshal.GetLastWin32Error();
@@ -491,28 +490,8 @@ public class SysFsDriver : UnixDriver
 
             if (waitResult > 0)
             {
-                pinNumber = events.data.pinNumber;
-
-                // This entire section is probably not necessary, but this seems to be hard to validate.
-                // See https://github.com/dotnet/iot/pull/914#discussion_r389924106 and issue #1024.
-                if (valueFileDescriptor == -1)
-                {
-                    // valueFileDescriptor will be -1 when using the callback eventing. For WaitForEvent, the value will be set.
-                    valueFileDescriptor = _devicePins[pinNumber].FileDescriptor;
-                }
-
-                int lseekResult = Interop.lseek(valueFileDescriptor, 0, SeekFlags.SEEK_SET);
-                if (lseekResult == -1)
-                {
-                    throw new IOException("Error while trying to seek in value file.");
-                }
-
-                int readResult = Interop.read(valueFileDescriptor, bufPtr, 1);
-                if (readResult != 1)
-                {
-                    throw new IOException("Error while trying to read value file.");
-                }
-
+                var @event = eventBuffer.ReadToManagedArray()[0];
+                pinNumber = @event.data.pinNumber;
                 return true;
             }
         }

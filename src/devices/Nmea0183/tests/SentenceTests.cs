@@ -285,7 +285,7 @@ namespace Iot.Device.Nmea0183.Tests
             CrossTrackError xte = (CrossTrackError)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.True(xte.Valid);
-            Assert.True(xte.Distance.Equals(Length.Zero, 0, ComparisonType.Absolute));
+            Assert.True(xte.Distance.Equals(Length.Zero, Length.Zero));
         }
 
         [Fact]
@@ -495,6 +495,30 @@ namespace Iot.Device.Nmea0183.Tests
             }
         }
 
+        [Fact]
+        public void HtcEncode()
+        {
+            var hdt = new HeadingAndTrackControl("M", null, "L", "N", null, null, null, null, null, null, null, true);
+            var msg = hdt.ToNmeaParameterList();
+            Assert.Equal("A,,L,M,N,,,,,,,,T", msg);
+
+            hdt = new HeadingAndTrackControl("H", Angle.FromDegrees(10.21), "L", "N", null, null, Length.FromNauticalMiles(22.29), null, null, null, Angle.FromDegrees(2), false);
+            msg = hdt.ToNmeaParameterList();
+            Assert.Equal("V,10.2,L,H,N,,,22.3,,,,2.0,M", msg);
+        }
+
+        [Fact]
+        public void StalkEncode()
+        {
+            var talk = new SeatalkNmeaMessage(new byte[]
+            {
+                0x9c, 00, 01
+            });
+
+            var msg = talk.ToNmeaParameterList();
+            Assert.Equal("9C,00,01", msg);
+        }
+
         [Theory]
         [InlineData("$GPRMC,211730.997,A,3511.28000,S,13823.26000,E,7.000,229.000,190120,,*19")]
         [InlineData("$GPRMC,115613.000,A,4729.49750,N,00930.39830,E,1.600,36.200,240520,1.900,E,D*34")]
@@ -523,6 +547,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$ECMDA,30.12,I,1.020,B,18.5,C,,C,38.7,,4.2,C,,T,,M,,N,,M*37")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42*73")]
         [InlineData("!AIVDM,1,1,,B,ENk`sR9`92ah97PR9h0W1T@1@@@=MTpS<7GFP00003vP000,2*4B")]
+        [InlineData("$STALK,84,86,26,97,02,00,00,00,08*6F")]
         public void SentenceRoundTrip(string input)
         {
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
@@ -574,6 +599,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$HCHDG,30.9,,,1.9,E")]
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,*64")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M*58")]
+        [InlineData("$APRSA,12.2,A,,V")]
         public void CanParseAllTheseMessages(string input)
         {
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
@@ -603,6 +629,10 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M")]
+        [InlineData("$APHTC,V,10.0,L,R,N,12.3,13.4,2.0,1.0,15.1,0.5,16.2,T")]
+        [InlineData("$APHTD,V,10.0,L,R,N,12.0,13.5,2.0,1.0,15.1,0.5,16.2,T,V,A,V,123.2")]
+        [InlineData("$STALK,84,86,26,97,02,00,00,00,08")]
+        [InlineData("$STALK,9C,01,12,00")]
         public void SentenceRoundTripIsUnaffectedByCulture(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here
@@ -639,6 +669,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M")]
+        [InlineData("$APHTD,V,10.0,L,R,N,12,13,2.5,1.0,15.1,0.5,16.2,M")]
         public void TwoWaysOfGettingSentenceAreEqual(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here

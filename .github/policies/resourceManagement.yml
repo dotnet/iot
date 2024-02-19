@@ -1,0 +1,261 @@
+id: 
+name: GitOps.PullRequestIssueManagement
+description: GitOps.PullRequestIssueManagement primitive
+owner: 
+resource: repository
+disabled: false
+where: 
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+    - description: Close stale pull requests
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isPullRequest
+      - isOpen
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      - hasLabel:
+          label: 'Status: No Recent Activity'
+      - noActivitySince:
+          days: 7
+      actions:
+      - closeIssue
+      - addReply:
+          reply: Hello @${issueAuthor}, the reviewers on this PR have requested changes and there has not been any activity for **14 days**, so it will be closed for housekeeping pourposes. Feel free to reopen or send a new one if you wish to resume the progress.
+    - description: Add no recent activity label to pull requests
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isPullRequest
+      - isOpen
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      - noActivitySince:
+          days: 7
+      - isNotLabeledWith:
+          label: 'Status: No Recent Activity'
+      actions:
+      - addLabel:
+          label: 'Status: No Recent Activity'
+      - addReply:
+          reply: This pull request has been automatically marked as stale because it has been marked as requiring author feedback but has not had any activity for **7 days**.
+    - description: Close stale issues
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isIssue
+      - isOpen
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      - hasLabel:
+          label: 'Status: No Recent Activity'
+      - noActivitySince:
+          days: 3
+      actions:
+      - closeIssue
+    - description: Add no recent activity label to issues
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isIssue
+      - isOpen
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      - noActivitySince:
+          days: 4
+      - isNotLabeledWith:
+          label: 'Status: No Recent Activity'
+      actions:
+      - addLabel:
+          label: 'Status: No Recent Activity'
+      - addReply:
+          reply: This issue has been automatically marked as stale because it has been marked as requiring author feedback but has not had any activity for **4 days**. It will be closed if no further activity occurs **within 3 days of this comment**.
+    - description: Close duplicate issues
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isIssue
+      - isOpen
+      - hasLabel:
+          label: duplicate
+      - noActivitySince:
+          days: 1
+      actions:
+      - addReply:
+          reply: This issue has been marked as duplicate and has not had any activity for **1 day**. It will be closed for housekeeping purposes.
+      - closeIssue
+    eventResponderTasks:
+    - if:
+      - payloadType: Pull_Request
+      then:
+      - if:
+        - includesModifiedFiles:
+            files:
+            - src/System.Device.Gpio/
+        then:
+        - addLabel:
+            label: area-System.Device.Gpio
+      - if:
+        - includesModifiedFiles:
+            files:
+            - src/devices/
+        then:
+        - addLabel:
+            label: area-device-bindings
+      description: Auto-add area-System.Device.Gpio and area-device-bindings
+    - if:
+      - payloadType: Pull_Request
+      - hasLabel:
+          label: Auto-Merge
+      then:
+      - enableAutoMerge:
+          mergeMethod: Squash
+      description: Auto merge pull requests that get the auto merge label.
+    - if:
+      - payloadType: Pull_Request
+      - labelRemoved:
+          label: Auto-Merge
+      then:
+      - disableAutoMerge
+      description: Auto merge pull requests that get the auto merge label.
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Opened
+      then:
+      - addCodeFlowLink
+      description: '[PR Template] Add a CodeFlow link to new pull requests'
+    - if:
+      - payloadType: Pull_Request_Review
+      - isAction:
+          action: Submitted
+      - isReviewState:
+          reviewState: Changes_requested
+      then:
+      - addLabel:
+          label: 'Needs: Author Feedback'
+      description: Add needs author feedback label to pull requests when changes are requested
+    - if:
+      - payloadType: Pull_Request
+      - isActivitySender:
+          issueAuthor: True
+      - not:
+          isAction:
+            action: Closed
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      then:
+      - removeLabel:
+          label: 'Needs: Author Feedback'
+      description: Remove needs author feedback label when the author responds to a pull request
+    - if:
+      - payloadType: Issue_Comment
+      - isActivitySender:
+          issueAuthor: True
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      then:
+      - removeLabel:
+          label: 'Needs: Author Feedback'
+      description: Remove needs author feedback label when the author comments on a pull request
+    - if:
+      - payloadType: Pull_Request_Review
+      - isActivitySender:
+          issueAuthor: True
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      then:
+      - removeLabel:
+          label: 'Needs: Author Feedback'
+      description: Remove needs author feedback label when the author responds to a pull request review comment
+    - if:
+      - payloadType: Pull_Request
+      - not:
+          isAction:
+            action: Closed
+      - hasLabel:
+          label: 'Status: No Recent Activity'
+      then:
+      - removeLabel:
+          label: 'Status: No Recent Activity'
+      description: Remove no recent activity label from pull requests
+    - if:
+      - payloadType: Issue_Comment
+      - hasLabel:
+          label: 'Status: No Recent Activity'
+      then:
+      - removeLabel:
+          label: 'Status: No Recent Activity'
+      description: Remove no recent activity label when a pull request is commented on
+    - if:
+      - payloadType: Pull_Request_Review
+      - hasLabel:
+          label: 'Status: No Recent Activity'
+      then:
+      - removeLabel:
+          label: 'Status: No Recent Activity'
+      description: Remove no recent activity label when a pull request is reviewed
+    - if:
+      - payloadType: Issue_Comment
+      - isAction:
+          action: Created
+      - isActivitySender:
+          issueAuthor: True
+      - hasLabel:
+          label: 'Needs: Author Feedback'
+      - isOpen
+      then:
+      - removeLabel:
+          label: 'Needs: Author Feedback'
+      description: Replace needs author feedback label with needs attention label when the author comments on an issue
+    - if:
+      - payloadType: Issues
+      - not:
+          isAction:
+            action: Closed
+      - hasLabel:
+          label: 'Status: No Recent Activity'
+      then:
+      - removeLabel:
+          label: 'Status: No Recent Activity'
+      description: Remove no recent activity label from issues
+    - if:
+      - payloadType: Issue_Comment
+      - hasLabel:
+          label: 'Status: No Recent Activity'
+      then:
+      - removeLabel:
+          label: 'Status: No Recent Activity'
+      description: Remove no recent activity label when an issue is commented on
+    - if:
+      - payloadType: Pull_Request
+      then:
+      - inPrLabel:
+          label: 'Status: In PR'
+      description: Add 'In-PR' label on issue when an open pull request is targeting it
+    - if:
+      - payloadType: Issues
+      - or:
+        - labelAdded:
+            label: Priority:0
+        - labelAdded:
+            label: Priority:1
+        - labelAdded:
+            label: Priority:2
+        - labelAdded:
+            label: Priority:3
+      - hasLabel:
+          label: untriaged
+      then:
+      - removeLabel:
+          label: untriaged
+      description: Remove untriaged label when a priority is assigned.
+onFailure: 
+onSuccess: 
