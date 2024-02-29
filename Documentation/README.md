@@ -118,14 +118,6 @@ While contributing, you should read the [coding guidelines section](https://gith
 
 * [PINE A64-LTS](https://www.pine64.org/?page_id=46823)
 
-## Platforms
-
-### Linux
-
-#### GPIO
-
-* [Use libgpiod to control GPIOs on Linux](./gpio-linux-libgpiod.md)
-
 ## Maker Resources
 
 ### Prototyping

@@ -7,7 +7,6 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.Gpio.Libgpiod.V1;
 using System.Runtime.InteropServices;
 #if NET6_0_OR_GREATER
 using System.Runtime.Loader;
@@ -18,7 +17,7 @@ using NativeLong = System.IntPtr;
 
 internal partial class Interop
 {
-    internal static partial class LibgpiodV1
+    internal static partial class Libgpiod
     {
 #if NET6_0_OR_GREATER
         private const string LibgpiodLibrary = "libgpiod.so.2";
@@ -27,11 +26,11 @@ internal partial class Interop
 #endif
         internal static IntPtr InvalidHandleValue;
 
-        static LibgpiodV1()
+        static Libgpiod()
         {
             InvalidHandleValue = new IntPtr(-1);
 #if NET6_0_OR_GREATER
-            Assembly currentAssembly = typeof(LibgpiodV1).Assembly;
+            Assembly currentAssembly = typeof(Libgpiod).Assembly;
 
             AssemblyLoadContext.GetLoadContext(currentAssembly)!.ResolvingUnmanagedDll += (assembly, libgpiodName) =>
             {
