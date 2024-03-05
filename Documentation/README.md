@@ -48,7 +48,7 @@ While contributing, you should read the [coding guidelines section](https://gith
 
 * [Configuring Remote Debugging from Dev machine to Raspberry Pi on ARM](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
 * [.NET Core Documentation](https://docs.microsoft.com/dotnet/)
-* [Install .NET Core on Raspberry Pi](https://github.com/dotnet/core/blob/master/samples/RaspberryPiInstructions.md)
+* [Deploy .NET apps on ARM single-board computers](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
 * [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
 * [How to Prepare a Publish Profile](How-to-Deploy-an-IoT-App.md)
