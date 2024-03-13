@@ -16,6 +16,7 @@
     <PackAsTool>True</PackAsTool>
     <ToolCommandName>dotnet-acs</ToolCommandName>
     <PackageOutputPath>..\..\..\artifacts\packages\$(Configuration)\Shipping</PackageOutputPath>
+    <Version>3.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,7 +40,7 @@
     <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
   <ItemGroup Condition="$(Configuration)!='Debug'">
-    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj"/>
-    <ProjectReference Include="..\..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj"/>
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
   </ItemGroup>
 </Project>
