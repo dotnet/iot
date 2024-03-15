@@ -16,6 +16,7 @@
     If we disable this here, the warning is still emmited for the individual projects.-->
     <NoWarn>$(NoWarn);SA1205</NoWarn>
     <!--Disabling default items so samples source won't get build by the main library-->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   
   <ItemGroup>
@@ -68,6 +69,7 @@
 
     <ItemGroup>
       <Compile Include="%(_CompileItemsFromProjects.Identity)" />
+      <None Include="$(RepoRoot)src/device/README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
     </ItemGroup>
   </Target>
 

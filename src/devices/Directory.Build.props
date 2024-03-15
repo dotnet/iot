@@ -27,7 +27,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <Content Include="$(RepoRoot)src/device/README-nuget.md" Pack="true" PackagePath="\README.md" />
   </ItemGroup>
 
 </Project>
