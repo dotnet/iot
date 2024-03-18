@@ -456,7 +456,8 @@ public class SysFsDriver : UnixDriver
         }
 
         // Ignore first time because it will always return the current state.
-        while (Interop.epoll_wait(pollFileDescriptor, UnmanagedArray<epoll_event>.Empty, 1, 0) == -1)
+        using var eventBuffer = new UnmanagedArray<epoll_event>(1);
+        while (Interop.epoll_wait(pollFileDescriptor, eventBuffer, 1, 0) == -1)
         {
             var errorCode = Marshal.GetLastWin32Error();
             if (errorCode != ERROR_CODE_EINTR)
@@ -467,14 +468,15 @@ public class SysFsDriver : UnixDriver
         }
     }
 
-    private unsafe bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
+    private bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
     {
         pinNumber = -1;
+
+        using var eventBuffer = new UnmanagedArray<epoll_event>(1);
 
         while (!cancellationToken.IsCancellationRequested)
         {
             // Wait until something happens
-            using var eventBuffer = new UnmanagedArray<epoll_event>(1);
             int waitResult = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 1, PollingTimeout);
             if (waitResult == -1)
             {
