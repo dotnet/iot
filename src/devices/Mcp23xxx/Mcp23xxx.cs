@@ -404,7 +404,7 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Reads the value of a set of pins
         /// </summary>
-        protected void Read(Span<PinValuePair> pinValuePairs)
+        protected override void Read(Span<PinValuePair> pinValuePairs)
         {
             lock (_interruptHandlerLock)
             {
@@ -462,7 +462,7 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Writes values to a set of pins
         /// </summary>
-        protected void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+        protected override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             lock (_interruptHandlerLock)
             {

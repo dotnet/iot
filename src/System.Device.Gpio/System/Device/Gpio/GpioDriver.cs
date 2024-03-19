@@ -132,6 +132,31 @@ public abstract class GpioDriver : IDisposable
     protected internal abstract void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback);
 
     /// <summary>
+    /// Write the given pins with the given values.
+    /// </summary>
+    /// <param name="pinValuePairs">The pin/value pairs to write.</param>
+    protected internal virtual void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+    {
+        for (int i = 0; i < pinValuePairs.Length; i++)
+        {
+            Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
+        }
+    }
+
+    /// <summary>
+    /// Read the given pins with the given pin numbers.
+    /// </summary>
+    /// <param name="pinValuePairs">The pin/value pairs to read.</param>
+    protected internal virtual void Read(Span<PinValuePair> pinValuePairs)
+    {
+        for (int i = 0; i < pinValuePairs.Length; i++)
+        {
+            int pin = pinValuePairs[i].PinNumber;
+            pinValuePairs[i] = new PinValuePair(pin, Read(pin));
+        }
+    }
+
+    /// <summary>
     /// Disposes this instance, closing all open pins
     /// </summary>
     public void Dispose()
