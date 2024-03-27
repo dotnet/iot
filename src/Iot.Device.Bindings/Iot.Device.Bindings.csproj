@@ -69,7 +69,7 @@
 
     <ItemGroup>
       <Compile Include="%(_CompileItemsFromProjects.Identity)" />
-      <None Include="$(RepoRoot)src/device/README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
+      <Content Include="$(RepoRoot)src/device/README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
     </ItemGroup>
   </Target>
 
