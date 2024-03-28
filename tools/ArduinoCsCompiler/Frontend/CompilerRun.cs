@@ -57,7 +57,7 @@ namespace ArduinoCsCompiler
 
                 _compiler = new MicroCompiler(board, true);
 
-                if (!_compiler.QueryBoardCapabilities(out var caps))
+                if (!_compiler.QueryBoardCapabilities(true, out var caps))
                 {
                     Logger.LogError("Couldn't query board capabilities. Possibly incompatible firmware");
                     return false;
@@ -144,6 +144,7 @@ namespace ArduinoCsCompiler
                 UseFlashForProgram = true,
                 UsePreviewFeatures = CommandLineOptions.UsePreviewFeatures,
                 AdditionalSuppressions = CommandLineOptions.Suppressions,
+                ProcessName = inputInfo.Name,
             };
 
             Logger.LogInformation("Collecting method information and metadata...");
@@ -158,16 +159,14 @@ namespace ArduinoCsCompiler
                 Logger.LogDebug($"Class {stat.Key.FullName}: {stat.Value.TotalBytes} Bytes");
             }
 
-            if (!string.IsNullOrEmpty(CommandLineOptions.TokenMapFile))
-            {
-                set.WriteMapFile(CommandLineOptions.TokenMapFile);
-            }
-
             Logger.LogInformation($"Compile successful. {ErrorManager.NumErrors} Errors, {ErrorManager.NumWarnings} Warnings");
 
             if (!CommandLineOptions.CompileOnly)
             {
                 set.Load(false);
+
+                // Call this after load, so we have an updated flash usage value available.
+                WriteTokenMap(set);
 
                 if (CommandLineOptions.Run == false)
                 {
@@ -289,6 +288,28 @@ namespace ArduinoCsCompiler
                         Abort();
                     }
                 }
+            }
+            else
+            {
+                WriteTokenMap(set); // If we don't load, do this anyway
+            }
+        }
+
+        private void WriteTokenMap(ExecutionSet set)
+        {
+            if (_compiler == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(CommandLineOptions.TokenMapFile))
+            {
+                if (!_compiler.QueryBoardCapabilities(true, out var caps))
+                {
+                    caps = new IlCapabilities(); // Illegal, but that should be obvious to anyone
+                }
+
+                set.WriteMapFile(CommandLineOptions.TokenMapFile, caps);
             }
         }
 
