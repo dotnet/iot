@@ -52,7 +52,7 @@ namespace Iot.Device.Nmea0183.Sentences
             get;
         }
 
-        private static UInt32 InverseEndianess(UInt32 value)
+        private static UInt32 InverseEndianness(UInt32 value)
         {
             return (value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 |
                    (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24;
@@ -64,7 +64,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <param name="input">Input string</param>
         /// <param name="start">Start offset of required number</param>
         /// <param name="length">Length of required number. Must be 2, 4 or 8</param>
-        /// <param name="inverseEndianess">True to inverse the endianess of the number (reverse the partial string)</param>
+        /// <param name="inverseEndianness">True to inverse the endianness of the number (reverse the partial string)</param>
         /// <param name="value">The output value</param>
         /// <returns>True on success, false otherwise</returns>
         /// <exception cref="ArgumentException">Length is not 2, 4 or 8</exception>
@@ -72,7 +72,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// Other erroneous inputs don't throw an exception but return false, e.g. string shorter than expected or
         /// value is not a hex number. This is to prevent an exception in case of a malformed message.
         /// </remarks>
-        protected bool ReadFromHexString(string input, int start, int length, bool inverseEndianess, out int value)
+        protected bool ReadFromHexString(string input, int start, int length, bool inverseEndianness, out int value)
         {
             if (length != 2 && length != 4 && length != 8)
             {
@@ -94,11 +94,11 @@ namespace Iot.Device.Nmea0183.Sentences
                 return false;
             }
 
-            if (length == 8 && inverseEndianess)
+            if (length == 8 && inverseEndianness)
             {
-                result = InverseEndianess(result);
+                result = InverseEndianness(result);
             }
-            else if (length == 4 && inverseEndianess)
+            else if (length == 4 && inverseEndianness)
             {
                 result = result >> 8 | ((result & 0xFF) << 8);
             }
