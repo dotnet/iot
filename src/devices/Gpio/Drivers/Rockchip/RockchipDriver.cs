@@ -32,6 +32,7 @@ namespace Iot.Device.Gpio.Drivers
 
         protected IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
         protected IntPtr[] _gpioPointers = Array.Empty<IntPtr>();
+        protected bool _isGpioV2 = false;
         #pragma warning restore CS1591
 
         /// <summary>
@@ -118,6 +119,18 @@ namespace Iot.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
+            if (_isGpioV2)
+            {
+                WriteV2(pinNumber, value);
+            }
+            else
+            {
+                WriteV1(pinNumber, value);
+            }
+        }
+
+        private void WriteV1(int pinNumber, PinValue value)
+        {
             (int GpioNumber, int Port, int PortNumber) unmapped = UnmapPinNumber(pinNumber);
 
             // data register (GPIO_SWPORT_DR) offset is 0x0000
@@ -136,13 +149,64 @@ namespace Iot.Device.Gpio.Drivers
             *dataPointer = dataValue;
         }
 
+        private void WriteV2(int pinNumber, PinValue value)
+        {
+            (int GpioNumber, int Port, int PortNumber) unmapped = UnmapPinNumber(pinNumber);
+
+            uint* dataPointer;
+            if (unmapped.PortNumber < 4)
+            {
+                dataPointer = (uint*)_gpioPointers[unmapped.GpioNumber];
+            }
+            else
+            {
+                dataPointer = (uint*)(_gpioPointers[unmapped.GpioNumber] + 0x0004);
+            }
+            uint dataValue = *dataPointer;
+
+            // software write enable
+            dataValue |= 0b1U << (16 + unmapped.Port % 2 * 8 + unmapped.PortNumber);
+            if (value == PinValue.High)
+            {
+                dataValue |= 0b1U << (unmapped.Port * 8 + unmapped.PortNumber);
+            }
+            else
+            {
+                dataValue &= ~(0b1U << (unmapped.Port * 8 + unmapped.PortNumber));
+            }
+
+            *dataPointer = dataValue;
+        }
+
         /// <inheritdoc/>
         protected unsafe override PinValue Read(int pinNumber)
+        {
+            if (_isGpioV2)
+            {
+                return ReadV2(pinNumber);
+            }
+            else
+            {
+                return ReadV1(pinNumber);
+            }
+        }
+
+        private PinValue ReadV1(int pinNumber)
         {
             (int GpioNumber, int Port, int PortNumber) unmapped = UnmapPinNumber(pinNumber);
 
             // data register (GPIO_EXT_PORTA) offset is 0x0050
             uint* dataPointer = (uint*)(_gpioPointers[unmapped.GpioNumber] + 0x0050);
+            uint dataValue = *dataPointer;
+
+            return Convert.ToBoolean((dataValue >> (unmapped.Port * 8 + unmapped.PortNumber)) & 0b1) ? PinValue.High : PinValue.Low;
+        }
+
+        private PinValue ReadV2(int pinNumber)
+        {
+            (int GpioNumber, int Port, int PortNumber) unmapped = UnmapPinNumber(pinNumber);
+
+            uint* dataPointer = (uint*)(_gpioPointers[unmapped.GpioNumber] + 0x0070);
             uint dataValue = *dataPointer;
 
             return Convert.ToBoolean((dataValue >> (unmapped.Port * 8 + unmapped.PortNumber)) & 0b1) ? PinValue.High : PinValue.Low;
@@ -244,6 +308,13 @@ namespace Iot.Device.Gpio.Drivers
                     }
 
                     _gpioPointers[i] = map;
+                }
+
+                // check GPIO type version, some of the latest models, such as RK3588 and RV1103, the GPIO type is V2
+                uint* versionPointer = (uint*)(_gpioPointers[0] + 0x0078);
+                if (*versionPointer == 0x01000C2B || *versionPointer == 0x0101157C)
+                {
+                    _isGpioV2 = true;
                 }
 
                 Interop.close(fileDescriptor);
