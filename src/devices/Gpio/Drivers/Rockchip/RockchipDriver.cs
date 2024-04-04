@@ -162,6 +162,7 @@ namespace Iot.Device.Gpio.Drivers
             {
                 dataPointer = (uint*)(_gpioPointers[unmapped.GpioNumber] + 0x0004);
             }
+
             uint dataValue = *dataPointer;
 
             // software write enable

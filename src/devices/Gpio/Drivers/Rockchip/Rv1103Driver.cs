@@ -33,7 +33,9 @@ namespace Iot.Device.Gpio.Drivers
         /// <summary>
         /// Initializes a new instance of the <see cref="Rv1103Driver"/> class.
         /// </summary>
-        public Rv1103Driver() { }
+        public Rv1103Driver()
+        {
+        }
 
         /// <inheritdoc/>
         protected override void SetPinMode(int pinNumber, PinMode mode)
@@ -44,7 +46,7 @@ namespace Iot.Device.Gpio.Drivers
             int iomuxBitOffset = unmapped.PortNumber * 3;
             int bitOffset = unmapped.PortNumber * 2;
 
-            if (unmapped.PortNumber < 4) 
+            if (unmapped.PortNumber < 4)
             {
                 // low register
                 dirPointer = (uint*)(_gpioPointers[unmapped.GpioNumber] + 0x0008);
@@ -82,6 +84,7 @@ namespace Iot.Device.Gpio.Drivers
                 default:
                     break;
             }
+
             *dirPointer = dirValue;
 
             if (mode == PinMode.InputPullUp || mode == PinMode.InputPullDown)
@@ -105,6 +108,7 @@ namespace Iot.Device.Gpio.Drivers
                     default:
                         break;
                 }
+
                 *modePointer = modeValue;
             }
 
