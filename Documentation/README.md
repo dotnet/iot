@@ -48,6 +48,7 @@ While contributing, you should read the [coding guidelines section](https://gith
 
 * [Configuring Remote Debugging from Dev machine to Raspberry Pi on ARM](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
 * [.NET Core Documentation](https://docs.microsoft.com/dotnet/)
+* [Install .NET on Raspberry Pi](https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian)
 * [Deploy .NET apps on ARM single-board computers](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
 * [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
 * [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
@@ -71,6 +72,7 @@ While contributing, you should read the [coding guidelines section](https://gith
 
 * [Enable SPI on Raspberry Pi](./raspi-spi.md)
 * [Enable I2C on Raspberry Pi](./raspi-i2c.md)
+* [Control GPIO pins within rootless Docker container on Raspberry Pi](./raspi-Docker-GPIO.md)
 * [Enable Hardware PWM on Raspberry Pi](./raspi-pwm.md)
 * [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
 * [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)
