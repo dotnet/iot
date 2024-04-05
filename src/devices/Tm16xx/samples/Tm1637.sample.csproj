@@ -4,6 +4,6 @@
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Tm1637.csproj" />
+    <ProjectReference Include="..\Tm16xx.csproj" />
   </ItemGroup>
 </Project>

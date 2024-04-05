@@ -9,7 +9,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(BitConverter), true)]
     internal class MiniBitConverter
     {
-        // This must be set to the endianess of the target platform, but currently all Microcontrollers that are supported seem to use little endian
+        // This must be set to the endianness of the target platform, but currently all Microcontrollers that are supported seem to use little endian
         public static readonly bool IsLittleEndian = true;
 
         [ArduinoImplementation("BitConverterSingleToInt32Bits")]

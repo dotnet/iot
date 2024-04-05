@@ -48,6 +48,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### GNSS Satellite receivers and navigation equipment
 
 * [NMEA 0183 Protocol](Nmea0183/README.md)
+* [Seatalk 1 Interface](Seatalk1/README.md)
 
 ### Liquid sensors
 
@@ -62,6 +63,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [SensorHub - Environmental sensor](SensorHub/README.md)
 * [TCS3472x Sensors](Tcs3472x/README.md)
 * [TSL256x - Illuminance sensor](Tsl256x/README.md)
+* [VCNL4040 - Proximity and Ambient Light Sensor](Vcnl4040/README.md)
 
 ### Barometers
 
@@ -151,6 +153,14 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MPU6050/MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu6xxx9xxx/README.md)
 * [Sense HAT](SenseHat/README.md)
 
+### Bus and GPIO multiplexers
+
+* [Charlieplex Segment binding](Charlieplex/README.md)
+* [Generic shift register](ShiftRegister/README.md)
+* [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
+* [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
+* [TCA954X - TCA954X Low-Voltage Multi-Channel I2C Switch with Reset](Tca954x/README.md)
+
 ### Hygrometers
 
 * [AHT10/15/20 - Temperature and humidity sensor modules](Ahtxx/README.md)
@@ -194,11 +204,11 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
 * [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
+* [GUI Support](Gui/README.md)
 * [Holtek HT1632 - 32×8 & 24×16 LED Driver](Ht1632/README.md)
 * [HT16K33 - LED Matrix Display Driver](Display/README.md)
 * [Ili934x TFT LCD Controller](Ili934x/README.md)
 * [IS31FL3730 -- LED Matrix Display Driver](Is31fl3730/README.md)
-* [IS31FL3731 -- LED Matrix Display Driver](Is31fl3731/README.md)
 * [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen](Pcd8544/README.md)
@@ -207,7 +217,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [SkiaSharp graphics library adapter](SkiaSharpAdapter/README.md)
 * [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
 * [Solomon Systech SSD13xx OLED display family](Ssd13xx/README.md)
-* [TM1637 - Segment Display](Tm1637/README.md)
+* [TitanmecLed - Segment Display](Tm16xx/README.md)
 * [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
 
 ### GPIO Expanders
@@ -216,7 +226,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
 * [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
-* [TCA9548A - TCA9548A Low-Voltage 8-Channel I2C Switch with Reset](Tca954x/README.md)
 
 ### CAN BUS libraries/modules
 
@@ -226,10 +235,12 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Proximity sensors
 
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
+* [VCNL4040 - Proximity and Ambient Light Sensor](Vcnl4040/README.md)
 
 ### Touch sensors
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [GUI Support](Gui/README.md)
 * [Ili934x TFT LCD Controller](Ili934x/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
 
@@ -269,8 +280,10 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Media libraries
 
 * [Buzzer - Piezo Buzzer Controller](Buzzer/README.md)
+* [GUI Support](Gui/README.md)
 * [SkiaSharp graphics library adapter](SkiaSharpAdapter/README.md)
 * [Still image recording library](Media/README.md)
+* [The Camera binding](Camera/README.md)
 
 ### USB devices
 
@@ -288,6 +301,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Generic shift register](ShiftRegister/README.md)
 * [GpioDriver for other boards](Gpio/README.md)
 * [Key Matrix](KeyMatrix/README.md)
+* [M5Stack Support bindings](M5Stack/README.md)
 * [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
 * [Quadrature Rotary Encoder](RotaryEncoder/README.md)
 * [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
@@ -297,16 +311,9 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [GoPiGo3](GoPiGo3/README.md)
 * [GrovePi](GrovePi/README.md)
+* [Seatalk 1 Interface](Seatalk1/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SensorHub - Environmental sensor](SensorHub/README.md)
-
-### Bus and GPIO multiplexers
-
-* [Charlieplex Segment binding](Charlieplex/README.md)
-* [Generic shift register](ShiftRegister/README.md)
-* [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
-* [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
-* [TCA954X - TCA954X Low-Voltage Multi-Channel I2C Switch with Reset](Tca954x/README.md)
 
 ### Protocols providers/libraries
 
@@ -317,6 +324,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MotorHat](MotorHat/README.md)
 * [NMEA 0183 Protocol](Nmea0183/README.md)
 * [Pca9685 - I2C PWM Driver](Pca9685/README.md)
+* [Seatalk 1 Interface](Seatalk1/README.md)
 * [Software PWM](SoftPwm/README.md)
 * [Software SPI](SoftwareSpi/README.md)
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
@@ -329,6 +337,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [AXP192 - Enhanced single Cell Li-Battery and Power System Management IC](Axp192/README.md)
 * [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
 * [IP5306 - Power management](Ip5306/README.md)
+* [M5Stack Support bindings](M5Stack/README.md)
 * [PiJuice - power supply for Raspberry Pi](PiJuice/README.md)
 
 ### Volatile Organic Compound sensors
@@ -345,12 +354,13 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Weight sensors
 
 * [DFRobot KIT0176: I2C 1kg Weight Sensor Kit - HX711 (Gravity: I2CWeight Sensor)](Hx711I2c/README.md)
+* [HX711: Load Cell amplifier and 24-Bit ADC Module](Hx711/README.md)
 
 </categorizedDevices>
 
 ## Binding Distribution
 
-These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) NuGet package.  Daily builds with the latest bindings are available on [MyGet](https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings). You can also consume the bindings as source.
+These bindings are distributed via the [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) NuGet package.  Daily builds with the latest bindings are available on [Azure DevOps](https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json). Just add the URL as a new nuget feed. You can also consume the bindings as source.
 
 ## Contributing a binding
 

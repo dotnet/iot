@@ -129,7 +129,7 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <summary>
-        /// Number of the engine.
+        /// Number of the engine, 0-based.
         /// </summary>
         public int EngineNumber
         {

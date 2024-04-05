@@ -57,7 +57,7 @@ $PCDIN,01F201,00002AF8,02,000000FFFF477C0005000018150000FFFF000000000000007F7F*5
 
             Assert.Equal(@"$ECRPM,E,1,0,0,A*50
 $PCDIN,01F200,00002710,02,000000FFFF00FFFF*23
-$PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000000100007F7F*5C
+$PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000010000007F7F*5C
 ", _sb.ToString());
 
             _sb.Clear();
@@ -68,6 +68,19 @@ $PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000000100007F7F*5
 $PCDIN,01F200,00002AF8,02,00003CFFFF64FFFF*58
 $PCDIN,01F201,00002AF8,02,000000FFFF477C0005000018150000FFFF000000000000007F7F*54
 ", _sb.ToString());
+        }
+
+        [Fact]
+        public void DecodeEngineDetail()
+        {
+            string data = "$PCDIN,01F201,00002710,02,000000FFFFE7720005000018150000FFFF000000010000007F7F*5C";
+            var ts = TalkerSentence.FromSentenceString(data, TalkerId.Any, out _);
+            Assert.NotNull(ts);
+            DateTimeOffset time = DateTimeOffset.Now;
+            var decoded = ts.TryGetTypedValue(ref time) as SeaSmartEngineDetail;
+            Assert.NotNull(decoded);
+            Assert.Equal(0, decoded.EngineNumber);
+            Assert.Equal(EngineStatus.CheckEngine, decoded.Status);
         }
 
         private void NewImpl(EngineData engineData)

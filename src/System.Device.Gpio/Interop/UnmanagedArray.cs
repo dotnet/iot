@@ -10,8 +10,6 @@ internal sealed class UnmanagedArray<T> : SafeHandle
     private readonly int _arrayLength;
     private readonly int _typeSize;
 
-    public static readonly UnmanagedArray<T> Empty = new(0);
-
     public UnmanagedArray(int arrayLength)
         : base(IntPtr.Zero, true)
     {
@@ -21,7 +19,7 @@ internal sealed class UnmanagedArray<T> : SafeHandle
         }
 
         _arrayLength = arrayLength;
-        _typeSize = Marshal.SizeOf(typeof(T));
+        _typeSize = Marshal.SizeOf<T>();
         SetHandle(Marshal.AllocHGlobal(_typeSize * arrayLength));
     }
 
@@ -58,4 +56,3 @@ internal sealed class UnmanagedArray<T> : SafeHandle
         return !unmanagedArray.IsInvalid ? unmanagedArray.handle : throw new InvalidOperationException("Invalid handle");
     }
 }
-
