@@ -16,7 +16,7 @@
     <PackAsTool>True</PackAsTool>
     <ToolCommandName>dotnet-acs</ToolCommandName>
     <PackageOutputPath>..\..\..\artifacts\packages\$(Configuration)\Shipping</PackageOutputPath>
-    <Version>3.2.0</Version>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
