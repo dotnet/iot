@@ -9,7 +9,7 @@ This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO dr
 
 ## Usage of virtual GpioController and virtual GpioPin
 
-When you have multiple GpioControllers and want to use them together in a specific binding, the `VirtualGpioController` allows to create a GpioController from GpioPin already open from different controllers. USage is straight forward and classes fully compatible with a normal `GpioController`.
+When you have multiple GpioControllers and want to use them together in a specific binding, the `VirtualGpioController` allows to create a GpioController from a set of `GpioPin`s already open from different controllers. Usage is straight forward and the class is fully compatible with a normal `GpioController`.
 
 ```csharp
 // Create pins from 2 different GpioControllers

@@ -103,7 +103,7 @@ public class GpioController : IDisposable
     /// The driver attempts to open the pin without changing its mode or value.
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-    public GpioPin OpenPin(int pinNumber)
+    public virtual GpioPin OpenPin(int pinNumber)
     {
         if (IsPinOpen(pinNumber))
         {
@@ -131,7 +131,7 @@ public class GpioController : IDisposable
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
     /// <param name="mode">The mode to be set.</param>
-    public GpioPin OpenPin(int pinNumber, PinMode mode)
+    public virtual GpioPin OpenPin(int pinNumber, PinMode mode)
     {
         var pin = OpenPin(pinNumber);
         SetPinMode(pinNumber, mode);
@@ -145,7 +145,7 @@ public class GpioController : IDisposable
     /// <param name="mode">The mode to be set.</param>
     /// <param name="initialValue">The initial value to be set if the mode is output. The driver will attempt to set the mode without causing glitches to the other value.
     /// (if <paramref name="initialValue"/> is <see cref="PinValue.High"/>, the pin should not glitch to low during open)</param>
-    public GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
+    public virtual GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
     {
         var pin = OpenPin(pinNumber);
         // Set the desired initial value
@@ -160,7 +160,7 @@ public class GpioController : IDisposable
     /// If allowed by the driver, the state of the pin is not changed.
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-    public void ClosePin(int pinNumber)
+    public virtual void ClosePin(int pinNumber)
     {
         if (!IsPinOpen(pinNumber))
         {
@@ -231,7 +231,7 @@ public class GpioController : IDisposable
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
     /// <returns>The status if the pin is open or closed.</returns>
-    public bool IsPinOpen(int pinNumber)
+    public virtual bool IsPinOpen(int pinNumber)
     {
         return _openPins.ContainsKey(pinNumber);
     }
@@ -416,7 +416,7 @@ public class GpioController : IDisposable
     }
 
     /// <inheritdoc/>
-    public void Dispose()
+    public virtual void Dispose()
     {
         Dispose(true);
     }
@@ -425,7 +425,7 @@ public class GpioController : IDisposable
     /// Write the given pins with the given values.
     /// </summary>
     /// <param name="pinValuePairs">The pin/value pairs to write.</param>
-    public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+    public virtual void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
     {
         for (int i = 0; i < pinValuePairs.Length; i++)
         {
@@ -437,7 +437,7 @@ public class GpioController : IDisposable
     /// Read the given pins with the given pin numbers.
     /// </summary>
     /// <param name="pinValuePairs">The pin/value pairs to read.</param>
-    public void Read(Span<PinValuePair> pinValuePairs)
+    public virtual void Read(Span<PinValuePair> pinValuePairs)
     {
         for (int i = 0; i < pinValuePairs.Length; i++)
         {
