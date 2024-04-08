@@ -305,5 +305,9 @@ public class LibcameraAppsSettings
 
             new CommandOption(CommandCategory.Video, Command.Frames,
                 "--frames", "Record exactly this many frames <number>", CommandInputType.Int),
+
+            new CommandOption(CommandCategory.Video, Command.Framerate,
+                "--framerate", "Set the frames per second captured <number>", CommandInputType.Int),
+
         };
 }

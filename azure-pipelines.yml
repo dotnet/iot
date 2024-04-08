@@ -68,6 +68,10 @@ stages:
         sourceFolder: $(Build.SourcesDirectory)/artifacts/packages/$(BuildConfiguration)/Shipping
         targetFolder: $(Build.ArtifactStagingDirectory)/Packages
 
+    - task: PublishTestResults@2
+      inputs:
+        mergeTestResults: true
+
     - publish: $(Build.ArtifactStagingDirectory)/Packages
       displayName: Publish Build Artifacts
       artifact: BuildPackages
@@ -90,28 +94,6 @@ stages:
         ls -r *.md | % { markdown-link-check -v -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
       displayName: 'Execute markdown-link-check'
       condition: eq(variables['build.reason'], 'PullRequest')
-
-  # - job: Windows_ArduinoIntegration
-  #   displayName: Arduino Integration Tests
-  #   timeoutInMinutes: 120
-  #   pool:
-  #     vmImage: windows-2022
-
-  #   strategy:
-  #     matrix:
-  #       Build_Release:
-  #         BuildConfiguration: Release
-  #       Build_Debug:
-  #         BuildConfiguration: Debug
-
-  #   steps:
-  #   - script: build.cmd -ci 
-  #       -configuration $(BuildConfiguration)
-  #       -prepareMachine
-  #     displayName: Build Iot
-      
-  #   - script: eng\ArduinoCsCI.cmd $(UserProfile) $(BuildConfiguration)
-  #     displayName: Build and run Arduino Integration Tests
 
   - job: Linux
     displayName: Linux Build
@@ -229,7 +211,7 @@ stages:
       runOnce:
         deploy:
           steps:
-          - task: NuGetAuthenticate@0
+          - task: NuGetAuthenticate@1
             displayName: 'NuGet Authenticate'
 
           - task: NuGetCommand@2

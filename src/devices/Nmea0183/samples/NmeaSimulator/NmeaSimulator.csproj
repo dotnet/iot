@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../Nmea0183.csproj" />
+    <ProjectReference Include="..\..\..\Seatalk1\Seatalk1.csproj" />
   </ItemGroup>
 
 </Project>

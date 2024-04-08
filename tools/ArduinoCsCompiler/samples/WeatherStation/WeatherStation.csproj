@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\devices\Arduino\Arduino.csproj" />
     <ProjectReference Include="..\..\..\..\src\devices\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\..\..\src\devices\Button\Button.csproj" />
     <ProjectReference Include="..\..\..\..\src\devices\CharacterLcd\CharacterLcd.csproj" />
     <ProjectReference Include="..\..\..\..\src\devices\Common\Common.csproj" />
     <ProjectReference Include="..\..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />

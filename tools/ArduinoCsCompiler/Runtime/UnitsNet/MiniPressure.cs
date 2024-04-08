@@ -12,7 +12,7 @@ namespace ArduinoCsCompiler.Runtime.UnitsNet
     {
         private const double DEGREE_TO_KELVIN = 273.15;
         private double _value;
-        private PressureUnit _unit;
+        private PressureUnit? _unit;
 
         private MiniPressure(double value, PressureUnit unit)
         {

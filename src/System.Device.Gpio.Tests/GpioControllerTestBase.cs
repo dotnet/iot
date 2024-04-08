@@ -28,7 +28,7 @@ public abstract class GpioControllerTestBase
     [InlineData(false)]
     public void PinValueStaysSameAfterDispose(bool closeAsHigh)
     {
-        var driver = GetTestDriver();
+        using var driver = GetTestDriver();
         if (driver is SysFsDriver)
         {
             // This check fails on the SysFsDriver, because it always sets the value to 0 when the pin is opened (but on close, the value does stay high)
@@ -181,7 +181,7 @@ public abstract class GpioControllerTestBase
     [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown, and it seems this cannot be changed
     public void OpenPinDefaultsModeToLastMode(PinMode modeToTest)
     {
-        var driver = GetTestDriver();
+        using var driver = GetTestDriver();
         if (driver is SysFsDriver)
         {
             // See issue #1581. There seems to be a library-version issue or some other random cause for this test to act differently on different hardware.
@@ -230,7 +230,7 @@ public abstract class GpioControllerTestBase
     [Fact]
     public void AddCallbackFallingEdgeNotDetectedTest()
     {
-        var driver = GetTestDriver();
+        using var driver = GetTestDriver();
         if (driver is SysFsDriver)
         {
             // This test is unreliable (flaky) with SysFs.
@@ -317,7 +317,7 @@ public abstract class GpioControllerTestBase
     [Fact]
     public void AddCallbackRemoveAllCallbackTest()
     {
-        GpioDriver testDriver = GetTestDriver();
+        using GpioDriver testDriver = GetTestDriver();
         // Skipping the test for now when using the SysFsDriver or the RaspberryPi3Driver given that this test is flaky for those drivers.
         // Issue tracking this problem is https://github.com/dotnet/iot/issues/629
         if (testDriver is SysFsDriver || testDriver is RaspberryPi3Driver)
@@ -496,7 +496,7 @@ public abstract class GpioControllerTestBase
     }
 
     [Fact]
-    public void WaitForEventBothEdgesTest()
+    public async Task WaitForEventBothEdgesTest()
     {
         using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
         {
@@ -529,7 +529,7 @@ public abstract class GpioControllerTestBase
             result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
             Assert.False(result.TimedOut);
             Assert.Equal(PinEventTypes.Rising, result.EventTypes);
-            Assert.True(task.Wait(TimeSpan.FromSeconds(30))); // Should end long before that
+            await task.WaitAsync(TimeSpan.FromSeconds(30)); // Should end long before that
             tokenSource.Dispose();
         }
     }

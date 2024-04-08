@@ -176,7 +176,7 @@ void TestI2c(Ftx232HDevice ft232h)
 
 void TestI2cTsl2561(Ftx232HDevice ft232H)
 {
-    var ftI2cBus = ft232h.CreateOrGetI2cBus(ft232h.GetDefaultI2cBusNumber());
+    var ftI2cBus = ft232H.CreateOrGetI2cBus(ft232H.GetDefaultI2cBusNumber());
     var i2cDevice = ftI2cBus.CreateDevice(Tsl256x.DefaultI2cAddress);
     Tsl256x tsl256X = new(i2cDevice, PackageType.Other);
 

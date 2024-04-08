@@ -255,6 +255,40 @@ public class CommandOptionsBuilder
         return this;
     }
 
+    /// <summary>
+    /// Adds the option to capture a video stream at a certain Framerate.
+    /// </summary>
+    /// <param name="rate">The number of frames per second, if not specified uses the camera default</param>
+    /// <returns>A reference to this instance.</returns>
+    public CommandOptionsBuilder WithVideoFramerate(int rate)
+    {
+        AddFramerate(rate);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds the option to load a tuning file for the camera
+    /// </summary>
+    /// <param name="path"> The path to the tuning file.</param>
+    /// <returns>A reference to this instance.</returns>
+    public CommandOptionsBuilder WithTuningFile(string path)
+    {
+        AddTuningFile(path);
+        return this;
+    }
+
+    private void AddFramerate(int rate)
+    {
+        var cmd = GetByCategory(CommandCategory.Video, Command.Framerate);
+        _commands.Add(new CommandOptionAndValue(cmd, rate.ToString()));
+    }
+
+    private void AddTuningFile(string path)
+    {
+        var cmd = Get(Command.TuningFile);
+        _commands.Add(new CommandOptionAndValue(cmd, path));
+    }
+
     private void AddListCameras()
     {
         var cmd = Get(Command.ListCameras);

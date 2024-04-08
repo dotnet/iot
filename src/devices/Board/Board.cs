@@ -248,7 +248,7 @@ namespace Iot.Device.Board
                     bus.Value.Dispose();
                 }
 
-                foreach (var bus in _managers)
+                foreach (var bus in _managers.ToList())
                 {
                     bus.Dispose();
                 }

@@ -34,7 +34,7 @@ public abstract class UnixDriver : GpioDriver
         UnixDriver? driver = null;
         try
         {
-            driver = new LibGpiodDriver();
+            driver = (UnixDriver)LibGpiodDriverFactory.Instance.Create(0).LibGpiodDriver;
         }
         catch (PlatformNotSupportedException)
         {

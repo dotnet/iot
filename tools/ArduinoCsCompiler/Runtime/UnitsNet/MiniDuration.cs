@@ -11,7 +11,7 @@ namespace ArduinoCsCompiler.Runtime.UnitsNet
     internal struct MiniDuration
     {
         private double _duration;
-        private DurationUnit _unit;
+        private DurationUnit? _unit;
 
         private MiniDuration(double value, DurationUnit unit)
         {

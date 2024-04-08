@@ -95,5 +95,10 @@ namespace ArduinoCsCompiler
                 Console.WriteLine(msg.ToString());
             }
         }
+
+        public static void Clear()
+        {
+            _messages.Clear();
+        }
     }
 }

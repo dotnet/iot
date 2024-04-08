@@ -89,7 +89,7 @@ public class RaspberryPi3Driver : GpioDriver
 
             if (_linuxDriver == null)
             {
-                throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: " + boardInfo.BoardModel);
+                throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: {boardInfo.BoardModel} (0x{((int)boardInfo.BoardModel):X4})");
             }
 
             _setSetRegister = (value) => _linuxDriver.SetRegister = value;

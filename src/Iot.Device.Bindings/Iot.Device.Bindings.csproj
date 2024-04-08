@@ -15,7 +15,7 @@
     <!--Partial elements should declare access modifier: Disabled for this project to simplify handling in common project. See also there.
     If we disable this here, the warning is still emmited for the individual projects.-->
     <NoWarn>$(NoWarn);SA1205</NoWarn>
-    <!--Disabling default items so samples source won't get build by the main library-->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   
   <ItemGroup>
@@ -28,6 +28,7 @@
   <!-- The following ItemGroup is in charge of getting the source files we will compile on each TFM -->
   <ItemGroup>
     <ProjectReference Include="$(DeviceRoot)**/*.csproj" Exclude="@(_ExcludeProjectReferences)" ReferenceOutputAssembly="false" BuildReference="false" />
+    <Content Include="$(RepoRoot)/src/devices/README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
   </ItemGroup>
 
   <ItemGroup>
@@ -67,7 +68,7 @@
     </MSBuild>
 
     <ItemGroup>
-      <Compile Include="%(_CompileItemsFromProjects.Identity)" />
+      <Compile Include="%(_CompileItemsFromProjects.Identity)" />      
     </ItemGroup>
   </Target>
 

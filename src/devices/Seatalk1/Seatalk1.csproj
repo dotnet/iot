@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>9</LangVersion>
+    <RootNamespace>Iot.Device.Seatalk1</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="Messages\ApparentWindSpeed.cs" />
+    <Compile Include="Messages\ApparentWindAngle.cs" />
+    <Compile Include="Messages\AutopilotAlarms.cs" />
+    <Compile Include="Messages\AutopilotButtons.cs" />
+    <Compile Include="Messages\AutopilotCalibrationParameterMessage.cs" />
+    <Compile Include="Messages\AutopilotCalibrationParameter.cs" />
+    <Compile Include="Messages\CompassHeadingAndRudderPosition.cs" />
+    <Compile Include="Messages\CompassHeadingAutopilotCourse.cs" />
+    <Compile Include="Messages\CompassHeadingAutopilotCourseAlt.cs" />
+    <Compile Include="Messages\CourseComputerStatus.cs" />
+    <Compile Include="Messages\CourseComputerWarnings.cs" />
+    <Compile Include="Messages\DeadbandMode.cs" />
+    <Compile Include="Messages\DeadbandSetting.cs" />
+    <Compile Include="Messages\DisplayBacklightLevel.cs" />
+    <Compile Include="Messages\Keystroke.cs" />
+    <Compile Include="Messages\NavigationToWaypoint.cs" />
+    <Compile Include="Messages\SeatalkMessage.cs" />
+    <Compile Include="Messages\SetLampIntensity.cs" />
+    <Compile Include="Messages\TurnDirection.cs" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>$(AssemblyName).Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nmea0183\Nmea0183.csproj" />
+  </ItemGroup>
+</Project>

@@ -40,13 +40,13 @@ namespace ArduinoCsCompiler
             Name = $"{MethodBase.MethodSignature()} (Token 0x{Token:X})";
         }
 
-        public ArduinoMethodDeclaration(int token, EquatableMethod methodBase, ArduinoMethodDeclaration? requestedBy, IlCode code)
+        public ArduinoMethodDeclaration(int token, EquatableMethod methodBase, ArduinoMethodDeclaration? requestedBy, IlCode code, MethodFlags extraFlags)
         {
             Index = -1;
             MethodBase = methodBase;
             RequestedBy = requestedBy;
             Code = code;
-            Flags = MethodFlags.None;
+            Flags = extraFlags;
             Token = token;
 
             var attribs = methodBase.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).Cast<ArduinoImplementationAttribute>().ToList();

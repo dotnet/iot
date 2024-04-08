@@ -54,7 +54,7 @@ namespace ArduinoCsCompiler.Runtime
 
             if (!enumType.IsEnum)
             {
-                throw new ArgumentException("Type is not an enum", nameof(enumType));
+                throw new ArgumentException("Invalid argument", nameof(enumType));
             }
 
             return MiniUnsafe.As<MiniType>(enumType);
@@ -116,8 +116,7 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
-            UInt64 other = (UInt64)obj;
-            return ToUInt64() == other;
+            return MiniRuntimeHelpers.EnumEqualsInternal(this, obj);
         }
     }
 }
