@@ -20,7 +20,12 @@ namespace System.Device.Gpio
         /// </summary>
         internal GpioDriver Driver { get; set; }
 
-        internal Gpio​Pin(int pinNumber, GpioDriver driver)
+        /// <summary>
+        /// Creates an instance of GPIO Pin with a new pin number based on an existing <see cref="GpioDriver"/>.
+        /// </summary>
+        /// <param name="pinNumber">The GPIO pin number.</param>
+        /// <param name="driver">The GpioDriver.</param>
+        protected internal Gpio​Pin(int pinNumber, GpioDriver driver)
         {
             Driver = driver;
             DriverPinNumber = pinNumber;
@@ -28,9 +33,9 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
-        /// Creates an instance of GPIO Pin with a new pin number based on an existing GpioPin.
+        /// Creates an instance of GPIO Pin with a new pin number based on an existing <see cref="GpioPin"/>.
         /// </summary>
-        /// <param name="gpioPin">The GPIO Pin class.</param>
+        /// <param name="gpioPin">The GpioPin.</param>
         /// <param name="pinNumber">The new pin number to associate.</param>
         protected internal GpioPin(GpioPin gpioPin, int pinNumber)
         {

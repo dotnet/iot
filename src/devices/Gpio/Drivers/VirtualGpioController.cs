@@ -39,16 +39,10 @@ namespace Iot.Device.Gpio
         public VirtualGpioController(PinNumberingScheme numberingScheme)
         {
             // Nothing on purpose, as only logical is suported
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="VirtualGpioController"/> class.
-        /// </summary>
-        /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-        /// <param name="driver">The driver that manages all of the pin operations for the controller.</param>
-        public VirtualGpioController(PinNumberingScheme numberingScheme, GpioDriver driver)
-        {
-            throw new NotImplementedException();
+            if (numberingScheme != PinNumberingScheme.Logical)
+            {
+                throw new ArgumentException("Only PinNumberingScheme Logical is supported.");
+            }
         }
 
         /// <summary>
@@ -100,7 +94,7 @@ namespace Iot.Device.Gpio
         /// If allowed by the driver, the state of the pin is not changed.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public new void ClosePin(int pinNumber)
+        public override void ClosePin(int pinNumber)
         {
             if (!IsPinOpen(pinNumber))
             {
@@ -113,7 +107,7 @@ namespace Iot.Device.Gpio
         /// <summary>
         /// Disposes this instance and closes all open pins associated with this controller.
         /// </summary>
-        public new void Dispose()
+        public override void Dispose()
         {
             foreach (int pin in _openPins.Keys)
             {
@@ -148,7 +142,7 @@ namespace Iot.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>The status if the pin is open or closed.</returns>
-        public new bool IsPinOpen(int pinNumber)
+        public override bool IsPinOpen(int pinNumber)
         {
             return _openPins.ContainsKey(pinNumber);
         }
@@ -158,7 +152,7 @@ namespace Iot.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="mode">The mode to be set.</param>
-        public new GpioPin OpenPin(int pinNumber, PinMode mode)
+        public override GpioPin OpenPin(int pinNumber, PinMode mode)
         {
             var pin = OpenPin(pinNumber);
             _pins[pinNumber].SetPinMode(mode);
@@ -172,7 +166,7 @@ namespace Iot.Device.Gpio
         /// <param name="mode">The mode to be set.</param>
         /// <param name="initialValue">The initial value to be set if the mode is output. The driver will attempt to set the mode without causing glitches to the other value.
         /// (if <paramref name="initialValue"/> is <see cref="PinValue.High"/>, the pin should not glitch to low during open)</param>
-        public new GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
+        public override GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
         {
             var pin = OpenPin(pinNumber, mode);
             _pins[pinNumber].Write(initialValue);
@@ -202,7 +196,6 @@ namespace Iot.Device.Gpio
         {
             ComponentInformation self = new ComponentInformation(this, "Virtual GPIO Controller");
 
-            // PinCount is not added on purpose, because the property throws NotSupportedException on some hardware
             self.Properties["OpenPins"] = string.Join(", ", _openPins.Select(x => x.Key));
 
             return self;
