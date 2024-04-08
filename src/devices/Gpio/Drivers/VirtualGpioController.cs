@@ -10,6 +10,7 @@ using System.Device.Gpio;
 using System;
 using System.Device;
 using System.Reflection;
+using Iot.Device.Gpio.Drivers;
 
 namespace Iot.Device.Gpio
 {
@@ -190,15 +191,9 @@ namespace Iot.Device.Gpio
                 return _openPins[pinNumber];
             }
 
-            // We're going to call the internal constructor taking a GpioPin
-            var ctor = typeof(GpioPin).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic).
-                FirstOrDefault(c => c.GetParameters().Where(m => m.ParameterType == typeof(GpioPin)).Any());
-            if (ctor == null)
-            {
-                throw new ArgumentException("Invalid version of System.Device.Gpio");
-            }
+            VirtualGpioPin pin = new VirtualGpioPin(_pins[pinNumber], pinNumber);
 
-            _openPins.TryAdd(pinNumber, (GpioPin)ctor.Invoke(new object[2] { _pins[pinNumber], pinNumber }));
+            _openPins.TryAdd(pinNumber, pin);
             return _openPins[pinNumber];
         }
 

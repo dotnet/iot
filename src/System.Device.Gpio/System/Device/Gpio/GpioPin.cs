@@ -27,7 +27,12 @@ namespace System.Device.Gpio
             _externalPinNumber = -1;
         }
 
-        internal GpioPin(GpioPin gpioPin, int pinNumber)
+        /// <summary>
+        /// Creates an instance of GPIO Pin with a new pin number based on an existing GpioPin.
+        /// </summary>
+        /// <param name="gpioPin">The GPIO Pin class.</param>
+        /// <param name="pinNumber">The new pin number to associate.</param>
+        protected internal GpioPin(GpioPin gpioPin, int pinNumber)
         {
             Driver = gpioPin.Driver;
             DriverPinNumber = gpioPin.DriverPinNumber;
