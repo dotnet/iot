@@ -69,7 +69,10 @@ using (CanRaw can = new CanRaw())
 
 - Connect SPI device to regular SPI pins (SI/MOSI - `BCM 10`; SO/MISO - `BCM 9`; CLK/SCK - `BCM 11`; CS - `CE0`)
 - Interrupt pin should be connected to any GPIO pin i.e. `BCM 25` (note: interrupt pin can be adjusted below)
-- Add following in `/boot/config.txt`
+- Add following in `/boot/firmware/config.txt`
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 ```text
 dtparam=spi=on

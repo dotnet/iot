@@ -82,7 +82,10 @@ var newColor = Color.FromArgb(0, color.R, color.G, color.B);
 
 ## Binding Notes
 
-### Raspberry Pi setup (/boot/config.txt)
+### Raspberry Pi setup (/boot/firmware/config.txt)
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 * Make sure SPI is enabled
 
