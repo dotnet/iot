@@ -13,7 +13,7 @@ arduino-cli lib install "DHT sensor library"
 arduino-cli lib install "Servo"
 
 arduino-cli config init
-arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
 arduino-cli core update-index
 
 REM directly execute PS, we can ignore any test errors.
