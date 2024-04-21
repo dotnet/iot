@@ -32,11 +32,14 @@ Understanding the measurement:
 
 In order to have this sensor working on a Raspberry Pi, you need to lower the bus speed. This sensor uses a mode called I2C stretching and it is not supported natively on Raspberry Pi. So you **must** lower the I2C clock to the minimum to make it working properly or use a software I2C with a low clock as well.
 
-In order to do so, open a ssh session with your Raspberry and edit the /boot/config.txt file:
+In order to do so, open a ssh session with your Raspberry and edit the /boot/firmware/config.txt file:
 
 ```bash
-sudo nano /boot/config.txt
+sudo nano /boot/firmware/config.txt
 ```
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 ## Lowering the hardware I2C clock
 

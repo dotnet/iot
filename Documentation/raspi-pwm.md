@@ -50,7 +50,10 @@ Unhandled exception. System.UnauthorizedAccessException: Access to the path '/sy
 
 ## Enabling hardware PWM
 
-In order to have the hardware PWM activated on the Raspberry Pi, you'll have to edit the /boot/config.txt file and add an overlay.
+In order to have the hardware PWM activated on the Raspberry Pi, you'll have to edit the /boot/firmware/config.txt file and add an overlay.
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 Main Raspberry Pi kernel documentation gives 2 possibilities. Either a [single channel](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L925), either a [dual channel](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L944).
 
@@ -81,11 +84,14 @@ We have then 4 options for the exposed GPIO pins:
 | PWM1 | 13 | 4 | Alt0 | dtoverlay=pwm,pin=13,func=4 |
 | PWM1 | 19 | 2 | Alt5 | dtoverlay=pwm,pin=19,func=2 |
 
-Edit the /boot/config.txt file and add the dtoverlay line in the file. You need root privileges for this:
+Edit the /boot/firmware/config.txt file and add the dtoverlay line in the file. You need root privileges for this:
 
 ```bash
-sudo nano /boot/config.txt
+sudo nano /boot/firmware/config.txt
 ```
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 Save the file with `ctrl + x` then `Y` then `enter`
 
@@ -106,11 +112,14 @@ You are all setup, the basic example should now work with the PWM and channel yo
 | PWM0 | 12 | 4 | Alt0 | PWM1 | 19 | 2 | Alt5 | dtoverlay=pwm-2chan,pin=12,func=4,pin2=19,func2=2 |
 | PWM0 | 18 | 2 | Alt5 | PWM1 | 19 | 2 | Alt5 | dtoverlay=pwm-2chan,pin=18,func=2,pin2=19,func2=2 |
 
-Edit the /boot/config.txt file and add the dtoverlay line in the file. You need root privileges for this:
+Edit the /boot/firmware/config.txt file and add the dtoverlay line in the file. You need root privileges for this:
 
 ```bash
-sudo nano /boot/config.txt
+sudo nano /boot/firmware/config.txt
 ```
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 Save the file with `ctrl + x` then `Y` then `enter`
 

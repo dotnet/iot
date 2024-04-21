@@ -228,7 +228,10 @@ Note: There are more than 1 temperature sensors on SenseHat board
 
 ## Binding notes
 
-When using SysFs implementation please make sure to enable Sense HAT in `/boot/config.txt` before using by adding following line:
+When using SysFs implementation please make sure to enable Sense HAT in `/boot/firmware/config.txt` before using by adding following line:
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 ```text
 dtoverlay=rpi-sense

@@ -48,11 +48,14 @@ See at the end if you want to write your own I2C scanner and find the correct de
 
 In most of the cases, it is easy and straight forward to enable I2C for your Raspberry Pi. The basic case can be [found here](https://www.raspberrypi-spy.co.uk/2014/11/enabling-the-i2c-interface-on-the-raspberry-pi/).
 
-Sometimes, you have I2C devices which can't support fast mode and the speed needs to be adjusted. In case you want to change the speed of the line, you'll need to add into the `/boot/config.txt` file:
+Sometimes, you have I2C devices which can't support fast mode and the speed needs to be adjusted. In case you want to change the speed of the line, you'll need to add into the `/boot/firmware/config.txt` file:
 
 ```bash
-sudo nano /boot/config.txt
+sudo nano /boot/firmware/config.txt
 ```
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/config.txt` if you have an older OS version.
 
 Add the line which will change the speed from 100_000 (default speed) to 10_000:
 

@@ -19,7 +19,7 @@ This binding was developed using the Adafruit Seesaw breakout board which uses t
 
 ## Usage
 
-These samples connect to a Raspberry Pi via the first I2C interface. Issues were noticed when using the out-of-the-box stiings and so the I2C bus has been slowed down by adding the following to the /boot/Config.txt file
+These samples connect to a Raspberry Pi via the first I2C interface. Issues were noticed when using the out-of-the-box stiings and so the I2C bus has been slowed down by adding the following to the /boot/firmware/config.txt file
 
  `dtparam=i2c1_baudrate=50000`
 

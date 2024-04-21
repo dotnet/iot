@@ -45,11 +45,14 @@ The nRF24L01 is a single chip radio transceiver for the world wide 2.4 - 2.5 GHz
 
 This example needs to enable SPI1 on Raspberry Pi running Raspbian.
 
-1. Open **/boot/config.txt** using editor, like
+1. Open **/boot/firmware/config.txt** using editor, like
 
     ```shell
-    sudo nano /boot/config.txt
+    sudo nano /boot/firmware/config.txt
     ```
+
+    > [!Note]
+    > Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 2. Add the line **dtoverlay=spi1-3cs** and save
 3. Reboot

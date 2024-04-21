@@ -128,7 +128,10 @@ All headers are standard 2.54mm headers. Male headers are usually sold longer an
 
 ### Linux
 
-`/boot/config.txt`
+`/boot/firmware/config.txt`
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 ```text
 # Enable I2C, SPI, PWM

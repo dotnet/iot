@@ -57,7 +57,10 @@ else
 
 ## How to setup 1-wire on Raspberry Pi
 
-Add the following to `/boot/config.txt` to enable 1-wire protocol. The default gpio is 4 (pin 7).
+Add the following to `/boot/firmware/config.txt` to enable 1-wire protocol. The default gpio is 4 (pin 7).
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 ```text
 dtoverlay=w1-gpio

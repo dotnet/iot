@@ -261,7 +261,10 @@ Filter rules are used to tell the router which messages from which source need t
 ## A note on the use of serial ports on the Raspberry Pi
 
 The Raspberry Pi 4 has up to 6 UART interfaces that can be enabled. UART0 on GPIO pins 14 and 15 is enabled by default, the others can be
-enabled using overlays configured in `/boot/config.txt`. The following entries add UARTS 2 and 3 on GPIO Pins 0/1 and 4/5 respectively:
+enabled using overlays configured in `/boot/firmware/config.txt`. The following entries add UARTS 2 and 3 on GPIO Pins 0/1 and 4/5 respectively:
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 ```text
 enable_uart=1
