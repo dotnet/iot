@@ -1,6 +1,6 @@
-# SPI, GPIO and I2C drivers for FT232H, FT2232H, FT4232H
+# SPI, GPIO and I2C drivers for FT232H, FT232HP, FT2232H, FT2232HP, FT2232HA, FT4232H, FT4232HA, FT4232HP
 
-This project support SPI, GPIO and I2C into a normal Windows (32 or 64 bits), Linux and MacOS environments thru FT232H, FT2232H, FT4232H chipsets.
+This project support SPI, GPIO and I2C into a normal Windows (32 or 64 bits), Linux and MacOS environments thru FT232H, FT232HP, FT2232H, FT2232HP, FT2232HA, FT4232H, FT4232HA, FT4232HP chipsets.
 
 ## Documentation
 
