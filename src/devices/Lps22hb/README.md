@@ -6,8 +6,6 @@ Some of the applications mentioned by the datasheet:
 - Weather station equipment
 - Sport watches
 
-See [samples](samples/README.md) for information about usage.
-
 ## References
 
 - https://www.st.com/resource/en/datasheet/lps22hb.pdf
