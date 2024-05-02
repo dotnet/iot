@@ -28,7 +28,7 @@ namespace Iot.Device.Ft232H
         public static List<Ft232HDevice> GetFt232H()
         {
             List<Ft232HDevice> ft232s = new List<Ft232HDevice>();
-            var devices = FtCommon.FtCommon.GetDevices(new FtDeviceType[] { FtDeviceType.Ft232H });
+            var devices = FtCommon.FtCommon.GetDevices(new FtDeviceType[] { FtDeviceType.Ft232H, FtDeviceType.Ft232HP });
             foreach (var device in devices)
             {
                 ft232s.Add(new Ft232HDevice(device));
