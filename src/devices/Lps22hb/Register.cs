@@ -37,7 +37,7 @@ namespace Iot.Device.Lps22hb
         CTRL_REG3 = 0x12,
 
         /// <summary>
-        ///  FIFO configuration register
+        /// FIFO configuration register
         /// </summary>
         FIFO_CTRL = 0x14,
 
@@ -59,7 +59,7 @@ namespace Iot.Device.Lps22hb
         RES_CONF = 0x1A,
 
         /// <summary>
-        ///  Interrupt register
+        /// Interrupt register
         /// </summary>
         INT_SOURCE = 0x25,
 
@@ -86,7 +86,7 @@ namespace Iot.Device.Lps22hb
         TEMP_OUT_L = 0x2B,
 
         /// <summary>
-        ///  Filter reset register
+        /// Filter reset register
         /// </summary>
         LPFP_RES = 0x33,
     }

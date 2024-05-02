@@ -8,28 +8,20 @@ using Iot.Device.Common;
 using Iot.Device.Lps22hb;
 using UnitsNet;
 
-// I2C address on SenseHat board
-const int I2cAddress = Iot.Device.Lps22hb.Lps22hb.DefaultI2cAddress;
+I2cConnectionSettings settings = new I2cConnectionSettings(1, Lps22hb.DefaultI2cAddress);
 
-// set this to the current sea level pressure in the area for correct altitude readings
-var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+I2cDevice device = I2cDevice.Create(settings);
 
-using Lps22hb th = new(CreateI2cDevice());
+using Lps22hb sensor = new Lps22hb(device);
+
 while (true)
 {
-    Temperature tempValue = th.Temperature;
-    Pressure preValue = th.Pressure;
-    Length altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+    var pressure = sensor.Pressure;
+    var temperature = sensor.Temperature;
 
-    Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
-    Console.WriteLine($"Altitude: {altValue:0.##}m");
+    Console.WriteLine($"Pressure: {pressure.Hectopascals:0.##}hPa");
+    Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
+
     Thread.Sleep(1000);
-}
-
-I2cDevice CreateI2cDevice()
-{
-    I2cConnectionSettings settings = new(1, I2cAddress);
-    return I2cDevice.Create(settings);
 }
 
