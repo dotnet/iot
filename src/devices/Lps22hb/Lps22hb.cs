@@ -50,11 +50,11 @@ namespace Iot.Device.Lps22hb
 
             // 7 - 0 - must be set 0
             // 6-4 - output data rate - 0b011 means 25Hz for both sensors
-            // 3 - Enable low-pass filter - 0 means disabled
+            // 3 - Enable low-pass filter
             // 2 - Low-pass configuration register - 0 means disabled
             // 1 - block data update - 1 means update when both MSB and LSB are read
             // 0 - SPI mode - we don't care what value since we use I2c, leave at default (0)
-            byte control1 = 0b0011_0010;
+            byte control1 = 0b0011_1010;
             WriteByte(Register.CTRL_REG1, control1);
         }
 
