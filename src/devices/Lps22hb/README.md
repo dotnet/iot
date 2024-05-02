@@ -40,7 +40,7 @@ while (true)
 - [x] Continus mode (25Hz)
 - [x] BDU
 - [x] Enable Low-pass filter
-- [x] Device WHO_AM_I 
+- [x] Device WHO_AM_I
 
 - [ ] Interface SPI
 - [ ] Low power mode
