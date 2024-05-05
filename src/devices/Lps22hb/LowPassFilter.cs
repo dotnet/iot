@@ -1,4 +1,7 @@
-﻿namespace Iot.Device.Lps22hb
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Iot.Device.Lps22hb
 {
     /// <summary>
     /// The LPS22HB embeds an additional low-pass filter that can be applied on the pressure
