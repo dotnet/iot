@@ -16,8 +16,8 @@ using Lps22hb sensor = new Lps22hb(device);
 
 while (true)
 {
-    var pressure = sensor.Pressure;
-    var temperature = sensor.Temperature;
+    sensor.TryReadPressure(out var pressure);
+    sensor.TryReadTemperature(out var temperature);
 
     Console.WriteLine($"Pressure: {pressure.Hectopascals:0.##}hPa");
     Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");

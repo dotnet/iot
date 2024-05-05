@@ -94,14 +94,47 @@ namespace Iot.Device.Lps22hb
         [Telemetry]
         public Temperature Temperature => Temperature.FromDegreesCelsius(ReadInt16(Register.TEMP_OUT_L) / 100f);
 
-
-
+        /// <summary>
+        /// Read temperature. A return value indicates whether the reading succeeded.
+        /// </summary>
+        /// <param name="temperature">Contains the measured temperature on success.</param>
+        /// <returns>True on success, false if reading failed.</returns>
+        [Telemetry("Temperature")]
+        public bool TryReadTemperature(out Temperature temperature)
+        {
+            try
+            {
+                temperature = Temperature.FromDegreesCelsius(ReadInt16(Register.TEMP_OUT_L) / 100f);
+                return true;
+            }
+            catch
+            {
+                temperature = default;
+                return false;
+            }
+        }
 
         /// <summary>
-        /// Pressure
+        /// Reads the pressure. A return value indicates whether the reading succeeded.
         /// </summary>
-        [Telemetry]
-        public Pressure Pressure => Pressure.FromHectopascals(ReadInt24(Register.PRESS_OUT_XL) / 4096.0);
+        /// <param name="pressure">
+        /// Contains the measured pressure  on success.
+        /// </param>
+        /// <returns>True on success, false if reading failed.</returns>
+        [Telemetry("Pressure")]
+        public bool TryReadPressure(out Pressure pressure)
+        {
+            try
+            {
+                pressure = Pressure.FromHectopascals(ReadInt24(Register.PRESS_OUT_XL) / 4096.0);
+                return true;
+            }
+            catch
+            {
+                pressure = default;
+                return false;
+            }
+        }
 
         private uint ReadInt24(Register register)
         {
