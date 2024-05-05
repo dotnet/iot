@@ -44,7 +44,7 @@ namespace Iot.Device.Lps22hb
 
             if (!TryRead())
             {
-                throw new Exception("Device not found");
+                throw new IOException("Lps22hb not found");
             }
 
             if (outputRate == OutputRate.PowerDownMode)
