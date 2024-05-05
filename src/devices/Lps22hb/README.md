@@ -37,9 +37,9 @@ while (true)
 - [x] Interface I2c
 - [x] Read pressure (24 bit)
 - [x] Read temperature (16 bit)
-- [x] Continus mode (25Hz)
-- [x] BDU
-- [x] Enable Low-pass filter
+- [x] Configurable: Continus mode with rate (1Hz,10Hz,25Hz,50Hz,75Hz)
+- [x] Configurable: BDU (Block Data Update) configurable
+- [x] Configurable: Low-pass filter (Lps22hb embeds an additional low-pass filter that can be applied)
 - [x] Device WHO_AM_I
 
 - [ ] Interface SPI

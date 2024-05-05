@@ -6,6 +6,7 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Device.Model;
 using System.Diagnostics;
+using System.IO;
 using UnitsNet;
 
 namespace Iot.Device.Lps22hb
@@ -29,7 +30,10 @@ namespace Iot.Device.Lps22hb
         /// Initializes a new instance of the <see cref="Lps22hb"/> class.
         /// </summary>
         /// <param name="i2cDevice">The I2C device used for communication.</param>
-        public Lps22hb(I2cDevice i2cDevice)
+        /// <param name="outputRate">Output data rate</param>
+        /// <param name="lowPassFilter">Use internal low-pass filter</param>
+        /// <param name="bdu">Block data update</param>
+        public Lps22hb(I2cDevice i2cDevice, OutputRate outputRate = OutputRate.DataRate25Hz, LowPassFilter lowPassFilter = LowPassFilter.Odr9, BduMode bdu = BduMode.BlockDataUpdate)
         {
             if (i2cDevice == null)
             {
@@ -43,19 +47,29 @@ namespace Iot.Device.Lps22hb
                 throw new Exception("Device not found");
             }
 
+            if (outputRate == OutputRate.PowerDownMode)
+            {
+                throw new NotImplementedException("One shot mode is not supported");
+            }
+
             // Hight resolution with Normal mode = 0 p43
             byte resolution = Read(Register.RES_CONF);
             resolution &= 0b10;
             WriteByte(Register.RES_CONF, resolution);
 
             // 7 - 0 - must be set 0
-            // 6-4 - output data rate - 0b011 means 25Hz for both sensors
-            // 3 - Enable low-pass filter
-            // 2 - Low-pass configuration register - 0 means disabled
-            // 1 - block data update - 1 means update when both MSB and LSB are read
+            // 6-4 - output data rate - set by outputRate
+            // 3 - Low-pass filter set by lowPassFilter
+            // 2 - Low-pass configuration register - set by lowPassFilter
+            // 1 - block data update - set by bdu
             // 0 - SPI mode - we don't care what value since we use I2c, leave at default (0)
-            byte control1 = 0b0011_1010;
+            var control1 = (byte)(0b0000_0000 | (uint)outputRate << 4 | (uint)lowPassFilter << 2 | (uint)bdu << 1);
             WriteByte(Register.CTRL_REG1, control1);
+
+            if (lowPassFilter != LowPassFilter.Disable)
+            {
+                Read(Register.LPFP_RES);
+            }
         }
 
         private static uint ReadInt24LittleEndian(ReadOnlySpan<byte> buff)
@@ -79,6 +93,9 @@ namespace Iot.Device.Lps22hb
         /// </summary>
         [Telemetry]
         public Temperature Temperature => Temperature.FromDegreesCelsius(ReadInt16(Register.TEMP_OUT_L) / 100f);
+
+
+
 
         /// <summary>
         /// Pressure
