@@ -233,6 +233,11 @@ public class GpioController : IDisposable
     /// <returns>The status if the pin is open or closed.</returns>
     public bool IsPinOpen(int pinNumber)
     {
+        if (_driver == null)
+        {
+            throw new ObjectDisposedException(nameof(GpioController));
+        }
+
         return _openPins.ContainsKey(pinNumber);
     }
 

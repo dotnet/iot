@@ -144,7 +144,7 @@ public class LibGpiodDriver : UnixDriver
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
-        _driver.Dispose();
+        _driver?.Dispose();
         base.Dispose(disposing);
     }
 }

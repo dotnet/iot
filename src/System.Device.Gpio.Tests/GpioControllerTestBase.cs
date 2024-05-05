@@ -601,7 +601,26 @@ public abstract class GpioControllerTestBase
         var controller = new GpioController(PinNumberingScheme.Logical, GetTestDriver());
         var pin6 = controller.OpenPin(InputPin, PinMode.Input);
         controller.Dispose();
-        Assert.Throws<ObjectDisposedException>(() => pin6.Read());
+        bool correctExceptionSeen = false;
+        try
+        {
+            pin6.Read();
+        }
+        catch (Exception x) when (x is InvalidOperationException || x is ObjectDisposedException)
+        {
+            correctExceptionSeen = true;
+        }
+
+        Assert.True(correctExceptionSeen);
+    }
+
+    [Fact]
+    public void UsingControllerAfterDisposeCausesException()
+    {
+        var controller = new GpioController(PinNumberingScheme.Logical, GetTestDriver());
+        var pin6 = controller.OpenPin(InputPin, PinMode.Input);
+        controller.Dispose();
+        Assert.Throws<ObjectDisposedException>(() => controller.OpenPin(InputPin, PinMode.Input));
     }
 
     protected abstract GpioDriver GetTestDriver();

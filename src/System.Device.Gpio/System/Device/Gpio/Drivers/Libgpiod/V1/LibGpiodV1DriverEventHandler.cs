@@ -36,7 +36,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
 
     private void SubscribeForEvent(SafeLineHandle pinHandle)
     {
-        int eventSuccess = LibgpiodV1.gpiod_line_request_both_edges_events(pinHandle, s_consumerName);
+        int eventSuccess = LibgpiodV1.gpiod_line_request_both_edges_events(pinHandle.Handle, s_consumerName);
 
         if (eventSuccess < 0)
         {
@@ -57,7 +57,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
                     TvNsec = new IntPtr(50_000_000)
                 };
 
-                WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle, ref timeout);
+                WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle.Handle, ref timeout);
                 if (waitResult == WaitEventResult.Error)
                 {
                     var errorCode = Marshal.GetLastWin32Error();
@@ -73,7 +73,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
                 if (waitResult == WaitEventResult.EventOccured)
                 {
                     GpioLineEvent eventResult = new GpioLineEvent();
-                    int checkForEvent = LibgpiodV1.gpiod_line_event_read(pinHandle, ref eventResult);
+                    int checkForEvent = LibgpiodV1.gpiod_line_event_read(pinHandle.Handle, ref eventResult);
                     if (checkForEvent == -1)
                     {
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());

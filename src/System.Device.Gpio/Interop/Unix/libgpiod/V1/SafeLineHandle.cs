@@ -12,11 +12,6 @@ namespace System.Device.Gpio.Libgpiod.V1;
 internal sealed class SafeLineHandle : IDisposable
 {
     private IntPtr _handle;
-    public SafeLineHandle()
-    {
-        _handle = IntPtr.Zero;
-    }
-
     public SafeLineHandle(IntPtr handle)
     {
         _handle = handle;
@@ -29,6 +24,11 @@ internal sealed class SafeLineHandle : IDisposable
     {
         get
         {
+            if (_handle == IntPtr.Zero)
+            {
+                throw new ObjectDisposedException(nameof(SafeLineHandle));
+            }
+
             return _handle;
         }
         set
@@ -38,21 +38,21 @@ internal sealed class SafeLineHandle : IDisposable
     }
 
     /// <summary>
-    /// Release the lock on the line handle. <see cref="Interop.libgpiod.gpiod_line_release"/>
+    /// Release the lock on the line handle. <see cref="Interop.LibgpiodV1.gpiod_line_release"/>
     /// </summary>
     public void ReleaseLock()
     {
         // Contrary to intuition, this does not invalidate the handle (see comment on declaration)
-        Interop.libgpiod.gpiod_line_release(_handle);
+        Interop.LibgpiodV1.gpiod_line_release(_handle);
     }
 
-    public bool IsInvalid => _handle == IntPtr.Zero || _handle == Interop.libgpiod.InvalidHandleValue;
+    public bool IsInvalid => _handle == IntPtr.Zero || _handle == Interop.LibgpiodV1.InvalidHandleValue;
 
     public void Dispose()
     {
         if (_handle != IntPtr.Zero)
         {
-            Interop.libgpiod.gpiod_line_release(_handle);
+            Interop.LibgpiodV1.gpiod_line_release(_handle);
             _handle = IntPtr.Zero;
         }
     }
