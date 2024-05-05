@@ -595,6 +595,15 @@ public abstract class GpioControllerTestBase
         }
     }
 
+    [Fact]
+    public void UsingPinAfterDriverDisposedCausesException()
+    {
+        var controller = new GpioController(PinNumberingScheme.Logical, GetTestDriver());
+        var pin6 = controller.OpenPin(InputPin, PinMode.Input);
+        controller.Dispose();
+        Assert.Throws<ObjectDisposedException>(() => pin6.Read());
+    }
+
     protected abstract GpioDriver GetTestDriver();
     protected abstract PinNumberingScheme GetTestNumberingScheme();
 }
