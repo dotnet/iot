@@ -52,6 +52,8 @@ namespace Iot.Device.Lps22hb
                 throw new NotImplementedException("One shot mode is not supported");
             }
 
+            ResetDevice();
+
             // Hight resolution with Normal mode = 0 p43
             byte resolution = Read(Register.RES_CONF);
             resolution &= 0b10;
@@ -89,10 +91,21 @@ namespace Iot.Device.Lps22hb
         }
 
         /// <summary>
-        /// Temperature
+        /// Reset the device
         /// </summary>
-        [Telemetry]
-        public Temperature Temperature => Temperature.FromDegreesCelsius(ReadInt16(Register.TEMP_OUT_L) / 100f);
+        public void ResetDevice()
+        {
+            WriteByte(Register.CTRL_REG2, 0b0100);
+            while (true)
+            {
+                byte reset = Read(Register.CTRL_REG2);
+
+                if ((reset & 0x04) == 0)
+                {
+                    break;
+                }
+            }
+        }
 
         /// <summary>
         /// Read temperature. A return value indicates whether the reading succeeded.
