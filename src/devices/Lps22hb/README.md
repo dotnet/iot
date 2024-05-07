@@ -41,7 +41,7 @@ while (true)
 - [x] Configurable: BDU (Block Data Update) configurable
 - [x] Configurable: Low-pass filter (Lps22hb embeds an additional low-pass filter that can be applied)
 - [x] Device WHO_AM_I
-- [x] Device software reset 
+- [x] Device software reset
 
 - [ ] Interface SPI
 - [ ] Low power mode
