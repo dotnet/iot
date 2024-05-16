@@ -61,11 +61,65 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given port name ({0}) does not resolve to a valid serial port.
+        /// </summary>
+        internal static string Arg_InvalidSerialPort {
+            get {
+                return ResourceManager.GetString("Arg_InvalidSerialPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given port name is invalid.  It may be a valid port, but not a serial port.
+        /// </summary>
+        internal static string Arg_InvalidSerialPortExtended {
+            get {
+                return ResourceManager.GetString("Arg_InvalidSerialPortExtended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IAsyncResult object did not come from the corresponding async method on this type.
+        /// </summary>
+        internal static string Arg_WrongAsyncResult {
+            get {
+                return ResourceManager.GetString("Arg_WrongAsyncResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.
+        /// </summary>
+        internal static string Argument_InvalidOffLen {
+            get {
+                return ResourceManager.GetString("Argument_InvalidOffLen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument must be between {0} and {1}.
+        /// </summary>
+        internal static string ArgumentOutOfRange_Bounds_Lower_Upper {
+            get {
+                return ResourceManager.GetString("ArgumentOutOfRange_Bounds_Lower_Upper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enum value was out of legal range.
         /// </summary>
         internal static string ArgumentOutOfRange_Enum {
             get {
                 return ResourceManager.GetString("ArgumentOutOfRange_Enum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Non-negative number required.
+        /// </summary>
+        internal static string ArgumentOutOfRange_NeedNonNegNumRequired {
+            get {
+                return ResourceManager.GetString("ArgumentOutOfRange_NeedNonNegNumRequired", resourceCulture);
             }
         }
         
@@ -106,6 +160,15 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to RtsEnable cannot be accessed if Handshake is set to RequestToSend or RequestToSendXOnXOff.
+        /// </summary>
+        internal static string CantSetRtsWithHandshaking {
+            get {
+                return ResourceManager.GetString("CantSetRtsWithHandshaking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Argument &apos;{0}&apos; cannot be zero-length.
         /// </summary>
         internal static string EmptyString {
@@ -115,11 +178,173 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The port is in the break state and cannot be written to.
+        /// </summary>
+        internal static string In_Break_State {
+            get {
+                return ResourceManager.GetString("In_Break_State", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader&apos;s or TextWriter&apos;s Synchronized methods. This also applies to classes like StreamWriter and StreamReader.
+        /// </summary>
+        internal static string IndexOutOfRange_IORaceCondition {
+            get {
+                return ResourceManager.GetString("IndexOutOfRange_IORaceCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An invalid value was passed to DataBits.
         /// </summary>
         internal static string InvalidDataBits {
             get {
                 return ResourceManager.GetString("InvalidDataBits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument {0} cannot be null or zero-length..
+        /// </summary>
+        internal static string InvalidNullEmptyArgument {
+            get {
+                return ResourceManager.GetString("InvalidNullEmptyArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EndRead can only be called once for each asynchronous operation.
+        /// </summary>
+        internal static string InvalidOperation_EndReadCalledMultiple {
+            get {
+                return ResourceManager.GetString("InvalidOperation_EndReadCalledMultiple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EndWrite can only be called once for each asynchronous operation.
+        /// </summary>
+        internal static string InvalidOperation_EndWriteCalledMultiple {
+            get {
+                return ResourceManager.GetString("InvalidOperation_EndWriteCalledMultiple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot create &apos;{0}&apos; because a file or directory with the same name already exists.
+        /// </summary>
+        internal static string IO_AlreadyExists_Name {
+            get {
+                return ResourceManager.GetString("IO_AlreadyExists_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to read beyond the end of the stream.
+        /// </summary>
+        internal static string IO_EOF_ReadBeyondEOF {
+            get {
+                return ResourceManager.GetString("IO_EOF_ReadBeyondEOF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file &apos;{0}&apos; already exists.
+        /// </summary>
+        internal static string IO_FileExists_Name {
+            get {
+                return ResourceManager.GetString("IO_FileExists_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find the specified file.
+        /// </summary>
+        internal static string IO_FileNotFound {
+            get {
+                return ResourceManager.GetString("IO_FileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find file &apos;{0}&apos;.
+        /// </summary>
+        internal static string IO_FileNotFound_FileName {
+            get {
+                return ResourceManager.GetString("IO_FileNotFound_FileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The I/O operation has been aborted because of either a thread exit or an application request.
+        /// </summary>
+        internal static string IO_OperationAborted {
+            get {
+                return ResourceManager.GetString("IO_OperationAborted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find a part of the path.
+        /// </summary>
+        internal static string IO_PathNotFound_NoPathName {
+            get {
+                return ResourceManager.GetString("IO_PathNotFound_NoPathName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find a part of the path &apos;{0}&apos;.
+        /// </summary>
+        internal static string IO_PathNotFound_Path {
+            get {
+                return ResourceManager.GetString("IO_PathNotFound_Path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified file name or path is too long, or a component of the specified path is too long.
+        /// </summary>
+        internal static string IO_PathTooLong {
+            get {
+                return ResourceManager.GetString("IO_PathTooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The path &apos;{0}&apos; is too long, or a component of the specified path is too long.
+        /// </summary>
+        internal static string IO_PathTooLong_Path {
+            get {
+                return ResourceManager.GetString("IO_PathTooLong_Path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The process cannot access the file &apos;{0}&apos; because it is being used by another process.
+        /// </summary>
+        internal static string IO_SharingViolation_File {
+            get {
+                return ResourceManager.GetString("IO_SharingViolation_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The process cannot access the file because it is being used by another process.
+        /// </summary>
+        internal static string IO_SharingViolation_NoFileName {
+            get {
+                return ResourceManager.GetString("IO_SharingViolation_NoFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maximum baud rate for the device is {0}.
+        /// </summary>
+        internal static string Max_Baud {
+            get {
+                return ResourceManager.GetString("Max_Baud", resourceCulture);
             }
         }
         
@@ -142,6 +367,15 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enumeration of serial port names is not supported on the current platform.
+        /// </summary>
+        internal static string PlatformNotSupported_SerialPort_GetPortNames {
+            get {
+                return ResourceManager.GetString("PlatformNotSupported_SerialPort_GetPortNames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The port is already open.
         /// </summary>
         internal static string Port_already_open {
@@ -156,6 +390,60 @@ namespace System.Device.Ports.SerialPort {
         internal static string Port_not_open {
             get {
                 return ResourceManager.GetString("Port_not_open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value for StopBits is invalid.
+        /// </summary>
+        internal static string StopBits_Invalid {
+            get {
+                return ResourceManager.GetString("StopBits_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access to the path is denied.
+        /// </summary>
+        internal static string UnauthorizedAccess_IODenied_NoPathName {
+            get {
+                return ResourceManager.GetString("UnauthorizedAccess_IODenied_NoPathName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access to the path &apos;{0}&apos; is denied.
+        /// </summary>
+        internal static string UnauthorizedAccess_IODenied_Path {
+            get {
+                return ResourceManager.GetString("UnauthorizedAccess_IODenied_Path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The underlying Win32 error is: 0x{0:X8}.
+        /// </summary>
+        internal static string Win32Error {
+            get {
+                return ResourceManager.GetString("Win32Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows port names must start with &apos;COM&apos; followed by a number.
+        /// </summary>
+        internal static string WinPortName_wrong {
+            get {
+                return ResourceManager.GetString("WinPortName_wrong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The write timed out.
+        /// </summary>
+        internal static string Write_timed_out {
+            get {
+                return ResourceManager.GetString("Write_timed_out", resourceCulture);
             }
         }
     }

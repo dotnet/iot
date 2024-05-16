@@ -27,52 +27,44 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Indicates that no time-out should occur.
         /// </summary>
-        public const int InfiniteTimeout = -1;
+        public const int InfiniteTimeout = SerialPortDefaults.InfiniteTimeout;
+
+        /// <summary>
+        /// Indicates that no time-out should occur.
+        /// This value is used for the SetCommTimeouts
+        /// which does not accept -1
+        /// </summary>
+        protected const int InfiniteCommTimeouts = -2;
 
         private const int MaxDataBitsNoParity = 9;
         private const int MinDataBits = 5;
-        private const int DefaultBaudRate = 9600;
-        private const Parity DefaultParity = Parity.None;
-        private const int DefaultDataBits = 8;
-        private const StopBits DefaultStopBits = StopBits.One;
-        private const Handshake DefaultHandshake = Handshake.None;
-        private const bool DefaultDtrEnable = false;
-        private const bool DefaultRtsEnable = false;
-        private const bool DefaultDiscardNull = false;
-        private const byte DefaultParityReplace = (byte)'?';
-        /*private const int DefaultBufferSize = 1024;*/
-        private const int DefaultReadBufferSize = 4096;
-        private const int DefaultWriteBufferSize = 2048;
 
-        private const int DefaultReceivedBytesThreshold = 1;
-        private const int DefaultReadTimeout = InfiniteTimeout;
-        private const int DefaultWriteTimeout = InfiniteTimeout;
-
-        private bool _isOpen;
         private int _baudRate;
         private Parity _parity;
         private int _dataBits;
         private StopBits _stopBits;
         private bool _breakState;
-        private bool _discardNull = DefaultDiscardNull;
-        private bool _dtrEnable = DefaultDtrEnable;
-        private Encoding _encoding = Encoding.ASCII;
-        private Handshake _handshake = DefaultHandshake;
-        private string _newLine = Environment.NewLine;
-        private byte _parityReplace = DefaultParityReplace;
+        private bool _discardNull = SerialPortDefaults.DefaultDiscardNull;
+        private bool _dtrEnable = SerialPortDefaults.DefaultDtrEnable;
+        private Handshake _handshake = SerialPortDefaults.DefaultHandshake;
+        private byte _parityReplace = SerialPortDefaults.DefaultParityReplace;
 
         /// <summary>
         /// The name of the serial port whose default value is platform dependent
         /// and set to a proper default name in the derived platform-specific classes
         /// </summary>
-        protected string _portName = String.Empty;
+        private string _portName = string.Empty;
 
-        private int _readBufferSize = DefaultReadBufferSize;
-        private int _readTimeout = DefaultReadTimeout;
-        private int _receivedBytesThreshold = DefaultReceivedBytesThreshold;
-        private bool _rtsEnable = DefaultRtsEnable;
-        private int _writeBufferSize = DefaultWriteBufferSize;
-        private int _writeTimeout = DefaultWriteTimeout;
+        /// <summary>
+        /// The field caching the value for the RTS enable flag
+        /// </summary>
+        protected bool _rtsEnable = SerialPortDefaults.DefaultRtsEnable;
+
+        private int _readBufferSize = SerialPortDefaults.DefaultReadBufferSize;
+        private int _readTimeout = SerialPortDefaults.DefaultReadTimeout;
+        private int _receivedBytesThreshold = SerialPortDefaults.DefaultReceivedBytesThreshold;
+        private int _writeBufferSize = SerialPortDefaults.DefaultWriteBufferSize;
+        private int _writeTimeout = SerialPortDefaults.DefaultWriteTimeout;
 
         /// <summary>
         /// The baud rate
@@ -92,16 +84,20 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
+                if (IsOpen)
+                {
+                    SetBaudRate(value);
+                }
+
                 _baudRate = value;
-                SetBaudRate(_baudRate);
             }
         }
 
         /// <summary>
         /// Set the baud rate
         /// </summary>
-        /// <param name="baudRate">The baud rate to set</param>
-        protected internal abstract void SetBaudRate(int baudRate);
+        /// <param name="value">The baud rate to set</param>
+        protected internal abstract void SetBaudRate(int value);
 
         /// <summary>
         /// The parity
@@ -121,16 +117,20 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
+                if (IsOpen)
+                {
+                    SetParity(value);
+                }
+
                 _parity = value;
-                SetParity(_parity);
             }
         }
 
         /// <summary>
         /// Set the communication parity
         /// </summary>
-        /// <param name="parity">The parity value to set</param>
-        protected internal abstract void SetParity(Parity parity);
+        /// <param name="value">The parity value to set</param>
+        protected internal abstract void SetParity(Parity value);
 
         /// <summary>
         /// The data bits
@@ -141,8 +141,8 @@ namespace System.Device.Ports.SerialPort
             set
             {
                 // 9 data bit is only supported by toggling the parity bit
-                if (_dataBits < MinDataBits || _dataBits > MaxDataBitsNoParity ||
-                    (_dataBits == MaxDataBitsNoParity && Parity != Parity.None))
+                if (value < MinDataBits || value > MaxDataBitsNoParity ||
+                    (value == MaxDataBitsNoParity && Parity != Parity.None))
                 {
                     throw new ArgumentOutOfRangeException(nameof(DataBits), Strings.InvalidDataBits);
                 }
@@ -152,16 +152,20 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
+                if (IsOpen)
+                {
+                    SetDataBits(value);
+                }
+
                 _dataBits = value;
-                SetDataBits(_dataBits);
             }
         }
 
         /// <summary>
         /// Set the communication data bits
         /// </summary>
-        /// <param name="dataBits">The data bits value to set</param>
-        protected internal abstract void SetDataBits(int dataBits);
+        /// <param name="value">The data bits value to set</param>
+        protected internal abstract void SetDataBits(int value);
 
         /// <summary>
         /// The stop bits
@@ -181,16 +185,20 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
+                if (IsOpen)
+                {
+                    SetStopBits(value);
+                }
+
                 _stopBits = value;
-                SetStopBits(_stopBits);
             }
         }
 
         /// <summary>
         /// Set the communication stop bits
         /// </summary>
-        /// <param name="stopBits">The stop bits value to set</param>
-        protected internal abstract void SetStopBits(StopBits stopBits);
+        /// <param name="value">The stop bits value to set</param>
+        protected internal abstract void SetStopBits(StopBits value);
 
         /// <summary>
         /// Gets or sets the break signal state.
@@ -200,6 +208,9 @@ namespace System.Device.Ports.SerialPort
             get => _breakState;
             set
             {
+                // In the old implementation SetBreakState is set every time using platform specific code
+                // for this reason, this code is commented but I left it here because the old behavior
+                // is still to be confirmed.
                 /*
                 if (value == _breakState)
                 {
@@ -207,16 +218,17 @@ namespace System.Device.Ports.SerialPort
                 }
                 */
 
+                // todo: throw if not open, get and set
+                SetBreakState(value);
                 _breakState = value;
-                SetBreakState(_breakState);
             }
         }
 
         /// <summary>
         /// Sets the break signal state.
         /// </summary>
-        /// <param name="breakState">true if the port is in a break state; otherwise, false.</param>
-        protected internal abstract void SetBreakState(bool breakState);
+        /// <param name="value">true if the port is in a break state; otherwise, false.</param>
+        protected internal abstract void SetBreakState(bool value);
 
         /// <summary>
         /// Gets the number of bytes of data in the receive buffer.
@@ -225,11 +237,12 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetBytesToRead();
             }
         }
@@ -246,11 +259,12 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetBytesToWrite();
             }
         }
@@ -263,15 +277,16 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Gets the state of the Carrier Detect line for the port.
         /// </summary>
-        public int CDHolding
+        public bool CDHolding
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetCDHolding();
             }
         }
@@ -279,20 +294,21 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Gets the state of the Carrier Detect line for the port.
         /// </summary>
-        protected internal abstract int GetCDHolding();
+        protected internal abstract bool GetCDHolding();
 
         /// <summary>
         /// Gets the state of the Clear-to-Send line.
         /// </summary>
-        public int CtsHolding
+        public bool CtsHolding
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetCtsHolding();
             }
         }
@@ -300,7 +316,7 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Gets the state of the Clear-to-Send line.
         /// </summary>
-        protected internal abstract int GetCtsHolding();
+        protected internal abstract bool GetCtsHolding();
 
         /// <summary>
         /// Gets or sets a value indicating whether null bytes are ignored when
@@ -311,15 +327,12 @@ namespace System.Device.Ports.SerialPort
             get => _discardNull;
             set
             {
-                /*
-                if (value == _discardNull)
+                if (IsOpen)
                 {
-                    return;
+                    SetDiscardNull(value);
                 }
-                */
 
                 _discardNull = value;
-                SetDiscardNull(_discardNull);
             }
         }
 
@@ -333,15 +346,16 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Gets the state of the Data Set Ready (DSR) signal.
         /// </summary>
-        public int DsrHolding
+        public bool DsrHolding
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open
                 return GetDsrHolding();
             }
         }
@@ -349,72 +363,44 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Gets the state of the Data Set Ready (DSR) signal.
         /// </summary>
-        protected internal abstract int GetDsrHolding();
+        protected internal abstract bool GetDsrHolding();
 
         /// <summary>
         /// Gets or sets a value that enables the Data Terminal Ready (DTR) signal during serial communication.
         /// </summary>
         public bool DtrEnable
         {
-            get => _dtrEnable;
+            get
+            {
+                if (IsOpen)
+                {
+                    _dtrEnable = GetDtrEnable();
+                }
+
+                return _dtrEnable;
+            }
             set
             {
-                /*
-                if (value == _dtrEnable)
+                if (!IsOpen)
                 {
-                    return;
+                    throw new InvalidOperationException(Strings.Port_not_open);
                 }
-                */
 
+                SetDtrEnable(value);
                 _dtrEnable = value;
-                SetDtrEnable(_dtrEnable);
             }
         }
 
         /// <summary>
-        /// Gets or sets a value that enables the Data Terminal Ready (DTR) signal during serial communication.
+        /// Gets a value that enables the Data Terminal Ready (DTR) signal during serial communication.
+        /// </summary>
+        protected internal abstract bool GetDtrEnable();
+
+        /// <summary>
+        /// Sets a value that enables the Data Terminal Ready (DTR) signal during serial communication.
         /// </summary>
         /// <param name="value">true to enable Data Terminal Ready (DTR); otherwise, false. The default is false.</param>
         protected internal abstract void SetDtrEnable(bool value);
-
-        /// <summary>
-        /// Gets or sets the byte encoding for pre- and post-transmission conversion of text.
-        /// </summary>
-        public Encoding Encoding
-        {
-            get => _encoding;
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(Encoding));
-                }
-
-                if (value == _encoding)
-                {
-                    return;
-                }
-
-                /*
-                // Limit the encodings we support to some known ones.  The code pages < 50000 represent all of the single-byte
-                // and double-byte code pages.  Code page 54936 is GB18030.
-                if (!(value is ASCIIEncoding || value is UTF8Encoding || value is UnicodeEncoding || value is UTF32Encoding ||
-                      value.CodePage < 50000 || value.CodePage == 54936))
-                {
-                    throw new ArgumentException(SR.Format(SR.NotSupportedEncoding, value.WebName), nameof(Encoding));
-                }
-
-                _encoding = value;
-                _decoder = _encoding.GetDecoder();
-
-                // This is somewhat of an approximate guesstimate to get the max char[] size needed to encode a single character
-                _maxByteCountForSingleChar = _encoding.GetMaxByteCount(1);
-                _singleCharBuffer = null;
-                 */
-
-                _encoding = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the handshaking protocol for serial port transmission of data using a value from Handshake.
@@ -434,48 +420,25 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
+                if (IsOpen)
+                {
+                    SetHandshake(value);
+                }
+
                 _handshake = value;
-                SetHandshake(_handshake);
             }
         }
 
         /// <summary>
         /// Gets or sets the handshaking protocol for serial port transmission of data using a value from Handshake.
         /// </summary>
-        /// <param name="handshake">One of the Handshake values. The default is None.</param>
-        protected internal abstract void SetHandshake(Handshake handshake);
+        /// <param name="value">One of the Handshake values. The default is None.</param>
+        protected internal abstract void SetHandshake(Handshake value);
 
         /// <summary>
         /// Gets a value indicating the open or closed status of the SerialPort object.
         /// </summary>
-        public bool IsOpen => _isOpen;
-
-        /// <summary>
-        /// Gets or sets the value used to interpret the end of a call to the ReadLine() and WriteLine(String) methods.
-        /// </summary>
-        public string NewLine
-        {
-            get => _newLine;
-            set
-            {
-                if (value == _newLine)
-                {
-                    return;
-                }
-
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(NewLine));
-                }
-
-                if (value.Length == 0)
-                {
-                    throw new ArgumentException(string.Format(Strings.EmptyString, nameof(NewLine)));
-                }
-
-                _newLine = value;
-            }
-        }
+        public bool IsOpen { get; protected set; }
 
         /// <summary>
         /// Gets or sets the byte that replaces invalid bytes in a data stream when a parity error occurs.
@@ -490,44 +453,44 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
+                if (IsOpen)
+                {
+                    SetParityReplace(value);
+                }
+
                 _parityReplace = value;
-                SetParityReplace(_parityReplace);
             }
         }
 
         /// <summary>
         /// Gets or sets the byte that replaces invalid bytes in a data stream when a parity error occurs.
         /// </summary>
-        /// <param name="parityReplace">A byte that replaces invalid bytes.</param>
-        /// <returns></returns>
-        protected internal abstract byte SetParityReplace(byte parityReplace);
+        /// <param name="value">A byte that replaces invalid bytes.</param>
+        protected internal abstract void SetParityReplace(byte value);
 
         /// <summary>
-        /// Gets or sets the value used to interpret the end of a call to the ReadLine() and WriteLine(String) methods.
+        /// Gets or sets the port name
         /// </summary>
         public string PortName
         {
             get => _portName;
             set
             {
-                if (value == _portName)
-                {
-                    return;
-                }
-
-                if (_portName == null)
-                {
-                    throw new ArgumentNullException(nameof(PortName));
-                }
-
                 if (value.Length == 0)
                 {
-                    throw new ArgumentException(string.Format(Strings.EmptyString, nameof(PortName)));
+                    // the default port name will be used on string.Empty
+                    return;
                 }
 
                 if (IsOpen)
                 {
-                    throw new InvalidOperationException(string.Format(Strings.Cant_be_set_when_open, nameof(PortName)));
+                    throw new InvalidOperationException(
+                        string.Format(Strings.Cant_be_set_when_open, nameof(PortName)));
+                }
+
+                if (value == _portName)
+                {
+                    return;
                 }
 
                 _portName = value;
@@ -560,6 +523,7 @@ namespace System.Device.Ports.SerialPort
                     throw new InvalidOperationException(string.Format(Strings.Cant_be_set_when_open, nameof(ReadBufferSize)));
                 }
 
+                InitializeBuffers(value, WriteBufferSize);
                 _readBufferSize = value;
             }
         }
@@ -585,16 +549,20 @@ namespace System.Device.Ports.SerialPort
                     throw new ArgumentOutOfRangeException(nameof(ReadTimeout), Strings.ArgumentOutOfRange_Timeout);
                 }
 
+                if (IsOpen)
+                {
+                    SetReadTimeout(value);
+                }
+
                 _readTimeout = value;
-                SetReadTimeout(_readTimeout);
             }
         }
 
         /// <summary>
         /// Gets or sets the number of milliseconds before a time-out occurs when a read operation does not finish.
         /// </summary>
-        /// <param name="timeout">The number of milliseconds before a time-out occurs when a read operation does not finish.</param>
-        protected internal abstract void SetReadTimeout(int timeout);
+        /// <param name="value">The number of milliseconds before a time-out occurs when a read operation does not finish.</param>
+        protected internal abstract void SetReadTimeout(int value);
 
         /// <summary>
         /// Gets or sets the number of bytes in the internal input buffer before a DataReceived event occurs.
@@ -617,15 +585,16 @@ namespace System.Device.Ports.SerialPort
                     throw new ArgumentOutOfRangeException(nameof(ReceivedBytesThreshold), Strings.ArgumentOutOfRange_NeedPosNum);
                 }
 
-                _receivedBytesThreshold = value;
-
                 if (IsOpen)
                 {
                     OnReceivedBytesThresholdChanged();
                 }
+
+                _receivedBytesThreshold = value;
             }
         }
 
+        // TODO
         private void OnReceivedBytesThresholdChanged()
         {
             // fake the call to our event handler in case the threshold has been set lower
@@ -640,7 +609,15 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         public bool RtsEnable
         {
-            get => _rtsEnable;
+            get
+            {
+                if (IsOpen)
+                {
+                    _rtsEnable = GetRtsEnable();
+                }
+
+                return _rtsEnable;
+            }
             set
             {
                 if (value == _rtsEnable)
@@ -648,16 +625,34 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                _rtsEnable = value;
-                SetRtsEnable(_rtsEnable);
+                if (Handshake == Handshake.RequestToSend || Handshake == Handshake.RequestToSendXOnXOff)
+                {
+                    throw new InvalidOperationException(Strings.CantSetRtsWithHandshaking);
+                }
+
+                if (IsOpen)
+                {
+                    SetRtsEnable(value, true);
+                }
+                else
+                {
+                    _rtsEnable = value;
+                }
             }
         }
 
         /// <summary>
+        /// Read the RtsEnable flag from the native APIs
+        /// </summary>
+        /// <returns></returns>
+        protected internal abstract bool GetRtsEnable();
+
+        /// <summary>
         /// Gets or sets a value indicating whether the Request to Send (RTS) signal is enabled during serial communication.
         /// </summary>
-        /// <param name="rtsEnable">true to enable Request to Transmit (RTS); otherwise, false. The default is false.</param>
-        protected internal abstract void SetRtsEnable(bool rtsEnable);
+        /// <param name="value">true to enable Request to Transmit (RTS); otherwise, false. The default is false.</param>
+        /// <param name="setField">true to set the underlying field</param>
+        protected internal abstract void SetRtsEnable(bool value, bool setField);
 
         /// <summary>
         /// Gets or sets the size of the serial port output buffer.
@@ -685,16 +680,17 @@ namespace System.Device.Ports.SerialPort
                     throw new InvalidOperationException(string.Format(Strings.Cant_be_set_when_open, nameof(WriteBufferSize)));
                 }
 
+                InitializeBuffers(ReadBufferSize, value);
                 _writeBufferSize = value;
-                SetWriteBufferSize(_writeBufferSize);
             }
         }
 
         /// <summary>
-        /// Gets or sets the size of the serial port output buffer.
+        /// Initialize the platform-specific buffers for reading and writing operations
         /// </summary>
-        /// <param name="writeBufferSize">The size of the output buffer. The default is 2048.</param>
-        protected internal abstract void SetWriteBufferSize(int writeBufferSize);
+        /// <param name="readBufferSize">The size of the read buffer.</param>
+        /// <param name="writeBufferSize">The size of the write buffer.</param>
+        protected internal abstract void InitializeBuffers(int readBufferSize, int writeBufferSize);
 
         /// <summary>
         /// Gets or sets the number of milliseconds before a time-out occurs when a write operation does not finish.
@@ -714,15 +710,19 @@ namespace System.Device.Ports.SerialPort
                     throw new ArgumentOutOfRangeException(nameof(WriteTimeout), Strings.ArgumentOutOfRange_WriteTimeout);
                 }
 
+                if (IsOpen)
+                {
+                    SetWriteTimeout(value);
+                }
+
                 _writeTimeout = value;
-                SetWriteTimeout(_writeTimeout);
             }
         }
 
         /// <summary>
         /// Gets or sets the number of milliseconds before a time-out occurs when a write operation does not finish.
         /// </summary>
-        /// <param name="writeTimeout">The number of milliseconds before a time-out occurs. The default is InfiniteTimeout.</param>
-        protected internal abstract void SetWriteTimeout(int writeTimeout);
+        /// <param name="value">The number of milliseconds before a time-out occurs. The default is InfiniteTimeout.</param>
+        protected internal abstract void SetWriteTimeout(int value);
     }
 }
