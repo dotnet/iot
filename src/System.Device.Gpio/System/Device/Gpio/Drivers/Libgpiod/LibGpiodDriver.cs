@@ -55,90 +55,103 @@ public class LibGpiodDriver : UnixDriver
     public static LibGpiodDriverVersion[] GetAvailableVersions() => LibGpiodDriverFactory.Instance.DriverCandidates;
 
     /// <inheritdoc/>
-    protected internal override int PinCount => _driver.PinCount;
+    protected internal override int PinCount => GetDriver().PinCount;
 
     /// <inheritdoc/>
     protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
     {
-        _driver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+        GetDriver().AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
     }
 
     /// <inheritdoc/>
     protected internal override void ClosePin(int pinNumber)
     {
-        _driver.ClosePin(pinNumber);
+        GetDriver().ClosePin(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
     {
-        return _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+        return GetDriver().ConvertPinNumberToLogicalNumberingScheme(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override PinMode GetPinMode(int pinNumber)
     {
-        return _driver.GetPinMode(pinNumber);
+        return GetDriver().GetPinMode(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
     {
-        return _driver.IsPinModeSupported(pinNumber, mode);
+        return GetDriver().IsPinModeSupported(pinNumber, mode);
     }
 
     /// <inheritdoc/>
     protected internal override void OpenPin(int pinNumber)
     {
-        _driver.OpenPin(pinNumber);
+        GetDriver().OpenPin(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override PinValue Read(int pinNumber)
     {
-        return _driver.Read(pinNumber);
+        return GetDriver().Read(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override void Toggle(int pinNumber)
     {
-        _driver.Toggle(pinNumber);
+        GetDriver().Toggle(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
     {
-        _driver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+        GetDriver().RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
     }
 
     /// <inheritdoc/>
     protected internal override void SetPinMode(int pinNumber, PinMode mode)
     {
-        _driver.SetPinMode(pinNumber, mode);
+        GetDriver().SetPinMode(pinNumber, mode);
     }
 
     /// <inheritdoc />
     protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
     {
-        _driver.SetPinMode(pinNumber, mode, initialValue);
+        GetDriver().SetPinMode(pinNumber, mode, initialValue);
     }
 
     /// <inheritdoc/>
     protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
     {
-        return _driver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+        return GetDriver().WaitForEvent(pinNumber, eventTypes, cancellationToken);
     }
 
     /// <inheritdoc/>
     protected internal override void Write(int pinNumber, PinValue value)
     {
-        _driver.Write(pinNumber, value);
+        GetDriver().Write(pinNumber, value);
     }
 
     /// <inheritdoc />
     public override ComponentInformation QueryComponentInformation()
     {
-        return _driver.QueryComponentInformation();
+        var ret = new ComponentInformation(this, "Libgpiod Wrapper driver");
+        ret.Properties.Add("Version", Version.ToString());
+        ret.AddSubComponent(GetDriver().QueryComponentInformation());
+        return ret;
+    }
+
+    private GpioDriver GetDriver()
+    {
+        if (_driver == null)
+        {
+            throw new ObjectDisposedException(nameof(LibGpiodDriver));
+        }
+
+        return _driver;
     }
 
     /// <inheritdoc/>
