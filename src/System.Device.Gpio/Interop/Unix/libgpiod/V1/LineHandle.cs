@@ -9,10 +9,10 @@ namespace System.Device.Gpio.Libgpiod.V1;
 /// <summary>
 /// Pointer to a pin (Not a real SafeLineHandle, because we need to align its finalization with the owning object)
 /// </summary>
-internal sealed class SafeLineHandle : IDisposable
+internal sealed class LineHandle : IDisposable
 {
     private IntPtr _handle;
-    public SafeLineHandle(IntPtr handle)
+    public LineHandle(IntPtr handle)
     {
         _handle = handle;
         PinMode = PinMode.Input;
@@ -26,7 +26,7 @@ internal sealed class SafeLineHandle : IDisposable
         {
             if (_handle == IntPtr.Zero)
             {
-                throw new ObjectDisposedException(nameof(SafeLineHandle));
+                throw new ObjectDisposedException(nameof(LineHandle));
             }
 
             return _handle;

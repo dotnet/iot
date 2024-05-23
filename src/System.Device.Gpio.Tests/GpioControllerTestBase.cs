@@ -606,7 +606,7 @@ public abstract class GpioControllerTestBase
         {
             pin6.Read();
         }
-        catch (Exception x) when (x is InvalidOperationException || x is ObjectDisposedException)
+        catch (ObjectDisposedException)
         {
             correctExceptionSeen = true;
         }

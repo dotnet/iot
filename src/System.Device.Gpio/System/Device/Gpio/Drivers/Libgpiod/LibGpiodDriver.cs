@@ -11,7 +11,7 @@ namespace System.Device.Gpio.Drivers;
 /// </summary>
 public class LibGpiodDriver : UnixDriver
 {
-    private readonly GpioDriver _driver;
+    private GpioDriver _driver;
 
     /// <summary>
     /// Creates an instance of the LibGpiodDriver
@@ -144,7 +144,12 @@ public class LibGpiodDriver : UnixDriver
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
-        _driver?.Dispose();
+        if (_driver != null && disposing)
+        {
+            _driver.Dispose();
+            _driver = null!;
+        }
+
         base.Dispose(disposing);
     }
 }
