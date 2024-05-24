@@ -3,6 +3,7 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Device;
 using System.Device.I2c;
 using System.Device.Model;
 using System.Diagnostics;
@@ -96,7 +97,8 @@ namespace Iot.Device.Lps22hb
         public void ResetDevice()
         {
             WriteByte(Register.CTRL_REG2, 0b0100);
-            while (true)
+            int timeoutLoop = 10;
+            while (timeoutLoop > 0)
             {
                 byte reset = Read(Register.CTRL_REG2);
 
@@ -104,6 +106,9 @@ namespace Iot.Device.Lps22hb
                 {
                     break;
                 }
+
+                DelayHelper.DelayMilliseconds(10, true);
+                timeoutLoop -= 1;
             }
         }
 
