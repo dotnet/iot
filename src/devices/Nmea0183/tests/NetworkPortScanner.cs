@@ -30,18 +30,49 @@ namespace Iot.Device.Nmea0183.Tests
         public static int GetNextAvailableTcpPort(int startPortNumber)
         {
             var portNumber = startPortNumber;
-            var isAvailable = false;
-            while (!isAvailable)
+            try
             {
-                isAvailable = true;
-                if (ListLocalActiveTcpEndpoints().Any(ep => ep.Port == portNumber))
+                while (portNumber < UInt16.MaxValue - 1)
                 {
-                    isAvailable = false;
+                    if (IsPortAvailable(portNumber))
+                    {
+                        return portNumber;
+                    }
+
+                    portNumber++;
+                }
+            }
+            catch (SocketException)
+            {
+                // The above approach didn't work, try alternate
+                while (portNumber < UInt16.MaxValue - 1)
+                {
+                    if (IsPortAvailableViaOpeningSocket(portNumber))
+                    {
+                        return portNumber;
+                    }
+
                     portNumber++;
                 }
             }
 
-            return portNumber;
+            throw new InvalidOperationException($"No free port found above {startPortNumber}");
+        }
+
+        private static bool IsPortAvailableViaOpeningSocket(int portNumber)
+        {
+            try
+            {
+                TcpListener listener = TcpListener.Create(portNumber);
+                listener.Start();
+                listener.Stop();
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -72,7 +103,7 @@ namespace Iot.Device.Nmea0183.Tests
             try
             {
                 Assert.False(string.IsNullOrWhiteSpace(ownHostName));
-                localIpAddresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList
+                localIpAddresses = Dns.GetHostEntry(ownHostName).AddressList
                     .Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
             }
             catch (SocketException x)
