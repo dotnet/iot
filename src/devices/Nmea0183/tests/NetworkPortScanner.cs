@@ -10,6 +10,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using Xunit;
 
 namespace Iot.Device.Nmea0183.Tests
 {
@@ -66,14 +67,17 @@ namespace Iot.Device.Nmea0183.Tests
             var activeTcpConnections = ipGlobalProperties.GetActiveTcpConnections();
             List<IPAddress> localIpAddresses;
 
+            string ownHostName = Dns.GetHostName();
+
             try
             {
+                Assert.False(string.IsNullOrWhiteSpace(ownHostName));
                 localIpAddresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList
                     .Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
             }
             catch (SocketException x)
             {
-                Debug.Print($"SocketException while trying to get local IPs: {x}. Trying alternate approach.");
+                Console.WriteLine($"SocketException while trying to get local IPs: {x}. Own Host: {ownHostName}");
                 // Documentation says that an empty string returns the local IPs (null is not valid, though)
                 localIpAddresses = Dns.GetHostAddresses(string.Empty).Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
             }
