@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -63,10 +64,23 @@ namespace Iot.Device.Nmea0183.Tests
         {
             var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             var activeTcpConnections = ipGlobalProperties.GetActiveTcpConnections();
-            var localIpAdresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
-            localIpAdresses.Add(IPAddress.Loopback);
+            List<IPAddress> localIpAddresses;
+
+            try
+            {
+                localIpAddresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList
+                    .Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
+            }
+            catch (SocketException x)
+            {
+                Debug.Print($"SocketException while trying to get local IPs: {x}. Trying alternate approach.");
+                // Documentation says that an empty string returns the local IPs (null is not valid, though)
+                localIpAddresses = Dns.GetHostAddresses(string.Empty).Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
+            }
+
+            localIpAddresses.Add(IPAddress.Loopback);
             // All TCP clients with remote side local machine (not the same than listeners)
-            var remoteEp = activeTcpConnections.Select(ac => ac.RemoteEndPoint).Where(rp => localIpAdresses.Contains(rp.Address)).ToList();
+            var remoteEp = activeTcpConnections.Select(ac => ac.RemoteEndPoint).Where(rp => localIpAddresses.Contains(rp.Address)).ToList();
             // All TCP clients local side
             var localEp = activeTcpConnections.Select(ac => ac.LocalEndPoint).ToList();
             // All TCP servers local side
