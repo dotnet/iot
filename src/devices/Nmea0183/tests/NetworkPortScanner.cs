@@ -61,15 +61,20 @@ namespace Iot.Device.Nmea0183.Tests
 
         private static bool IsPortAvailableViaOpeningSocket(int portNumber)
         {
+            TcpListener? listener = null;
             try
             {
-                TcpListener listener = TcpListener.Create(portNumber);
+                listener = TcpListener.Create(portNumber);
                 listener.Start();
                 listener.Stop();
             }
             catch (SocketException)
             {
                 return false;
+            }
+            finally
+            {
+                listener?.Stop();
             }
 
             return true;
@@ -106,9 +111,8 @@ namespace Iot.Device.Nmea0183.Tests
                 localIpAddresses = Dns.GetHostEntry(ownHostName).AddressList
                     .Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
             }
-            catch (SocketException x)
+            catch (SocketException)
             {
-                Console.WriteLine($"SocketException while trying to get local IPs: {x}. Own Host: {ownHostName}");
                 // Documentation says that an empty string returns the local IPs (null is not valid, though)
                 localIpAddresses = Dns.GetHostAddresses(string.Empty).Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
             }
