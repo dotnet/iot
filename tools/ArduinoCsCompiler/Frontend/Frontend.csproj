@@ -17,6 +17,8 @@
     <ToolCommandName>dotnet-acs</ToolCommandName>
     <PackageOutputPath>..\..\..\artifacts\packages\$(Configuration)\Shipping</PackageOutputPath>
     <Version>1.0.2</Version>
+    <!-- Stay in beta mode -->
+    <SuppressFinalPackageVersion>true</SuppressFinalPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,6 +35,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ArduinoCsCompiler.csproj" />
   </ItemGroup>
+  <!-- In debug mode, we take the dependencies from the current build, in release mode we link to the officially released packages.
+  This implies that any application the user want's to translate do the same. If they're not part of the same repository,
+  they will always link to the packages, not the projects.
+  -->
   <ItemGroup Condition="$(Configuration)=='Debug'">
     <ProjectReference Include="..\..\..\src\devices\Mcp3xxx\Mcp3xxx.csproj" />
     <ProjectReference Include="..\..\..\src\devices\Bmxx80\Bmxx80.csproj" />

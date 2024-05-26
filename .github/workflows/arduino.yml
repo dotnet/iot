@@ -19,7 +19,7 @@ jobs:
     runs-on: windows-latest
     strategy:
         matrix:
-            configuration: [Debug, Release]
+            configuration: [Release]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
