@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using Xunit;
 
 namespace Iot.Device.Nmea0183.Tests
 {
@@ -28,18 +30,54 @@ namespace Iot.Device.Nmea0183.Tests
         public static int GetNextAvailableTcpPort(int startPortNumber)
         {
             var portNumber = startPortNumber;
-            var isAvailable = false;
-            while (!isAvailable)
+            try
             {
-                isAvailable = true;
-                if (ListLocalActiveTcpEndpoints().Any(ep => ep.Port == portNumber))
+                while (portNumber < UInt16.MaxValue - 1)
                 {
-                    isAvailable = false;
+                    if (IsPortAvailable(portNumber))
+                    {
+                        return portNumber;
+                    }
+
+                    portNumber++;
+                }
+            }
+            catch (SocketException)
+            {
+                // The above approach didn't work, try alternate
+                while (portNumber < UInt16.MaxValue - 1)
+                {
+                    if (IsPortAvailableViaOpeningSocket(portNumber))
+                    {
+                        return portNumber;
+                    }
+
                     portNumber++;
                 }
             }
 
-            return portNumber;
+            throw new InvalidOperationException($"No free port found above {startPortNumber}");
+        }
+
+        private static bool IsPortAvailableViaOpeningSocket(int portNumber)
+        {
+            TcpListener? listener = null;
+            try
+            {
+                listener = TcpListener.Create(portNumber);
+                listener.Start();
+                listener.Stop();
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
+            finally
+            {
+                listener?.Stop();
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -63,10 +101,25 @@ namespace Iot.Device.Nmea0183.Tests
         {
             var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             var activeTcpConnections = ipGlobalProperties.GetActiveTcpConnections();
-            var localIpAdresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
-            localIpAdresses.Add(IPAddress.Loopback);
+            List<IPAddress> localIpAddresses;
+
+            string ownHostName = Dns.GetHostName();
+
+            try
+            {
+                Assert.False(string.IsNullOrWhiteSpace(ownHostName));
+                localIpAddresses = Dns.GetHostEntry(ownHostName).AddressList
+                    .Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
+            }
+            catch (SocketException)
+            {
+                // Documentation says that an empty string returns the local IPs (null is not valid, though)
+                localIpAddresses = Dns.GetHostAddresses(string.Empty).Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToList();
+            }
+
+            localIpAddresses.Add(IPAddress.Loopback);
             // All TCP clients with remote side local machine (not the same than listeners)
-            var remoteEp = activeTcpConnections.Select(ac => ac.RemoteEndPoint).Where(rp => localIpAdresses.Contains(rp.Address)).ToList();
+            var remoteEp = activeTcpConnections.Select(ac => ac.RemoteEndPoint).Where(rp => localIpAddresses.Contains(rp.Address)).ToList();
             // All TCP clients local side
             var localEp = activeTcpConnections.Select(ac => ac.LocalEndPoint).ToList();
             // All TCP servers local side
