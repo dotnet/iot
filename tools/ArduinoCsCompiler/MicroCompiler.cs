@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -15,14 +16,17 @@ using System.Threading;
 using ArduinoCsCompiler.Runtime;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
+using TypeInfo = System.Reflection.TypeInfo;
 
 namespace ArduinoCsCompiler
 {
     public sealed class MicroCompiler : IDisposable
     {
-        private const int DataVersion = 1;
+        // DataVersion 1 was shipped with Iot.Device.Bindings version 2.2.0
+        private const int DataVersion = 2;
 
         /// <summary>
         /// The list of system assemblies (these may contain kernel interop calls)
@@ -46,7 +50,9 @@ namespace ArduinoCsCompiler
         private readonly List<ArduinoTask> _activeTasks;
         private readonly object _activeTasksLock;
         private readonly ILogger _logger;
-        private readonly CompilerCommandHandler _commandHandler;
+        private readonly Type _arraySortHelper;
+
+        private CompilerCommandHandler _commandHandler;
 
         private ExecutionSet? _activeExecutionSet;
 
@@ -66,6 +72,8 @@ namespace ArduinoCsCompiler
             _activeTasksLock = new object();
             _activeTasks = new List<ArduinoTask>();
             _activeExecutionSet = null;
+
+            _arraySortHelper = GetSystemPrivateType("System.Collections.Generic.ArraySortHelper`1");
 
             _commandHandler = new CompilerCommandHandler(this);
             board.AddCommandHandler(_commandHandler);
@@ -148,29 +156,29 @@ namespace ArduinoCsCompiler
             {
                 var task = _activeTasks.FirstOrDefault(x => x.TaskId == taskId);
 
-                if (task == null)
-                {
-                    // Because two threads run here, we might already have parsed this result
-                    _logger.LogError($"Invalid method state update. {taskId} does not denote an active task.");
-                    return;
-                }
-
-                if (task.State != MethodState.Running && task.HasResult)
+                if (task != null && task.State != MethodState.Running && task.HasResult)
                 {
                     // Result already known
                     _logger.LogDebug($"Task {taskId} reported a result but had already ended.");
-
                     return;
                 }
 
-                var codeRef = task.MethodInfo;
+                if (task == null)
+                {
+                    _logger.LogDebug($"Thread {taskId} sends a debug state.");
+                }
 
-                if (state == MethodState.Debugging)
+                if (state == MethodState.Debugging || task == null)
                 {
                     _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
                     if (_debugger == null)
                     {
-                        _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
+                        _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This means something serious has happened");
+                        var stack = Debugger.DecodeStackTrace(_activeExecutionSet, (byte[])args);
+                        foreach (var frame in stack)
+                        {
+                            _logger.LogInformation(frame.ToString());
+                        }
                     }
                     else
                     {
@@ -179,6 +187,8 @@ namespace ArduinoCsCompiler
 
                     return; // Don't update the task state - for an outside observer, debugging does not affect the task state.
                 }
+
+                var codeRef = task.MethodInfo;
 
                 if (state == MethodState.Aborted)
                 {
@@ -276,14 +286,14 @@ namespace ArduinoCsCompiler
 
             void AddMethod(EquatableMethod method, int nativeMethod)
             {
-                if (!set.HasMethod(method, method, out _))
+                if (!set.HasMethod(method, method, out _, out _))
                 {
                     set.GetReplacement(method.DeclaringType);
                     var replacement = set.GetReplacement(method, method);
                     if (replacement != null)
                     {
                         method = replacement;
-                        if (set.HasMethod(method, method, out _))
+                        if (set.HasMethod(method, method, out _, out _))
                         {
                             return;
                         }
@@ -355,8 +365,11 @@ namespace ArduinoCsCompiler
                             methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => EquatableMethod.MethodsHaveSameSignature(x, m) || EquatableMethod.AreSameOperatorMethods(x, m));
                             if (methodToReplace == null)
                             {
-                                // That may be ok if it is our own internal implementation, but for now we abort, since we currently have no such case
-                                throw new InvalidOperationException($"A replacement method has nothing to replace: {m.MethodSignature()}");
+                                // if the method is not explicitly marked as InternalCall this is an error
+                                if (!iaMethod.InternalCall)
+                                {
+                                    throw new InvalidOperationException($"A replacement method has nothing to replace: {m.MethodSignature()}");
+                                }
                             }
                             else
                             {
@@ -366,7 +379,14 @@ namespace ArduinoCsCompiler
                     }
 
                     // Also go over ctors (if any)
-                    foreach (var m in replacement.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
+                    var interestingConstructors = replacement.GetConstructors(BindingFlags.Public | BindingFlags.Instance).ToList();
+                    var cctor = replacement.GetConstructor(BindingFlags.NonPublic | BindingFlags.Static, Array.Empty<Type>());
+                    if (cctor != null)
+                    {
+                        interestingConstructors.Add(cctor);
+                    }
+
+                    foreach (var m in interestingConstructors)
                     {
                         // Methods that have this attribute shall be replaced - if the value is ArduinoImplementation.None, the C# implementation is used,
                         // otherwise a native implementation is provided
@@ -417,6 +437,9 @@ namespace ArduinoCsCompiler
             HashSet<int> hi = new HashSet<int>();
             PrepareClass(set, hi.Comparer.GetType()); // GenericEqualityComparer<int>
             PrepareClass(set, typeof(IEquatable<Nullable<int>>));
+
+            var comparerOfString = Comparer<string>.Default;
+            PrepareClass(set, comparerOfString.GetType());
 
             PrepareClass(set, typeof(System.Array));
 
@@ -538,6 +561,35 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            if (classType == typeof(Thread))
+            {
+                fields = fields.OrderBy(x =>
+                {
+                    // make sure the order is given
+                    if (x.Name == "_DONT_USE_InternalThread")
+                    {
+                        return 0;
+                    }
+
+                    if (x.Name == "_managedThreadId")
+                    {
+                        return 1;
+                    }
+
+                    if (x.Name == "_name")
+                    {
+                        return 2;
+                    }
+
+                    if (x.Name == "_startHelper")
+                    {
+                        return 3;
+                    }
+
+                    return 10;
+                }).ToList();
+            }
+
             if (classType.IsValueType && fields.Count > 1)
             {
                 // Order value types by marshalled position. This guarantees correct ordering, which is particularly important
@@ -547,6 +599,136 @@ namespace ArduinoCsCompiler
 
             List<ClassMember> memberTypes = new List<ClassMember>();
 
+            IdentifyFields(set, classType, fields, memberTypes);
+
+            for (var index = 0; index < methods.Count; index++)
+            {
+                var m = methods[index] as ConstructorInfo;
+                if (m != null)
+                {
+                    memberTypes.Add(new ClassMember(m, VariableKind.Method, set.GetOrAddMethodToken(m, m), new List<int>()));
+                }
+            }
+
+            var sizeOfClass = GetClassSize(classType, memberTypes);
+
+            var interfaces = classType.GetInterfaces().ToList();
+
+            sizeOfClass.Dynamic = PerformFieldAlignment(classType, sizeOfClass.Dynamic, memberTypes);
+
+            // Add this first, so we break the recursion to this class further down
+            var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
+            set.AddClass(newClass);
+            foreach (var iface in interfaces)
+            {
+                PrepareClassDeclaration(set, iface);
+            }
+
+            FindDependentClasses(set, classType);
+        }
+
+        /// <summary>
+        /// This method finds classes and interfaces that are dependent on a given interface and are (probably) also required.
+        /// The reason is in the runtime: It constructs these internal type using reflection from the original types (e.g. comparators for a type)
+        /// </summary>
+        /// <param name="set">The execution set</param>
+        /// <param name="classType">The class that's being observed</param>
+        private void FindDependentClasses(ExecutionSet set, Type classType)
+        {
+            if (classType.IsConstructedGenericType)
+            {
+                // If EqualityComparer<something> is used, we need to force a reference to IEquatable<something> and ObjectEqualityComparer<something>
+                // as they sometimes fail to get recognized. This is because CreateDefaultEqualityComparer uses the special reflection method
+                // CreateInstanceForAnotherGenericParameter
+                var openType = classType.GetGenericTypeDefinition();
+                if (openType == typeof(EqualityComparer<>))
+                {
+                    // The logic here can be refined by reversing the logic in ComparerHelpers.CreateDefaultEqualityComparer
+                    var typeArgs = classType.GetGenericArguments();
+                    var requiredInterface = typeof(IEquatable<>).MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, requiredInterface);
+                    if (!typeArgs[0].IsValueType)
+                    {
+                        // If the class type implements IEquatable<T>, we need the GenericEqualityComparer, otherwise the ObjectEqualityComparer
+                        if (typeArgs[0].IsAssignableTo(requiredInterface))
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        else
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                    }
+                    else if (typeArgs[0].IsGenericType && typeArgs[0].GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        var embeddedType = typeArgs[0].GetGenericArguments()[0];
+                        if (embeddedType.IsEnum)
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.EnumEqualityComparer`1")!.MakeGenericType(embeddedType);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        else
+                        {
+                            // This doesn't work with enums
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.NullableEqualityComparer`1")!.MakeGenericType(embeddedType);
+                            PrepareClassDeclaration(set, alsoRequired);
+                            // Also need ObjectEqualityComparer<Nullable<T>>
+                            var nullableOfT = typeof(Nullable<>).MakeGenericType(embeddedType);
+                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(nullableOfT);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                    }
+                    else if (!typeArgs[0].IsAssignableTo(requiredInterface))
+                    {
+                        // If the value type being declared does not implement IEquatable<OfItself> we need an ObjectEqualityComparer<T> instead
+                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                        PrepareClassDeclaration(set, alsoRequired);
+                    }
+                    else if (typeArgs[0].IsValueType)
+                    {
+                        try
+                        {
+                            // This throws if the given types violate a constraint for the comparer
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        catch (ArgumentException x)
+                        {
+                            _logger.LogWarning(x, x.Message);
+                        }
+                    }
+                }
+
+                if (openType == typeof(Comparer<>))
+                {
+                    var typeArgs = classType.GetGenericArguments();
+                    var requiredInterface = typeof(IComparable<>).MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, requiredInterface);
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectComparer`1")!.MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, alsoRequired);
+                }
+
+                if (openType == typeof(Nullable<>))
+                {
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(classType);
+                    PrepareClassDeclaration(set, alsoRequired);
+                }
+
+                if (openType == _arraySortHelper)
+                {
+                    var typeArgs = classType.GetGenericArguments();
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericArraySortHelper`1")!.MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, alsoRequired);
+                }
+            }
+        }
+
+        private void IdentifyFields(ExecutionSet set, Type classType, List<FieldInfo> fields, List<ClassMember> memberTypes)
+        {
             for (var index = 0; index < fields.Count; index++)
             {
                 int staticFieldSize = 0;
@@ -677,108 +859,18 @@ namespace ArduinoCsCompiler
                     token = set.GetOrAddFieldToken(field);
                 }
 
+                var specialAttrs = field.GetCustomAttributes(true);
+                foreach (var attr in specialAttrs)
+                {
+                    if (attr is ThreadStaticAttribute)
+                    {
+                        _logger.LogDebug($"Class {classType.MemberInfoSignature()} is using [ThreadStatic] on field {field.Name}.");
+                        fieldType |= VariableKind.ThreadSpecific;
+                    }
+                }
+
                 var newvar = new ClassMember(field, fieldType, token, size, -1, staticFieldSize);
                 memberTypes.Add(newvar);
-            }
-
-            for (var index = 0; index < methods.Count; index++)
-            {
-                var m = methods[index] as ConstructorInfo;
-                if (m != null)
-                {
-                    memberTypes.Add(new ClassMember(m, VariableKind.Method, set.GetOrAddMethodToken(m, m), new List<int>()));
-                }
-            }
-
-            var sizeOfClass = GetClassSize(classType, memberTypes);
-
-            var interfaces = classType.GetInterfaces().ToList();
-
-            sizeOfClass.Dynamic = PerformFieldAlignment(classType, sizeOfClass.Dynamic, memberTypes);
-
-            // Add this first, so we break the recursion to this class further down
-            var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
-            set.AddClass(newClass);
-            foreach (var iface in interfaces)
-            {
-                PrepareClassDeclaration(set, iface);
-            }
-
-            if (classType.IsConstructedGenericType)
-            {
-                // If EqualityComparer<something> is used, we need to force a reference to IEquatable<something> and ObjectEqualityComparer<something>
-                // as they sometimes fail to get recognized. This is because CreateDefaultEqualityComparer uses the special reflection method
-                // CreateInstanceForAnotherGenericParameter
-                var openType = classType.GetGenericTypeDefinition();
-                if (openType == typeof(EqualityComparer<>))
-                {
-                    // The logic here can be refined by reversing the logic in ComparerHelpers.CreateDefaultEqualityComparer
-                    var typeArgs = classType.GetGenericArguments();
-                    var requiredInterface = typeof(IEquatable<>).MakeGenericType(typeArgs);
-                    PrepareClassDeclaration(set, requiredInterface);
-                    if (!typeArgs[0].IsValueType)
-                    {
-                        // If the class type implements IEquatable<T>, we need the GenericEqualityComparer, otherwise the ObjectEqualityComparer
-                        if (typeArgs[0].IsAssignableTo(requiredInterface))
-                        {
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                        else
-                        {
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                    }
-                    else if (typeArgs[0].IsGenericType && typeArgs[0].GetGenericTypeDefinition() == typeof(Nullable<>))
-                    {
-                        var embeddedType = typeArgs[0].GetGenericArguments()[0];
-                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.NullableEqualityComparer`1")!.MakeGenericType(embeddedType);
-                        PrepareClassDeclaration(set, alsoRequired);
-                    }
-                    else if (!typeArgs[0].IsAssignableTo(requiredInterface))
-                    {
-                        // If the value type being declared does not implement IEquatable<OfItself> we need an ObjectEqualityComparer<T> instead
-                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                        PrepareClassDeclaration(set, alsoRequired);
-                    }
-                    else if (typeArgs[0].IsValueType)
-                    {
-                        try
-                        {
-                            // This throws if the given types violate a constraint for the comparer
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                        catch (ArgumentException x)
-                        {
-                            _logger.LogWarning(x, x.Message);
-                        }
-                    }
-                    ////else if (typeArgs[0].IsClass)
-                    ////{
-                    ////    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                    ////    PrepareClassDeclaration(set, alsoRequired);
-                    ////}
-                }
-
-                if (openType == typeof(Comparer<>))
-                {
-                    var typeArgs = classType.GetGenericArguments();
-                    var requiredInterface = typeof(IComparable<>).MakeGenericType(typeArgs);
-                    PrepareClassDeclaration(set, requiredInterface);
-                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectComparer`1")!.MakeGenericType(typeArgs);
-                    PrepareClassDeclaration(set, alsoRequired);
-                }
-
-                ////if (openType == typeof(IEquatable<>))
-                ////{
-                ////    var typeArgs = classType.GetGenericArguments();
-                ////    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                ////    PrepareClassDeclaration(set, alsoRequired);
-                ////}
             }
         }
 
@@ -896,7 +988,7 @@ namespace ArduinoCsCompiler
                     // Add all virtual members (the others are not assigned to classes in our metadata)
                     if (m.IsConstructor || m.IsVirtual || m.IsAbstract)
                     {
-                        PrepareCodeInternal(set, m, null);
+                        PrepareMethod(set, m, null);
                     }
                     else
                     {
@@ -905,7 +997,7 @@ namespace ArduinoCsCompiler
                         MicroCompiler.CollectBaseImplementations(set, m, methodsBeingImplemented);
                         if (methodsBeingImplemented.Any())
                         {
-                            PrepareCodeInternal(set, m, null);
+                            PrepareMethod(set, m, null);
                         }
                     }
                 }
@@ -913,7 +1005,7 @@ namespace ArduinoCsCompiler
                 foreach (var m in c.TheType.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
                 {
                     // Add all ctors
-                    PrepareCodeInternal(set, m, null);
+                    PrepareMethod(set, m, null);
                 }
             }
         }
@@ -930,6 +1022,8 @@ namespace ArduinoCsCompiler
                 throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
+            AddCallbackMethods(set);
+
             if (forKernel)
             {
                 CompleteClasses(set);
@@ -938,6 +1032,7 @@ namespace ArduinoCsCompiler
             // Because the code below is still not water proof (there could have been virtual methods added only in the end), we do this twice
             for (int i = 0; i < 2; i++)
             {
+                AddCallbackMethods(set);
                 // Contains all classes traversed so far
                 List<ClassDeclaration> declarations = new List<ClassDeclaration>(set.Classes);
                 // Contains the new ones to be traversed this time (start with all)
@@ -960,7 +1055,7 @@ namespace ArduinoCsCompiler
                             continue;
                         }
 
-                        PrepareCodeInternal(set, cctor, null);
+                        PrepareMethod(set, cctor, null);
                     }
 
                     if (set.Classes.Count == declarations.Count)
@@ -1008,6 +1103,19 @@ namespace ArduinoCsCompiler
 
             set.RemoveUnusedDataFields();
 
+            var ordered = set.Classes.OrderBy(x => x.NewToken).ToList();
+            int previousToken = -1;
+            foreach (var cls in ordered)
+            {
+                if (cls.NewToken == previousToken)
+                {
+                    // We have a duplicate token - these two classes shall be the same, so drop one (shouldn't matter which one)
+                    set.Classes.Remove(cls);
+                }
+
+                previousToken = cls.NewToken;
+            }
+
             if (!forKernel)
             {
                 PrepareStaticCtors(set);
@@ -1015,13 +1123,48 @@ namespace ArduinoCsCompiler
                 {
                     Type t = typeof(ArduinoNativeHelpers);
                     var method = t.GetMethod("MainStub", BindingFlags.Static | BindingFlags.NonPublic)!;
-                    PrepareCodeInternal(set, method, null);
+                    PrepareMethod(set, method, null);
                     int tokenOfStartupMethod = set.GetOrAddMethodToken(method, method);
                     set.TokenOfStartupMethod = tokenOfStartupMethod;
                 }
+
+                set.AddReverseFieldLookupTable();
             }
 
             _logger.LogInformation($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
+        }
+
+        /// <summary>
+        /// Adds some static callback methods required by the runtime
+        /// </summary>
+        /// <param name="set">The execution set</param>
+        /// <exception cref="NotSupportedException">An error occurred finding a required method</exception>
+        private void AddCallbackMethods(ExecutionSet set)
+        {
+            if (set.Methods().Any(x => x.MethodBase.DeclaringType == typeof(Thread) && x.MethodBase.Name == "Start"))
+            {
+                // We get here if Thread.Start() is called anywhere. This means we need to also include Thread.StartCallback
+                var methodToInclude = typeof(Thread).GetMethod("StartCallback", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (methodToInclude == null)
+                {
+                    throw new NotSupportedException("The method Thread.StartCallback cannot be found");
+                }
+
+                PrepareMethod(set, new EquatableMethod(methodToInclude), null);
+            }
+
+            var c1 = set.Classes.FirstOrDefault(x => x.Name == "System.Threading.TimerQueue");
+            if (c1 != null)
+            {
+                // We get here if Thread.Start() is called anywhere. This means we need to also include Thread.StartCallback
+                var methodToInclude = c1.TheType.GetMethod("AppDomainTimerCallback", BindingFlags.Static | BindingFlags.NonPublic);
+                if (methodToInclude == null)
+                {
+                    throw new NotSupportedException("The method TimerQueue.AppDomainTimerCallback cannot be found");
+                }
+
+                PrepareMethod(set, new EquatableMethod(methodToInclude), null);
+            }
         }
 
         /// <summary>
@@ -1032,7 +1175,19 @@ namespace ArduinoCsCompiler
             /// <inheritdoc cref="IComparer{T}.Compare"/>
             public int Compare(ClassDeclaration? x, ClassDeclaration? y)
             {
-                if (x == y)
+                if (x == null || y == null)
+                {
+                    throw new ArgumentNullException(nameof(x));
+                }
+
+                int result = CompareInternal(x, y);
+                // Debug.WriteLine($"Comparing {x.Name} to {y.Name} results in {result}");
+                return result;
+            }
+
+            private static int CompareInternal(ClassDeclaration x, ClassDeclaration y)
+            {
+                if (x!.Equals(y))
                 {
                     return 0;
                 }
@@ -1053,10 +1208,25 @@ namespace ArduinoCsCompiler
 
                 if (xt.IsInterface && yt.IsInterface)
                 {
-                    return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
+                    goto compareByName;
+                }
+
+                // Sort arrays last
+                if (xt.IsArray && !yt.IsArray)
+                {
+                    return 1;
+                }
+                else if (!xt.IsArray && yt.IsArray)
+                {
+                    return -1;
+                }
+                else if (xt.IsArray && yt.IsArray)
+                {
+                    goto compareByName;
                 }
 
                 // Both x and y are not interfaces now (and not equal)
+                // But this returns true if comparing two array-of-enum types! typeof(Enum1[]).IsAssignableTo(typeof(Enum2[]))!
                 if (xt.IsAssignableFrom(yt))
                 {
                     return -1;
@@ -1067,6 +1237,7 @@ namespace ArduinoCsCompiler
                     return 1;
                 }
 
+                compareByName:
                 return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
             }
         }
@@ -1079,7 +1250,7 @@ namespace ArduinoCsCompiler
             foreach (var a in set.ArrayListImplementation)
             {
                 // this adds MiniArray.GetEnumerator(T[]) as implementation of T[].IList<T>()
-                PrepareCodeInternal(set, a.Value, null);
+                PrepareMethod(set, a.Value, null);
                 var m = set.GetMethod(a.Value);
                 var arrayClass = set.Classes.Single(x => x.NewToken == (int)KnownTypeTokens.Array);
                 if (arrayClass.Members.All(y => y.Method != a.Value))
@@ -1112,7 +1283,7 @@ namespace ArduinoCsCompiler
 
                         // If this method is required because base implementations are called, we also need its implementation (obviously)
                         // Unfortunately, this can recursively require further classes and methods
-                        PrepareCodeInternal(set, mb, null);
+                        PrepareMethod(set, mb, null);
 
                         List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x, mb)).ToList();
                         cls.AddClassMember(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb, mb), baseTokens));
@@ -1326,7 +1497,7 @@ namespace ArduinoCsCompiler
                 CollectBaseImplementations(set, new EquatableMethod(m), methodsBeingImplemented);
 
                 // We need the implementation if at least one base implementation is being called and is used
-                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, m, out _));
+                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, m, out _, out _));
             }
 
             return false;
@@ -1555,7 +1726,7 @@ namespace ArduinoCsCompiler
         /// <param name="t">Type to query</param>
         /// <param name="minSizeOfMember">Minimum size of the member (used to force alignment)</param>
         /// <param name="sizeOfMember">Returns the actual size of the member, used for value-type arrays (because byte[] should use just one byte per entry)</param>
-        /// <returns></returns>
+        /// <returns>VariableKind instance</returns>
         internal static VariableKind GetVariableType(Type t, int minSizeOfMember, out int sizeOfMember)
         {
             string name = t.Name;
@@ -1805,14 +1976,14 @@ namespace ArduinoCsCompiler
                 {
                     // Ensure we're not scanning the same implementation twice, as this would result
                     // in a stack overflow when a method is recursive (even indirect)
-                    if (!set.HasMethod(me, methodInfo, out var code1) && newMethods.Add(me))
+                    if (!set.HasMethod(me, methodInfo, out var code1, out _) && newMethods.Add(me))
                     {
                         CollectDependendentMethods(set, me, code1, newMethods);
                     }
                 }
                 else if (finalMethod.Method is ConstructorInfo co)
                 {
-                    if (!set.HasMethod(co, methodInfo, out var code2) && newMethods.Add(co))
+                    if (!set.HasMethod(co, methodInfo, out var code2, out _) && newMethods.Add(co))
                     {
                         CollectDependendentMethods(set, co, code2, newMethods);
                     }
@@ -1848,7 +2019,7 @@ namespace ArduinoCsCompiler
                 throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
-            if (set.HasMethod(methodInfo, methodInfo, out _))
+            if (set.HasMethod(methodInfo, methodInfo, out _, out _))
             {
                 unchecked
                 {
@@ -1892,66 +2063,59 @@ namespace ArduinoCsCompiler
                 }
             }
 
-            ExecutionSet exec;
+            ExecutionSet set;
 
             if (ExecutionSet.CompiledKernel == null || ExecutionSet.CompiledKernel.CompilerSettings != compilerSettings)
             {
-                exec = new ExecutionSet(this, compilerSettings);
+                set = new ExecutionSet(this, compilerSettings);
                 // We never want these types in our execution set - reflection is not supported, except in very specific cases
-                exec.SuppressType("System.Reflection.MethodBase");
-                exec.SuppressType("System.Reflection.MethodInfo");
-                exec.SuppressType("System.Reflection.ConstructorInfo");
-                exec.SuppressType("System.Reflection.Module");
-                exec.SuppressType("System.Reflection.Assembly");
-                exec.SuppressType("System.Reflection.RuntimeAssembly");
-                exec.SuppressType("System.Globalization.HebrewNumber");
-                exec.SuppressType("System.Resources.RuntimeResourceSet");
-                exec.SuppressType("System.Resources.ResourceReader");
+                set.SuppressType("System.Reflection.MethodBase");
+                set.SuppressType("System.Reflection.MethodInfo");
+                set.SuppressType("System.Reflection.ConstructorInfo");
+                set.SuppressType("System.Reflection.Module");
+                set.SuppressType("System.Reflection.Assembly");
+                set.SuppressType("System.Reflection.RuntimeAssembly");
+                set.SuppressType("System.Globalization.HebrewNumber");
+                set.SuppressType("System.Resources.RuntimeResourceSet");
+                set.SuppressType("System.Resources.ResourceReader");
                 // exec.SuppressNamespace("System.Runtime.Intrinsics", true);
                 // Native libraries are not supported
-                exec.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));
+                set.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));
 
                 // Only the invariant culture is supported (we might later change this to "only one culture is supported", and
                 // upload the strings matching a specific culture)
-                exec.SuppressType(typeof(System.Globalization.HebrewCalendar));
-                exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
-                exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
-                exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
-                exec.SuppressType(typeof(IDeserializationCallback));
-                exec.SuppressType(typeof(IConvertible)); // Remove support for this rarely used interface which links many methods (i.e. on String)
-                exec.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
-                exec.SuppressType(typeof(Microsoft.Win32.Registry));
-                exec.SuppressType(typeof(Microsoft.Win32.RegistryKey));
+                set.SuppressType(typeof(System.Globalization.HebrewCalendar));
+                set.SuppressType(typeof(System.Globalization.JapaneseCalendar));
+                set.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
+                set.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
+                set.SuppressType(typeof(IDeserializationCallback));
+                set.SuppressType(typeof(IConvertible)); // Remove support for this rarely used interface which links many methods (i.e. on String)
+                set.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
+                set.SuppressType(typeof(Microsoft.Win32.Registry));
+                set.SuppressType(typeof(Microsoft.Win32.RegistryKey));
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
-                exec.SuppressType(typeof(MicroCompiler));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.LibGpiodDriver));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.RaspberryPi3Driver));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.UnixDriver));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.Windows10Driver));
-                exec.SuppressType(typeof(Iot.Device.Board.DummyGpioDriver));
-                exec.SuppressType(typeof(Iot.Device.Board.KeyboardGpioDriver));
-
-                // We don't currently support threads or tasks
-                // exec.SuppressType(typeof(System.Threading.Tasks.Task));
-                // exec.SuppressType(typeof(System.Threading.Tasks.ValueTask));
-                // exec.SuppressType("System.Threading.Tasks.ThreadPoolTaskScheduler");
+                set.SuppressType(typeof(MicroCompiler));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.LibGpiodDriver));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.RaspberryPi3Driver));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.UnixDriver));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.Windows10Driver));
+                set.SuppressType(typeof(Iot.Device.Board.DummyGpioDriver));
+                set.SuppressType(typeof(Iot.Device.Board.KeyboardGpioDriver));
 
                 // Can't afford to load these, at least not on the Arduino Due. They're way to big.
-                exec.SuppressType(typeof(UnitsNet.QuantityFormatter));
-                exec.SuppressType(typeof(UnitsNet.UnitAbbreviationsCache));
+                set.SuppressType(typeof(UnitsNet.QuantityFormatter));
+                set.SuppressType(typeof(UnitsNet.UnitAbbreviationsCache));
 
                 foreach (string compilerSettingsAdditionalSuppression in compilerSettings.AdditionalSuppressions)
                 {
-                    exec.SuppressType(compilerSettingsAdditionalSuppression);
+                    set.SuppressType(compilerSettingsAdditionalSuppression);
                 }
 
-                //// exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
-
-                PrepareLowLevelInterface(exec);
+                PrepareLowLevelInterface(set);
                 if (compilerSettings.CreateKernelForFlashing)
                 {
                     // Clone the kernel and save as static member
-                    ExecutionSet.CompiledKernel = new ExecutionSet(exec, this, compilerSettings);
+                    ExecutionSet.CompiledKernel = new ExecutionSet(set, this, compilerSettings);
                 }
                 else
                 {
@@ -1961,19 +2125,19 @@ namespace ArduinoCsCompiler
             else
             {
                 // Another clone, to leave the static member alone. Replace the compiler in that kernel with the current one.
-                exec = new ExecutionSet(ExecutionSet.CompiledKernel, this, compilerSettings);
+                set = new ExecutionSet(ExecutionSet.CompiledKernel, this, compilerSettings);
             }
 
             if (mainEntryPoint.DeclaringType != null)
             {
-                PrepareClass(exec, mainEntryPoint.DeclaringType);
+                PrepareClass(set, mainEntryPoint.DeclaringType);
             }
 
-            PrepareCodeInternal(exec, mainEntryPoint, null);
+            PrepareMethod(set, mainEntryPoint, null);
 
-            exec.MainEntryPointMethod = mainEntryPoint;
-            FinalizeExecutionSet(exec, false);
-            return exec;
+            set.MainEntryPointMethod = mainEntryPoint;
+            FinalizeExecutionSet(set, false);
+            return set;
         }
 
         /// <summary>
@@ -2043,7 +2207,15 @@ namespace ArduinoCsCompiler
             return exec;
         }
 
-        internal void PrepareCodeInternal(ExecutionSet set, EquatableMethod methodInfo, ArduinoMethodDeclaration? parent)
+        /// <summary>
+        /// Ensures the given method is part of the execution set and generates its patched binary code
+        /// </summary>
+        /// <param name="set">The execution set</param>
+        /// <param name="methodInfo">The method to add</param>
+        /// <param name="parent">The parent method (for tracing only)</param>
+        /// <returns>The new method token for the added method</returns>
+        /// <exception cref="InvalidOperationException">A method should have been replaced, but is missing</exception>
+        internal int PrepareMethod(ExecutionSet set, EquatableMethod methodInfo, ArduinoMethodDeclaration? parent)
         {
             // Ensure the class is known, if it needs replacement
             var classReplacement = set.GetReplacement(methodInfo.DeclaringType);
@@ -2060,9 +2232,9 @@ namespace ArduinoCsCompiler
                 methodInfo = replacement;
             }
 
-            if (set.HasMethod(methodInfo, parentMethod, out _))
+            if (set.HasMethod(methodInfo, parentMethod, out _, out int newToken))
             {
-                return;
+                return newToken;
             }
 
             if (classReplacement != null && replacement == null)
@@ -2077,7 +2249,7 @@ namespace ArduinoCsCompiler
                 int tk1 = set.GetOrAddMethodToken(methodInfo, parentMethod);
                 var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
                 set.AddMethod(newInfo1);
-                return;
+                return newInfo1.Token;
             }
 
             if (HasIntrinsicAttribute(methodInfo))
@@ -2089,7 +2261,7 @@ namespace ArduinoCsCompiler
                     int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
                     var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, ArduinoImplementationAttribute.GetStaticHashCode("ByReferenceCtor"));
                     set.AddMethod(newInfo1);
-                    return;
+                    return newInfo1.Token;
                 }
 
                 if (methodInfo.Name == "get_Value" && methodInfo.DeclaringType!.Name == "ByReference`1")
@@ -2097,8 +2269,21 @@ namespace ArduinoCsCompiler
                     int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
                     var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, ArduinoImplementationAttribute.GetStaticHashCode("ByReferenceValue"));
                     set.AddMethod(newInfo1);
-                    return;
+                    return newInfo1.Token;
                 }
+            }
+
+            MethodFlags extraFlags = MethodFlags.None;
+            var specialFlags = methodInfo.GetMethodImplementationFlags();
+            if ((specialFlags & MethodImplAttributes.Synchronized) == MethodImplAttributes.Synchronized)
+            {
+                if (methodInfo.IsStatic)
+                {
+                    // This would require locking on the type. Doable, but if we don't need it, rather warn here.
+                    ErrorManager.AddError("ACS0006", $"Method {methodInfo.MemberInfoSignature()} has [MethodImpl(MethodImplAttributes.Synchronized)] and is static. This is not supported");
+                }
+
+                extraFlags |= MethodFlags.Synchronized;
             }
 
             var body = methodInfo.GetMethodBody();
@@ -2109,7 +2294,7 @@ namespace ArduinoCsCompiler
 
             bool constructedCode = false;
             bool needsParsing = true;
-            MethodFlags constructedFlags = MethodFlags.None;
+
             List<FieldInfo> manuallyReferencedFields = new List<FieldInfo>();
             List<MethodBase> dependentMethods = new List<MethodBase>();
 
@@ -2128,7 +2313,7 @@ namespace ArduinoCsCompiler
                         var baseCtor = methods.Single(x => x.Name == "CtorClosedStatic"); // Implementation is same for static and instance, except for a null test
 
                         // Make sure this stub method is in memory
-                        PrepareCodeInternal(set, baseCtor, parent);
+                        PrepareMethod(set, baseCtor, parent);
                         // Directly use the new token (the baseCtor.Token cannot be resolved further down, because it belongs to another assembly)
                         int token = set.GetOrAddMethodToken(baseCtor, methodInfo);
                         needsParsing = false;
@@ -2153,7 +2338,7 @@ namespace ArduinoCsCompiler
                         };
                         ilBytes = code;
                         constructedCode = true;
-                        constructedFlags = MethodFlags.Ctor;
+                        extraFlags |= MethodFlags.Ctor;
                     }
                     else
                     {
@@ -2198,10 +2383,10 @@ namespace ArduinoCsCompiler
                         code.Add((byte)OpCode.CEE_RET);
                         ilBytes = code.ToArray();
                         constructedCode = true;
-                        constructedFlags = MethodFlags.Virtual;
+                        extraFlags |= MethodFlags.Virtual;
                         if (methodDetail.ReturnType == typeof(void))
                         {
-                            constructedFlags |= MethodFlags.Void;
+                            extraFlags |= MethodFlags.Void;
                         }
 
                         needsParsing = false; // We have already translated the tokens
@@ -2218,7 +2403,7 @@ namespace ArduinoCsCompiler
                 else
                 {
                     ErrorManager.AddWarning("ACS0004", $"{methodInfo.MethodSignature()} has no visible implementation");
-                    return;
+                    return 0;
                 }
             }
 
@@ -2226,7 +2411,7 @@ namespace ArduinoCsCompiler
             {
                 // Assemble the startup code for our program. This shall contain a call to all static initializers and finally a call to the
                 // original main method.
-                constructedFlags = MethodFlags.Void | MethodFlags.Static;
+                extraFlags |= MethodFlags.Void | MethodFlags.Static;
                 constructedCode = true;
                 int token;
                 needsParsing = false; // We insert already translated tokens (because the methods we call come from all possible places, the Resolve would otherwise fail)
@@ -2405,11 +2590,11 @@ namespace ArduinoCsCompiler
             ArduinoMethodDeclaration newInfo;
             if (constructedCode)
             {
-                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, constructedFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), parserResult);
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, extraFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), parserResult);
             }
             else
             {
-                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, parserResult);
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, parserResult, extraFlags);
             }
 
             if (set.AddMethod(newInfo))
@@ -2418,7 +2603,19 @@ namespace ArduinoCsCompiler
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType, null).Statics > 0)
                 {
-                    PrepareClass(set, methodInfo.DeclaringType);
+                    if (MicroCompiler.HasReplacementAttribute(methodInfo.DeclaringType!, out var attribute) && attribute.ReplaceEntireType == false)
+                    {
+                        // If this _is_ the replacement class already, and we're not replacing the full type, add the original type, or we end up with
+                        // both the original and the replacement types in the execution set.
+                        if (attribute.TypeToReplace != null)
+                        {
+                            PrepareClass(set, attribute.TypeToReplace);
+                        }
+                    }
+                    else
+                    {
+                        PrepareClass(set, methodInfo.DeclaringType);
+                    }
                 }
 
                 // TODO: Change to dictionary and transfer IlCode object to correct place (it's evaluated inside, but discarded there)
@@ -2443,9 +2640,11 @@ namespace ArduinoCsCompiler
                         PrepareClass(set, dep.DeclaringType);
                     }
 
-                    PrepareCodeInternal(set, dep, newInfo);
+                    PrepareMethod(set, dep, newInfo);
                 }
             }
+
+            return newInfo.Token;
         }
 
         private void InitStructFromConstant<T>(ExecutionSet set, EquatableMethod parentMethod, T information, List<byte> code, List<MethodBase> dependentMethods)
@@ -2594,7 +2793,7 @@ namespace ArduinoCsCompiler
                 ClassDeclaration? cls = classes[index];
                 if (!cls.SuppressInit && cls.TheType.TypeInitializer != null)
                 {
-                    set.HasMethod(cls.TheType.TypeInitializer, cls.TheType.TypeInitializer, out var code);
+                    set.HasMethod(cls.TheType.TypeInitializer, cls.TheType.TypeInitializer, out var code, out _);
                     if (code == null)
                     {
                         throw new InvalidOperationException("Inconsistent data set");
@@ -2610,6 +2809,9 @@ namespace ArduinoCsCompiler
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
             // The last of the BringToFront elements below will be the first cctor that gets executed
+            BringToFront(codeSequences, typeof(UnitsNet.BaseUnits));
+            BringToFront(codeSequences, typeof(UnitsNet.BaseDimensions));
+            BringToFront(codeSequences, typeof(UnitsNet.QuantityInfo));
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.HashHelpers"));
             BringToFront(codeSequences, typeof(System.Text.UTF8Encoding));
             BringToFront(codeSequences, typeof(System.Text.Encoding));
@@ -2623,6 +2825,7 @@ namespace ArduinoCsCompiler
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(codeSequences, typeof(System.DateTime));
             BringToFront(codeSequences, typeof(MiniString)); // Initializes String.Empty
+            SendToBack(codeSequences, typeof(StreamWriter));
             SendToBack(codeSequences, GetSystemPrivateType("System.DateTimeFormat"));
             SendToBack(codeSequences, typeof(System.TimeZoneInfo));
 
@@ -2651,6 +2854,12 @@ namespace ArduinoCsCompiler
                 }
 
                 _logger.LogDebug($"Task {task.TaskId}: Static initializer of {initializer.DeclaringType!.MemberInfoSignature()} done.");
+            }
+
+            lock (_activeTasksLock)
+            {
+                // Reset all active tasks but the main task. From now on, task ids are equivalent with thread ids
+                _activeTasks.RemoveAll(x => x.TaskId != 0);
             }
         }
 
@@ -2799,13 +3008,13 @@ namespace ArduinoCsCompiler
 
         public void KillTask(EquatableMethod? methodInfo)
         {
-            if (_activeExecutionSet == null)
-            {
-                throw new InvalidOperationException("No execution set loaded");
-            }
-
             if (methodInfo != null)
             {
+                if (_activeExecutionSet == null)
+                {
+                    throw new InvalidOperationException("No execution set loaded");
+                }
+
                 var decl = _activeExecutionSet.GetMethod(methodInfo);
 
                 _commandHandler.SendKillTask(decl.Token);
@@ -2841,6 +3050,13 @@ namespace ArduinoCsCompiler
 
         public void Dispose()
         {
+            if (_commandHandler != null)
+            {
+                _commandHandler.Dispose();
+                _board?.RemoveCommandHandler(_commandHandler);
+            }
+
+            _commandHandler = null!;
             _debugger = null;
         }
 

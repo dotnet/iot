@@ -51,9 +51,9 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             [ArduinoImplementation("Kernel32_WriteConsole")]
-            internal static unsafe Int32 WriteConsole(System.IntPtr handle, System.Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, System.IntPtr mustBeZero)
+            internal static unsafe bool WriteConsole(System.IntPtr handle, System.Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, System.IntPtr mustBeZero)
             {
-                return 0;
+                return true;
             }
 
             [ArduinoImplementation("Kernel32_WideCharToMultiByte")]

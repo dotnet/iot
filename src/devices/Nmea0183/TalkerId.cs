@@ -303,5 +303,10 @@ namespace Iot.Device.Nmea0183
         /// Filter placeholder for any talker id
         /// </summary>
         public static TalkerId Any => new TalkerId('*', ' ');
+
+        /// <summary>
+        /// Seatalk messages wrapped up as NMEA data should always be prefixed $STALK
+        /// </summary>
+        public static TalkerId Seatalk => new TalkerId('S', 'T');
     }
 }

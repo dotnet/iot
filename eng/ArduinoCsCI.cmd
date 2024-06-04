@@ -5,7 +5,7 @@ REM Second argument is either "Debug" or "Release"
 if %1!==! goto :usage
 
 REM Defines the revision to check out in the ExtendedConfigurableFirmata repo
-set FIRMATA_SIMULATOR_CHECKOUT_REVISION=e2cfb5223aeb71e3a0756d67619db6c238b6acb5
+set FIRMATA_SIMULATOR_CHECKOUT_REVISION=4a3b895c062c8e48685b9018d642d2c5ea84c354
 set RUN_COMPILER_TESTS=FALSE
 
 choco install -y --no-progress arduino-cli
@@ -13,8 +13,11 @@ arduino-cli lib install "DHT sensor library"
 arduino-cli lib install "Servo"
 
 arduino-cli config init
-arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
 arduino-cli core update-index
+
+REM directly execute PS, we can ignore any test errors.
+powershell -ExecutionPolicy ByPass -command "%~dp0common\Build.ps1" -restore -build -ci -configuration %2 -preparemachine
 
 set ArduinoRootDir=%1\Documents\Arduino
 set acspath=%~dp0\..\tools\ArduinoCsCompiler\Frontend\bin\%2\net6.0\acs.exe
@@ -23,6 +26,8 @@ git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\librar
 git clone https://github.com/pgrawehr/ExtendedConfigurableFirmata %ArduinoRootDir%\ExtendedConfigurableFirmata
 arduino-cli core install esp32:esp32
 
+git fetch --all
+git branch --list
 REM Check whether any compiler files have changed - if so, enable the (long running) compiler tests
 git diff --name-status origin/main | find /C /I "tools/ArduinoCsCompiler"
 REM Find returns 1 when the string was NOT found, we want to set the variable to true when it does find something

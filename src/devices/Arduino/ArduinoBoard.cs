@@ -330,6 +330,27 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Unregisters the given command handler
+        /// </summary>
+        /// <typeparam name="T">A type derived from <see cref="ExtendedCommandHandler"/></typeparam>
+        /// <param name="commandHandler">The instance</param>
+        /// <remarks>This is intended mostly for unit test scenarios, where the command handlers are recreated. It does not
+        /// remove the modes supported by the handler</remarks>
+        public void RemoveCommandHandler<T>(T commandHandler)
+            where T : ExtendedCommandHandler
+        {
+            _commandHandlersLock.EnterWriteLock();
+            try
+            {
+                _extendedCommandHandlers.Remove(commandHandler);
+            }
+            finally
+            {
+                _commandHandlersLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
         /// Gets the command handler with the provided type. An exact type match is performed.
         /// </summary>
         /// <typeparam name="T">The type to query</typeparam>

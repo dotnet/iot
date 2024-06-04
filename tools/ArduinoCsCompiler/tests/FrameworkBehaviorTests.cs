@@ -3,13 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ArduinoCsCompiler;
 using Xunit;
 
 #pragma warning disable SA1405 // Debug.Assert without description
@@ -129,6 +130,20 @@ namespace Iot.Device.Tests
         {
             Assert.Equal(1024, RoundUp(1024, 1024));
             Assert.Equal(1024, RoundUp(100, 1024));
+        }
+
+        /// <summary>
+        /// Documentation and implementation don't match - so test this
+        /// </summary>
+        [Fact]
+        public void TestHexParsing()
+        {
+            string hexNumber = "0x9f";
+            Assert.True(Debugger.TryParseHexOrDec(hexNumber, out int number));
+            Assert.Equal(0x9f, number);
+            Assert.False(Debugger.TryParseHexOrDec("0x", out number));
+            Assert.True(Debugger.TryParseHexOrDec("234", out number));
+            Assert.Equal(234, number);
         }
 
         private long RoundUp(long offset, long align)

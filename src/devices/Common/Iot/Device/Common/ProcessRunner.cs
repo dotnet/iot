@@ -55,11 +55,11 @@ namespace Iot.Device.Common
             {
                 if (_process != null && !_process.HasExited)
                 {
-#if NETSTANDARD2_0
+    #if NETSTANDARD2_0
                     _process.Kill();
-#else
+    #else
                     _process.Kill(true);
-#endif
+    #endif
                     if (!_process.HasExited)
                     {
                         _process.WaitForExit(5000);
@@ -129,11 +129,11 @@ namespace Iot.Device.Common
 
                 if (target == null)
                 {
-#if NETSTANDARD2_0
+    #if NETSTANDARD2_0
                     _process.WaitForExit();
-#else
+    #else
                     await _process.WaitForExitAsync(_cts.Token);
-#endif
+    #endif
                     return;
                 }
 
@@ -145,11 +145,10 @@ namespace Iot.Device.Common
                 {
                     await _process.StandardOutput.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
                 }
-
-                _process.WaitForExit(_processSettings.MaxMillisecondsToWaitAfterProcessCompletes);
             }
             finally
             {
+                _process?.WaitForExit(_processSettings.MaxMillisecondsToWaitAfterProcessCompletes);
                 _process?.Dispose();
                 _process = null;
             }
@@ -214,6 +213,34 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
+        /// Runs the execute on a separate thread
+        /// </summary>
+        /// <param name="arguments">The array of command line arguments.</param>
+        /// <param name="target">The pipe that will receive the output of the process.</param>
+        /// <returns>A task that represent the new thread communicating with the process.
+        /// The returned value is the task that represents the output being copied to the target pipe</returns>
+        public Task<Task> ContinuousRunAsync(string[] arguments, PipeWriter target)
+        {
+            var argsString = string.Join(" ", arguments);
+            return ContinuousRunAsync(argsString, target);
+        }
+
+        /// <summary>
+        /// Runs the execute on a separate thread
+        /// </summary>
+        /// <param name="argsString">A string will the complete command line of the process.</param>
+        /// <param name="target">The pipe that will receive the output of the process.</param>
+        /// <returns>A task that represent the new thread communicating with the process.
+        /// The returned value is the task that represents the output being copied to the target pipe</returns>
+        public async Task<Task> ContinuousRunAsync(string argsString, PipeWriter target)
+        {
+            return await Task.Factory.StartNew(async () =>
+            {
+                await ExecuteAsync(argsString, target);
+            }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+
+        /// <summary>
         /// Execute the process with a number of arguments. The target Pipe
         /// receive the stdout of the process
         /// </summary>
@@ -243,6 +270,7 @@ namespace Iot.Device.Common
             }
             finally
             {
+                _process?.WaitForExit(_processSettings.MaxMillisecondsToWaitAfterProcessCompletes);
                 _process?.Dispose();
                 _process = null;
             }

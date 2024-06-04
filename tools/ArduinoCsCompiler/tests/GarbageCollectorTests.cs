@@ -14,7 +14,7 @@ using Xunit;
 namespace Iot.Device.Arduino.Tests
 {
     [Collection("SingleClientOnly")]
-    [Trait("feature", "firmata-compiler")]
+    [Trait("feature", "firmata")]
     [Trait("requires", "hardware")]
     public class GarbageCollectorTests : ArduinoTestBase, IClassFixture<FirmataTestFixture>, IDisposable
     {

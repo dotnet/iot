@@ -23,6 +23,7 @@ namespace Iot.Device.Board
     /// </summary>
     public class RaspberryPiBoard : GenericBoard
     {
+        private readonly string[] _configFile = new string[] { "/boot/firmware/config.txt", "/boot/config.txt" };
         private readonly object _initLock = new object();
         private readonly string[] _possibleI2cActivations = new string[]
         {
@@ -95,6 +96,20 @@ namespace Iot.Device.Board
             // TODO: Ideally detect board type, so that invalid combinations can be prevented (i.e. I2C bus 2 on Raspi 3)
             PinCount = 28;
             _initialized = false;
+
+            // Try to find the right configuration file
+            // There has been changes in RPI and it's now "/boot/firmware/config.txt"
+            // On older OS, the location is "/boot/config.txt"
+            // BUT, the "/boot/config.txt" still exists on newer OS but the file is not accessible
+            // So we have to try first the existance of the new location, then the old one
+            if (File.Exists(_configFile[0]))
+            {
+                ConfigurationFile = _configFile[0];
+            }
+            else
+            {
+                ConfigurationFile = _configFile[1];
+            }
         }
 
         /// <summary>
@@ -160,47 +175,47 @@ namespace Iot.Device.Board
             switch (busId)
             {
                 case 0:
-                {
-                    // Bus 0 is the one on logical pins 0 and 1. According to the docs, it should not
-                    // be used by application software and instead is reserved for HATs, but if you don't have one, it is free for other purposes
-                    sda = 0;
-                    scl = 1;
-                    break;
-                }
+                    {
+                        // Bus 0 is the one on logical pins 0 and 1. According to the docs, it should not
+                        // be used by application software and instead is reserved for HATs, but if you don't have one, it is free for other purposes
+                        sda = 0;
+                        scl = 1;
+                        break;
+                    }
 
                 case 1:
-                {
-                    // This is the bus commonly used by application software.
-                    sda = 2;
-                    scl = 3;
-                    break;
-                }
+                    {
+                        // This is the bus commonly used by application software.
+                        sda = 2;
+                        scl = 3;
+                        break;
+                    }
 
                 case 2:
-                {
-                    throw new NotSupportedException("I2C Bus number 2 doesn't exist");
-                }
+                    {
+                        throw new NotSupportedException("I2C Bus number 2 doesn't exist");
+                    }
 
                 case 3:
-                {
-                    sda = 4;
-                    scl = 5;
-                    break;
-                }
+                    {
+                        sda = 4;
+                        scl = 5;
+                        break;
+                    }
 
                 case 4:
-                {
-                    sda = 6;
-                    scl = 7;
-                    break;
-                }
+                    {
+                        sda = 6;
+                        scl = 7;
+                        break;
+                    }
 
                 case 5:
-                {
-                    sda = 10;
-                    scl = 11;
-                    break;
-                }
+                    {
+                        sda = 10;
+                        scl = 11;
+                        break;
+                    }
 
                 case 6:
                     sda = 22;

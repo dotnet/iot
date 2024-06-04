@@ -1,0 +1,3 @@
+.model DLED_Sim D (IS=1a RS=3.3 N=1.8)
+
+.model DLED_Nichia D (IS=2.5939E-13 N=4.0113 RS=0.24229 IKF=0 EG=3 XTI=25)

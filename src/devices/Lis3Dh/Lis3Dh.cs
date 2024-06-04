@@ -130,7 +130,7 @@ namespace Iot.Device.Lis3DhAccelerometer
             byte lowPowerModeBitAndAxesEnable = (byte)(operatingMode == OperatingMode.LowPowerMode ? 0b1111 : 0b0111);
             this[Register.CTRL_REG1] = (byte)(dataRateBits | lowPowerModeBitAndAxesEnable);
 
-            // remainder of the bits (block data update/endianess/self-test/SPI 3 or 4-wire setting) set to default
+            // remainder of the bits (block data update/endianness/self-test/SPI 3 or 4-wire setting) set to default
             byte fullScaleBits = (byte)((byte)accelerationScale << 4);
             byte highResolutionModeBit = (byte)(operatingMode == OperatingMode.HighResolutionMode ? 0b1000 : 0b0000);
             this[Register.CTRL_REG4] = (byte)(fullScaleBits | highResolutionModeBit);

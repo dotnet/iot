@@ -6,13 +6,15 @@
 
 .NET can be used to build applications for [IoT](https://en.wikipedia.org/wiki/Internet_of_things) devices and scenarios. IoT applications typically interact with sensors, displays and input devices that require the use of [GPIO pins](https://en.wikipedia.org/wiki/General-purpose_input/output), serial ports or similar hardware.
 
-> **IMPORTANT**: This is the GitHub repo for the libraries. You might want to start with our [official documentation](https://docs.microsoft.com/dotnet/iot/).
+> [!IMPORTANT]
+> This is the GitHub repo for the libraries. You might want to start with our [official documentation](https://docs.microsoft.com/dotnet/iot/).
 
 This repository contains the [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio) library and implementations for various boards like [Raspberry Pi](https://www.raspberrypi.org/) and [Hummingboard](https://www.solid-run.com/nxp-family/hummingboard/).
 
 The repository also contains [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings), a growing set of community-maintained [device bindings](src/devices/README.md) for IoT components.
 
-> **NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
+> [!NOTE]
+> This repository is still in experimental stage and all APIs are subject to changes.
 
 ## Hardware requirements
 
@@ -26,7 +28,9 @@ The sample projects target the latest stable .NET Version. This applies to the s
 
 ## How to Install
 
-You can install the latest daily pre-release build of the .NET System.Device.Gpio and Iot.Device.Bindings NuGet packages from the Azure artifacts feed.
+From Visual Studio, you can just add a nuget by searching for `System.Device.Gpio` and `Iot.Device.Bindings`.
+
+If you need, you can also install the latest daily pre-release build of the .NET `System.Device.Gpio` and `Iot.Device.Bindings` NuGet packages from the Azure artifacts feed.
   
 ### NuGet.exe
 

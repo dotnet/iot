@@ -8,6 +8,7 @@ using System.Device.Pwm;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ArduinoCsCompiler.Runtime;
@@ -18,7 +19,7 @@ namespace ArduinoCsCompiler
 {
     /// <summary>
     /// This is the arduino board driver when running on the Arduino/ESP32. It is pretty simple, because
-    /// it represents the actual hardware.
+    /// it represents the board from it's own perspective.
     /// </summary>
     [ArduinoReplacement(typeof(ArduinoBoard), true, IncludingPrivates = true)]
     public class ArduinoNativeBoard : Board
@@ -27,8 +28,15 @@ namespace ArduinoCsCompiler
         {
         }
 
-        public static bool TryConnectToNetworkedBoard(System.Net.IPAddress boardAddress, System.Int32 port,
+        public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port,
             [NotNullWhen(true)] out ArduinoBoard board)
+        {
+            board = null!;
+            return false;
+        }
+
+        public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port, bool useAutoReconnect,
+            [NotNullWhen(true)] out ArduinoBoard? board)
         {
             board = null!;
             return false;

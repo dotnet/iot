@@ -128,7 +128,7 @@ namespace Iot.Device.Card.Ultralight
                     NdefCapacity = 504;
                     UltralightCardType = UltralightCardType.UltralightNtag215;
                 }
-                else if ((Data[2] == 0x04) && (Data[3] == 0x01) && (Data[4] == 0x01) && (Data[5] == 0x00) && (Data[6] == 0x13))
+                else if ((Data[2] == 0x04) && (Data[3] == 0x02) && (Data[4] == 0x01) && (Data[5] == 0x00) && (Data[6] == 0x13))
                 {
                     NdefCapacity = 888;
                     UltralightCardType = UltralightCardType.UltralightNtag216;

@@ -68,6 +68,7 @@ Currently the full test suite requires following components, if you don't have o
 | BME280 (I2C) | `-notrait feature=i2c` |
 | Pins 5 and 6 connected | `-notrait feature=gpio` |
 | libgpiod | `-notrait feature=gpio-libgpiod` |
+| libgpiodV2 | `-notrait feature=gpio-libgpiod2` |
 | sysfs access (i.e. sudo or permissions) | `-notrait feature=gpio-sysfs` |
 | configured PWM (overlaps with MCP3008 setting) | `-notrait feature=pwm` |
 | root access (overlaps, assumes you use default permissions) | `-notrait requirement=root` |
@@ -127,7 +128,10 @@ All headers are standard 2.54mm headers. Male headers are usually sold longer an
 
 ### Linux
 
-`/boot/config.txt`
+`/boot/firmware/config.txt`
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 ```text
 # Enable I2C, SPI, PWM

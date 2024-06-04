@@ -9,6 +9,7 @@ using System.Threading;
 using Iot.Device.Arduino;
 using Microsoft.Win32.SafeHandles;
 
+#pragma warning disable CA1416 // Function is only available on Windows (Oh, well, what a coincidence that we're mimicking the windows kernel here...)
 namespace ArduinoCsCompiler.Runtime
 {
     internal partial class MiniInterop
@@ -31,6 +32,19 @@ namespace ArduinoCsCompiler.Runtime
             internal const uint LOCALE_IFIRSTDAYOFWEEK = 0x0000100C;
             internal const uint LOCALE_RETURN_NUMBER = 0x20000000;
             internal const uint LOCALE_NOUSEROVERRIDE = 0x80000000;
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static unsafe bool GetThreadIOPendingFlag(System.IntPtr hThread, out bool lpIOIsPending)
+            {
+                lpIOIsPending = false;
+                return true;
+            }
+
+            [ArduinoImplementation("Interop_Kernel32GetCurrentThreadNative")]
+            public static int GetCurrentThread()
+            {
+                return 1;
+            }
 
             public static unsafe uint GetFullPathNameW(ref Char lpFileName, UInt32 nBufferLength, ref Char lpBuffer, IntPtr lpFilePart)
             {
@@ -319,8 +333,14 @@ namespace ArduinoCsCompiler.Runtime
                 return 1;
             }
 
-            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2", 0x210)]
+            [ArduinoImplementation]
             internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, NativeOverlapped* lpOverlapped)
+            {
+                return WriteFile(handle.DangerousGetHandle(), bytes, numBytesToWrite, ref numBytesWritten, lpOverlapped->OffsetLow);
+            }
+
+            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2", 0x210)]
+            internal static unsafe Int32 WriteFile(IntPtr handle, Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, Int32 offset)
             {
                 return 0;
             }
@@ -347,6 +367,7 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
+            // TODO: Probably better rewrite managed
             [ArduinoImplementation("Interop_Kernel32CreateEventEx", 0x213)]
             internal static IntPtr CreateEventExInternal(string name, uint flags, uint desiredAccess)
             {
@@ -440,8 +461,14 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
-            [ArduinoImplementation("Interop_Kernel32GetFileInformationByHandleEx", 0x20E)]
+            [ArduinoImplementation]
             internal static unsafe Boolean GetFileInformationByHandleEx(Microsoft.Win32.SafeHandles.SafeFileHandle hFile, System.Int32 FileInformationClass, void* lpFileInformation, System.UInt32 dwBufferSize)
+            {
+                return GetFileInformationByHandleExInternal(hFile.DangerousGetHandle(), FileInformationClass, lpFileInformation, dwBufferSize);
+            }
+
+            [ArduinoImplementation("Interop_Kernel32GetFileInformationByHandleEx", 0x20E)]
+            public static unsafe Boolean GetFileInformationByHandleExInternal(IntPtr hFile, System.Int32 FileInformationClass, void* lpFileInformation, System.UInt32 dwBufferSize)
             {
                 return false;
             }

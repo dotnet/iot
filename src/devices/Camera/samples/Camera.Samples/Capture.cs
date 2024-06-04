@@ -113,7 +113,7 @@ internal class Capture
         // The ContinuousRunAsync method offload the capture on a separate thread
         // the first await is tied the thread being run
         // the second await is tied to the capture
-        var task = await proc.ContinuousRunAsync(args, null);
+        var task = await proc.ContinuousRunAsync(args, default(Stream));
         await task;
     }
 

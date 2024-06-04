@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <Content Include="$(RepoRoot)README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

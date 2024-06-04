@@ -4,10 +4,11 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
+using System;
 using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
     [DllImport(LibcLibrary, SetLastError = true)]
-    internal static extern int epoll_wait(int epfd, out epoll_event events, int maxevents, int timeout);
+    internal static extern int epoll_wait(int epfd, IntPtr events, int maxevents, int timeout);
 }

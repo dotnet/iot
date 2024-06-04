@@ -13,9 +13,10 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(Monitor), true)]
     internal class MiniMonitor
     {
-        [ArduinoImplementation("MonitorEnter")]
+        [ArduinoImplementation]
         public static void Enter(Object o)
         {
+            Monitor.TryEnter(o, -1);
         }
 
         [ArduinoImplementation]
@@ -28,22 +29,43 @@ namespace ArduinoCsCompiler.Runtime
         [ArduinoImplementation("MonitorExit")]
         public static void Exit(Object o)
         {
+            throw new NotImplementedException();
         }
 
         public static void PulseAll(Object o)
         {
-            // No op
+            // Simplistic implementation: don't do anything.
+            // Should work because at the moment we have a fair scheduler (note that this is called while the calling thread still owns the lock)
         }
 
+        [ArduinoImplementation]
         public static void Pulse(Object o)
         {
-            // No op
+            PulseAll(o);
         }
 
         [ArduinoImplementation("MonitorWait")]
         public static bool Wait(Object obj, Int32 millisecondsTimeout)
         {
             throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("MonitorTryEnter")]
+        public static bool TryEnter(object obj, Int32 millisecondsTimeout)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation]
+        public static bool TryEnter(object obj, Int32 millisecondsTimeout, ref bool lockTaken)
+        {
+            if (TryEnter(obj, millisecondsTimeout))
+            {
+                lockTaken = true;
+                return true;
+            }
+
+            return false;
         }
     }
 }

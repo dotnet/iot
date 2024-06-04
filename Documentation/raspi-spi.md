@@ -40,11 +40,14 @@ Aborted
 
 ## Enabling SPI0 without Hardware Chip Select
 
-In very short, this is the line you'll need to add into the `/boot/config.txt` file:
+In very short, this is the line you'll need to add into the `/boot/firmware/config.txt` file:
 
 ```bash
-sudo nano /boot/config.txt
+sudo nano /boot/firmware/config.txt
 ```
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 Add the line:
 
@@ -72,7 +75,10 @@ This will enable SPI0 where those are the pins which will be selected, only Soft
 
 ## Enabling any SPI with any Chip Select
 
-In order to activate  Chip Select, you'll need to add a specific dtoverlay on the `/boot/config.txt` file. If you've used the previous way of activating SPI0, you should comment the line `dtparam=spi=on` and add what follows using the `dtoverlay`configurations.
+In order to activate  Chip Select, you'll need to add a specific dtoverlay on the `/boot/firmware/config.txt` file. If you've used the previous way of activating SPI0, you should comment the line `dtparam=spi=on` and add what follows using the `dtoverlay`configurations.
+
+> [!Note]
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
 
 Here is the table with the different options for SP0 and SP1 (please refer to the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/) to activate other SPI)
 
