@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -60,6 +61,9 @@ namespace Iot.Device.FtCommon
 
         internal List<SpiConnectionSettings> ConnectionSettings = new List<SpiConnectionSettings>();
 
+        private bool _isFt4232;
+        private bool _isFt232;
+
         /// <summary>
         /// Gets all the FTx232H connected
         /// </summary>
@@ -67,14 +71,25 @@ namespace Iot.Device.FtCommon
         public static List<Ftx232HDevice> GetFtx232H()
         {
             List<Ftx232HDevice> ft232s = new List<Ftx232HDevice>();
-            var devices = FtCommon.GetDevices(new FtDeviceType[] { FtDeviceType.Ft232H, FtDeviceType.Ft2232H, FtDeviceType.Ft4232H, FtDeviceType.Ft2232 });
+            var devices = FtCommon.GetDevices(new FtDeviceType[]
+            {
+                FtDeviceType.Ft2232,
+                FtDeviceType.Ft2232H,
+                FtDeviceType.Ft2232HA,
+                FtDeviceType.Ft2232HP,
+                FtDeviceType.Ft232H,
+                FtDeviceType.Ft232HP,
+                FtDeviceType.Ft4232H,
+                FtDeviceType.Ft4232HA,
+                FtDeviceType.Ft4232HP,
+            });
             foreach (var device in devices)
             {
                 var dev = device.Type switch
                 {
-                    FtDeviceType.Ft2232 or FtDeviceType.Ft2232H => new Ft2232HDevice(device),
-                    FtDeviceType.Ft232H => new Ft232HDevice(device),
-                    FtDeviceType.Ft4232H => new Ft4232HDevice(device),
+                    FtDeviceType.Ft2232 or FtDeviceType.Ft2232H or FtDeviceType.Ft2232HA or FtDeviceType.Ft2232HP => new Ft2232HDevice(device),
+                    FtDeviceType.Ft232H or FtDeviceType.Ft232HP => new Ft232HDevice(device),
+                    FtDeviceType.Ft4232H or FtDeviceType.Ft4232HA or FtDeviceType.Ft4232HP => new Ft4232HDevice(device),
                     _ => new Ftx232HDevice(device),
                 };
 
@@ -96,6 +111,17 @@ namespace Iot.Device.FtCommon
         public Ftx232HDevice(FtFlag flags, FtDeviceType type, uint id, uint locId, string serialNumber, string description)
         : base(flags, type, id, locId, serialNumber, description)
         {
+            _isFt4232 = type switch
+            {
+                FtDeviceType.Ft4232H or FtDeviceType.Ft4232HA or FtDeviceType.Ft4232HP => true,
+                _ => false
+            };
+
+            _isFt232 = type switch
+            {
+                FtDeviceType.Ft232H or FtDeviceType.Ft232HP => true,
+                _ => false
+            };
         }
 
         /// <summary>
@@ -103,7 +129,7 @@ namespace Iot.Device.FtCommon
         /// </summary>
         /// <param name="ftDevice">a FT Device</param>
         public Ftx232HDevice(FtDevice ftDevice)
-            : base(ftDevice.Flags, ftDevice.Type, ftDevice.Id, ftDevice.LocId, ftDevice.SerialNumber, ftDevice.Description)
+            : this(ftDevice.Flags, ftDevice.Type, ftDevice.Id, ftDevice.LocId, ftDevice.SerialNumber, ftDevice.Description)
         {
         }
 
@@ -114,12 +140,12 @@ namespace Iot.Device.FtCommon
         {
             get
             {
-                return SerialNumber switch
+                return SerialNumber.Last() switch
                 {
-                    "A" => FtChannel.A,
-                    "B" => FtChannel.B,
-                    "C" => FtChannel.C,
-                    "D" => FtChannel.D,
+                    'A' => FtChannel.A,
+                    'B' => FtChannel.B,
+                    'C' => FtChannel.C,
+                    'D' => FtChannel.D,
                     _ => FtChannel.A,
                 };
             }
@@ -128,7 +154,7 @@ namespace Iot.Device.FtCommon
         /// <summary>
         /// Gets the number of pins for this specific FT device.
         /// </summary>
-        public int PinCount => Type == FtDeviceType.Ft4232H ? PinNumberFT4x : PinNumberFT2x;
+        public int PinCount => _isFt4232 ? PinNumberFT4x : PinNumberFT2x;
 
         /// <summary>
         /// Gets or sets the I2C Bus frequency. Default value is 400 KHz.
@@ -267,7 +293,7 @@ namespace Iot.Device.FtCommon
             toSend[idx++] = 0x00;
             // Command to set directions of lower 8 pins and force value on bits set as output
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 // SDA and SCL both output high(open drain)
                 GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
@@ -319,7 +345,7 @@ namespace Iot.Device.FtCommon
             int idx = 0;
             // SDA high, SCL high
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
                 GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
@@ -340,7 +366,7 @@ namespace Iot.Device.FtCommon
 
             // SDA lo, SCL high
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 GpioLowData = (byte)(I2cDataSDAloSCLhi | (GpioLowData & MaskGpio));
             }
@@ -358,7 +384,7 @@ namespace Iot.Device.FtCommon
 
             // SDA lo, SCL lo
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 GpioLowData = (byte)(I2cDataSDAloSCLlo | (GpioLowData & MaskGpio));
             }
@@ -376,7 +402,7 @@ namespace Iot.Device.FtCommon
 
             // Release SDA
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 GpioLowData = (byte)(I2cDataSDAhiSCLlo | (GpioLowData & MaskGpio));
             }
@@ -410,7 +436,7 @@ namespace Iot.Device.FtCommon
 
             // SDA low, SCL high
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 GpioLowData = (byte)(I2cDataSDAloSCLhi | (GpioLowData & MaskGpio));
                 GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
@@ -430,7 +456,7 @@ namespace Iot.Device.FtCommon
 
             // SDA high, SCL high
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
                 GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
@@ -456,7 +482,7 @@ namespace Iot.Device.FtCommon
             int idx = 0;
             // SDA low, SCL low
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
                 GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
@@ -478,10 +504,10 @@ namespace Iot.Device.FtCommon
         internal bool I2cSendByteAndCheckACK(byte data)
         {
             int idx = 0;
-            Span<byte> toSend = stackalloc byte[Type == FtDeviceType.Ft232H ? 10 : 13];
+            Span<byte> toSend = stackalloc byte[_isFt232 ? 10 : 13];
             Span<byte> toRead = stackalloc byte[1];
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 // Just clock with one byte (0 = 1 byte)
                 toSend[idx++] = (byte)FtOpcode.ClockDataBytesOutOnMinusVeClockMSBFirst;
@@ -546,10 +572,10 @@ namespace Iot.Device.FtCommon
         internal byte I2CReadByte(bool ack)
         {
             int idx = 0;
-            Span<byte> toSend = stackalloc byte[Type == FtDeviceType.Ft232H ? 10 : 16];
+            Span<byte> toSend = stackalloc byte[_isFt232 ? 10 : 16];
             Span<byte> toRead = stackalloc byte[1];
             // The behavior is a bit different for FT232H and FT2232H/FT4232H
-            if (Type == FtDeviceType.Ft232H)
+            if (_isFt232)
             {
                 // Read one byte
                 toSend[idx++] = (byte)FtOpcode.ClockDataBytesInOnPlusVeClockMSBFirst;
@@ -610,7 +636,7 @@ namespace Iot.Device.FtCommon
         internal void InitializeGpio()
         {
             // Check if the chip supports MPSEE or not. So far only channel C and D of FT4232H does not
-            if ((Type == FtDeviceType.Ft4232H) && ((Channel == FtChannel.C) || (Channel == FtChannel.D)))
+            if ((_isFt4232) && ((Channel == FtChannel.C) || (Channel == FtChannel.D)))
             {
                 UsesMpseeForGpio = false;
             }

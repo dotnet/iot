@@ -77,5 +77,60 @@ namespace Iot.Device.FtCommon
         /// OTP programmer board for the FT4222.
         /// </summary>
         Ft4222OtpProgrammerBoard,
+
+        /// <summary>
+        /// FT900 Device
+        /// </summary>
+        Ft900,
+
+        /// <summary>
+        /// FT930 Device
+        /// </summary>
+        Ft930,
+
+        /// <summary>
+        /// FTUMFTPD3A Device
+        /// </summary>
+        FtUmftpd3A,
+
+        /// <summary>
+        /// FT2233HP Device
+        /// </summary>
+        Ft2233HP,
+
+        /// <summary>
+        /// FT4233HP Device
+        /// </summary>
+        Ft4233HP,
+
+        /// <summary>
+        /// FT2232HP Device
+        /// </summary>
+        Ft2232HP,
+
+        /// <summary>
+        /// FT4232HP Device
+        /// </summary>
+        Ft4232HP,
+
+        /// <summary>
+        /// FT233HP Device
+        /// </summary>
+        Ft233HP,
+
+        /// <summary>
+        /// FT232HP Device
+        /// </summary>
+        Ft232HP,
+
+        /// <summary>
+        /// FT2232HA Device
+        /// </summary>
+        Ft2232HA,
+
+        /// <summary>
+        /// FT4232HA Device
+        /// </summary>
+        Ft4232HA,
     }
 }

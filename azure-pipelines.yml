@@ -150,7 +150,7 @@ stages:
     steps:
     - script: ./build.sh --ci
         --configuration $(BuildConfiguration)
-        --prepareMachine
+        --prepareMachine /maxCpuCount:1
       displayName: Build
 
     - task: PublishBuildArtifacts@1
