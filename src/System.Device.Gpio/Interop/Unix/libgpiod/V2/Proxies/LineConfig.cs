@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Device.Gpio.Drivers;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using LibgpiodV2 = Interop.LibgpiodV2;
 
 namespace System.Device.Gpio.Libgpiod.V2;
@@ -20,6 +21,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// If any of the offsets was duplicated, the last one will take precedence.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__config.html"/>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class LineConfig : LibGpiodProxyBase
 {
     internal LineConfigSafeHandle Handle { get; }

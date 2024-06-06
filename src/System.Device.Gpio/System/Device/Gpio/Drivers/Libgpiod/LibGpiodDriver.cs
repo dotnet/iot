@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Device.Gpio.Drivers;
@@ -23,9 +24,11 @@ public class LibGpiodDriver : UnixDriver
     /// </remarks>
     public LibGpiodDriver(int gpioChip = 0)
     {
+#pragma warning disable SDGPIO0001 // Suppressing diagnostic for using experimental APIs from this same repository.
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip);
         _driver = versionedLibgpiodDriver.LibGpiodDriver;
         Version = versionedLibgpiodDriver.DriverVersion;
+#pragma warning restore SDGPIO0001 // Suppressing diagnostic for using experimental APIs from this same repository.
     }
 
     /// <summary>
@@ -36,6 +39,7 @@ public class LibGpiodDriver : UnixDriver
     /// <param name="gpioChip">The number of the GPIO chip to drive</param>
     /// <param name="driverVersion">Version of the libgpiod driver to create</param>
     /// <remarks>Alternatively, specify the environment variable DOTNET_IOT_LIBGPIOD_DRIVER_VERSION, see documentation</remarks>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public LibGpiodDriver(int gpioChip, LibGpiodDriverVersion driverVersion)
     {
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip, driverVersion);
@@ -46,12 +50,14 @@ public class LibGpiodDriver : UnixDriver
     /// <summary>
     /// Version of the libgpiod driver
     /// </summary>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public LibGpiodDriverVersion Version { get; protected set; }
 
     /// <summary>
     /// A collection of driver versions that correspond to the installed versions of libgpiod on this system. Each driver is dependent
     /// on specific libgpiod version/s. If the collection is empty, it indicates that libgpiod might not be installed or could not be detected.
     /// </summary>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public static LibGpiodDriverVersion[] GetAvailableVersions() => LibGpiodDriverFactory.Instance.DriverCandidates;
 
     /// <inheritdoc/>
