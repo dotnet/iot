@@ -584,7 +584,7 @@ namespace Iot.Device.Card.Mifare
             // Type of Mifare can be partially determined by ATQA and SAK
             // https://www.nxp.com/docs/en/application-note/AN10833.pdf
             // Not complete
-            if (ATQA == 0x0004)
+            if (ATQA == 0x0004 || ATQA == 0x0044)
             {
                 if (SAK == 0x08)
                 {
@@ -655,44 +655,20 @@ namespace Iot.Device.Card.Mifare
             switch (Command)
             {
                 case MifareCardCommand.AuthenticationA:
-                    if (KeyA is null || SerialNumber is null)
-                    {
-                        throw new ArgumentException($"Card is not configured for {nameof(MifareCardCommand.AuthenticationA)}.");
-                    }
-
-                    ser = new byte[2 + KeyA.Length + SerialNumber.Length];
-                    ser[0] = (byte)Command;
-                    ser[1] = BlockNumber;
-                    if (KeyA.Length > 0)
-                    {
-                        KeyA.CopyTo(ser, 2);
-                    }
-
-                    if (SerialNumber.Length > 0)
-                    {
-                        SerialNumber.CopyTo(ser, 2 + KeyA.Length);
-                    }
-
-                    return ser;
                 case MifareCardCommand.AuthenticationB:
-                    if (KeyB is null || SerialNumber is null)
+                    byte[]? key = (Command == MifareCardCommand.AuthenticationA) ? KeyA : KeyB;
+                    if (key is null || key.Length != 6 || SerialNumber is null ||
+                        (SerialNumber.Length != 4 && SerialNumber.Length != 7))
                     {
-                        throw new ArgumentException($"Card is not configured for {nameof(MifareCardCommand.AuthenticationB)}.");
+                        throw new ArgumentException($"Card is not configured for {Command}.");
                     }
 
-                    ser = new byte[2 + KeyB.Length + SerialNumber.Length];
+                    ser = new byte[2 + 6 + 4];
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;
-                    if (KeyB.Length > 0)
-                    {
-                        KeyB.CopyTo(ser, 2);
-                    }
-
-                    if (SerialNumber.Length > 0)
-                    {
-                        SerialNumber.CopyTo(ser, 2 + KeyB.Length);
-                    }
-
+                    key.CopyTo(ser, 2);
+                    // SerialNumber[^4..].CopyTo(ser, 2 + 6);
+                    SerialNumber.AsSpan().Slice(SerialNumber.Length - 4).CopyTo(ser.AsSpan().Slice(2 + 6));
                     return ser;
                 case MifareCardCommand.Write16Bytes:
                 case MifareCardCommand.Write4Bytes:
