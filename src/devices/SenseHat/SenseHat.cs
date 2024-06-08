@@ -177,6 +177,9 @@ namespace Iot.Device.SenseHat
         /// <inheritdoc/>
         public void Dispose()
         {
+            // Terminate text animation timer if active
+            LedMatrix?.Terminate();
+
             if (_shouldDispose)
             {
                 _i2cBus?.Dispose();
