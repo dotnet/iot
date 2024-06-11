@@ -165,7 +165,7 @@ internal class RaspberryBoardInfo
         0x00C1 => Model.RaspberryPiZeroW,
         0x2120 => Model.RaspberryPiZero2W,
         0x2082 or 0x2083 => Model.RaspberryPi3B,
-        0x20D3 => Model.RaspberryPi3BPlus,
+        0x20D3 or 0x20D4 => Model.RaspberryPi3BPlus,
         0x20E0 => Model.RaspberryPi3APlus,
         0x20E1 => Model.RaspberryPi3APlus, // 3A, rev 1.1
         0x20A0 or 0x2100 => Model.RaspberryPiComputeModule3,
