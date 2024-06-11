@@ -42,15 +42,15 @@ namespace Iot.Device.SenseHat
         /// <summary>
         /// Lazily initialized text render state. Initialized when rendering text.
         /// </summary>
-        protected SenseHatTextRenderMatrix? _textRenderMatrix = null;
+        protected SenseHatTextRenderState? _textRenderState = null;
 
         /// <summary>
-        /// Text color when rendering text. Null for "no color".
+        /// Text color when rendering text.
         /// </summary>
         protected Color _textColor = Color.DarkBlue;
 
         /// <summary>
-        /// Text background color when rendering text. Null for "no color".
+        /// Text background color when rendering text.
         /// </summary>
         protected Color _textBackgroundColor = Color.Black;
 
@@ -69,9 +69,15 @@ namespace Iot.Device.SenseHat
         /// </summary>
         protected System.Timers.Timer? _textAnimationTimer = null;
 
+        // Lock object to maintain a consistent set of render parameters.
+        private object _lockTextRenderState = new();
+
         // Lock object to prevent i2c disposal during render.
         // "Terminate" must be called for clean termination of text animation.
-        private object _lockTextRender = new();
+        private object _lockWrite = new();
+
+        // Flag set to true when no more rendering should take place because the LED matrix is about to be disposed.
+        private volatile bool _terminate = false;
 
         /// <summary>
         /// Constructs SenseHatLedMatrix instance
@@ -146,10 +152,16 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public void Terminate()
         {
-            lock (_lockTextRender)
+            lock (_lockTextRenderState)
             {
-                _textRenderMatrix = null;
+                _textRenderState = null;
                 StopTextAnimationTimer();
+            }
+
+            lock (_lockWrite)
+            {
+                // Prevent further access to the underlying device (i.e. i2c bus)
+                _terminate = true;
             }
         }
 
@@ -167,6 +179,11 @@ namespace Iot.Device.SenseHat
             {
                 StopTextAnimationTimer();
                 Fill(_textBackgroundColor);
+                lock (_lockTextRenderState)
+                {
+                    _textRenderState = null;
+                }
+
                 return;
             }
 
@@ -175,9 +192,16 @@ namespace Iot.Device.SenseHat
                 _pixelFont = new SenseHatTextFont();
             }
 
-            _textRenderMatrix = _pixelFont.RenderText(text);
+            var renderMatrix = _pixelFont.RenderText(text);
+            SenseHatTextRenderState renderState;
+            lock (_lockTextRenderState)
+            {
+                // Create a new render state containing the render matrix for the new text
+                _textRenderState = new SenseHatTextRenderState(renderMatrix, _textColor, _textBackgroundColor, _textRotation);
+                renderState = _textRenderState;
+            }
 
-            RenderText();
+            RenderText(renderState);
 
             StartOrStopTextScrolling();
         }
@@ -195,7 +219,20 @@ namespace Iot.Device.SenseHat
             set
             {
                 _textColor = value;
-                RenderText();
+
+                // Apply new state. Lock because render state is nullable and assignment may not be atomic.
+                SenseHatTextRenderState? renderState;
+                lock (_lockTextRenderState)
+                {
+                    if (_textRenderState != null)
+                    {
+                        _textRenderState = _textRenderState.ApplyTextColor(value);
+                    }
+
+                    renderState = _textRenderState;
+                }
+
+                RenderText(renderState);
             }
         }
 
@@ -212,12 +249,25 @@ namespace Iot.Device.SenseHat
             set
             {
                 _textBackgroundColor = value;
-                RenderText();
+
+                // Apply new state. Lock because render state is nullable and assignment may not be atomic.
+                SenseHatTextRenderState? renderState;
+                lock (_lockTextRenderState)
+                {
+                    if (_textRenderState != null)
+                    {
+                        _textRenderState = _textRenderState.ApplyTextBackgroundColor(value);
+                    }
+
+                    renderState = _textRenderState;
+                }
+
+                RenderText(renderState);
             }
         }
 
         /// <summary>
-        /// Text background color when rendering text.
+        /// Text scroll speed in pixels per second.
         /// </summary>
         [Property]
         public double TextScrollPixelsPerSecond
@@ -246,15 +296,34 @@ namespace Iot.Device.SenseHat
             set
             {
                 _textRotation = value;
-                RenderText();
+
+                // Apply new state. Lock because render state is nullable and assignment may not be atomic.
+                SenseHatTextRenderState? renderState;
+                lock (_lockTextRenderState)
+                {
+                    if (_textRenderState != null)
+                    {
+                        _textRenderState = _textRenderState.ApplyTextRotation(value);
+                    }
+
+                    renderState = _textRenderState;
+                }
+
+                RenderText(renderState);
             }
         }
 
         private void StartOrStopTextScrolling()
         {
-            var renderMatrix = _textRenderMatrix;
+            SenseHatTextRenderState? renderState;
+            // Lock because render state is nullable and assignment may not be atomic
+            lock (_lockTextRenderState)
+            {
+                renderState = _textRenderState;
+            }
+
             int millisecondsPerPixel;
-            if (renderMatrix == null || renderMatrix.Text.Length == 0 || _textScrollPixelsPerSecond <= 0)
+            if (renderState == null || renderState.TextRenderMatrix.Text.Length == 0 || _textScrollPixelsPerSecond <= 0)
             {
                 millisecondsPerPixel = 0;
             }
@@ -295,57 +364,78 @@ namespace Iot.Device.SenseHat
 
         private void TextAnimationTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            var renderMatrix = _textRenderMatrix;
-            if (renderMatrix != null && renderMatrix.Text.Length > 1)
+            SenseHatTextRenderState? renderState;
+            // Lock because render state is nullable and assignment may not be atomic
+            lock (_lockTextRenderState)
             {
-                renderMatrix.ScrollByOnePixel();
-                RenderText();
+                renderState = _textRenderState;
+            }
+
+            if (renderState != null)
+            {
+                var renderMatrix = renderState.TextRenderMatrix;
+                if (renderMatrix.Text.Length > 1)
+                {
+                    renderMatrix.ScrollByOnePixel();
+                    RenderText(renderState);
+                }
             }
         }
 
-        private void RenderText()
+        private void RenderText(SenseHatTextRenderState? textRenderState)
         {
-            lock (_lockTextRender)
+            if (textRenderState == null)
             {
-                if (_textRenderMatrix == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                // Render the 8x8 matrix
-                for (var x = 0; x < NumberOfPixelsPerColumn; x++)
+            // Allocate frame buffer to hold color values for one frame
+            var frameBuffer = new Color[NumberOfPixelsPerColumn * NumberOfPixelsPerRow];
+
+            // Render the 8x8 matrix
+            for (var x = 0; x < NumberOfPixelsPerColumn; x++)
+            {
+                for (var y = 0; y < NumberOfPixelsPerRow; y++)
                 {
-                    for (var y = 0; y < NumberOfPixelsPerRow; y++)
+                    int tx = x;
+                    int ty = y;
+                    switch (textRenderState.TextRotation)
                     {
-                        int tx = x;
-                        int ty = y;
-                        switch (_textRotation)
-                        {
-                            case SenseHatTextRotation.Rotate_0_Degrees:
-                                break;
-                            case SenseHatTextRotation.Rotate_90_Degrees:
-                                tx = y;
-                                ty = NumberOfPixelsPerColumn - x - 1;
-                                break;
-                            case SenseHatTextRotation.Rotate_180_Degrees:
-                                tx = NumberOfPixelsPerColumn - x - 1;
-                                ty = NumberOfPixelsPerRow - y - 1;
-                                break;
-                            case SenseHatTextRotation.Rotate_270_Degrees:
-                                tx = NumberOfPixelsPerColumn - y - 1;
-                                ty = x;
-                                break;
-                        }
-
-                        if (_textRenderMatrix.IsPixelSet(x, y))
-                        {
-                            SetPixel(tx, ty, _textColor);
-                        }
-                        else
-                        {
-                            SetPixel(tx, ty, _textBackgroundColor);
-                        }
+                        case SenseHatTextRotation.Rotate_0_Degrees:
+                            break;
+                        case SenseHatTextRotation.Rotate_90_Degrees:
+                            tx = y;
+                            ty = NumberOfPixelsPerColumn - x - 1;
+                            break;
+                        case SenseHatTextRotation.Rotate_180_Degrees:
+                            tx = NumberOfPixelsPerColumn - x - 1;
+                            ty = NumberOfPixelsPerRow - y - 1;
+                            break;
+                        case SenseHatTextRotation.Rotate_270_Degrees:
+                            tx = NumberOfPixelsPerColumn - y - 1;
+                            ty = x;
+                            break;
                     }
+
+                    var frameIndex = PositionToIndex(tx, ty);
+
+                    if (textRenderState.TextRenderMatrix.IsPixelSet(x, y))
+                    {
+                        frameBuffer[frameIndex] = textRenderState.TextColor;
+                    }
+                    else
+                    {
+                        frameBuffer[frameIndex] = textRenderState.TextBackgroundColor;
+                    }
+                }
+            }
+
+            // Lock write so that SenseHat disposal does not interfere
+            lock (_lockWrite)
+            {
+                if (!_terminate)
+                {
+                    Write(frameBuffer);
                 }
             }
         }
