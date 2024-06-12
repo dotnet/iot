@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Device.Gpio.Libgpiod;
 using System.Device.Gpio.Libgpiod.V2;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
@@ -13,6 +14,7 @@ namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 /// <summary>
 /// Driver that uses libgpiod V2 for GPIO control.
 /// </summary>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal sealed class LibGpiodV2Driver : UnixDriver
 {
     private static readonly string ConsumerId = $"C#-{nameof(LibGpiodV2Driver)}-{Process.GetCurrentProcess().Id}";
