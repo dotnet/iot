@@ -17,6 +17,11 @@ namespace Iot.Device.Button.Tests
         {
         }
 
+        public TestButton(TimeSpan debounceTime, TimeSpan holdingTime, TimeSpan doublePress)
+            : base(doublePress, holdingTime, debounceTime)
+        {
+        }
+
         public void PressButton()
         {
             HandleButtonPressed();
