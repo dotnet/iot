@@ -24,7 +24,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
     private readonly Task _task;
     private bool _disposing;
 
-    public LibGpiodV1DriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle)
+    public LibGpiodV1DriverEventHandler(int pinNumber, LineHandle safeLineHandle)
     {
         _pinNumber = pinNumber;
         _cancellationTokenSource = new CancellationTokenSource();
@@ -34,9 +34,9 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
 
     public CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
-    private void SubscribeForEvent(SafeLineHandle pinHandle)
+    private void SubscribeForEvent(LineHandle pinHandle)
     {
-        int eventSuccess = LibgpiodV1.gpiod_line_request_both_edges_events(pinHandle, s_consumerName);
+        int eventSuccess = LibgpiodV1.gpiod_line_request_both_edges_events(pinHandle.Handle, s_consumerName);
 
         if (eventSuccess < 0)
         {
@@ -44,7 +44,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
         }
     }
 
-    private Task InitializeEventDetectionTask(CancellationToken token, SafeLineHandle pinHandle)
+    private Task InitializeEventDetectionTask(CancellationToken token, LineHandle pinHandle)
     {
         return Task.Run(() =>
         {
@@ -57,7 +57,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
                     TvNsec = new IntPtr(50_000_000)
                 };
 
-                WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle, ref timeout);
+                WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle.Handle, ref timeout);
                 if (waitResult == WaitEventResult.Error)
                 {
                     var errorCode = Marshal.GetLastWin32Error();
@@ -73,7 +73,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
                 if (waitResult == WaitEventResult.EventOccured)
                 {
                     GpioLineEvent eventResult = new GpioLineEvent();
-                    int checkForEvent = LibgpiodV1.gpiod_line_event_read(pinHandle, ref eventResult);
+                    int checkForEvent = LibgpiodV1.gpiod_line_event_read(pinHandle.Handle, ref eventResult);
                     if (checkForEvent == -1)
                     {
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());

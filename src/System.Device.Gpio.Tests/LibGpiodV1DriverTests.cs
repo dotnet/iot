@@ -72,4 +72,36 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
             gc.UnregisterCallbackForPinValueChangedEvent(InputPin, PinChanged);
         }
     }
+
+    /// <summary>
+    /// Ensure leaking instances of the driver doesn't cause a segfault
+    /// Regression test for https://github.com/dotnet/iot/issues/1849
+    /// </summary>
+    [Fact]
+    public void LeakingDriverDoesNotCrash()
+    {
+        GpioController controller1 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        controller1.OpenPin(10, PinMode.Output);
+        GpioController controller2 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        controller2.OpenPin(11, PinMode.Output);
+        GpioController controller3 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        controller3.OpenPin(12, PinMode.Output);
+        GpioController controller4 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        controller4.OpenPin(13, PinMode.Output);
+        GpioController controller5 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        controller5.OpenPin(14, PinMode.Output);
+
+        for (int i = 0; i < 10; i++)
+        {
+            GC.Collect();
+            GpioController controller6 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+            controller6.OpenPin(15, PinMode.Output);
+            controller6.ClosePin(15);
+            controller6.Dispose();
+            GC.Collect();
+            Thread.Sleep(20);
+        }
+
+        GC.WaitForPendingFinalizers();
+    }
 }

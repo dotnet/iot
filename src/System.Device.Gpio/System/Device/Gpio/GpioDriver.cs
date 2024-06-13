@@ -13,6 +13,14 @@ namespace System.Device.Gpio;
 public abstract class GpioDriver : IDisposable
 {
     /// <summary>
+    /// Finalizer to clean up unmanaged resources
+    /// </summary>
+    ~GpioDriver()
+    {
+        Dispose(false);
+    }
+
+    /// <summary>
     /// The number of pins provided by the driver.
     /// </summary>
     protected internal abstract int PinCount { get; }

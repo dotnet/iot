@@ -15,6 +15,12 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Gpio.GpioDriver.Finalize</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:System.Device.Gpio.PinEventTypes.#ctor</Target>
     <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
