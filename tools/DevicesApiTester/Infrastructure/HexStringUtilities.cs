@@ -17,6 +17,7 @@ namespace DeviceApiTester.Infrastructure
             {
                 throw new ArgumentOutOfRangeException(nameof(perGroup));
             }
+
             if (perLine < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(perLine));
@@ -28,9 +29,9 @@ namespace DeviceApiTester.Infrastructure
             const string groupDelimeter = " ";
 
             var sb = new StringBuilder(
-                dataLength * 2                                     // 2 characters per byte
-                + dataLength / perGroup * groupDelimeter.Length    // group delimiter string
-                + lineCount * Environment.NewLine.Length           // 1 new-line string between each line
+                dataLength * 2 // 2 characters per byte
+                + dataLength / perGroup * groupDelimeter.Length // group delimiter string
+                + lineCount * Environment.NewLine.Length // 1 new-line string between each line
                 + perLine);                                        // some extra calculation padding
 
             int groupsPerLine = perLine / perGroup;

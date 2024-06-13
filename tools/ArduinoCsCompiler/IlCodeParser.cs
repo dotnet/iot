@@ -301,26 +301,26 @@ namespace ArduinoCsCompiler
                 switch (opCode)
                 {
                     case OpCode.CEE_LDSTR:
-                    {
-                        String data = m.Module.ResolveString(token);
-                        patchValue = set.GetOrAddString(data);
-                        break;
-                    }
+                        {
+                            String data = m.Module.ResolveString(token);
+                            patchValue = set.GetOrAddString(data);
+                            break;
+                        }
 
                     case OpCode.CEE_CALL:
                     case OpCode.CEE_CALLVIRT:
                     case OpCode.CEE_NEWOBJ:
                     case OpCode.CEE_LDFTN:
                     case OpCode.CEE_LDVIRTFTN:
-                    {
-                        // These opcodes are followed by a method token
-                        var methodTarget = ResolveMember(m, token)!;
-                        MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
-                        patchValue = set.GetOrAddMethodToken(mb, method);
-                        // Do an inverse lookup again - might have changed due to replacement
-                        methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
-                        break;
-                    }
+                        {
+                            // These opcodes are followed by a method token
+                            var methodTarget = ResolveMember(m, token)!;
+                            MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
+                            patchValue = set.GetOrAddMethodToken(mb, method);
+                            // Do an inverse lookup again - might have changed due to replacement
+                            methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
+                            break;
+                        }
 
                     // These instructions take field tokens
                     case OpCode.CEE_STSFLD:
@@ -329,103 +329,103 @@ namespace ArduinoCsCompiler
                     case OpCode.CEE_STFLD:
                     case OpCode.CEE_LDFLDA:
                     case OpCode.CEE_LDSFLDA:
-                    {
-                        var fieldTarget = ResolveMember(m, token)!;
-                        FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
-                        var replacementClassForField = set.GetReplacement(mb.DeclaringType);
-                        if (replacementClassForField != null)
                         {
-                            // The class whose member this is was replaced - replace the member, too.
-                            // Note that this will only apply when a class that is being replaced has a public field (an example is MiniBitConverter.IsLittleEndian)
-                            var members = replacementClassForField.FindMembers(MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, (x, y) => x.Name == mb.Name, null);
-                            if (members.Length != 1)
+                            var fieldTarget = ResolveMember(m, token)!;
+                            FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
+                            var replacementClassForField = set.GetReplacement(mb.DeclaringType);
+                            if (replacementClassForField != null)
                             {
-                                // If this crashes, our replacement class misses a public field
-                                throw new InvalidOperationException($"Class {replacementClassForField.MemberInfoSignature()} is missing field {mb.Name}");
+                                // The class whose member this is was replaced - replace the member, too.
+                                // Note that this will only apply when a class that is being replaced has a public field (an example is MiniBitConverter.IsLittleEndian)
+                                var members = replacementClassForField.FindMembers(MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, (x, y) => x.Name == mb.Name, null);
+                                if (members.Length != 1)
+                                {
+                                    // If this crashes, our replacement class misses a public field
+                                    throw new InvalidOperationException($"Class {replacementClassForField.MemberInfoSignature()} is missing field {mb.Name}");
+                                }
+
+                                mb = (FieldInfo)members.Single();
                             }
 
-                            mb = (FieldInfo)members.Single();
-                        }
+                            byte[]? data = null;
 
-                        byte[]? data = null;
-
-                        if (opCode == OpCode.CEE_LDSFLDA && mb.DeclaringType != null && mb.DeclaringType.Name.Contains(MicroCompiler.PrivateImplementationDetailsName))
-                        {
-                            data = TryReadInitializerData(mb);
-                        }
-
-                        if (data != null)
-                        {
-                            patchValue = set.GetOrAddFieldToken(mb, data);
-                        }
-                        else
-                        {
-                            // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
-                            patchValue = set.GetOrAddFieldToken(mb);
-                        }
-
-                        fieldsUsed.Add((FieldInfo)set.InverseResolveToken(patchValue)!);
-
-                        if (MicroCompiler.HasReplacementAttribute(mb.DeclaringType!, out var attribute) && attribute.ReplaceEntireType == false)
-                        {
-                            // If this _is_ the replacement class already, and we're not replacing the full type, add the original type, or we end up with
-                            // both the original and the replacement types in the execution set.
-                            if (attribute.TypeToReplace != null)
+                            if (opCode == OpCode.CEE_LDSFLDA && mb.DeclaringType != null && mb.DeclaringType.Name.Contains(MicroCompiler.PrivateImplementationDetailsName))
                             {
-                                typesUsed.Add(attribute.TypeToReplace.GetTypeInfo());
+                                data = TryReadInitializerData(mb);
                             }
-                        }
-                        else
-                        {
-                            // Add the fields' class to the list of used classes, or that one will be missing if the class consists of only fields (rare, but happens)
-                            typesUsed.Add(mb.DeclaringType!.GetTypeInfo());
-                        }
 
-                        break;
-                    }
+                            if (data != null)
+                            {
+                                patchValue = set.GetOrAddFieldToken(mb, data);
+                            }
+                            else
+                            {
+                                // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
+                                patchValue = set.GetOrAddFieldToken(mb);
+                            }
+
+                            fieldsUsed.Add((FieldInfo)set.InverseResolveToken(patchValue)!);
+
+                            if (MicroCompiler.HasReplacementAttribute(mb.DeclaringType!, out var attribute) && attribute.ReplaceEntireType == false)
+                            {
+                                // If this _is_ the replacement class already, and we're not replacing the full type, add the original type, or we end up with
+                                // both the original and the replacement types in the execution set.
+                                if (attribute.TypeToReplace != null)
+                                {
+                                    typesUsed.Add(attribute.TypeToReplace.GetTypeInfo());
+                                }
+                            }
+                            else
+                            {
+                                // Add the fields' class to the list of used classes, or that one will be missing if the class consists of only fields (rare, but happens)
+                                typesUsed.Add(mb.DeclaringType!.GetTypeInfo());
+                            }
+
+                            break;
+                        }
 
                     case OpCode.CEE_NEWARR:
-                    {
-                        var typeTarget = ResolveMember(m, token)!;
-                        TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
+                        {
+                            var typeTarget = ResolveMember(m, token)!;
+                            TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
 
-                        // If we create an array instance, we also need to provide this special iterator
-                        var getEnumeratorCall = typeof(Runtime.MiniArray).GetMethod("GetEnumerator")!.MakeGenericMethod(mb);
-                        methodsUsed.Add(getEnumeratorCall);
-                        patchValue = set.GetOrAddClassToken(mb);
-                        typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
-                        set.AddArrayImplementation(mb, getEnumeratorCall);
-                        break;
-                    }
+                            // If we create an array instance, we also need to provide this special iterator
+                            var getEnumeratorCall = typeof(Runtime.MiniArray).GetMethod("GetEnumerator")!.MakeGenericMethod(mb);
+                            methodsUsed.Add(getEnumeratorCall);
+                            patchValue = set.GetOrAddClassToken(mb);
+                            typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                            set.AddArrayImplementation(mb, getEnumeratorCall);
+                            break;
+                        }
 
                     // LDTOKEN takes typically types, but can also take virtual stuff (whatever that means)
                     case OpCode.CEE_LDTOKEN:
                     case OpCode.CEE_CASTCLASS:
-                    {
-                        var resolved = ResolveMember(m, token);
-                        if (resolved is TypeInfo ti)
                         {
-                            bool isEnum = ti.IsEnum;
-                            patchValue = set.GetOrAddClassToken(ti);
-                            typesUsed.Add(ti);
-                        }
-                        else if (resolved is FieldInfo mi)
-                        {
-                            byte[]? array = TryReadInitializerData(mi);
-                            if (array == null)
+                            var resolved = ResolveMember(m, token);
+                            if (resolved is TypeInfo ti)
                             {
-                                throw new InvalidOperationException($"Field {mi.Name} is expected to have a constant initializer, but it was not found");
+                                bool isEnum = ti.IsEnum;
+                                patchValue = set.GetOrAddClassToken(ti);
+                                typesUsed.Add(ti);
+                            }
+                            else if (resolved is FieldInfo mi)
+                            {
+                                byte[]? array = TryReadInitializerData(mi);
+                                if (array == null)
+                                {
+                                    throw new InvalidOperationException($"Field {mi.Name} is expected to have a constant initializer, but it was not found");
+                                }
+
+                                patchValue = set.GetOrAddFieldToken(mi, array);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Unknown token type {resolved}");
                             }
 
-                            patchValue = set.GetOrAddFieldToken(mi, array);
+                            break;
                         }
-                        else
-                        {
-                            throw new InvalidOperationException($"Unknown token type {resolved}");
-                        }
-
-                        break;
-                    }
 
                     case OpCode.CEE_STELEM:
                     case OpCode.CEE_LDELEM:
@@ -439,14 +439,14 @@ namespace ArduinoCsCompiler
                     case OpCode.CEE_INITOBJ:
                     case OpCode.CEE_ISINST:
                     case OpCode.CEE_SIZEOF:
-                    {
-                        // These take a type as argument
-                        var typeTarget = ResolveMember(m, token)!;
-                        TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
-                        patchValue = set.GetOrAddClassToken(mb);
-                        typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
-                        break;
-                    }
+                        {
+                            // These take a type as argument
+                            var typeTarget = ResolveMember(m, token)!;
+                            TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
+                            patchValue = set.GetOrAddClassToken(mb);
+                            typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                            break;
+                        }
 
                     default:
                         throw new InvalidOperationException($"Opcode {opCode} has a token argument, but is unhandled in {method.MethodSignature()}.");

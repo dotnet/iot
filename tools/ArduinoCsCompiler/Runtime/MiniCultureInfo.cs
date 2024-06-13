@@ -353,10 +353,10 @@ namespace ArduinoCsCompiler.Runtime
         {
             get => InvariantCulture;
             set
-                // If you add pre-conditions to this method, check to see if you also need to
-                // add them to Thread.CurrentCulture.set.
-                {
-                }
+            // If you add pre-conditions to this method, check to see if you also need to
+            // add them to Thread.CurrentCulture.set.
+            {
+            }
         }
 
         public static MiniCultureInfo? DefaultThreadCurrentUICulture

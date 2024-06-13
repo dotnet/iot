@@ -1237,7 +1237,7 @@ namespace ArduinoCsCompiler
                     return 1;
                 }
 
-                compareByName:
+            compareByName:
                 return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
             }
         }

@@ -131,57 +131,57 @@ namespace ArduinoCsCompiler
             {
                 case OpCodeType.InlineI:
                 case OpCodeType.ShortInlineI:
-                {
-                    int arg = DecodeIntegerArgument();
-                    return $"{arg} (0x{arg:X})";
-                }
+                    {
+                        int arg = DecodeIntegerArgument();
+                        return $"{arg} (0x{arg:X})";
+                    }
 
                 case OpCodeType.ShortInlineVar:
                 case OpCodeType.InlineVar:
-                {
-                    int arg = DecodeIntegerArgument();
-                    return $"{arg}";
-                }
+                    {
+                        int arg = DecodeIntegerArgument();
+                        return $"{arg}";
+                    }
 
                 case OpCodeType.ShortInlineBrTarget:
                 case OpCodeType.InlineBrTarget:
-                {
-                    int offset = DecodeIntegerArgument();
-                    return $"Offset {offset}, --> 0x{(offset + Pc + Size):X}"; // Offset is from beginning of next instruction
-                }
+                    {
+                        int offset = DecodeIntegerArgument();
+                        return $"Offset {offset}, --> 0x{(offset + Pc + Size):X}"; // Offset is from beginning of next instruction
+                    }
 
                 case OpCodeType.InlineField:
-                {
-                    int token = DecodeIntegerArgument();
-                    var field = set.InverseResolveToken(token);
-                    if (field != null)
                     {
-                        return $"{token} - {field.Name}";
+                        int token = DecodeIntegerArgument();
+                        var field = set.InverseResolveToken(token);
+                        if (field != null)
+                        {
+                            return $"{token} - {field.Name}";
+                        }
+                        else
+                        {
+                            return $"{token} - (unknown field)";
+                        }
                     }
-                    else
-                    {
-                        return $"{token} - (unknown field)";
-                    }
-                }
 
                 case OpCodeType.InlineMethod:
-                {
-                    int token = DecodeIntegerArgument();
-                    var method = set.InverseResolveToken(token);
-                    if (method == null)
                     {
-                        return $"{token} - Unable to resolve";
+                        int token = DecodeIntegerArgument();
+                        var method = set.InverseResolveToken(token);
+                        if (method == null)
+                        {
+                            return $"{token} - Unable to resolve";
+                        }
+
+                        return $"{token} - {method.MemberInfoSignature(false)}";
                     }
 
-                    return $"{token} - {method.MemberInfoSignature(false)}";
-                }
-
                 case OpCodeType.InlineString:
-                {
-                    int token = DecodeIntegerArgument();
-                    string value = set.GetString(token);
-                    return $"{token} \"{value}\"";
-                }
+                    {
+                        int token = DecodeIntegerArgument();
+                        string value = set.GetString(token);
+                        return $"{token} \"{value}\"";
+                    }
             }
 
             return null;

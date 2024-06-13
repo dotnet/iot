@@ -37,7 +37,8 @@ namespace Iot.Device.Arduino.Tests
             {
                 settings = new CompilerSettings()
                 {
-                    CreateKernelForFlashing = false, UseFlashForKernel = false
+                    CreateKernelForFlashing = false,
+                    UseFlashForKernel = false
                 };
                 settings.AdditionalSuppressions.Add("System.Number");
                 settings.AdditionalSuppressions.Add("System.SR");

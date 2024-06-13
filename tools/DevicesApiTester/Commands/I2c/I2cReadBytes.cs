@@ -30,7 +30,7 @@ namespace DeviceApiTester.Commands.I2c
             }
             else
             {
-                Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress} (0x{DeviceAddress:X2}), FirstRegister={ FirstRegister} (0x{FirstRegister:X2}), ByteCount={ByteCount}");
+                Console.WriteLine($"BusId={BusId}, DeviceAddress={DeviceAddress} (0x{DeviceAddress:X2}), FirstRegister={FirstRegister} (0x{FirstRegister:X2}), ByteCount={ByteCount}");
             }
 
             var connectionSettings = new I2cConnectionSettings(BusId, DeviceAddress);

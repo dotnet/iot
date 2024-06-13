@@ -79,7 +79,8 @@ namespace DeviceApiTester.Commands.Gpio
                         controller.Write(LedPin.Value, ledValue);
                     }
                 }
-            } while (!waitResult.TimedOut);
+            }
+            while (!waitResult.TimedOut);
 
             controller.ClosePin(ButtonPin);
             if (LedPin != null)
