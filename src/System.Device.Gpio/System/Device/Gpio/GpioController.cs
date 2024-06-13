@@ -33,7 +33,11 @@ public class GpioController : IDisposable
     /// If a pin element exists, that pin is open. Uses current controller's numbering scheme
     /// </summary>
     private readonly ConcurrentDictionary<int, PinValue?> _openPins;
-    private readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
+
+    /// <summary>
+    /// The GPIO pins open in the GpioController.
+    /// </summary>
+    protected readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
     private GpioDriver _driver;
 
     /// <summary>
@@ -161,7 +165,7 @@ public class GpioController : IDisposable
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
     /// <param name="mode">The mode to be set.</param>
-    public virtual GpioPin OpenPin(int pinNumber, PinMode mode)
+    public GpioPin OpenPin(int pinNumber, PinMode mode)
     {
         var pin = OpenPin(pinNumber);
         SetPinMode(pinNumber, mode);
@@ -175,7 +179,7 @@ public class GpioController : IDisposable
     /// <param name="mode">The mode to be set.</param>
     /// <param name="initialValue">The initial value to be set if the mode is output. The driver will attempt to set the mode without causing glitches to the other value.
     /// (if <paramref name="initialValue"/> is <see cref="PinValue.High"/>, the pin should not glitch to low during open)</param>
-    public virtual GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
+    public GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
     {
         var pin = OpenPin(pinNumber);
         // Set the desired initial value
@@ -261,7 +265,7 @@ public class GpioController : IDisposable
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
     /// <returns>The status if the pin is open or closed.</returns>
-    public virtual bool IsPinOpen(int pinNumber)
+    public bool IsPinOpen(int pinNumber)
     {
         CheckDriverValid();
         return _openPins.ContainsKey(pinNumber);
@@ -456,7 +460,7 @@ public class GpioController : IDisposable
     }
 
     /// <inheritdoc/>
-    public virtual void Dispose()
+    public void Dispose()
     {
         Dispose(true);
     }
@@ -465,7 +469,7 @@ public class GpioController : IDisposable
     /// Write the given pins with the given values.
     /// </summary>
     /// <param name="pinValuePairs">The pin/value pairs to write.</param>
-    public virtual void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+    public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
     {
         for (int i = 0; i < pinValuePairs.Length; i++)
         {
@@ -477,7 +481,7 @@ public class GpioController : IDisposable
     /// Read the given pins with the given pin numbers.
     /// </summary>
     /// <param name="pinValuePairs">The pin/value pairs to read.</param>
-    public virtual void Read(Span<PinValuePair> pinValuePairs)
+    public void Read(Span<PinValuePair> pinValuePairs)
     {
         for (int i = 0; i < pinValuePairs.Length; i++)
         {

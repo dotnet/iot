@@ -20,7 +20,6 @@ namespace Iot.Device.Gpio
     public class VirtualGpioController : GpioController
     {
         private readonly ConcurrentDictionary<int, GpioPin> _pins = new ConcurrentDictionary<int, GpioPin>();
-        private readonly ConcurrentDictionary<int, GpioPin> _openPins = new ConcurrentDictionary<int, GpioPin>();
         private readonly ConcurrentDictionary<int, PinEvent> _callbackEvents = new ConcurrentDictionary<int, PinEvent>();
 
         private record PinEvent(PinEventTypes PinEventTypes, PinChangeEventHandler? Callbacks);
@@ -101,15 +100,16 @@ namespace Iot.Device.Gpio
                 throw new InvalidOperationException($"Can not close pin {pinNumber} because it is not open.");
             }
 
-            _openPins.TryRemove(pinNumber, out _);
+            _gpioPins.TryRemove(pinNumber, out _);
         }
 
         /// <summary>
         /// Disposes this instance and closes all open pins associated with this controller.
         /// </summary>
-        public override void Dispose()
+        /// <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
+        protected override void Dispose(bool disposing)
         {
-            foreach (int pin in _openPins.Keys)
+            foreach (int pin in _gpioPins.Keys)
             {
                 // The list contains the pin in the current NumberingScheme
                 ClosePin(pin);
@@ -117,7 +117,7 @@ namespace Iot.Device.Gpio
 
             // We're just emptying the lists
             _pins.Clear();
-            _openPins.Clear();
+            _gpioPins.Clear();
         }
 
         /// <inheritdoc/>
@@ -138,57 +138,21 @@ namespace Iot.Device.Gpio
         }
 
         /// <summary>
-        /// Checks if a specific pin is open.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The status if the pin is open or closed.</returns>
-        public override bool IsPinOpen(int pinNumber)
-        {
-            return _openPins.ContainsKey(pinNumber);
-        }
-
-        /// <summary>
-        /// Opens a pin and sets it to a specific mode.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="mode">The mode to be set.</param>
-        public override GpioPin OpenPin(int pinNumber, PinMode mode)
-        {
-            var pin = OpenPin(pinNumber);
-            _pins[pinNumber].SetPinMode(mode);
-            return pin;
-        }
-
-        /// <summary>
-        /// Opens a pin and sets it to a specific mode and value.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <param name="mode">The mode to be set.</param>
-        /// <param name="initialValue">The initial value to be set if the mode is output. The driver will attempt to set the mode without causing glitches to the other value.
-        /// (if <paramref name="initialValue"/> is <see cref="PinValue.High"/>, the pin should not glitch to low during open)</param>
-        public override GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
-        {
-            var pin = OpenPin(pinNumber, mode);
-            _pins[pinNumber].Write(initialValue);
-            return pin;
-        }
-
-        /// <summary>
         /// Opens a pin in order for it to be ready to use.
         /// The driver attempts to open the pin without changing its mode or value.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public new GpioPin OpenPin(int pinNumber)
+        public override GpioPin OpenPin(int pinNumber)
         {
             if (IsPinOpen(pinNumber))
             {
-                return _openPins[pinNumber];
+                return _gpioPins[pinNumber];
             }
 
             VirtualGpioPin pin = new VirtualGpioPin(_pins[pinNumber], pinNumber);
 
-            _openPins.TryAdd(pinNumber, pin);
-            return _openPins[pinNumber];
+            _gpioPins.TryAdd(pinNumber, pin);
+            return _gpioPins[pinNumber];
         }
 
         /// <inheritdoc/>
@@ -196,7 +160,7 @@ namespace Iot.Device.Gpio
         {
             ComponentInformation self = new ComponentInformation(this, "Virtual GPIO Controller");
 
-            self.Properties["OpenPins"] = string.Join(", ", _openPins.Select(x => x.Key));
+            self.Properties["OpenPins"] = string.Join(", ", _gpioPins.Select(x => x.Key));
 
             return self;
         }
