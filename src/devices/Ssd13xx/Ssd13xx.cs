@@ -29,7 +29,7 @@ namespace Iot.Device.Ssd13xx
         /// <summary>
         /// Underlying SPI device
         /// </summary>
-        protected SpiDevice? _spiDevice;
+        internal SpiDevice? SpiDevice { get; set; }
 
         /// <summary>
         /// Constructs instance of Ssd13xx using an I2C device
@@ -52,13 +52,13 @@ namespace Iot.Device.Ssd13xx
         /// <param name="spiDevice">SPI device used to communicate with the device</param>
         /// <param name="width">Width of the display, in pixels</param>
         /// <param name="height">Height of the display, in pixels</param>
-        protected Ssd13xx(SpiDevice? spiDevice, int width, int height)
+        protected Ssd13xx(SpiDevice spiDevice, int width, int height)
         {
             _genericBuffer = new byte[DefaultBufferSize];
             ScreenHeight = height;
             ScreenWidth = width;
             BrightnessThreshold = DefaultThreshold;
-            _spiDevice = spiDevice;
+            SpiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
         }
 
         /// <inheritdoc />
@@ -133,9 +133,9 @@ namespace Iot.Device.Ssd13xx
             {
                 _i2cDevice.Write(writeBuffer);
             }
-            else if (_spiDevice != null)
+            else if (SpiDevice != null)
             {
-                _spiDevice.Write(writeBuffer);
+                SpiDevice.Write(writeBuffer);
             }
             else
             {
@@ -151,8 +151,8 @@ namespace Iot.Device.Ssd13xx
                 _i2cDevice?.Dispose();
                 _i2cDevice = null!;
 
-                _spiDevice?.Dispose();
-                _spiDevice = null!;
+                SpiDevice?.Dispose();
+                SpiDevice = null!;
             }
         }
 

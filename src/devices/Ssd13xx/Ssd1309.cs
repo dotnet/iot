@@ -23,7 +23,7 @@ namespace Iot.Device.Ssd13xx
         private readonly GpioPin _dcGpioPin;
         private readonly GpioPin _rstGpioPin;
 
-        private GpioController? _gpioController;
+        private GpioController _gpioController;
 
         /// <summary>
         /// Initializes new instance of Ssd13069 device that will communicate using SPI
@@ -39,7 +39,7 @@ namespace Iot.Device.Ssd13xx
         /// <param name="csGpioPin">GPIO pin for chip-select. Active state is LOW. Does not guarantee support for multiple SPI bus devices.</param>
         /// <param name="dcGpioPin">GPIO pin for Data/Command control</param>
         /// <param name="rstGpioPin">GPIO pin for Reset behavior</param>
-        public Ssd1309(SpiDevice? spiDevice, GpioController gpioController, int csGpioPin, int dcGpioPin, int rstGpioPin, int width, int height)
+        public Ssd1309(SpiDevice spiDevice, GpioController gpioController, int csGpioPin, int dcGpioPin, int rstGpioPin, int width, int height)
         : base(spiDevice, width, height)
         {
             _gpioController = gpioController;
@@ -82,7 +82,7 @@ namespace Iot.Device.Ssd13xx
 
             commandBytes.CopyTo(writeBuffer.Slice(0));
 
-            if (_spiDevice != null)
+            if (SpiDevice != null)
             {
                 // Begin consuming SPI bus data
                 // Because the timing is not perfect, this may have adverse side-effects when using multiple SPI bus devices
@@ -90,7 +90,7 @@ namespace Iot.Device.Ssd13xx
 
                 // Enable command mode
                 _dcGpioPin.Write(PinValue.Low);
-                _spiDevice.Write(writeBuffer);
+                SpiDevice.Write(writeBuffer);
 
                 // Stop consuming SPI bus data
                 _csGpioPin.Write(PinValue.High);
@@ -112,7 +112,7 @@ namespace Iot.Device.Ssd13xx
                 throw new ArgumentNullException(nameof(data));
             }
 
-            if (_spiDevice != null)
+            if (SpiDevice != null)
             {
                 // Begin consuming SPI bus data
                 // Because the timing is not perfect, this may have adverse side-effects when using multiple SPI bus devices
@@ -120,7 +120,7 @@ namespace Iot.Device.Ssd13xx
 
                 // Enable data mode
                 _dcGpioPin.Write(PinValue.High);
-                _spiDevice.Write(data);
+                SpiDevice.Write(data);
 
                 // Stop consuming SPI bus data
                 _csGpioPin.Write(PinValue.High);
@@ -137,11 +137,10 @@ namespace Iot.Device.Ssd13xx
         protected virtual void Initialize()
         {
             SendCommand(new SetDisplayOff());
-            SendCommand(new SetDisplayClockDivideRatioOscillatorFrequency(0x00, 0x08));
+            SendCommand(new SetDisplayClockDivideRatioOscillatorFrequency());
             SendCommand(new SetMultiplexRatio());
-            SendCommand(new SetDisplayOffset(0x00));
-            SendCommand(new SetDisplayStartLine(0x00));
-            SendCommand(new SetChargePump(true));
+            SendCommand(new SetDisplayOffset());
+            SendCommand(new SetDisplayStartLine());
             SendCommand(new SetMemoryAddressingMode(SetMemoryAddressingMode.AddressingMode.Horizontal));
             SetStartAddress();
             SendCommand(new SetSegmentReMap(true));
@@ -149,7 +148,7 @@ namespace Iot.Device.Ssd13xx
             SendCommand(new SetComPinsHardwareConfiguration());
             SendCommand(new SetContrastControlForBank0());
             SendCommand(new SetPreChargePeriod());
-            SendCommand(new SetVcomhDeselectLevel(SetVcomhDeselectLevel.DeselectLevel.Vcc0_77));
+            SendCommand(new SetVcomhDeselectLevel());
             SendCommand(new EntireDisplayOn(false));
             SendCommand(new SetNormalDisplay());
             SendCommand(new SetDisplayOn());

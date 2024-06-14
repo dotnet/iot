@@ -1,14 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Threading;
-using System.Collections.Concurrent;
+using System;
 using System.Threading.Tasks;
-using Iot.Device.Graphics.SkiaSharpAdapter;
+using System.Collections.Concurrent;
 using Iot.Device.Ssd13xx;
 using Iot.Device.Graphics;
-using SkiaSharp;
 
 namespace Ssd13xx.Samples.Simulations
 {
@@ -155,10 +153,9 @@ namespace Ssd13xx.Samples.Simulations
                 await Task.Delay(bufferInterval);
             }
 
-            Console.ReadKey(true);
-
             if (_isRunning)
             {
+                Console.ReadKey();
                 Stop();
             }
         }

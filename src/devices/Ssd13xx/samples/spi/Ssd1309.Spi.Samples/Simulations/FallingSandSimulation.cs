@@ -3,7 +3,6 @@
 
 using System;
 using System.Drawing;
-using Iot.Device.Graphics;
 using Iot.Device.Graphics.SkiaSharpAdapter;
 using Iot.Device.Ssd13xx;
 using SkiaSharp;
