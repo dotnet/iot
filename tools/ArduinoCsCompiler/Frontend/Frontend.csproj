@@ -13,6 +13,8 @@
     <Authors>The .NET Foundation community</Authors>
     <NeutralLanguage>en</NeutralLanguage>
     <IsPackable>True</IsPackable>
+    <!-- This is a tool package so we disable generating a symbol package. -->
+    <IncludeSymbols>false</IncludeSymbols>
     <LangVersion>latest</LangVersion>
     <PackAsTool>True</PackAsTool>
     <ToolCommandName>dotnet-acs</ToolCommandName>
