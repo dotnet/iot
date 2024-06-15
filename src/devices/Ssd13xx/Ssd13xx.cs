@@ -24,7 +24,7 @@ namespace Iot.Device.Ssd13xx
         /// <summary>
         /// Underlying I2C device
         /// </summary>
-        protected I2cDevice? _i2cDevice;
+        internal I2cDevice? I2cDevice { get; set; }
 
         /// <summary>
         /// Underlying SPI device
@@ -43,7 +43,7 @@ namespace Iot.Device.Ssd13xx
             ScreenHeight = height;
             ScreenWidth = width;
             BrightnessThreshold = DefaultThreshold;
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            I2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
         }
 
         /// <summary>
@@ -129,9 +129,9 @@ namespace Iot.Device.Ssd13xx
             writeBuffer[0] = 0x40; // Control byte.
             data.CopyTo(writeBuffer.Slice(1));
 
-            if (_i2cDevice != null)
+            if (I2cDevice != null)
             {
-                _i2cDevice.Write(writeBuffer);
+                I2cDevice.Write(writeBuffer);
             }
             else if (SpiDevice != null)
             {
@@ -148,8 +148,8 @@ namespace Iot.Device.Ssd13xx
         {
             if (disposing)
             {
-                _i2cDevice?.Dispose();
-                _i2cDevice = null!;
+                I2cDevice?.Dispose();
+                I2cDevice = null!;
 
                 SpiDevice?.Dispose();
                 SpiDevice = null!;
