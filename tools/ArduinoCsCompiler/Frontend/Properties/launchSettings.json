@@ -10,7 +10,7 @@
     },
     "BlinkingLed": {
       "commandName": "Project",
-      "commandLineArgs": "compile --run ..\\..\\..\\..\\samples\\BlinkingLed\\bin\\$(Configuration)\\net6.0\\BlinkingLed.exe --network localhost --mapfile ..\\..\\..\\..\\samples\\BlinkingLed\\bin\\$(Configuration)\\net6.0\\BlinkingLed-tokenmap.txt"
+      "commandLineArgs": "compile --run \r\n..\\..\\..\\BlinkingLed\\$(Configuration)\\net6.0\\BlinkingLed.exe --network localhost \r\n--mapfile ..\\..\\..\\BlinkingLed\\$(Configuration)\\net6.0\\BlinkingLed-tokenmap.txt"
     },
     "Help": {
       "commandName": "Project",
@@ -18,7 +18,7 @@
     },
     "WeatherStation": {
       "commandName": "Project",
-      "commandLineArgs": "compile --run ..\\..\\..\\..\\samples\\WeatherStation\\bin\\$(Configuration)\\net6.0\\WeatherStation.exe --network localhost --mapfile ..\\..\\..\\..\\samples\\WeatherStation\\bin\\$(Configuration)\\net6.0\\WeatherStation-tokenmap.txt"
+      "commandLineArgs": "compile --run ..\\..\\..\\WeatherStation\\$(Configuration)\\net6.0\\WeatherStation.exe --network localhost --mapfile ..\\..\\..\\WeatherStation\\$(Configuration)\\net6.0\\WeatherStation-tokenmap.txt --debug"
     }
   }
 }
