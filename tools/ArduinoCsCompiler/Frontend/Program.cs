@@ -15,9 +15,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using CommandLine;
 using Iot.Device.Arduino;
-using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using UnitsNet;
 
 namespace ArduinoCsCompiler
@@ -34,6 +32,8 @@ namespace ArduinoCsCompiler
             }
 
             Console.WriteLine($"ArduinoCsCompiler - Version {version.Version}");
+            Console.WriteLine("This tool is experimental - expect many missing features and that the behavior will change.");
+            Console.WriteLine($"Active runtime version {RuntimeInformation.FrameworkDescription}");
             bool runResult = false;
 
             var parser = new Parser(x =>

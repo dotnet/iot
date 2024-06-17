@@ -1504,9 +1504,19 @@ namespace ArduinoCsCompiler
             }
         }
 
-        public void WriteMapFile(string tokenMapFile)
+        public void WriteMapFile(string tokenMapFile, IlCapabilities ilCapabilities)
         {
             using StreamWriter w = new StreamWriter(tokenMapFile);
+
+            w.WriteLine("Program data summary");
+            w.WriteLine("====================");
+            w.WriteLine($"Program Name: {CompilerSettings.ProcessName ?? "N/A"}");
+            w.WriteLine(ilCapabilities);
+            w.WriteLine($"Total number of classes: {_classes.Count}");
+            w.WriteLine($"Total number of methods: {_methods.Count}");
+            w.WriteLine($"Total number of static fields: {_staticFieldsUsed.Count}");
+            w.WriteLine($"Total number of string constants: {_strings.Count}");
+            w.WriteLine();
 
             w.WriteLine("Token map file, ordered by token number");
             w.WriteLine("=======================================");

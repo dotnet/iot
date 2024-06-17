@@ -30,7 +30,21 @@ namespace ArduinoCsCompiler
             _logger = this.GetCurrentClassLogger();
         }
 
-        public IlCapabilities? IlCapabilities => _ilCapabilities;
+        /// <summary>
+        /// Query the hardware capabilities.
+        /// Use the setter to set the value to null, to force an update
+        /// </summary>
+        public IlCapabilities? IlCapabilities
+        {
+            get
+            {
+                return _ilCapabilities;
+            }
+            set
+            {
+                _ilCapabilities = value;
+            }
+        }
 
         protected override void OnErrorMessage(string message, Exception? exception)
         {

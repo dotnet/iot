@@ -50,6 +50,12 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation]
+        public static bool Wait(Object obj, TimeSpan timeOut)
+        {
+            return Wait(obj, (int)timeOut.TotalMilliseconds);
+        }
+
         [ArduinoImplementation("MonitorTryEnter")]
         public static bool TryEnter(object obj, Int32 millisecondsTimeout)
         {
@@ -57,9 +63,27 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation]
+        public static bool TryEnter(object obj, TimeSpan timeOut)
+        {
+            return TryEnter(obj, (int)timeOut.TotalMilliseconds);
+        }
+
+        [ArduinoImplementation]
         public static bool TryEnter(object obj, Int32 millisecondsTimeout, ref bool lockTaken)
         {
             if (TryEnter(obj, millisecondsTimeout))
+            {
+                lockTaken = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        [ArduinoImplementation]
+        public static bool TryEnter(object obj, TimeSpan timeout, ref bool lockTaken)
+        {
+            if (TryEnter(obj, (int)timeout.TotalMilliseconds))
             {
                 lockTaken = true;
                 return true;

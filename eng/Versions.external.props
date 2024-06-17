@@ -4,6 +4,10 @@
     <PackageReference Include="UnitsNet" Version="5.31.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <MicrosoftNETTestSdkVersion>17.8.0</MicrosoftNETTestSdkVersion>
+  </PropertyGroup>
+
   <!-- Automatically include these assemblies in all test projects -->
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
      <PackageReference Include="Moq" Version="4.16.1" />
@@ -13,7 +17,6 @@
        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit.runner.utility" Version="2.6.3" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Shouldly" Version="4.2.1" />
   </ItemGroup>
 </Project>

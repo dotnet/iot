@@ -103,7 +103,8 @@ namespace ArduinoCsCompiler
 
             return new WaitForEventResult()
             {
-                EventTypes = PinEventTypes.None, TimedOut = true
+                EventTypes = PinEventTypes.None,
+                TimedOut = true
             };
         }
 

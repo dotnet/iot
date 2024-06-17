@@ -8,25 +8,25 @@ namespace DeviceApiTester.Infrastructure
 {
     public static class DriverFactory
     {
-        public static InstanceType? CreateFromEnum<InstanceType, EnumType>(EnumType driver, params object[] parameters)
-            where InstanceType : class
+        public static TInstanceType? CreateFromEnum<TInstanceType, TEnumType>(TEnumType driver, params object[] parameters)
+            where TInstanceType : class
         {
             try
             {
                 string name = driver?.ToString() ?? "Foo";
-                ImplementationTypeAttribute creatorAttribute = typeof(EnumType)
+                ImplementationTypeAttribute creatorAttribute = typeof(TEnumType)
                     .GetMember(name)[0]
                     .GetCustomAttributes(typeof(ImplementationTypeAttribute), false)
                     .OfType<ImplementationTypeAttribute>()
                     .FirstOrDefault()
-                    ?? throw new InvalidOperationException($"The {typeof(EnumType).Name}.{driver} enum value is not attributed with an {nameof(ImplementationTypeAttribute)}.");
+                    ?? throw new InvalidOperationException($"The {typeof(TEnumType).Name}.{driver} enum value is not attributed with an {nameof(ImplementationTypeAttribute)}.");
 
                 if (creatorAttribute.ImplementationType is null)
                 {
                     return null;
                 }
 
-                return Activator.CreateInstance(creatorAttribute.ImplementationType, parameters) as InstanceType;
+                return Activator.CreateInstance(creatorAttribute.ImplementationType, parameters) as TInstanceType;
             }
             catch (Exception ex)
             {

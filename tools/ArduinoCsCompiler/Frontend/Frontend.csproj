@@ -9,20 +9,53 @@
     <AssemblyName>acs</AssemblyName>
     <RootNamespace>ArduinoCsCompiler</RootNamespace>
     <Product>Arduino CS Compiler</Product>
-    <Description>A translation compiler that retargets C# applications so they can run on a microcontroller using the unnamed firmware.</Description>
+    <Description>A translation compiler that retargets C# applications so they can run on a microcontroller using a special firmware. See Readme for further information.</Description>
     <Authors>The .NET Foundation community</Authors>
     <NeutralLanguage>en</NeutralLanguage>
+    <IsPackable>True</IsPackable>
+    <!-- This is a tool package so we disable generating a symbol package. -->
+    <IncludeSymbols>false</IncludeSymbols>
+    <LangVersion>latest</LangVersion>
+    <PackAsTool>True</PackAsTool>
+    <ToolCommandName>dotnet-acs</ToolCommandName>
+    <PackageOutputPath>..\..\..\artifacts\packages\$(Configuration)\Shipping</PackageOutputPath>
+    <MajorVersion>1</MajorVersion>
+    <MinorVersion>0</MinorVersion>
+    <PatchVersion>2</PatchVersion>
+    <!-- Stay in beta mode -->
+    <SuppressFinalPackageVersion>true</SuppressFinalPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="*.cs" />
+
+    <!-- Required for packaging -->
+    <None Include="$(PackageIconFullPath)" Pack="true" PackagePath="$(PackageIcon)" Visible="false" />
+    <None Include="$(RepoRoot)/src/devices/README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\src\devices\Arduino\samples\ApiChecker\RgbLedTest.cs" Link="RgbLedTest.cs" />
+    <Compile Include="..\..\..\src\devices\Arduino\samples\ApiChecker\TestCases.cs" Link="TestCases.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\devices\Arduino\Arduino.csproj" />
-    <ProjectReference Include="..\..\..\src\devices\Arduino\samples\ApiChecker\Arduino.sample.csproj" />
     <ProjectReference Include="..\ArduinoCsCompiler.csproj" />
+  </ItemGroup>
+  <!-- In debug mode, we take the dependencies from the current build, in release mode we link to the officially released packages.
+  This implies that any application the user want's to translate do the same. If they're not part of the same repository,
+  they will always link to the packages, not the projects.
+  -->
+  <ItemGroup Condition="$(Configuration)=='Debug'">
+    <ProjectReference Include="..\..\..\src\devices\Mcp3xxx\Mcp3xxx.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(Configuration)!='Debug'">
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
   </ItemGroup>
 </Project>

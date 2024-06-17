@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
@@ -8,21 +8,28 @@
     <!-- We don't want to run hardware test by default -->
     <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>
     <RootNamespace>ArduinoCsCompiler.Tests</RootNamespace>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(Configuration)=='Debug'">
     <ProjectReference Include="..\..\..\src\devices\Arduino\Arduino.csproj" />
-    <ProjectReference Include="..\..\..\src\devices\Arduino\tests\Arduino.Tests.csproj" />
     <ProjectReference Include="..\..\..\src\devices\Bmxx80\Bmxx80.csproj" />
     <ProjectReference Include="..\..\..\src\devices\Board\Board.csproj" />
     <ProjectReference Include="..\..\..\src\devices\CharacterLcd\CharacterLcd.csproj" />
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(Configuration)!='Debug'">
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj"/>
+    <ProjectReference Include="..\..\..\src\Iot.Device.Bindings\Iot.Device.Bindings.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\src\devices\Arduino\tests\FirmataTestFixture.cs" Link="FirmataTestFixture.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\ArduinoCsCompiler.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
-    
-    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

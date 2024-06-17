@@ -12,7 +12,7 @@ using GenerateDocFxStructure.Helpers;
 
 namespace GenerateDocFxStructure
 {
-    class Program
+    internal class Program
     {
         private static readonly string[] _mediaExtentions = new string[] { ".png", ".jpg", ".mpg", ".mpeg", ".mov", ".mp4", ".bmp", ".gif", ".svg" };
         private static CommandlineOptions? _options;
@@ -89,7 +89,6 @@ namespace GenerateDocFxStructure
                 allFiles.Add(file);
             }
 
-
             // we start at the root to generate the items
             DirectoryInfo rootDir = new DirectoryInfo(_options.SourceFolder);
             WalkDirectoryTree(rootDir);
@@ -134,7 +133,7 @@ namespace GenerateDocFxStructure
                 _message.Verbose($"Processing {fi.FullName}");
                 string content = File.ReadAllText(fi.FullName);
 
-                // first see if there are links in this file                
+                // first see if there are links in this file
                 if (_rxContent.Matches(content).Any())
                 {
                     _message.Verbose($"  Links detected.");
@@ -282,12 +281,12 @@ namespace GenerateDocFxStructure
                                         newRelative = $"~/{nameOfMediaFolder}/{relativeMediaPath.Replace('\\', '/')}";
                                         needAbsoluteLink = false;
                                     }
-                                    else if(extention == ".md")
+                                    else if (extention == ".md")
                                     {
                                         // Case 2: it's a Markdown file in what's been moved
                                         // we will do a relative link on it
                                         // if not an absolute link on the repo
-                                        if((_options.SourceFolder.Length + 1)  >= absolute.Length)
+                                        if ((_options.SourceFolder.Length + 1) >= absolute.Length)
                                         {
                                             needAbsoluteLink = true;
                                         }
@@ -299,8 +298,8 @@ namespace GenerateDocFxStructure
                                             needAbsoluteLink = false;
                                         }
                                     }
-                                    
-                                    if(needAbsoluteLink)
+
+                                    if (needAbsoluteLink)
                                     {
                                         // Case 2: it's a link on a directory in the repo or a file
                                         // Adjust the link

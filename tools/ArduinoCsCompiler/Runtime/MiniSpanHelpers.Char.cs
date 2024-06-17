@@ -84,7 +84,7 @@ namespace ArduinoCsCompiler.Runtime
                 i += 1;
             }
 
-            Equal:
+        Equal:
             return lengthDelta;
         }
 
@@ -123,7 +123,7 @@ namespace ArduinoCsCompiler.Runtime
 
                 return false;
 
-                Found:
+            Found:
                 return true;
             }
         }
@@ -177,13 +177,13 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             return -1;
-            Found3:
+        Found3:
             return (int)(offset + 3);
-            Found2:
+        Found2:
             return (int)(offset + 2);
-            Found1:
+        Found1:
             return (int)(offset + 1);
-            Found:
+        Found:
             return (int)(offset);
         }
 
@@ -225,13 +225,13 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             return -1;
-            Found3:
+        Found3:
             return (int)(offset + 3);
-            Found2:
+        Found2:
             return (int)(offset + 2);
-            Found1:
+        Found1:
             return (int)(offset + 1);
-            Found:
+        Found:
             return (int)offset;
         }
 
@@ -273,13 +273,13 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             return -1;
-            Found3:
+        Found3:
             return (int)(offset + 3);
-            Found2:
+        Found2:
             return (int)(offset + 2);
-            Found1:
+        Found1:
             return (int)(offset + 1);
-            Found:
+        Found:
             return (int)offset;
 
         }
@@ -322,13 +322,13 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             return -1;
-            Found3:
+        Found3:
             return (int)(offset + 3);
-            Found2:
+        Found2:
             return (int)(offset + 2);
-            Found1:
+        Found1:
             return (int)(offset + 1);
-            Found:
+        Found:
             return (int)offset;
 
         }
@@ -371,13 +371,13 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             return -1;
-            Found3:
+        Found3:
             return (int)(offset + 3);
-            Found2:
+        Found2:
             return (int)(offset + 2);
-            Found1:
+        Found1:
             return (int)(offset + 1);
-            Found:
+        Found:
             return (int)offset;
         }
 
@@ -413,13 +413,13 @@ namespace ArduinoCsCompiler.Runtime
                 }
 
                 return -1;
-                Found:
+            Found:
                 return (int)(pCh - pEndCh);
-                Found1:
+            Found1:
                 return (int)(pCh - pEndCh) + 1;
-                Found2:
+            Found2:
                 return (int)(pCh - pEndCh) + 2;
-                Found3:
+            Found3:
                 return (int)(pCh - pEndCh) + 3;
             }
         }
