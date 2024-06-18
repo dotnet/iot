@@ -33,7 +33,11 @@ public class GpioController : IDisposable
     /// If a pin element exists, that pin is open. Uses current controller's numbering scheme
     /// </summary>
     private readonly ConcurrentDictionary<int, PinValue?> _openPins;
-    private readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
+
+    /// <summary>
+    /// The GPIO pins open in the GpioController.
+    /// </summary>
+    protected readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
     private GpioDriver _driver;
 
     /// <summary>
@@ -110,7 +114,7 @@ public class GpioController : IDisposable
     /// The driver attempts to open the pin without changing its mode or value.
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-    public GpioPin OpenPin(int pinNumber)
+    public virtual GpioPin OpenPin(int pinNumber)
     {
         if (IsPinOpen(pinNumber))
         {
@@ -167,7 +171,7 @@ public class GpioController : IDisposable
     /// If allowed by the driver, the state of the pin is not changed.
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-    public void ClosePin(int pinNumber)
+    public virtual void ClosePin(int pinNumber)
     {
         if (!IsPinOpen(pinNumber))
         {
