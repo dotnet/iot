@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Ssd13xx.csproj" />
-    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
-    <ProjectReference Include="..\..\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\..\..\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
+    <ProjectReference Include="..\..\..\Ssd13xx.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="images\*.bmp">
