@@ -217,15 +217,6 @@ namespace Iot.Device.Mcp23xxx.Tests
 
             protected override void Toggle(int pinNumber) => Write(pinNumber, !Read(pinNumber));
 
-            public void Read(Span<PinValuePair> pinValuePairs)
-            {
-                for (int i = 0; i < pinValuePairs.Length; i++)
-                {
-                    int pin = pinValuePairs[i].PinNumber;
-                    pinValuePairs[i] = new PinValuePair(pin, Read(pin));
-                }
-            }
-
             protected override void SetPinMode(int pinNumber, PinMode mode)
             {
                 _pinModes.AddOrUpdate(pinNumber, mode, (key, oldValue) => mode);
