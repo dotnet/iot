@@ -8,6 +8,7 @@ namespace System.Device.Gpio
     /// </summary>
     public class Gpio​Pin
     {
+        // This pin number is used when there is a virtual controller.
         private readonly int _externalPinNumber;
 
         /// <summary>
