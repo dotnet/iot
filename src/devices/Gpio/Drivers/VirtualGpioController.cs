@@ -9,8 +9,6 @@ using System.Collections.Concurrent;
 using System.Device.Gpio;
 using System;
 using System.Device;
-using System.Reflection;
-using Iot.Device.Gpio.Drivers;
 
 namespace Iot.Device.Gpio
 {
@@ -89,8 +87,7 @@ namespace Iot.Device.Gpio
         public override int PinCount => _pins.Count;
 
         /// <summary>
-        /// Closes an open pin.
-        /// If allowed by the driver, the state of the pin is not changed.
+        /// This removes the pin for the virtual controller. It does not close the pin as the pin has been opened by another controller.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         public override void ClosePin(int pinNumber)
@@ -104,7 +101,7 @@ namespace Iot.Device.Gpio
         }
 
         /// <summary>
-        /// Disposes this instance and closes all open pins associated with this controller.
+        /// Disposes this instance and removes all pins associated with this virtual controller.
         /// </summary>
         /// <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
         protected override void Dispose(bool disposing)
@@ -125,7 +122,7 @@ namespace Iot.Device.Gpio
         {
             if (!IsPinOpen(pinNumber))
             {
-                throw new InvalidOperationException($"Can not set a mode to pin {pinNumber} because it is not open.");
+                throw new InvalidOperationException($"Can not get a mode to pin {pinNumber} because it is not open.");
             }
 
             return _pins[pinNumber].GetPinMode();
@@ -159,6 +156,11 @@ namespace Iot.Device.Gpio
         public override ComponentInformation QueryComponentInformation()
         {
             ComponentInformation self = new ComponentInformation(this, "Virtual GPIO Controller");
+
+            foreach (var cp in self.SubComponents)
+            {
+                self.AddSubComponent(cp);
+            }
 
             self.Properties["OpenPins"] = string.Join(", ", _gpioPins.Select(x => x.Key));
 

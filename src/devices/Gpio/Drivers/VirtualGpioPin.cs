@@ -3,7 +3,7 @@
 
 using System.Device.Gpio;
 
-namespace Iot.Device.Gpio.Drivers
+namespace Iot.Device.Gpio
 {
     /// <summary>
     /// A virtual GpioPin to allow creating a new GpioPin and a new pin number
