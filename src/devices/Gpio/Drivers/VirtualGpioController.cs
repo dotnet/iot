@@ -97,7 +97,7 @@ namespace Iot.Device.Gpio
                 throw new InvalidOperationException($"Can not close pin {pinNumber} because it is not open.");
             }
 
-            _gpioPins.TryRemove(pinNumber, out _);
+            GpioPins.TryRemove(pinNumber, out _);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Iot.Device.Gpio
         /// <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
         protected override void Dispose(bool disposing)
         {
-            foreach (int pin in _gpioPins.Keys)
+            foreach (int pin in GpioPins.Keys)
             {
                 // The list contains the pin in the current NumberingScheme
                 ClosePin(pin);
@@ -114,7 +114,7 @@ namespace Iot.Device.Gpio
 
             // We're just emptying the lists
             _pins.Clear();
-            _gpioPins.Clear();
+            GpioPins.Clear();
         }
 
         /// <inheritdoc/>
@@ -143,13 +143,13 @@ namespace Iot.Device.Gpio
         {
             if (IsPinOpen(pinNumber))
             {
-                return _gpioPins[pinNumber];
+                return GpioPins[pinNumber];
             }
 
             VirtualGpioPin pin = new VirtualGpioPin(_pins[pinNumber], pinNumber);
 
-            _gpioPins.TryAdd(pinNumber, pin);
-            return _gpioPins[pinNumber];
+            GpioPins.TryAdd(pinNumber, pin);
+            return GpioPins[pinNumber];
         }
 
         /// <inheritdoc/>
@@ -162,7 +162,7 @@ namespace Iot.Device.Gpio
                 self.AddSubComponent(cp);
             }
 
-            self.Properties["OpenPins"] = string.Join(", ", _gpioPins.Select(x => x.Key));
+            self.Properties["OpenPins"] = string.Join(", ", GpioPins.Select(x => x.Key));
 
             return self;
         }

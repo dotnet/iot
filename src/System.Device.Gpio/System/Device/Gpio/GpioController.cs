@@ -37,7 +37,7 @@ public class GpioController : IDisposable
     /// <summary>
     /// The GPIO pins open in the GpioController.
     /// </summary>
-    protected readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
+    protected readonly ConcurrentDictionary<int, GpioPin> GpioPins;
     private GpioDriver _driver;
 
     /// <summary>
@@ -77,7 +77,7 @@ public class GpioController : IDisposable
         _driver = driver;
         NumberingScheme = numberingScheme;
         _openPins = new ConcurrentDictionary<int, PinValue?>();
-        _gpioPins = new ConcurrentDictionary<int, GpioPin>();
+        GpioPins = new ConcurrentDictionary<int, GpioPin>();
     }
 
     /// <summary>
@@ -116,7 +116,7 @@ public class GpioController : IDisposable
     {
         get
         {
-            return _gpioPins.Values;
+            return GpioPins.Values;
         }
     }
 
@@ -141,13 +141,13 @@ public class GpioController : IDisposable
     {
         if (IsPinOpen(pinNumber))
         {
-            return _gpioPins[pinNumber];
+            return GpioPins[pinNumber];
         }
 
         OpenPinCore(pinNumber);
         _openPins.TryAdd(pinNumber, null);
-        _gpioPins[pinNumber] = new GpioPin(pinNumber, _driver);
-        return _gpioPins[pinNumber];
+        GpioPins[pinNumber] = new GpioPin(pinNumber, _driver);
+        return GpioPins[pinNumber];
     }
 
     /// <summary>
@@ -213,7 +213,7 @@ public class GpioController : IDisposable
     {
         int logicalPinNumber = GetLogicalPinNumber(pinNumber);
         _driver.ClosePin(logicalPinNumber);
-        _gpioPins.TryRemove(pinNumber, out _);
+        GpioPins.TryRemove(pinNumber, out _);
     }
 
     /// <summary>
@@ -454,7 +454,7 @@ public class GpioController : IDisposable
         }
 
         _openPins.Clear();
-        _gpioPins.Clear();
+        GpioPins.Clear();
         _driver?.Dispose();
         _driver = null!;
     }
