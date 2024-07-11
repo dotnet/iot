@@ -4,9 +4,6 @@ name: Arduino_Compiler_CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events
-  push:
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   pull_request:
