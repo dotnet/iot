@@ -12,9 +12,7 @@ The following deliverables are not in any particular order:
 * [ ] Improve the abstraction for devices in Iot.Device.Bindings package
 * [ ] Add E2E sample that leverages the integration with Azure services
 * [ ] Improve testing setup - i.e. distributed ways to contribute to queue (i.e. @Ellerbach shares RPi3 + encoder and @krwq shares RPi3 + SenseHat)
-* [ ] Support new protocols; for example I2S.
+* [ ] Support new protocols; for example I2S, Matter
 * [ ] Support common serial protocols: RS-485 Serial Port, Modbus
 
 ![dotnet iot rodmap](images/DotNetIotRoadmapComponents.png)
-  
-More libraries and features are coming soon. Stay tuned!
