@@ -152,7 +152,7 @@ namespace ArduinoCsCompiler.Runtime
             internal static unsafe int LCMapStringEx(string lpLocaleName, uint dwMapFlags, char* lpSrcStr, int cchsrc, void* lpDestStr,
                 int cchDest, void* lpVersionInformation, void* lpReserved, IntPtr sortHandle)
             {
-                throw new NotImplementedException();
+                return 0; // Can apparently be null in InvariantCulture mode.
             }
 
             internal static int FindNLSString(
