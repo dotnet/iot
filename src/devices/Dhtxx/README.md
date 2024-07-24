@@ -157,7 +157,7 @@ Now if your sensor is an I2C sensor, it should just work perfectly on Windows 10
 
 #### 1-Wire Protocol Circuit
 
-Simply connect your DHTxx data pin to GPIO26 (physical pin 37), the ground to the ground (physical pin 6) and the VCC to +5V (physical pin 2).
+Simply connect your DHTxx data pin to GPIO26 (physical pin 37), the ground to the ground (physical pin 6) and the VCC to +3.3V (physical pin 1). You should probably add a 10k pullup resistor between GPIO26 (physical pin 37) and 3.3v (physical pin 1), to be within the specifications of the sensor, although it will usually work with software-pullups, which this library uses if available.
 
 ![schema](./dht22.png)
 
