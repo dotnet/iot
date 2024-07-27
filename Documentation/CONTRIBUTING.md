@@ -2,24 +2,26 @@
 
 ## Recommended Software
 
-1. (If building on Windows) - **[Visual Studio 2019](https://visualstudio.microsoft.com/vs/preview/)** (Community, Professional, Enterprise) with the latest updates. This is not required for building the repo, but it will help a lot if the intent is to change the code or add new bindings.
-1. **.NET Core SDK** To ensure the install worked, make sure you can call `dotnet` tool from a command prompt. We now require .NET 6 preview versions of the SDKs because of our central infrastructure, you can find the installers per platform here:
-
-- For Windows: [Link to .NET 6 preview installer for Windows](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-rc.1.21430.12/dotnet-sdk-6.0.100-rc.1.21430.12-win-x64.exe) **This is important as you won't be able to open projects on Visual Studio if you don't install this machine-wide**
-- For Linux: [Link to .NET 6 preview SDK for Linux](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-rc.1.21430.12/dotnet-sdk-6.0.100-rc.1.21430.12-linux-x64.tar.gz)
-- For OSX: [Link to .NET 6 preview SDK for OSX](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-rc.1.21430.12/dotnet-sdk-6.0.100-rc.1.21430.12-osx-x64.tar.gz)
+1. (If building on Windows) - **[Visual Studio 2022](https://visualstudio.microsoft.com/vs/)** (Community, Professional, Enterprise) with the latest updates.  
+(Alternatively, on any platform) - **[Visual Studio Code](https://code.visualstudio.com/download)** with the **[C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit)** extension.  
+These are not required for building the repo, but they will help a lot if the intent is to change the code or add new bindings.
+1. **.NET SDK** To ensure the install worked, make sure you can call the `dotnet` tool from a command prompt. We recommend a current release version of the SDK because of our central infrastructure. You can find the supported releases [here](https://dotnet.microsoft.com/en-us/download/dotnet). For each supported release there are installers for Windows, Linux, and MacOS.
 
 ## Building from the Command Line
 
-From a (non-admin) Command Prompt window (or a Terminal shell when building on Linux/OSX):
+From a (non-admin) Command Prompt on Windows or a (non-root) shell when building on Linux/OSX):
 
-- `build.cmd` (or `./build.sh` on Linux/OSX) -  Will cause basic tool initialization and build the main library (System.Device.Gpio), the device bindings (projects under src/devices), tools and samples.
+- `build.cmd` on Windows, or `./build.sh` on Linux/OSX -  Will cause basic tool initialization and build the main library (System.Device.Gpio), the device bindings (projects under src/devices), tools and samples.
 
-For more information on how to turn of parts of the build, please type `build.cmd -h` (or `./build.sh -h` on Linux/OSX) to see an up-to-date list
+For more information on how to turn of parts of the build, please type `build.cmd -h` (or `./build.sh -h` on Linux/OSX) to see an up-to-date list.
+
+## Building from Visual Studio Code
+
+Open a Terminal within Visual Studio Code and follow the instructions for building from the command line.
 
 ## Building from Visual Studio (Windows only)
 
-**Make sure you have the .NET 6 preview SDK installed machine-wide in order to be able to open projects in VisualStudio or else you will get project loading problems. You can find the link above.**
+**Make sure you have the .NET SDK installed machine-wide in order to be able to open projects in Visual Studio or else you will get project loading problems. You can find the link above.**
 
 In order to be able to open and build most projects in the repo with Visual Studio, you would have to already have run `build.cmd` from the root at least once. This is because this command will restore basic tooling and SDKs that most of the repo relies on. Once you have done that once, you should be able to open individual projects with Visual Studio, and should be able to build them in the IDE.
 
