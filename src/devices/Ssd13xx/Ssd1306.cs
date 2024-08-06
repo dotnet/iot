@@ -60,7 +60,7 @@ namespace Iot.Device.Ssd13xx
             // Be aware there is a Continuation Bit in the Control byte and can be used
             // to state (logic LOW) if there is only data bytes to follow.
             // This binding separates commands and data by using SendCommand and SendData.
-            _i2cDevice.Write(writeBuffer);
+            I2cDevice?.Write(writeBuffer);
         }
 
         // Display size 128x32 or 128x64
