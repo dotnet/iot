@@ -20,7 +20,7 @@ These devices are controlled purely by GPIO (except Grove LCD RGB Backlight). Th
 Here is a Hello World example of how to consume this binding:
 
 ```csharp
-using (var lcd = new Lcd1602(18, 5, new int[]{6, 16, 20, 21})) //using 4 data pins
+using (var lcd = new Lcd1602(22, 17, new int[] { 25, 24, 23, 18 })) //using 4 data pins
 {
     lcd.Write("Hello World!");
 }
