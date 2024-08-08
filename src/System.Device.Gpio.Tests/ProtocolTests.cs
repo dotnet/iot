@@ -16,7 +16,8 @@ namespace System.Device.Gpio.Tests;
 
 public class ProtocolsTests
 {
-    [Fact]
+    // See #2339: This test is very frequently failing in CI, looks like a hardware issue.
+    [Fact(Skip = "Test is running unreliably")]
     [Trait("feature", "spi")]
     public void SPI_Mcp3008CanRead()
     {
