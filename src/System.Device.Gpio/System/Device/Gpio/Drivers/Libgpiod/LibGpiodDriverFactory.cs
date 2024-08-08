@@ -165,7 +165,11 @@ internal sealed class LibGpiodDriverFactory
                     DirectoryInfo[] subdirectories = currentDirectory.GetDirectories();
                     foreach (var subdirectory in subdirectories)
                     {
-                        directoriesToProcess.Push(subdirectory);
+                        var depth = subdirectory.FullName.Count(separator => separator == Path.DirectorySeparatorChar);
+                        if (depth < 10)
+                        {
+                            directoriesToProcess.Push(subdirectory);
+                        }
                     }
                 }
             }
