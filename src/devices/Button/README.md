@@ -40,7 +40,7 @@ In order to ease the configuration, here is a simple table with the connections 
 
 ## Usage
 
-You can find an example in the [samples](./Samples/Program.cs) directory.
+You can find an example in the [samples](./samples/Program.cs) directory.
 
 ```csharp
 // Initialize a new button with the corresponding button pin assuming internal pull-up
