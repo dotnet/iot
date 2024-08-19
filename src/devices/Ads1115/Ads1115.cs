@@ -7,6 +7,7 @@ using System.Threading;
 using System.Device;
 using System.Device.I2c;
 using System.Device.Gpio;
+using System.IO;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -261,19 +262,36 @@ namespace Iot.Device.Ads1115
         /// </summary>
         private void DisableAlertReadyPin()
         {
-            _comparatorQueue = ComparatorQueue.Disable;
-            SetConfig();
-            // Reset to defaults
-            Span<byte> writeBuff = stackalloc byte[3]
+            bool success = false;
+            int retries = 3;
+            Span<byte> writeBuff = stackalloc byte[3];
+            while (!success)
             {
-                (byte)Register.ADC_CONFIG_REG_LO_THRESH, 0x80, 0
-            };
-            _i2cDevice.Write(writeBuff);
-            writeBuff = stackalloc byte[3]
-            {
-                (byte)Register.ADC_CONFIG_REG_HI_THRESH, 0x7F, 0xFF
-            };
-            _i2cDevice.Write(writeBuff);
+                // Retry this a few times, otherwise Dispose() may throw an exception, which is ugly.
+                try
+                {
+                    _comparatorQueue = ComparatorQueue.Disable;
+                    SetConfig();
+                    // Reset to defaults
+                    writeBuff[0] = (byte)Register.ADC_CONFIG_REG_LO_THRESH;
+                    writeBuff[1] = 0x80;
+                    writeBuff[2] = 0;
+                    _i2cDevice.Write(writeBuff);
+                    writeBuff[0] = (byte)Register.ADC_CONFIG_REG_HI_THRESH;
+                    writeBuff[1] = 0x7F;
+                    writeBuff[2] = 0xFF;
+                    _i2cDevice.Write(writeBuff);
+                    success = true;
+                }
+                catch (IOException)
+                {
+                    if (retries-- < 0)
+                    {
+                        throw;
+                    }
+                }
+            }
+
             if (_gpioController is object)
             {
                 _gpioController.UnregisterCallbackForPinValueChangedEvent(_gpioInterruptPin, ConversionReadyCallback);

@@ -71,7 +71,7 @@ namespace Iot.Device.Common
         /// <param name="currentTrack">First angle, actual direction</param>
         /// <param name="destinationTrack">Second angle, desired direction</param>
         /// <returns>The normalized result of <paramref name="currentTrack"/>-<paramref name="destinationTrack"/>. The value is negative if
-        /// the current track is to port (left) of the the desired track and positive otherwise</returns>
+        /// the current track is to port (left) of the desired track and positive otherwise</returns>
         public static Angle Difference(Angle currentTrack, Angle destinationTrack)
         {
             double val = currentTrack.Radians - destinationTrack.Radians;
