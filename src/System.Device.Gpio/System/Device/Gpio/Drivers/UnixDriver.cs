@@ -34,7 +34,10 @@ public abstract class UnixDriver : GpioDriver
         UnixDriver? driver = null;
         try
         {
-            driver = (UnixDriver)LibGpiodDriverFactory.Instance.Create(0).LibGpiodDriver;
+#pragma warning disable SDGPIO0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            driver =
+                (UnixDriver)LibGpiodDriverFactory.Instance.Create(0).LibGpiodDriver;
+#pragma warning restore SDGPIO0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         }
         catch (PlatformNotSupportedException)
         {

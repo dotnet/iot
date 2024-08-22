@@ -1,8 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Runtime.InteropServices;
 using System.Device.Gpio.Drivers;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using LibgpiodV2 = Interop.LibgpiodV2;
 
 namespace System.Device.Gpio.Libgpiod.V2;
@@ -13,6 +14,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// The line must be requested to access the line value.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__info.html"/>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class LineInfo : LibGpiodProxyBase
 {
     private readonly LineInfoSafeHandle _handle;

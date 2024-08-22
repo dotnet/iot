@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Iot.Tools.DeviceListing
 {
-    class DeviceInfo : IComparable<DeviceInfo>
+    internal class DeviceInfo : IComparable<DeviceInfo>
     {
         public string Title { get; private set; }
         public string ReadmePath { get; private set; }
@@ -32,6 +32,17 @@ namespace Iot.Tools.DeviceListing
             return Title.CompareTo(other?.Title);
         }
 
+        private static string? GetTitle(string readmePath)
+        {
+            string[] lines = File.ReadAllLines(readmePath);
+            if (lines[0].StartsWith("# "))
+            {
+                return lines[0].Substring(2);
+            }
+
+            return null;
+        }
+
         private void ImportCategories()
         {
             if (!CategoriesFileExists)
@@ -52,17 +63,6 @@ namespace Iot.Tools.DeviceListing
                     Console.WriteLine($"Warning: Category `{line}` is duplicated in `{CategoriesFilePath}`");
                 }
             }
-        }
-
-        private static string? GetTitle(string readmePath)
-        {
-            string[] lines = File.ReadAllLines(readmePath);
-            if (lines[0].StartsWith("# "))
-            {
-                return lines[0].Substring(2);
-            }
-
-            return null;
         }
     }
 }

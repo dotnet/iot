@@ -81,7 +81,7 @@ internal partial class Interop
         /// <param name="offset">The offset of the GPIO line</param>
         /// <returns>Handle to the GPIO line or <see langword="null" /> if an error occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern SafeLineHandle gpiod_chip_get_line(SafeChipHandle chip, int offset);
+        internal static extern IntPtr gpiod_chip_get_line(SafeChipHandle chip, int offset);
 
         /// <summary>
         /// Reserve a single line, set the direction to input.
@@ -90,7 +90,7 @@ internal partial class Interop
         /// <param name="consumer">Name of the consumer.</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_request_input(SafeLineHandle line, string consumer);
+        internal static extern int gpiod_line_request_input(IntPtr line, string consumer);
 
         /// <summary>
         /// Reserve a single line, set the direction to input with flags
@@ -100,7 +100,7 @@ internal partial class Interop
         /// <param name="flags">Additional request flags.</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_request_input_flags(SafeLineHandle line, string consumer, int flags);
+        internal static extern int gpiod_line_request_input_flags(IntPtr line, string consumer, int flags);
 
         /// <summary>
         /// Reserve a single line, set the direction to output.
@@ -110,7 +110,7 @@ internal partial class Interop
         /// <param name="default_val">Initial value of the line</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_request_output(SafeLineHandle line, string consumer, int default_val);
+        internal static extern int gpiod_line_request_output(IntPtr line, string consumer, int default_val);
 
         /// <summary>
         /// Set the value of a single GPIO line.
@@ -119,7 +119,7 @@ internal partial class Interop
         /// <param name="value">New value.</param>
         /// <returns>0 if the operation succeeds. In case of an error this routine returns -1 and sets the last error number.</returns>
         [DllImport(LibgpiodLibrary)]
-        internal static extern int gpiod_line_set_value(SafeLineHandle line, int value);
+        internal static extern int gpiod_line_set_value(IntPtr line, int value);
 
         /// <summary>
         /// Read current value of a single GPIO line.
@@ -127,7 +127,7 @@ internal partial class Interop
         /// <param name="line">GPIO line handle</param>
         /// <returns>0 or 1 if the operation succeeds. On error this routine returns -1 and sets the last error number.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_get_value(SafeLineHandle line);
+        internal static extern int gpiod_line_get_value(IntPtr line);
 
         /// <summary>
         /// Check if line is no used (not set as Input or Output, not listening events).
@@ -135,7 +135,7 @@ internal partial class Interop
         /// <param name="line">GPIO line handle</param>
         /// <returns>false if pin is used as Input/Output or Listening an event, true if it is free</returns>
         [DllImport(LibgpiodLibrary)]
-        internal static extern bool gpiod_line_is_free(SafeLineHandle line);
+        internal static extern bool gpiod_line_is_free(IntPtr line);
 
         /// <summary>
         /// Release a previously reserved line.
@@ -153,7 +153,7 @@ internal partial class Interop
         /// <param name="lineHandle">GPIO line handle</param>
         /// <returns>1 for input, 2 for output</returns>
         [DllImport(LibgpiodLibrary)]
-        internal static extern int gpiod_line_direction(SafeLineHandle lineHandle);
+        internal static extern int gpiod_line_direction(IntPtr lineHandle);
 
         /// <summary>
         /// Read the GPIO line bias setting.
@@ -161,7 +161,7 @@ internal partial class Interop
         /// <param name="lineHandle">GPIO line handle</param>
         /// <returns>GPIOD_LINE_BIAS_PULL_UP (3), GPIOD_LINE_BIAS_PULL_DOWN (4), GPIOD_LINE_BIAS_DISABLE (2) or GPIOD_LINE_BIAS_UNKNOWN (1). </returns>
         [DllImport(LibgpiodLibrary)]
-        internal static extern int gpiod_line_bias(SafeLineHandle lineHandle);
+        internal static extern int gpiod_line_bias(IntPtr lineHandle);
 
         /// <summary>
         /// Request all event type notifications on a single line.
@@ -170,7 +170,7 @@ internal partial class Interop
         /// <param name="consumer">Name of the consumer.</param>
         /// <returns>0 the operation succeeds, -1 on failure.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_request_both_edges_events(SafeLineHandle line, string consumer);
+        internal static extern int gpiod_line_request_both_edges_events(IntPtr line, string consumer);
 
         /// <summary>
         /// Wait for an event on a single line.
@@ -179,7 +179,7 @@ internal partial class Interop
         /// <param name="timeout">The TimeSpec to wait for before timing out</param>
         /// <returns>0 if wait timed out, -1 if an error occurred, 1 if an event occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern WaitEventResult gpiod_line_event_wait(SafeLineHandle line, ref TimeSpec timeout);
+        internal static extern WaitEventResult gpiod_line_event_wait(IntPtr line, ref TimeSpec timeout);
 
         /// <summary>
         /// Read the last event from the GPIO line.
@@ -188,7 +188,7 @@ internal partial class Interop
         /// <param name="gpioEvent">Reference to the gpio event that was detected</param>
         /// <returns>1 if rising edge event occurred, 2 on falling edge, -1 on error.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_event_read(SafeLineHandle line, ref GpioLineEvent gpioEvent);
+        internal static extern int gpiod_line_event_read(IntPtr line, ref GpioLineEvent gpioEvent);
 
         /// <summary>
         /// Open a gpiochip by number.

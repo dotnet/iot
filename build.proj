@@ -36,6 +36,7 @@
       <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
       <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
       <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\Iot.Device.Bindings.SkiaSharpAdapter\Iot.Device.Bindings.SkiaSharpAdapter.csproj" />
+      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)tools\ArduinoCsCompiler\Frontend\Frontend.csproj"/>
 
       <ProjectReference Condition="'$(BuildPackages)' == 'true'" Include="@(_ProjectsToPackage)" Targets="Pack" />
   </ItemGroup>

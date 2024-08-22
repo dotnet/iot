@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace System.Device.Gpio.Libgpiod.V2;
 
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal abstract class LibGpiodProxyBase : IDisposable
 {
     /// <remarks>

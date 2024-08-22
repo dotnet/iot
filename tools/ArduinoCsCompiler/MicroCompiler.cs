@@ -994,7 +994,7 @@ namespace ArduinoCsCompiler
                     {
                         // Or if the method is implementing an interface
                         List<EquatableMethod> methodsBeingImplemented = new List<EquatableMethod>();
-                        MicroCompiler.CollectBaseImplementations(set, m, methodsBeingImplemented);
+                        CollectBaseImplementations(set, m, methodsBeingImplemented);
                         if (methodsBeingImplemented.Any())
                         {
                             PrepareMethod(set, m, null);
@@ -1237,7 +1237,7 @@ namespace ArduinoCsCompiler
                     return 1;
                 }
 
-                compareByName:
+            compareByName:
                 return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
             }
         }
@@ -1474,7 +1474,7 @@ namespace ArduinoCsCompiler
         /// <param name="method">The method instance</param>
         /// <param name="methodsBeingImplemented">Returns the list of methods (from interfaces or base classes) that this method implements</param>
         /// <returns>True if the method shall be part of the class declaration</returns>
-        private static bool MemberLinkRequired(ExecutionSet set, MemberInfo method, out List<EquatableMethod> methodsBeingImplemented)
+        private bool MemberLinkRequired(ExecutionSet set, MemberInfo method, out List<EquatableMethod> methodsBeingImplemented)
         {
             methodsBeingImplemented = new List<EquatableMethod>();
 
@@ -1497,13 +1497,13 @@ namespace ArduinoCsCompiler
                 CollectBaseImplementations(set, new EquatableMethod(m), methodsBeingImplemented);
 
                 // We need the implementation if at least one base implementation is being called and is used
-                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, m, out _, out _));
+                return methodsBeingImplemented.Any(x => set.HasMethod(x, m, out _, out _));
             }
 
             return false;
         }
 
-        internal static void CollectBaseImplementations(ExecutionSet set, EquatableMethod method, List<EquatableMethod> methodsBeingImplemented)
+        internal void CollectBaseImplementations(ExecutionSet set, EquatableMethod method, List<EquatableMethod> methodsBeingImplemented)
         {
             Type? cls = method.DeclaringType?.BaseType;
             while (cls != null)
@@ -1539,6 +1539,7 @@ namespace ArduinoCsCompiler
                     EquatableMethod equatableCandidate = new EquatableMethod(candidate);
                     if (EquatableMethod.IsOverriddenImplementation(equatableCandidate, method, true))
                     {
+                        _logger.LogDebug($"Need to include {method.MethodSignature()} in execution set because it implements {interf}");
                         methodsBeingImplemented.Add(equatableCandidate);
                     }
                 }
@@ -3053,7 +3054,9 @@ namespace ArduinoCsCompiler
             if (_commandHandler != null)
             {
                 _commandHandler.Dispose();
+#if DEBUG // TODO: Re-enable (method is not yet available in the released package)
                 _board?.RemoveCommandHandler(_commandHandler);
+#endif
             }
 
             _commandHandler = null!;
@@ -3090,10 +3093,15 @@ namespace ArduinoCsCompiler
             _commandHandler.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
         }
 
-        public bool QueryBoardCapabilities(
+        public bool QueryBoardCapabilities(bool force,
             [NotNullWhen(true)]
             out IlCapabilities ilCapabilities)
         {
+            if (force)
+            {
+                _commandHandler.IlCapabilities = null;
+            }
+
             ilCapabilities = null!;
             _commandHandler.QueryCapabilities();
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Device.Gpio.Drivers.Libgpiod.V2;
 using System.Device.Gpio.Libgpiod.V2;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -13,6 +14,7 @@ namespace System.Device.Gpio.Drivers;
 /// <summary>
 /// Driver factory for different versions of libgpiod.
 /// </summary>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal sealed class LibGpiodDriverFactory
 {
     private const string DriverVersionEnvVar = "DOTNET_IOT_LIBGPIOD_DRIVER_VERSION";

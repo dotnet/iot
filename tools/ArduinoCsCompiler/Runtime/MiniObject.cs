@@ -34,7 +34,7 @@ namespace ArduinoCsCompiler.Runtime
         [ArduinoImplementation("ObjectToString", 4)]
         public override string ToString()
         {
-           throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         [ArduinoImplementation("ObjectGetType", 5)]

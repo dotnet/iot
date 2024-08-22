@@ -10,7 +10,7 @@ namespace GenerateDocFxStructure.Helpers
     /// </summary>
     public class MessageHelper
     {
-        private readonly CommandlineOptions options;
+        private readonly CommandlineOptions _options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageHelper"/> class.
@@ -18,7 +18,7 @@ namespace GenerateDocFxStructure.Helpers
         /// <param name="options">Command line options.</param>
         public MessageHelper(CommandlineOptions options)
         {
-            this.options = options;
+            _options = options;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace GenerateDocFxStructure.Helpers
         /// <param name="message">Message to show in verbose mode.</param>
         public void Verbose(string message)
         {
-            if (this.options == null || this.options.Verbose)
+            if (_options == null || _options.Verbose)
             {
                 Console.WriteLine(message);
             }

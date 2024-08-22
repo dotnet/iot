@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Device.Gpio.Drivers;
@@ -11,7 +12,7 @@ namespace System.Device.Gpio.Drivers;
 /// </summary>
 public class LibGpiodDriver : UnixDriver
 {
-    private readonly GpioDriver _driver;
+    private GpioDriver _driver;
 
     /// <summary>
     /// Creates an instance of the LibGpiodDriver
@@ -23,9 +24,11 @@ public class LibGpiodDriver : UnixDriver
     /// </remarks>
     public LibGpiodDriver(int gpioChip = 0)
     {
+#pragma warning disable SDGPIO0001 // Suppressing diagnostic for using experimental APIs from this same repository.
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip);
         _driver = versionedLibgpiodDriver.LibGpiodDriver;
         Version = versionedLibgpiodDriver.DriverVersion;
+#pragma warning restore SDGPIO0001 // Suppressing diagnostic for using experimental APIs from this same repository.
     }
 
     /// <summary>
@@ -36,6 +39,7 @@ public class LibGpiodDriver : UnixDriver
     /// <param name="gpioChip">The number of the GPIO chip to drive</param>
     /// <param name="driverVersion">Version of the libgpiod driver to create</param>
     /// <remarks>Alternatively, specify the environment variable DOTNET_IOT_LIBGPIOD_DRIVER_VERSION, see documentation</remarks>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public LibGpiodDriver(int gpioChip, LibGpiodDriverVersion driverVersion)
     {
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip, driverVersion);
@@ -46,105 +50,127 @@ public class LibGpiodDriver : UnixDriver
     /// <summary>
     /// Version of the libgpiod driver
     /// </summary>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public LibGpiodDriverVersion Version { get; protected set; }
 
     /// <summary>
     /// A collection of driver versions that correspond to the installed versions of libgpiod on this system. Each driver is dependent
     /// on specific libgpiod version/s. If the collection is empty, it indicates that libgpiod might not be installed or could not be detected.
     /// </summary>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public static LibGpiodDriverVersion[] GetAvailableVersions() => LibGpiodDriverFactory.Instance.DriverCandidates;
 
     /// <inheritdoc/>
-    protected internal override int PinCount => _driver.PinCount;
+    protected internal override int PinCount => GetDriver().PinCount;
 
     /// <inheritdoc/>
     protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
     {
-        _driver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+        GetDriver().AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
     }
 
     /// <inheritdoc/>
     protected internal override void ClosePin(int pinNumber)
     {
-        _driver.ClosePin(pinNumber);
+        GetDriver().ClosePin(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
     {
-        return _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+        return GetDriver().ConvertPinNumberToLogicalNumberingScheme(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override PinMode GetPinMode(int pinNumber)
     {
-        return _driver.GetPinMode(pinNumber);
+        return GetDriver().GetPinMode(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
     {
-        return _driver.IsPinModeSupported(pinNumber, mode);
+        return GetDriver().IsPinModeSupported(pinNumber, mode);
     }
 
     /// <inheritdoc/>
     protected internal override void OpenPin(int pinNumber)
     {
-        _driver.OpenPin(pinNumber);
+        GetDriver().OpenPin(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override PinValue Read(int pinNumber)
     {
-        return _driver.Read(pinNumber);
+        return GetDriver().Read(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override void Toggle(int pinNumber)
     {
-        _driver.Toggle(pinNumber);
+        GetDriver().Toggle(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
     {
-        _driver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+        GetDriver().RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
     }
 
     /// <inheritdoc/>
     protected internal override void SetPinMode(int pinNumber, PinMode mode)
     {
-        _driver.SetPinMode(pinNumber, mode);
+        GetDriver().SetPinMode(pinNumber, mode);
     }
 
     /// <inheritdoc />
     protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
     {
-        _driver.SetPinMode(pinNumber, mode, initialValue);
+        GetDriver().SetPinMode(pinNumber, mode, initialValue);
     }
 
     /// <inheritdoc/>
     protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
     {
-        return _driver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+        return GetDriver().WaitForEvent(pinNumber, eventTypes, cancellationToken);
     }
 
     /// <inheritdoc/>
     protected internal override void Write(int pinNumber, PinValue value)
     {
-        _driver.Write(pinNumber, value);
+        GetDriver().Write(pinNumber, value);
     }
 
     /// <inheritdoc />
     public override ComponentInformation QueryComponentInformation()
     {
-        return _driver.QueryComponentInformation();
+        var ret = new ComponentInformation(this, "Libgpiod Wrapper driver");
+#pragma warning disable SDGPIO0001
+        ret.Properties.Add("Version", Version.ToString());
+        ret.AddSubComponent(GetDriver().QueryComponentInformation());
+#pragma warning restore SDGPIO0001
+        return ret;
+    }
+
+    private GpioDriver GetDriver()
+    {
+        if (_driver == null)
+        {
+            throw new ObjectDisposedException(nameof(LibGpiodDriver));
+        }
+
+        return _driver;
     }
 
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
-        _driver.Dispose();
+        if (_driver != null && disposing)
+        {
+            _driver.Dispose();
+            _driver = null!;
+        }
+
         base.Dispose(disposing);
     }
 }

@@ -32,7 +32,7 @@ namespace Iot.Device.Arduino.Tests
 
             _compiler = new MicroCompiler(_fixture.Board!, true);
 
-            if (!_compiler.QueryBoardCapabilities(out IlCapabilities data))
+            if (!_compiler.QueryBoardCapabilities(false, out IlCapabilities data))
             {
                 throw new NotSupportedException("No valid IL execution firmware found on board");
             }

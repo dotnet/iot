@@ -94,7 +94,15 @@ namespace ArduinoCsCompiler
             set;
         }
 
+        /// <summary>
+        /// True to support language preview features
+        /// </summary>
         public bool UsePreviewFeatures { get; set; }
+
+        /// <summary>
+        /// The name of the process, if applicable
+        /// </summary>
+        public string? ProcessName { get; set; }
 
         object ICloneable.Clone()
         {

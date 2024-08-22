@@ -1,0 +1,24 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "Prepare": {
+      "commandName": "Project",
+      "commandLineArgs": "prepare --flashsize 4MiB --firmwaresize 1.2MiB"
+    },
+    "BlinkingLed": {
+      "commandName": "Project",
+      "commandLineArgs": "compile --run \r\n..\\..\\..\\BlinkingLed\\$(Configuration)\\net6.0\\BlinkingLed.exe --network localhost \r\n--mapfile ..\\..\\..\\BlinkingLed\\$(Configuration)\\net6.0\\BlinkingLed-tokenmap.txt"
+    },
+    "Help": {
+      "commandName": "Project",
+      "commandLineArgs": "--version"
+    },
+    "WeatherStation": {
+      "commandName": "Project",
+      "commandLineArgs": "compile --run ..\\..\\..\\WeatherStation\\$(Configuration)\\net6.0\\WeatherStation.exe --network localhost --mapfile ..\\..\\..\\WeatherStation\\$(Configuration)\\net6.0\\WeatherStation-tokenmap.txt --debug"
+    }
+  }
+}

@@ -4,9 +4,6 @@ name: Arduino_Compiler_CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events
-  push:
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   pull_request:
@@ -17,6 +14,9 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: windows-latest
+    strategy:
+        matrix:
+            configuration: [Release]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -24,5 +24,6 @@ jobs:
         uses: actions/checkout@master
         
       - run: |
-          eng/ArduinoCsCI.cmd %USERPROFILE% Debug
+          eng/ArduinoCsCI.cmd %USERPROFILE% ${{ matrix.configuration }}
+
 

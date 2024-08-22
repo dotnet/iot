@@ -75,7 +75,14 @@ public class GpioController : IDisposable
     /// <summary>
     /// The number of pins provided by the controller.
     /// </summary>
-    public virtual int PinCount => _driver.PinCount;
+    public virtual int PinCount
+    {
+        get
+        {
+            CheckDriverValid();
+            return _driver.PinCount;
+        }
+    }
 
     /// <summary>
     /// Returns the collection of open pins
@@ -233,7 +240,16 @@ public class GpioController : IDisposable
     /// <returns>The status if the pin is open or closed.</returns>
     public bool IsPinOpen(int pinNumber)
     {
+        CheckDriverValid();
         return _openPins.ContainsKey(pinNumber);
+    }
+
+    private void CheckDriverValid()
+    {
+        if (_driver == null)
+        {
+            throw new ObjectDisposedException(nameof(GpioController));
+        }
     }
 
     /// <summary>
@@ -244,6 +260,7 @@ public class GpioController : IDisposable
     /// <returns>The status if the pin supports the mode.</returns>
     public virtual bool IsPinModeSupported(int pinNumber, PinMode mode)
     {
+        CheckDriverValid();
         int logicalPinNumber = GetLogicalPinNumber(pinNumber);
         return _driver.IsPinModeSupported(logicalPinNumber, mode);
     }

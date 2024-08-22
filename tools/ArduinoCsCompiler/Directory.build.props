@@ -1,8 +1,7 @@
 <Project>
-  <Import Project="../../eng/Analyzers.props" />
-  <Import Project="../../eng/Versions.props" />
-  <Import Project="../../eng/Versions.external.props" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
   <PropertyGroup>
-	<Nullable>enable</Nullable>
+	  <Nullable>enable</Nullable>
   </PropertyGroup>
 </Project>
