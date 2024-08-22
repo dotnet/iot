@@ -289,6 +289,8 @@ namespace Iot.Device.Ads1115
                     {
                         throw;
                     }
+
+                    Thread.Sleep(100);
                 }
             }
 
