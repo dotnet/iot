@@ -95,8 +95,7 @@ namespace Iot.Device.Ssd13xx
         public void SendCommand(byte command)
         {
             Span<byte> writeBuffer = new byte[] { Command_Mode, command };
-
-            _i2cDevice.Write(writeBuffer);
+            I2cDevice?.Write(writeBuffer);
         }
 
         /// <summary>

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
+using System.Device.Spi;
 using System.Linq;
 using Iot.Device.Graphics;
 using Iot.Device.Ssd13xx.Commands;
@@ -23,10 +24,15 @@ namespace Iot.Device.Ssd13xx
         /// <summary>
         /// Underlying I2C device
         /// </summary>
-        protected I2cDevice _i2cDevice;
+        protected I2cDevice? I2cDevice { get; set; }
 
         /// <summary>
-        /// Constructs instance of Ssd13xx
+        /// Underlying SPI device
+        /// </summary>
+        protected SpiDevice? SpiDevice { get; set; }
+
+        /// <summary>
+        /// Constructs instance of Ssd13xx using an I2C device
         /// </summary>
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
         /// <param name="width">Width of the display, in pixels</param>
@@ -37,7 +43,22 @@ namespace Iot.Device.Ssd13xx
             ScreenHeight = height;
             ScreenWidth = width;
             BrightnessThreshold = DefaultThreshold;
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            I2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+        }
+
+        /// <summary>
+        /// Constructs instance of Ssd13xx using an SPI device
+        /// </summary>
+        /// <param name="spiDevice">SPI device used to communicate with the device</param>
+        /// <param name="width">Width of the display, in pixels</param>
+        /// <param name="height">Height of the display, in pixels</param>
+        protected Ssd13xx(SpiDevice spiDevice, int width, int height)
+        {
+            _genericBuffer = new byte[DefaultBufferSize];
+            ScreenHeight = height;
+            ScreenWidth = width;
+            BrightnessThreshold = DefaultThreshold;
+            SpiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
         }
 
         /// <inheritdoc />
@@ -107,7 +128,19 @@ namespace Iot.Device.Ssd13xx
 
             writeBuffer[0] = 0x40; // Control byte.
             data.CopyTo(writeBuffer.Slice(1));
-            _i2cDevice.Write(writeBuffer);
+
+            if (I2cDevice != null)
+            {
+                I2cDevice.Write(writeBuffer);
+            }
+            else if (SpiDevice != null)
+            {
+                SpiDevice.Write(writeBuffer);
+            }
+            else
+            {
+                throw new InvalidOperationException("No I2C/SPI device available or it has been disposed.");
+            }
         }
 
         /// <inheritdoc />
@@ -115,8 +148,11 @@ namespace Iot.Device.Ssd13xx
         {
             if (disposing)
             {
-                _i2cDevice?.Dispose();
-                _i2cDevice = null!;
+                I2cDevice?.Dispose();
+                I2cDevice = null!;
+
+                SpiDevice?.Dispose();
+                SpiDevice = null!;
             }
         }
 
@@ -205,6 +241,39 @@ namespace Iot.Device.Ssd13xx
             {
                 SendData(buffer.Skip(i).Take(chunk_size).ToArray());
             }
+        }
+
+        /// <summary>
+        /// Returns the display-ready span of bytes for a bitmap without sending the data to the display
+        /// </summary>
+        /// <param name="image">Image to render</param>
+        public virtual byte[] PreRenderBitmap(BitmapImage image)
+        {
+            if (!CanConvertFromPixelFormat(image.PixelFormat))
+            {
+                throw new InvalidOperationException($"{image.PixelFormat} is not a supported pixel format");
+            }
+
+            int width = ScreenWidth;
+            int pages = image.Height / 8;
+            List<byte> buffer = new();
+
+            for (int page = 0; page < pages; page++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int bits = 0;
+                    for (byte bit = 0; bit < 8; bit++)
+                    {
+                        bits = bits << 1;
+                        bits |= image[x, page * 8 + 7 - bit].GetBrightness() > BrightnessThreshold ? 1 : 0;
+                    }
+
+                    buffer.Add((byte)bits);
+                }
+            }
+
+            return buffer.ToArray();
         }
     }
 }
