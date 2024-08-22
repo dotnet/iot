@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Device.Gpio.Drivers;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Device.Spi;
@@ -35,11 +36,6 @@ public static class SetupHelpers
             actual,
             Math.Max(0, expected - error),
             Math.Min(1, expected + error));
-    }
-
-    public static Mcp3008 CreateAdc()
-    {
-        return new Mcp3008(SpiDevice.Create(new SpiConnectionSettings(0, 0)));
     }
 
     public static Bme280 CreateBme280()
@@ -93,5 +89,36 @@ public static class SetupHelpers
         }
 
         return pwm;
+    }
+
+    internal static AdcWrapper CreateAdc()
+    {
+        return new AdcWrapper();
+    }
+
+    internal sealed class AdcWrapper : IDisposable
+    {
+        private const int CsLine = 8;
+        private GpioPin _csPin;
+        private GpioController _controller;
+        public Mcp3xxx Mcp { get; }
+
+        public AdcWrapper()
+        {
+            _controller = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+            _csPin = _controller.OpenPin(CsLine, PinMode.Output, PinValue.Low);
+            Mcp = new Mcp3008(SpiDevice.Create(new SpiConnectionSettings(0, -1)));
+        }
+
+        public int Read(int channel)
+        {
+            return Mcp.Read(channel);
+        }
+
+        public void Dispose()
+        {
+            Mcp.Dispose();
+            _controller.Dispose();
+        }
     }
 }

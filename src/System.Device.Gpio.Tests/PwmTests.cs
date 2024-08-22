@@ -98,7 +98,7 @@ public class PwmTests
         // settling time calculation was done for 10k and 9k was close enough
         // to not change calculations significantly
         using (PwmChannel pwm = CreatePwmChannel(9000))
-        using (Mcp3008 adc = CreateAdc())
+        using (var adc = CreateAdc())
         {
             // Let the analog value to settle
             Thread.Sleep(3);

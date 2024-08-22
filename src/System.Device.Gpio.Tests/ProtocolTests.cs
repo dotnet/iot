@@ -16,12 +16,11 @@ namespace System.Device.Gpio.Tests;
 
 public class ProtocolsTests
 {
-    // See #2339: This test is very frequently failing in CI, looks like a hardware issue.
-    [Fact(Skip = "Test is running unreliably")]
+    [Fact]
     [Trait("feature", "spi")]
     public void SPI_Mcp3008CanRead()
     {
-        using (Mcp3008 adc = CreateAdc())
+        using (var adc = CreateAdc())
         {
             // We don't care about specific value for the first 5 channels
             for (int i = 0; i <= 4; i++)
@@ -170,7 +169,7 @@ public class ProtocolsTests
     public void PWM_DutyCycleIsSetCorrectly()
     {
         using (PwmChannel pwm = CreatePwmChannel(dutyCycle: 0))
-        using (Mcp3008 adc = CreateAdc())
+        using (var adc = CreateAdc())
         {
             for (int n = 0; n < 2; n++)
             {

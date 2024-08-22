@@ -12,7 +12,7 @@ public class Mcp3008Tests
     [Fact]
     public void InvalidChannel_Throws()
     {
-        using (Mcp3008 adc = CreateAdc())
+        using (var adc = CreateAdc())
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => adc.Read(-1));
             Assert.Throws<ArgumentOutOfRangeException>(() => adc.Read(8));
@@ -22,7 +22,7 @@ public class Mcp3008Tests
     [Fact]
     public void DoubleDispose_DoesNotThrow()
     {
-        Mcp3008 adc = CreateAdc();
+        var adc = CreateAdc();
         adc.Dispose();
         adc.Dispose();
     }

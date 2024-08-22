@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
+#pragma warning disable SDGPIO0001 // Use of experimental features
 namespace System.Device.Gpio.Tests;
 
 [Trait("feature", "gpio")]
