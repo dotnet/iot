@@ -174,7 +174,8 @@ namespace Iot.Device.Ssd13xx
         }
 
         /// <summary>
-        /// Reset device by cycling RST pin to LOW and resting at HIGH
+        /// Reset device by cycling RST pin to LOW and resting at HIGH.
+        /// This will not re-initialize the device.
         /// </summary>
         protected virtual void Reset()
         {

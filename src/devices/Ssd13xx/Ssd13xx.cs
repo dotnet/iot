@@ -24,12 +24,12 @@ namespace Iot.Device.Ssd13xx
         /// <summary>
         /// Underlying I2C device
         /// </summary>
-        internal I2cDevice? I2cDevice { get; set; }
+        protected I2cDevice? I2cDevice { get; set; }
 
         /// <summary>
         /// Underlying SPI device
         /// </summary>
-        internal SpiDevice? SpiDevice { get; set; }
+        protected SpiDevice? SpiDevice { get; set; }
 
         /// <summary>
         /// Constructs instance of Ssd13xx using an I2C device
