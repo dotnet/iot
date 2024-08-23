@@ -105,7 +105,7 @@ public static class SetupHelpers
 
         public AdcWrapper()
         {
-            _controller = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+            _controller = new GpioController(PinNumberingScheme.Logical, new SysFsDriver());
             _csPin = _controller.OpenPin(CsLine, PinMode.Output, PinValue.Low);
             Mcp = new Mcp3008(SpiDevice.Create(new SpiConnectionSettings(0, -1)));
         }
