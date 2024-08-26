@@ -1,3 +1,7 @@
+# LED Displays
+
+A number of LED displays have supported devices or can be extended as necessary.
+
 # HT16K33 - LED Matrix Display Driver
 
 The [Ht16k33](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf) is a multi-function LED controller driver. It is used as a [backpack driver for several Adafruit products](https://www.adafruit.com/?q=Ht16k33). It uses the I2C protocol.
@@ -95,3 +99,23 @@ bargraph[2] = LedColor.YELLOW;
 bargraph[3] = LedColor.OFF;
 bargraph[4] = LedColor.RED;
 ```
+
+# Other Displays
+
+## GPIO Devices
+
+The [5641AS](http://www.xlitx.com/datasheet/5641AS.pdf) segment display is similar to above devices but without colon and degrees LEDs. It can be used without a driver.
+
+![5641AS Segment Display](.\samples\LedSegmentDisplay5641AS.Sample\5641AS.jpg "5641AS Segment Display")
+
+The following code initializes the pin scheme for the device - mapping pins on the device to the GPIO pins on the board - and creates the display.
+
+```c#
+var scheme = new LedSegmentDisplay5641ASPinScheme(16, 21, 6, 19, 26, 20, 5, 13,
+                22, 27, 17, 4);
+
+using var gpio = new System.Device.Gpio.GpioController();
+using var display = new LedSegmentDisplay5641AS(scheme, gpio, false);
+```
+
+See the sample project for pin diagram and a stopwatch example.
