@@ -9,6 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Button\Button.csproj" />
     <ProjectReference Include="..\..\Display.csproj" />
+    <Compile Include="Program.cs" />
+    <Compile Include="SegmentStopwatch.cs" />
   </ItemGroup>
 
 </Project>

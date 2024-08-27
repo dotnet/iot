@@ -1,7 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Display;
 using Iot.Device.Button;
 using Iot.Device.Display;
@@ -45,7 +48,7 @@ namespace LedSEgmentDisplay5641AS.Sample
                     _toWrite.Clear();
                 }
 
-                display.Write(FontHelper.GetString(_sw.Elapsed.ToString("ssff")), decimalsEnabled);
+                display.Write(FontHelper.GetString(_sw.Elapsed.ToString("ssff")).AsSpan(), decimalsEnabled);
                 Thread.Sleep(5);
             }
             while (true);
