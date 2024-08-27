@@ -5,6 +5,22 @@ using System.Device.Gpio;
 
 namespace Display
 {
+    /// <summary>
+    /// Display mode of the segment display, representing current flow through the pins
+    /// </summary>
+    public enum Led7SegmentDisplayMode
+    {
+        /// <summary>
+        /// A common anode display is ON when a high value is sent to the pin
+        /// </summary>
+        CommonAnode = 0,
+
+        /// <summary>
+        /// A common cathode display is OFF when a high value is sent to the pin. Common for LEDs.
+        /// </summary>
+        CommonCathode = 1
+    }
+
     /// <summary>Default pin scheme for the 5641AS 4-digit 7-segment display</summary>
     /// <remarks>
     ///
