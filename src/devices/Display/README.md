@@ -2,13 +2,13 @@
 
 A number of LED displays have supported devices or can be extended as necessary.
 
-# HT16K33 - LED Matrix Display Driver
+## HT16K33 - LED Matrix Display Driver
 
 The [Ht16k33](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf) is a multi-function LED controller driver. It is used as a [backpack driver for several Adafruit products](https://www.adafruit.com/?q=Ht16k33). It uses the I2C protocol.
 
 This binding and samples are based on [adafruit/Adafruit_CircuitPython_HT16K33](https://github.com/adafruit/Adafruit_CircuitPython_HT16K33).
 
-## 7-Segment Display
+### 7-Segment Display
 
 These [bright crisp displays](https://www.adafruit.com/product/1270) are good for showing numeric output. Besides the four 7-segments there is a top right dot (perhaps useful as a degrees symbol) and two sets of colon-dots (good for time-based projects). They come in several colors.
 
@@ -40,7 +40,7 @@ display.Dots = Dot.DecimalPoint;
 display.Flush();
 ```
 
-## 14-Segment Display
+### 14-Segment Display
 
 This [display](https://shop.pimoroni.com/products/four-letter-phat?variant=39256047178) is good for showing alpha-numeric output, and its additional segments provide a wider range of characters
 
@@ -48,7 +48,7 @@ This [display](https://shop.pimoroni.com/products/four-letter-phat?variant=39256
 
 Checkout a [sample](samples/Large4Digit14SegmentDisplay/Program.cs).
 
-## 8x8 and 16x8 LED Matrix
+### 8x8 and 16x8 LED Matrix
 
 Make a [scrolling sign or a small video display](https://www.adafruit.com/product/1614) with [16x8](https://www.adafruit.com/product/2040), [8x8](https://www.adafruit.com/product/1632), and [Bicolor](https://www.adafruit.com/product/902) LED matrices. They are quite visible but not so large it won't plug into a breadboard!
 
@@ -76,7 +76,7 @@ matrix[4, 3] = 1;
 matrix[7, 7] = 1;
 ```
 
-## Bi-Color Bargraph Usage
+### Bi-Color Bargraph Usage
 
 Make a [small linear display](https://www.adafruit.com/product/1721) with multiple colors using this elegant bi-color LED bargraph. Every bar has two LEDs inside so you can have it display red, green, yellow or with fast multiplexing (provided by the HT16K33 driver chip) any color in between.
 
@@ -100,9 +100,9 @@ bargraph[3] = LedColor.OFF;
 bargraph[4] = LedColor.RED;
 ```
 
-# Other Displays
+## Other Displays
 
-## GPIO Devices
+### GPIO Devices
 
 The [5641AS](http://www.xlitx.com/datasheet/5641AS.pdf) segment display is similar to above devices but without colon and degrees LEDs. It can be used without a driver.
 
