@@ -106,7 +106,7 @@ bargraph[4] = LedColor.RED;
 
 The [5641AS](http://www.xlitx.com/datasheet/5641AS.pdf) segment display is similar to above devices but without colon and degrees LEDs. It can be used without a driver.
 
-![5641AS Segment Display](.\samples\LedSegmentDisplay5641AS.Sample\5641AS.jpg "5641AS Segment Display")
+![5641AS Segment Display](samples/LedSegmentDisplay5641AS.Sample/5641AS.jpg)
 
 The following code initializes the pin scheme for the device - mapping pins on the device to the GPIO pins on the board - and creates the display.
 
