@@ -37,7 +37,6 @@ namespace LedSEgmentDisplay5641AS.Sample
             GpioButton timerButton = new GpioButton(12, gpio: gpio);
             timerButton.Press += TimerButton_Press;
 
-            display.Open();
             display.Clear();
             Thread.Sleep(2000);
 

@@ -46,12 +46,14 @@ namespace Display
 
             _segments = new(pinScheme.SegmentCountPerDigit);
             _digits = new(pinScheme.DigitCount);
+
+            Open();
         }
 
         /// <summary>
         /// Opens GPIO pins defined in <see cref="LedSegmentDisplay5641ASPinScheme"/> as <see cref="PinMode.Output"/>
         /// </summary>
-        public void Open()
+        private void Open()
         {
             foreach (var segmentPinNumBoard in _pinScheme.Segments)
             {
@@ -67,7 +69,7 @@ namespace Display
         /// <summary>
         /// Closes GPIO pins defined in <see cref="LedSegmentDisplay5641ASPinScheme"/>
         /// </summary>
-        public void Close()
+        private void Close()
         {
             foreach (var segmentPinNumBoard in _pinScheme.Segments)
             {
