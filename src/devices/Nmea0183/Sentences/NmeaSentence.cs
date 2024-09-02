@@ -165,7 +165,7 @@ namespace Iot.Device.Nmea0183.Sentences
             }
             else
             {
-                d1 = DateTimeOffset.Now.Date;
+                d1 = DateTimeOffset.UtcNow.Date;
             }
 
             return new DateTimeOffset(d1.Year, d1.Month, d1.Day, t1.Hours, t1.Minutes, t1.Seconds, t1.Milliseconds, gregorianCalendar, TimeSpan.Zero);

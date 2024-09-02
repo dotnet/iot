@@ -20,6 +20,7 @@
     <Compile Include="Messages\AutopilotButtons.cs" />
     <Compile Include="Messages\AutopilotCalibrationParameterMessage.cs" />
     <Compile Include="Messages\AutopilotCalibrationParameter.cs" />
+    <Compile Include="Messages\AutopilotWindStatus.cs" />
     <Compile Include="Messages\CompassHeadingAndRudderPosition.cs" />
     <Compile Include="Messages\CompassHeadingAutopilotCourse.cs" />
     <Compile Include="Messages\CompassHeadingAutopilotCourseAlt.cs" />
@@ -32,6 +33,8 @@
     <Compile Include="Messages\NavigationToWaypoint.cs" />
     <Compile Include="Messages\SeatalkMessage.cs" />
     <Compile Include="Messages\SetLampIntensity.cs" />
+    <Compile Include="Messages\SpeedTroughWater.cs" />
+    <Compile Include="Messages\TargetWaypointName.cs" />
     <Compile Include="Messages\TurnDirection.cs" />
     <None Include="README.md" />
   </ItemGroup>

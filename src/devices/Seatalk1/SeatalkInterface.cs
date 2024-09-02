@@ -202,23 +202,30 @@ namespace Iot.Device.Seatalk1
             }
 
             // Only one thread at a time, please!
-            lock (_lock)
+            try
             {
-                foreach (var e in dataWithParity)
+                lock (_lock)
                 {
-                    // The many flushes here appear to be necessary to make sure the parity correctly applies to the next byte we send (and only to the next)
-                    if (_port.Parity != e.P)
+                    foreach (var e in dataWithParity)
                     {
-                        _port.BaseStream.Flush();
-                        _port.Parity = e.P;
-                        _port.BaseStream.Flush();
+                        // The many flushes here appear to be necessary to make sure the parity correctly applies to the next byte we send (and only to the next)
+                        if (_port.Parity != e.P)
+                        {
+                            _port.BaseStream.Flush();
+                            _port.Parity = e.P;
+                            _port.BaseStream.Flush();
+                        }
+
+                        _port.Write(data, e.Index, 1);
                     }
 
-                    _port.Write(data, e.Index, 1);
+                    _port.BaseStream.Flush();
+                    _port.Parity = DefaultParity;
                 }
-
-                _port.BaseStream.Flush();
-                _port.Parity = DefaultParity;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
             }
 
             return true;
