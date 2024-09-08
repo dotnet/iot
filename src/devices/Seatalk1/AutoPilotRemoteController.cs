@@ -557,9 +557,11 @@ namespace Iot.Device.Seatalk1
         {
             lock (_lock)
             {
-                if (_lastUpdateTime + TimeSpan.FromSeconds(10) < DateTime.UtcNow)
+                // Netstandard 2.0 doesn't support the multiply operator on timespan
+                TimeSpan twice = new TimeSpan(DefaultTimeout.Ticks * 2);
+                if (_lastUpdateTime + twice < DateTime.UtcNow)
                 {
-                    // The autopilot hasn't sent anything for 5 seconds. Assume it's offline
+                    // The autopilot hasn't sent anything for several seconds. Assume it's offline
                     if (Status != AutopilotStatus.Offline) // don't repeat message
                     {
                         _logger.LogWarning("Autopilot connection timed out. Assuming it's offline");
