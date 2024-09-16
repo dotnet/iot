@@ -9,14 +9,24 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-#pragma warning disable 1591
 namespace Iot.Device.Common
 {
+    /// <summary>
+    /// A simple logger that creates textual log files. Created via <see cref="SimpleFileLoggerFactory"/>
+    /// </summary>
     public sealed class SimpleFileLogger : ILogger
     {
         private readonly string _category;
         private TextWriter _writer;
 
+        /// <summary>
+        /// Creates a new logger
+        /// </summary>
+        /// <param name="category">Logger category name</param>
+        /// <param name="writer">The text writer for logging.</param>
+        /// <remarks>
+        /// The <paramref name="writer"/> must be a thread-safe file writer!
+        /// </remarks>
         public SimpleFileLogger(string category, TextWriter writer)
         {
             _category = category;
@@ -33,17 +43,25 @@ namespace Iot.Device.Common
             set;
         }
 
+        /// <summary>
+        /// Does nothing and returns an empty IDisposable
+        /// </summary>
+        /// <typeparam name="TState">Current logger state</typeparam>
+        /// <param name="state">State argument</param>
+        /// <returns>An empty <see cref="IDisposable"/></returns>
         public IDisposable BeginScope<TState>(TState state)
             where TState : notnull
         {
             return new LogDispatcher.ScopeDisposable();
         }
 
+        /// <inheritdoc />
         public bool IsEnabled(LogLevel logLevel)
         {
             return Enabled;
         }
 
+        /// <inheritdoc />
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (Enabled)

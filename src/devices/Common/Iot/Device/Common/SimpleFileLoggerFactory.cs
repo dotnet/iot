@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Common
 {
     /// <summary>
@@ -21,6 +20,10 @@ namespace Iot.Device.Common
         private TextWriter? _writer;
         private List<SimpleFileLogger> _createdLoggers;
 
+        /// <summary>
+        /// Create a logger factory that creates loggers to logs to the specified file
+        /// </summary>
+        /// <param name="fileName">File name to log to (full path)</param>
         public SimpleFileLoggerFactory(string fileName)
         {
             _writer = TextWriter.Synchronized(new StreamWriter(fileName, true, Encoding.UTF8));
