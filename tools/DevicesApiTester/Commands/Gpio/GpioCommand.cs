@@ -9,7 +9,7 @@ namespace DeviceApiTester.Commands.Gpio
 {
     public abstract class GpioCommand : DebuggableCommand
     {
-        [Option('d', "driver", HelpText = "The GpioDriver to use: { Default | Windows | UnixSysFs | HummingBoard | RPi3 }", Required = false, Default = GpioDriverType.Default)]
+        [Option('d', "driver", HelpText = "The GpioDriver to use: { Default | Windows | UnixSysFs | RPi3 }", Required = false, Default = GpioDriverType.Default)]
         public GpioDriverType Driver { get; set; }
 
         protected GpioController CreateGpioController()

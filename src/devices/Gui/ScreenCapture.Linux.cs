@@ -17,7 +17,7 @@ namespace Iot.Device.Gui
     {
         private IntPtr _display;
 
-        private unsafe void InitLinux()
+        private void InitLinux()
         {
             _display = XOpenDisplay();
             if (_display == IntPtr.Zero)

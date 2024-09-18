@@ -69,8 +69,8 @@ namespace CameraIoT.Controllers
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.ContentType = "multipart/x-mixed-replace; boundary=--frame";
-            HttpContext.Response.Headers.Add("Connection", "Keep-Alive");
-            HttpContext.Response.Headers.Add("CacheControl", "no-cache");
+            HttpContext.Response.Headers["Connection"] = "Keep-Alive";
+            HttpContext.Response.Headers["CacheControl"] = "no-cache";
             _camera.NewImageReady += WriteBufferBody;
 
             try
@@ -122,8 +122,8 @@ namespace CameraIoT.Controllers
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.ContentType = "multipart/x-mixed-replace; boundary=--frame";
-            HttpContext.Response.Headers.Add("Connection", "Keep-Alive");
-            HttpContext.Response.Headers.Add("CacheControl", "no-cache");
+            HttpContext.Response.Headers["Connection"] = "Keep-Alive";
+            HttpContext.Response.Headers["CacheControl"] = "no-cache";
             _camera.NewImageReady += WriteModifiedBufferBody;
 
             try

@@ -2099,7 +2099,6 @@ namespace ArduinoCsCompiler
                 set.SuppressType(typeof(System.Device.Gpio.Drivers.LibGpiodDriver));
                 set.SuppressType(typeof(System.Device.Gpio.Drivers.RaspberryPi3Driver));
                 set.SuppressType(typeof(System.Device.Gpio.Drivers.UnixDriver));
-                set.SuppressType(typeof(System.Device.Gpio.Drivers.Windows10Driver));
                 set.SuppressType(typeof(Iot.Device.Board.DummyGpioDriver));
                 set.SuppressType(typeof(Iot.Device.Board.KeyboardGpioDriver));
 

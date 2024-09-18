@@ -6,18 +6,18 @@
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <MicrosoftDotNetGenAPIPackageVersion>8.0.0-beta.24461.2</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
-    <SystemDrawingCommonPackageVersion>6.0.0</SystemDrawingCommonPackageVersion>
-    <SystemIOPortsPackageVersion>5.0.1</SystemIOPortsPackageVersion>
+    <SystemDrawingCommonPackageVersion>8.0.8</SystemDrawingCommonPackageVersion>
+    <SystemIOPortsPackageVersion>8.0.0</SystemIOPortsPackageVersion>
     <MicrosoftWin32RegistryPackageVersion>5.0.0</MicrosoftWin32RegistryPackageVersion>
     <SystemRuntimeWindowsRuntimePackageVersion>4.6.0</SystemRuntimeWindowsRuntimePackageVersion>
     <SystemManagementPackageVersion>5.0.0</SystemManagementPackageVersion>
     <SystemThreadingTasksExtensionsPackageVersion>4.5.4</SystemThreadingTasksExtensionsPackageVersion>
     <SystemMemoryPackageVersion>4.5.5</SystemMemoryPackageVersion>
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
-    <MicrosoftExtensionsLoggingConsolePackageVersion>7.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
-    <MicrosoftExtensionsLoggingPackageVersion>7.0.0</MicrosoftExtensionsLoggingPackageVersion>
-    <MicrosoftExtensionsLoggingAbstractionsPackageVersion>7.0.1</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
-    <SystemTextJsonPackageVersion>6.0.10</SystemTextJsonPackageVersion>
-    <SystemIOPipelinesVersion>7.0.0</SystemIOPipelinesVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>8.0.0</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingAbstractionsPackageVersion>8.0.0</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
+    <SystemTextJsonPackageVersion>8.0.4</SystemTextJsonPackageVersion>
+    <SystemIOPipelinesVersion>8.0.0</SystemIOPipelinesVersion>
   </PropertyGroup>
 </Project>

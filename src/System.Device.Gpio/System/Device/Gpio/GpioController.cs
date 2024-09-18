@@ -26,9 +26,6 @@ public class GpioController : IDisposable
     private const string RaspberryPi3Product = "Raspberry Pi 3";
     private const string RaspberryPi5Product = "Raspberry Pi 5";
 
-    private const string HummingBoardProduct = "HummingBoard-Edge";
-    private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
-
     /// <summary>
     /// If a pin element exists, that pin is open. Uses current controller's numbering scheme
     /// </summary>
@@ -572,13 +569,8 @@ public class GpioController : IDisposable
             return new RaspberryPi3Driver();
         }
 
-        if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
-        {
-            return new HummingBoardDriver();
-        }
-
         // Default for Windows IoT Core on a non-specific device
-        return new Windows10Driver();
+        throw new PlatformNotSupportedException();
     }
 
     /// <summary>
