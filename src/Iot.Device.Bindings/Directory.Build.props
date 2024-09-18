@@ -3,8 +3,8 @@
   <PropertyGroup>
     <MajorVersion>3</MajorVersion>
     <MinorVersion>2</MinorVersion>
-    <Description>This package provides a set of Device Bindings that use System.Device.Gpio package to communicate with a microcontroller.</Description>
-    <PackageTags>.NET Core GPIO Pins SPI I2C PWM BCM2835 BCM2837 RPi IoT Device Bindings</PackageTags>
+    <Description>This package provides a set of Device Bindings ("Device drivers") that use System.Device.Gpio package to communicate with sensors and microcontrollers.</Description>
+    <PackageTags>.NET GPIO Pins SPI I2C PWM RPi IoT Device Bindings</PackageTags>
     <EnablePackageValidation>true</EnablePackageValidation>
     <PackageValidationBaselineVersion>3.1.0</PackageValidationBaselineVersion>
   </PropertyGroup>

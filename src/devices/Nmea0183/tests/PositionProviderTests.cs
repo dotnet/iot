@@ -17,12 +17,14 @@ namespace Iot.Device.Nmea0183.Tests
     public class PositionProviderTests
     {
         private readonly Mock<NmeaSinkAndSource> _sink;
+        private readonly Mock<NmeaSinkAndSource> _dummySource;
         private readonly SentenceCache _cache;
         private readonly PositionProvider _provider;
 
         public PositionProviderTests()
         {
             _sink = new Mock<NmeaSinkAndSource>(MockBehavior.Strict, "Test");
+            _dummySource = new Mock<NmeaSinkAndSource>(MockBehavior.Strict, "Dummy");
             _cache = new SentenceCache(_sink.Object);
             _provider = new PositionProvider(_cache);
         }
@@ -31,7 +33,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void GetNothingEmptyRoute()
         {
             var sentence1 = new RoutePart("RT", 1, 1, new List<string>());
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
 
             Assert.Equal(AutopilotErrorState.WaypointsWithoutPosition, _provider.TryGetCurrentRoute(out _));
         }
@@ -40,7 +42,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void GetCompleteRouteOneElement()
         {
             var sentence1 = new RoutePart("RT", 1, 1, new List<string>() { "A", "B" });
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
 
             _cache.Add(new Waypoint(new GeographicPosition(), "A"));
             _cache.Add(new Waypoint(new GeographicPosition(), "B"));
@@ -60,13 +62,13 @@ namespace Iot.Device.Nmea0183.Tests
         {
             // Even with three times the same message, this should return just one route
             var sentence1 = new RoutePart("RT", 1, 1, new List<string>() { "A", "B" });
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
             var sentence2 = new Waypoint(new GeographicPosition(1, 2, 3), "A");
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence2);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
             var sentence3 = new Waypoint(new GeographicPosition(2, 3, 4), "B");
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence3);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence3);
 
             Assert.Equal(AutopilotErrorState.RoutePresent, _provider.TryGetCurrentRoute(out var route));
             Assert.Equal(2, route.Count);
@@ -78,9 +80,9 @@ namespace Iot.Device.Nmea0183.Tests
             // Even with three times the same message, this should return just one route
             var sentence1 = new RoutePart("RT", 2, 1, new List<string>() { "A", "B" });
             var sentence2 = new RoutePart("RT", 2, 2, new List<string>() { "C", "D" });
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence2);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
 
             _cache.Add(new Waypoint(new GeographicPosition(), "A"));
             _cache.Add(new Waypoint(new GeographicPosition(), "B"));
@@ -103,8 +105,8 @@ namespace Iot.Device.Nmea0183.Tests
             // The latest route is interesting
             var sentence1 = new RoutePart("RTOld", 1, 1, new List<string>() { "A", "B" });
             var sentence2 = new RoutePart("RTNew", 1, 1, new List<string>() { "C", "D" });
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence2);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
 
             _cache.Add(new Waypoint(new GeographicPosition(), "A"));
             _cache.Add(new Waypoint(new GeographicPosition(), "B"));
@@ -122,8 +124,8 @@ namespace Iot.Device.Nmea0183.Tests
             // The latest route is interesting
             var sentence1 = new RoutePart("RTOld", 1, 1, new List<string>() { "A", "B" });
             var sentence2 = new RoutePart("RTNew", 1, 1, new List<string>() { "C", "D" });
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence2);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
 
             _cache.Add(new Waypoint(new GeographicPosition(), "A"));
             _cache.Add(new Waypoint(new GeographicPosition(), "B"));
@@ -143,9 +145,9 @@ namespace Iot.Device.Nmea0183.Tests
                 "C"
             });
             var sentence2 = new RoutePart("RTNew", 3, 1, new List<string>() { "C", "D" });
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence1b);
-            _sink.Raise(x => x.OnNewSequence += null, null, sentence2);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1b);
+            _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
 
             _cache.Add(new Waypoint(new GeographicPosition(), "A"));
             _cache.Add(new Waypoint(new GeographicPosition(), "B"));

@@ -17,7 +17,7 @@ public abstract partial class SpiDevice : IDisposable
     {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
-            return CreateWindows10SpiDevice(settings);
+            throw new PlatformNotSupportedException();
         }
         else
         {

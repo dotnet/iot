@@ -25,13 +25,4 @@
     <!-- The following is supported on windows only. We need it to take screenshots under windows -->
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Include="FrameworkCompatibilityExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Include="IsExternalInit.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
-  </ItemGroup>
 </Project>
