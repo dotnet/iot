@@ -25,6 +25,7 @@ namespace Iot.Device.Nmea0183
     {
         private readonly int _localPort;
         private readonly int _remotePort;
+        private readonly string _broadcastAddress;
 
         private UdpClient? _server;
         private NmeaParser? _parser;
@@ -57,10 +58,26 @@ namespace Iot.Device.Nmea0183
         /// <param name="localPort">The port to receive data on</param>
         /// <param name="remotePort">The network port to send data to (must be different than local port when communicating to a local process)</param>
         public NmeaUdpServer(string name, int localPort, int remotePort)
+            : this(name, localPort, remotePort, "255.255.255.255")
+        {
+        }
+
+        /// <summary>
+        /// Create an UDP server with the given name on the given port, using an alternate outgoing port. The outgoing and incoming
+        /// port may be equal only if the sender and the receiver are not on the same computer.
+        /// </summary>
+        /// <param name="name">The network source name</param>
+        /// <param name="localPort">The port to receive data on</param>
+        /// <param name="remotePort">The network port to send data to (must be different than local port when communicating to a local process)</param>
+        /// <param name="broadcastAddress">Broadcast address of the network interface to use. This is the IP-Address of that interfaces with all
+        /// bits set to 1 that are NOT set in the subnetmask. For a default subnet mask of 255.255.255.0 and a local ip of 192.168.1.45 this is therefore
+        /// 192.168.1.255.</param>
+        public NmeaUdpServer(string name, int localPort, int remotePort, string broadcastAddress)
             : base(name)
         {
             _localPort = localPort;
             _remotePort = remotePort;
+            _broadcastAddress = broadcastAddress;
         }
 
         /// <summary>
@@ -89,8 +106,11 @@ namespace Iot.Device.Nmea0183
                 throw new InvalidOperationException("Server already started");
             }
 
-            _server = new UdpClient(_localPort);
-
+            _server = new UdpClient();
+            _server.EnableBroadcast = true;
+            _server.Client.Bind(new IPEndPoint(IPAddress.Any, _localPort));
+            // byte[] bytes = Encoding.UTF8.GetBytes("Test message\r\n");
+            // _server.Send(bytes, bytes.Length, "192.168.1.255", _localPort);
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 // This is unsupported on MacOS (https://github.com/dotnet/runtime/issues/27653), but this shouldn't
@@ -110,7 +130,7 @@ namespace Iot.Device.Nmea0183
                 _server.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
             }
 
-            _clientStream = new UdpClientStream(_server, _localPort, _remotePort, this);
+            _clientStream = new UdpClientStream(_server, _localPort, _remotePort, this, _broadcastAddress);
             _parser = new NmeaParser($"{InterfaceName} (Port {_localPort})", _clientStream, _clientStream);
             _parser.OnNewSequence += OnSentenceReceivedFromClient;
             _parser.OnParserError += ParserOnParserError;
@@ -179,6 +199,7 @@ namespace Iot.Device.Nmea0183
             private readonly int _remotePort;
             private readonly NmeaUdpServer _parent;
             private readonly Queue<byte> _data;
+            private readonly string _broadcastAddress;
 
             private object _disposalLock = new object();
 
@@ -187,11 +208,12 @@ namespace Iot.Device.Nmea0183
             private CancellationTokenSource _cancellationSource;
             private CancellationToken _cancellationToken;
 
-            public UdpClientStream(UdpClient client, int localPort, int remotePort, NmeaUdpServer parent)
+            public UdpClientStream(UdpClient client, int localPort, int remotePort, NmeaUdpServer parent, string broadcastAddress)
             {
                 _client = client;
                 _localPort = localPort;
                 _remotePort = remotePort;
+                _broadcastAddress = broadcastAddress;
                 _parent = parent;
                 _data = new Queue<byte>();
                 _knownSenders = new();
@@ -230,7 +252,7 @@ namespace Iot.Device.Nmea0183
                     {
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                         {
-#if NET6_O_OR_GREATER
+#if NET6_0_OR_GREATER
                             var result = _client.ReceiveAsync(_cancellationToken).GetAwaiter().GetResult();
                             datagram = result.Buffer;
 #else
@@ -362,8 +384,8 @@ namespace Iot.Device.Nmea0183
 
                     try
                     {
-                        IPEndPoint pt = new IPEndPoint(IPAddress.Broadcast, _remotePort);
-                        _client.Send(tempBuf, count, pt);
+                        IPEndPoint pt = new IPEndPoint(IPAddress.Parse(_broadcastAddress), _remotePort);
+                        _client.Send(tempBuf, count,  pt);
                         _lastUnsuccessfulSend.Stop();
                     }
                     catch (SocketException x)

@@ -103,6 +103,19 @@ namespace Iot.Device.Tests.Seatalk1
         }
 
         [Fact]
+        public void ReturnsToOfflineAfterTimeout()
+        {
+            SetToStandby();
+            Assert.Equal(AutopilotStatus.Standby, _testee.Status);
+            _testee.UpdateStatus();
+            Assert.Equal(AutopilotStatus.Standby, _testee.Status);
+            _testee.DefaultTimeout = TimeSpan.FromSeconds(0);
+            Thread.Sleep(100);
+            _testee.UpdateStatus();
+            Assert.Equal(AutopilotStatus.Offline, _testee.Status);
+        }
+
+        [Fact]
         public void TurnToStarboard()
         {
             // Ap is in auto mode

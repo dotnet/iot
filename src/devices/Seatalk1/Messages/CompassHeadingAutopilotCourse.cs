@@ -14,8 +14,7 @@ using UnitsNet;
 namespace Iot.Device.Seatalk1.Messages
 {
     /// <summary>
-    /// Compass heading and current autopilot course and parameters. This message contains the same fields as <see cref="CompassHeadingAutopilotCourse"/>,
-    /// plus some more.
+    /// Compass heading and current autopilot course and parameters.
     /// </summary>
     public record CompassHeadingAutopilotCourse : SeatalkMessage
     {
@@ -79,6 +78,10 @@ namespace Iot.Device.Seatalk1.Messages
             if (status == AutopilotStatus.Undefined)
             {
                 Logger.LogWarning($"Unknown autopilot status byte {data[4]}");
+            }
+            else
+            {
+                Logger.LogInformation($"Current autopilot status: {status}");
             }
 
             sbyte rudder = (sbyte)data[6];

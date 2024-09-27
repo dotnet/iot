@@ -99,7 +99,7 @@ namespace Iot.Device.Nmea0183.Sentences
             // If override is active ("A"), then we treat this as standby
             if (manualOverride == "A")
             {
-                Status = "A";
+                Status = "M";
                 Valid = true;
             }
             else
@@ -187,6 +187,24 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <inheritdoc />
         public override bool ReplacesOlderInstance => true;
 
+        /// <summary>
+        /// Returns the status as user-readable string (common name)
+        /// </summary>
+        /// <returns>Name of the mode</returns>
+        public static string UserState(string statusChar)
+        {
+            return statusChar switch
+            {
+                "M" => "Standby",
+                "S" => "Auto",
+                "H" => "External",
+                "T" => "Track",
+                "R" => "Remote",
+                "W" => "Wind",
+                _ => "Unknown",
+            };
+        }
+
         /// <inheritdoc />
         public override string ToNmeaParameterList()
         {
@@ -224,7 +242,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <inheritdoc />
         public override string ToReadableContent()
         {
-            return $"Mode: {Status}, CommandedTrack: {CommandedTrack}, TurnMode: {TurnMode}";
+            return $"Autopilot command: {UserState(Status)}, CommandedTrack: {CommandedTrack}, TurnMode: {TurnMode}";
         }
 
         /// <summary>
@@ -232,7 +250,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         /// <param name="value">Input angle</param>
         /// <returns>An angle or null, if the input is null</returns>
-        protected static Angle? AsAngle(double? value)
+        internal static Angle? AsAngle(double? value)
         {
             if (value.HasValue)
             {
@@ -247,7 +265,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         /// <param name="angle">Angle to translate</param>
         /// <returns>The translated angle or just a comma</returns>
-        protected static string FromAngle(Angle? angle)
+        internal static string FromAngle(Angle? angle)
         {
             if (!angle.HasValue)
             {
@@ -259,7 +277,7 @@ namespace Iot.Device.Nmea0183.Sentences
             }
         }
 
-        private static Length? AsLength(double? value)
+        internal static Length? AsLength(double? value)
         {
             if (value.HasValue)
             {
@@ -269,7 +287,7 @@ namespace Iot.Device.Nmea0183.Sentences
             return null;
         }
 
-        private static string FromLength(Length? length)
+        internal static string FromLength(Length? length)
         {
             if (length.HasValue == false)
             {

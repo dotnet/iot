@@ -505,6 +505,32 @@ namespace Iot.Device.Nmea0183.Tests
             hdt = new HeadingAndTrackControl("H", Angle.FromDegrees(10.21), "L", "N", null, null, Length.FromNauticalMiles(22.29), null, null, null, Angle.FromDegrees(2), false);
             msg = hdt.ToNmeaParameterList();
             Assert.Equal("V,10.2,L,H,N,,,22.3,,,,2.0,M", msg);
+
+            var sentence = TalkerSentence.FromSentenceString("$GPHTC,V,10.2,L,H,N,,,22.3,,,,2.0,M", out var error);
+            Assert.Equal(NmeaError.None, error);
+            DateTimeOffset time = DateTimeOffset.UtcNow;
+            var hdt2 = (HeadingAndTrackControl)sentence!.TryGetTypedValue(ref time)!;
+            Assert.Equal(hdt.ToNmeaParameterList(), hdt2.ToNmeaParameterList());
+        }
+
+        [Fact]
+        public void HtdEncode()
+        {
+            var hdt = new HeadingAndTrackControlStatus("M", null, "L", "N", null, null, null, null, null, null, null, true, false, false, false, Angle.FromDegrees(10.12));
+            var msg = hdt.ToNmeaParameterList();
+            Assert.Equal("A,,L,M,N,,,,,,,,T,A,A,A,10.1", msg);
+
+            hdt = new HeadingAndTrackControlStatus("H", Angle.FromDegrees(10.21), "L", "N", null, null, Length.FromNauticalMiles(22.29), null, null, null, Angle.FromDegrees(2), false, true, true, true, Angle.FromDegrees(12.23));
+            msg = hdt.ToNmeaParameterList();
+            Assert.Equal("V,10.2,L,H,N,,,22.3,,,,2.0,M,V,V,V,12.2", msg);
+
+            var sentence = TalkerSentence.FromSentenceString("$GPHTD,V,10.2,L,H,N,,,22.3,,,,2.0,M,V,V,V,12.23", out var error);
+            Assert.Equal(NmeaError.None, error);
+            DateTimeOffset time = DateTimeOffset.UtcNow;
+            var hdt2 = (HeadingAndTrackControlStatus)sentence!.TryGetTypedValue(ref time)!;
+            Assert.Equal(hdt.ToNmeaParameterList(), hdt2.ToNmeaParameterList());
+            Assert.Equal(HeadingAndTrackControlStatus.Id, hdt.SentenceId);
+            Assert.Equal(HeadingAndTrackControlStatus.Id, hdt2.SentenceId);
         }
 
         [Fact]
@@ -600,6 +626,8 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,*64")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M*58")]
         [InlineData("$APRSA,12.2,A,,V")]
+        [InlineData("$GPHTD,V,10.2,L,H,N,,,22.3,,,,2.0,M,V,V,V,12.23")]
+        [InlineData("$GPHTC,V,10.2,L,H,N,,,22.3,,,,2.0,M")]
         public void CanParseAllTheseMessages(string input)
         {
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
@@ -633,6 +661,8 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$APHTD,V,10.0,L,R,N,12.0,13.5,2.0,1.0,15.1,0.5,16.2,T,V,A,V,123.2")]
         [InlineData("$STALK,84,86,26,97,02,00,00,00,08")]
         [InlineData("$STALK,9C,01,12,00")]
+        [InlineData("$GPHTD,V,10.2,L,H,N,,,22.3,,,,2.0,M,V,V,V,12.2")]
+        [InlineData("$GPHTC,V,10.2,L,H,N,,,22.3,,,,2.0,M")]
         public void SentenceRoundTripIsUnaffectedByCulture(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here
