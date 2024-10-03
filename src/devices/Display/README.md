@@ -1,4 +1,4 @@
-# LED Displays
+# LED Displays - 5641AS, HT16K33 and LED Matrix Display Driver
 
 A number of LED displays have supported devices or can be extended as necessary.
 
