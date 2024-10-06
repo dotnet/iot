@@ -19,7 +19,9 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     {
     }
 
+#pragma warning disable SDGPIO0001
     protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0, LibGpiodDriverVersion.V1);
+#pragma warning restore SDGPIO0001
 
     protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 

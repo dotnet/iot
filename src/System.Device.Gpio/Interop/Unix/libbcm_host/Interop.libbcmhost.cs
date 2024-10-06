@@ -9,7 +9,9 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     internal partial class libbcmhost
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     {
         private const string LibbcmhostLibrary = "libbcm_host";
 

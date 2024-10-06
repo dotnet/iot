@@ -56,7 +56,7 @@ namespace ArduinoCsCompiler.Runtime
         {
             fixed (byte* bytePointer = &b)
             {
-                ZeroMemory(bytePointer, byteLength);
+                ZeroMemory((void*)bytePointer, byteLength);
             }
         }
 

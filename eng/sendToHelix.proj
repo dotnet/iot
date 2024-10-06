@@ -13,7 +13,7 @@
 
     <IncludeDotNetCli>true</IncludeDotNetCli>
     <DotNetCliPackageType>sdk</DotNetCliPackageType>
-    <DotNetCliVersion>6.0.400</DotNetCliVersion>
+    <DotNetCliVersion>8.0.300</DotNetCliVersion>
 
     <EnableAzurePipelinesReporter Condition="'$(SYSTEM_ACCESSTOKEN)' != ''">true</EnableAzurePipelinesReporter>
     <TestRunNamePrefix>$(AGENT_JOBNAME)</TestRunNamePrefix>
@@ -35,8 +35,7 @@
   <ItemGroup Condition="'$(TestOS)' == 'Unix'">
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
-      <TargetFramework>net6.0</TargetFramework>
-      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
+      <TargetFramework>net8.0</TargetFramework>
     </XUnitProject>
     <!-- Target queues -->
     <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.11.Arm32.IoT"/>

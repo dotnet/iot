@@ -11,14 +11,8 @@ namespace DeviceApiTester.Commands.Gpio
         [ImplementationType(null)]
         Default,
 
-        [ImplementationType(typeof(Windows10Driver))]
-        Windows,
-
         [ImplementationType(typeof(UnixDriver))]
         Unix,
-
-        [ImplementationType(typeof(HummingBoardDriver))]
-        HummingBoard,
 
         [ImplementationType(typeof(RaspberryPi3Driver))]
         RPi3,

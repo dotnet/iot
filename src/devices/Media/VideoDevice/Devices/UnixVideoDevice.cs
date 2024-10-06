@@ -404,7 +404,7 @@ namespace Iot.Device.Media
             InteropVideodev2.v4l2_format format = new InteropVideodev2.v4l2_format
             {
                 type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                fmt = new InteropVideodev2.fmt
+                fmt = new InteropVideodev2.V412_Fmt
                 {
                     pix = new InteropVideodev2.v4l2_pix_format
                     {
