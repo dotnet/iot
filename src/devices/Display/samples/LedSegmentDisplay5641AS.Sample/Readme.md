@@ -1,4 +1,4 @@
-# Example commands for deploying to Raspberry Pi:
+# Example commands for deploying to Raspberry Pi
 
 ## Build / Publish
 
