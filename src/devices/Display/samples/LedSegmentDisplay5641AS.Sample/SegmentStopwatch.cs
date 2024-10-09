@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Display;
 using Iot.Device.Button;
@@ -47,8 +48,16 @@ namespace LedSEgmentDisplay5641AS.Sample
                     _toWrite.Clear();
                 }
 
-                display.Write(FontHelper.GetString(_sw.Elapsed.ToString("ssff")).AsSpan(), decimalsEnabled);
-                Thread.Sleep(5);
+                // Use the Segment[] overload to set DP per digit
+                Segment[] elapsedString = FontHelper.GetString(_sw.Elapsed.ToString("ssff")).Cast<Segment>().ToArray();
+                elapsedString[1] |= Segment.Dot;
+
+                /* Use Font[] overload for general string writes without DP
+                Font[] elapsedString = FontHelper.GetString(_sw.Elapsed.ToString("ssff"));
+                */
+
+                display.Write(elapsedString);
+                Thread.Sleep(1);
             }
             while (true);
         }

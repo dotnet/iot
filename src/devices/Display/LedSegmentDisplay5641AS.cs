@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Iot.Device.Display;
 
 namespace Display
@@ -26,14 +24,21 @@ namespace Display
         private readonly bool _shouldDispose;
         private bool _disposedValue;
 
-        private List<GpioPin> _segments;
-        private List<GpioPin> _digits;
+        private List<GpioPin> _segmentPins;
+        private List<GpioPin> _digitPins;
+
+        // address, Segment(s)
+        private Dictionary<int, Segment> _displayBuffer;
 
         /// <inheritdoc />
         public int NumberOfDigits => _pinScheme.DigitCount;
 
         /// <inheritdoc />
-        public Segment this[int address] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Segment this[int address]
+        {
+            get => _displayBuffer[address];
+            set => WriteDigitAtAddress(address, value);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LedSegmentDisplay5641AS"/> class.
@@ -44,8 +49,9 @@ namespace Display
             _gpioController = gpioController ?? new GpioController();
             _shouldDispose = gpioController is null || shouldDispose;
 
-            _segments = new(pinScheme.SegmentCountPerDigit);
-            _digits = new(pinScheme.DigitCount);
+            _segmentPins = new(pinScheme.SegmentCountPerDigit);
+            _digitPins = new(pinScheme.DigitCount);
+            _displayBuffer = new Dictionary<int, Segment>(pinScheme.DigitCount);
 
             Open();
         }
@@ -57,12 +63,12 @@ namespace Display
         {
             foreach (var segmentPinNumBoard in _pinScheme.Segments)
             {
-                _segments.Add(_gpioController.OpenPin(segmentPinNumBoard, PinMode.Output));
+                _segmentPins.Add(_gpioController.OpenPin(segmentPinNumBoard, PinMode.Output));
             }
 
             foreach (var digitPinNumBoard in _pinScheme.Digits)
             {
-                _digits.Add(_gpioController.OpenPin(digitPinNumBoard, PinMode.Output));
+                _digitPins.Add(_gpioController.OpenPin(digitPinNumBoard, PinMode.Output));
             }
         }
 
@@ -81,8 +87,8 @@ namespace Display
                 _gpioController.ClosePin(digitPinNumBoard);
             }
 
-            _segments = new(_pinScheme.SegmentCountPerDigit);
-            _digits = new(_pinScheme.DigitCount);
+            _segmentPins = new(_pinScheme.SegmentCountPerDigit);
+            _digitPins = new(_pinScheme.DigitCount);
         }
 
         /// <summary>
@@ -90,71 +96,72 @@ namespace Display
         /// </summary>
         public void Clear()
         {
-            foreach (var seg in _segments)
+            foreach (var seg in _segmentPins)
             {
                 seg?.Write(PinValue.Low);
             }
         }
 
-        /// <summary>
-        /// Writes a series of characters to the display, with optional support for dots/decimals.
-        /// </summary>
-        /// <param name="characters">A list of characters represented in Fonts</param>
-        /// <param name="decimalsEnabled">Array indicating displayed (true) or not displayed (false) decimal point in each position</param>
-        /// <exception cref="ArgumentException"></exception>
-        /// <remarks>The 5641AS display has four dots in the bottom right corner of each digit
-        /// and are handled separately from the characters to support changes at runtime.</remarks>
-        public void Write(ReadOnlySpan<Font> characters, bool[]? decimalsEnabled = null)
+        /// <inheritdoc/>
+        public void Write(ReadOnlySpan<Segment> digits, int startAddress = 0)
+        {
+            if (digits.Length > NumberOfDigits)
+            {
+                throw new ArgumentOutOfRangeException(nameof(digits), $"Too many digits specified (max {NumberOfDigits} supported");
+            }
+
+            if (startAddress > NumberOfDigits - 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startAddress), $"Specified digit address out of range (max {NumberOfDigits} supported");
+            }
+
+            // Characters must be written to the device in reverse order to be displayed in the intended order
+            Segment[] digitsToWrite = digits.ToArray().Reverse().ToArray();
+
+            for (int idx = startAddress; idx < NumberOfDigits; idx++)
+            {
+                WriteDigitAtAddress(idx, digitsToWrite[idx]);
+                Thread.Sleep(5);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Write(ReadOnlySpan<Font> characters, int startAddress = 0)
         {
             if (characters.Length > NumberOfDigits)
             {
                 throw new ArgumentException($"Too many characters specified (max {NumberOfDigits} supported)", nameof(characters));
             }
 
-            if (decimalsEnabled?.Length > _digits.Count)
-            {
-                throw new ArgumentException($"Too many decimal points specified (max {_pinScheme.DigitCount} supported)", nameof(decimalsEnabled));
-            }
+            Write(characters.ToArray().Select(c => (Segment)c).ToArray(), startAddress);
+        }
 
-            // Characters must be written to the device in reverse order to be displayed in the intended order
-            //  Let's be nice and handle this for the caller
-            Font[] charToWrite = characters.ToArray().Reverse().ToArray();
-            bool[] decimalsToWrite = decimalsEnabled?.Reverse().ToArray() ?? Enumerable.Repeat(false, _pinScheme.DigitCount).ToArray();
+        private void WriteDigitAtAddress(int digitAddress, Segment segmentsToWrite)
+        {
+            ActivateDigit(digitAddress);
 
-            for (int idx = 0; idx < _digits.Count; idx++)
-            {
-                GpioPin digit = _digits[idx];
-                WriteAll(_digits, _pinScheme.DigitDisplayOff);
-                digit.Write(!_pinScheme.DigitDisplayOff);
+            ReadOnlySpan<PinValue> mapping = SegmentHelpers.GetPinValuesFromSegment(segmentsToWrite);
+            SetPinValues(mapping);
 
-                // write the number
-                Font currentNumToWrite = charToWrite[idx];
-                var mapping = SegmentHelpers.GetPinValuesFromFont(currentNumToWrite);
-                for (int i = 0; i < mapping.Length; i++)
-                {
-                    PinValue val = mapping[i];
-                    _segments[i].Write(val);
-                }
+            _displayBuffer[digitAddress] = segmentsToWrite;
+        }
 
-                // DP handling per digit
-                _segments.Last().Write(decimalsToWrite?[idx] ?? false);
-
-                Thread.Sleep(5);
-            }
+        private void ActivateDigit(int idx)
+        {
+            GpioPin digit = _digitPins[idx];
+            WriteAll(_digitPins, _pinScheme.DigitDisplayOff);
+            digit.Write(!_pinScheme.DigitDisplayOff);
 
             static void WriteAll(List<GpioPin> pins, PinValue pinValue) => pins.ForEach(p => p.Write(pinValue));
         }
 
-        /// <inheritdoc/>
-        public void Write(ReadOnlySpan<Segment> digits, int startAddress = 0)
+        private void SetPinValues(ReadOnlySpan<PinValue> pinValues)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc/>
-        public void Write(ReadOnlySpan<Font> characters, int startAddress = 0)
-        {
-            Write(characters, decimalsEnabled: null);
+            for (int i = 0; i < pinValues.Length; i++)
+            {
+                PinValue val = pinValues[i];
+                _segmentPins[i].Write(val);
+            }
         }
 
         /// <summary>
@@ -167,7 +174,6 @@ namespace Display
             {
                 if (disposing)
                 {
-                    Clear();
                     if (_shouldDispose)
                     {
                         _gpioController?.Dispose();

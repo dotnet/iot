@@ -11,6 +11,7 @@ namespace Display
 {
     internal static class SegmentHelpers
     {
+        // Dictionary allows key-based lookup
         private static readonly Dictionary<Segment, int> SegIndex = new Dictionary<Segment, int>()
         {
             { Segment.Top, 0 },
@@ -23,9 +24,8 @@ namespace Display
             { Segment.Dot, 7 }, // DP is required for each digit but set independently
         };
 
-        public static ReadOnlySpan<PinValue> GetPinValuesFromFont(Font font)
+        public static ReadOnlySpan<PinValue> GetPinValuesFromSegment(Segment segments)
         {
-            var segments = (Segment)font;
             var pinValues = Enumerable.Repeat(PinValue.Low, 8).ToArray();
             foreach (var kvp in SegIndex)
             {
