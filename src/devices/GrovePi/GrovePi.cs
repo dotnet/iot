@@ -7,6 +7,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.IO;
 using System.Threading;
+
 using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice
@@ -100,7 +101,7 @@ namespace Iot.Device.GrovePiDevice
                     return;
                 }
                 catch (IOException ex)
-                 {
+                {
                     innerEx = ex;
                     tries++;
                     Thread.Sleep(10);
@@ -118,9 +119,10 @@ namespace Iot.Device.GrovePiDevice
         /// <returns></returns>
         public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
         {
+            const int dataNotAvailableCommand = 23;
             int numberBytesToRead = command switch
             {
-                GrovePiCommand.DigitalRead => 1,
+                GrovePiCommand.DigitalRead => 2,
                 GrovePiCommand.AnalogRead or GrovePiCommand.UltrasonicRead or GrovePiCommand.LetBarGet => 3,
                 GrovePiCommand.Version => 4,
                 GrovePiCommand.DhtTemp => 9,
@@ -143,7 +145,6 @@ namespace Iot.Device.GrovePiDevice
                 try
                 {
                     _i2cDevice.Read(outArray);
-                    return outArray;
                 }
                 catch (IOException ex)
                 {
@@ -151,7 +152,16 @@ namespace Iot.Device.GrovePiDevice
                     innerEx = ex;
                     tries++;
                     Thread.Sleep(10);
+                    continue;
                 }
+
+                if (outArray[0] != dataNotAvailableCommand && outArray[0] != 255)
+                {
+                    return outArray;
+                }
+
+                tries++;
+                Thread.Sleep(10);
             }
 
             throw new IOException($"{nameof(ReadCommand)}: Failed to write command {command}", innerEx);
@@ -174,7 +184,13 @@ namespace Iot.Device.GrovePiDevice
             {
                 try
                 {
-                    return (PinValue)_i2cDevice.ReadByte();
+                    var inArray = ReadCommand(GrovePiCommand.DigitalRead, pin);
+                    if (inArray is null || inArray.Length < 2)
+                    {
+                        return (PinValue)(-1);
+                    }
+
+                    return (PinValue)inArray[1];
                 }
                 catch (IOException ex)
                 {
