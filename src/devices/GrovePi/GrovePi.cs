@@ -175,33 +175,20 @@ namespace Iot.Device.GrovePiDevice
         public PinValue DigitalRead(GrovePort pin)
         {
             WriteCommand(GrovePiCommand.DigitalRead, pin, 0, 0);
-            byte tries = 0;
-            IOException? innerEx = null;
-            // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
-            // So we wait a little bit before retrying
-            // In most cases, the I2C read/write can go thru without waiting
-            while (tries < MaxRetries)
+            try
             {
-                try
+                var data = ReadCommand(GrovePiCommand.DigitalRead, pin);
+                if (data is null || data.Length < 2)
                 {
-                    var inArray = ReadCommand(GrovePiCommand.DigitalRead, pin);
-                    if (inArray is null || inArray.Length < 2)
-                    {
-                        return (PinValue)(-1);
-                    }
+                    return (PinValue)(-1);
+                }
 
-                    return (PinValue)inArray[1];
-                }
-                catch (IOException ex)
-                {
-                    // Give it another try
-                    innerEx = ex;
-                    tries++;
-                    Thread.Sleep(10);
-                }
+                return (PinValue)data[1];
             }
-
-            throw new IOException($"{nameof(DigitalRead)}: Failed to read byte with command {GrovePiCommand.DigitalRead}", innerEx);
+            catch (IOException)
+            {
+                return (PinValue)(-1);
+            }
         }
 
         /// <summary>
