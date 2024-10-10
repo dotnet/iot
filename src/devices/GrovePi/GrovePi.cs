@@ -17,7 +17,7 @@ namespace Iot.Device.GrovePiDevice
     /// </summary>
     public class GrovePi : IDisposable
     {
-        private const byte MaxRetries = 4;
+        private const byte MaxRetries = 10;
         private readonly bool _shouldDispose;
         private I2cDevice _i2cDevice;
 
