@@ -8,6 +8,7 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -77,9 +78,8 @@ namespace Iot.Device.Arduino.Sample
 
         private static void TestI2cBmp280(ArduinoBoard board)
         {
-            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bmp280.DefaultI2cAddress));
-
-            var bmp = new Bmp280(device);
+            using var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bmp280.DefaultI2cAddress));
+            using var bmp = new Bmp280(device);
             bmp.StandbyTime = StandbyTime.Ms250;
             bmp.SetPowerMode(Bmx280PowerMode.Normal);
             Console.WriteLine("Device open");
@@ -91,8 +91,6 @@ namespace Iot.Device.Arduino.Sample
                 Thread.Sleep(100);
             }
 
-            bmp.Dispose();
-            device.Dispose();
             Console.ReadKey();
             Console.WriteLine();
         }
@@ -220,73 +218,80 @@ namespace Iot.Device.Arduino.Sample
             var key = Console.ReadKey();
             Console.WriteLine();
 
-            switch (key.KeyChar)
+            try
             {
-                case '1':
-                    TestI2cBmp280(_board);
-                    break;
-                case '2':
-                    TestGpio();
-                    break;
-                case '3':
-                    TestInput();
-                    break;
-                case '4':
-                    TestEventsDirectWait();
-                    break;
-                case '5':
-                    TestEventsCallback();
-                    break;
-                case '6':
-                    TestPwm();
-                    break;
-                case '7':
-                    TestAnalogIn();
-                    break;
-                case '8':
-                    TestAnalogCallback(_board);
-                    break;
-                case '9':
-                    TestSpi(_board);
-                    break;
-                case '0':
-                    ScanDeviceAddressesOnI2cBus(_board);
-                    break;
-                case 'h':
-                case 'H':
-                    TestDht(_board);
-                    break;
-                case 'b':
-                case 'B':
-                    TestI2cBme680(_board);
-                    break;
-                case 'f':
-                case 'F':
-                    TestFrequency(_board);
-                    break;
-                case 'a':
-                case 'A':
-                    {
-                        var test = new RgbLedTest(_board);
-                        test.DoTest();
-                    }
+                switch (key.KeyChar)
+                {
+                    case '1':
+                        TestI2cBmp280(_board);
+                        break;
+                    case '2':
+                        TestGpio();
+                        break;
+                    case '3':
+                        TestInput();
+                        break;
+                    case '4':
+                        TestEventsDirectWait();
+                        break;
+                    case '5':
+                        TestEventsCallback();
+                        break;
+                    case '6':
+                        TestPwm();
+                        break;
+                    case '7':
+                        TestAnalogIn();
+                        break;
+                    case '8':
+                        TestAnalogCallback(_board);
+                        break;
+                    case '9':
+                        TestSpi(_board);
+                        break;
+                    case '0':
+                        ScanDeviceAddressesOnI2cBus(_board);
+                        break;
+                    case 'h':
+                    case 'H':
+                        TestDht(_board);
+                        break;
+                    case 'b':
+                    case 'B':
+                        TestI2cBme680(_board);
+                        break;
+                    case 'f':
+                    case 'F':
+                        TestFrequency(_board);
+                        break;
+                    case 'a':
+                    case 'A':
+                        {
+                            var test = new RgbLedTest(_board);
+                            test.DoTest();
+                        }
 
-                    break;
-                case 'c':
-                case 'C':
-                    ConfigurePins();
-                    break;
-                case 'i':
-                case 'I':
-                    BoardInformation();
-                    break;
-                case 's':
-                case 'S':
-                    SendBoardToSleep();
-                    break;
-                case 'x':
-                case 'X':
-                    return false;
+                        break;
+                    case 'c':
+                    case 'C':
+                        ConfigurePins();
+                        break;
+                    case 'i':
+                    case 'I':
+                        BoardInformation();
+                        break;
+                    case 's':
+                    case 'S':
+                        SendBoardToSleep();
+                        break;
+                    case 'x':
+                    case 'X':
+                        return false;
+                }
+            }
+            catch (IOException x)
+            {
+                Console.WriteLine($"The command failed with the following error: {x.Message}");
             }
 
             return true;

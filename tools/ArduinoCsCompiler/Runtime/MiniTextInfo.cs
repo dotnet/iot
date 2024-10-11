@@ -16,15 +16,6 @@ namespace ArduinoCsCompiler.Runtime
             return false;
         }
 
-        public bool IsInvariant
-        {
-            [ArduinoImplementation]
-            get
-            {
-                return true;
-            }
-        }
-
         [ArduinoImplementation]
         public unsafe void NlsChangeCase(Char* pSource, Int32 pSourceLen, Char* pResult, Int32 pResultLen, Boolean toUpper)
         {

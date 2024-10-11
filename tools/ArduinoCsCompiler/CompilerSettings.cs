@@ -18,7 +18,7 @@ namespace ArduinoCsCompiler
             UseFlashForProgram = false;
             AdditionalSuppressions = new List<string>();
             LaunchProgramFromFlash = false;
-            MaxMemoryUsage = 256 * 1024;
+            MaxMemoryUsage = 0;
             UsePreviewFeatures = false;
         }
 
@@ -89,6 +89,16 @@ namespace ArduinoCsCompiler
         /// True to force writing the program, even if the existing code in flash seemingly matches.
         /// </summary>
         public bool ForceFlashWrite
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// If true, the execution set is not completed (e.g. no additional virtual dependencies are checked).
+        /// This speeds up compilation for very simple programs considerably.
+        /// </summary>
+        public bool SkipIterativeCompletion
         {
             get;
             set;

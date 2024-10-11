@@ -138,7 +138,7 @@ namespace ArduinoCsCompiler
                         switch (sysEx)
                         {
                             case SystemException.MissingMethod:
-                                ex = new MissingMethodException(resolved.MemberInfoSignature() + " " + textualStackTrace);
+                                ex = new MissingMethodException(resolved.MemberInfoSignature() + $" (Token 0x{targetToken:X})" + textualStackTrace);
                                 break;
                             case SystemException.NullReference:
                                 ex = new NullReferenceException($"NullReferenceException in {resolved.MemberInfoSignature()} " + textualStackTrace);

@@ -202,6 +202,7 @@ namespace ArduinoCsCompiler
                             IntSize = Information.FromBytes(data[6]),
                             PointerSize = Information.FromBytes(data[7]),
                             RamSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8 + 10)),
+                            ProtocolVersion = FirmataCommandSequence.DecodeInt14(data, 4),
                         };
 
                         _ilCapabilities = ilCapabilities;
@@ -380,7 +381,13 @@ namespace ArduinoCsCompiler
                 for (int i = startIndex; i < startIndex + localsToSend; i++)
                 {
                     sequence.WriteByte((byte)localTypes[i].VariableType);
-                    sequence.SendInt14((short)(localTypes[i].SizeOfField >> 2));
+                    int sizeOfField = localTypes[i].SizeOfField;
+                    if (sizeOfField > 0x3FFF)
+                    {
+                        throw new InvalidOperationException("Variables with size > 2^14 are not supported as locals");
+                    }
+
+                    sequence.SendInt14(sizeOfField);
                 }
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
@@ -404,7 +411,13 @@ namespace ArduinoCsCompiler
                 for (int i = startIndex; i < startIndex + localsToSend; i++)
                 {
                     sequence.WriteByte((byte)argTypes[i].VariableType);
-                    sequence.SendInt14((short)(argTypes[i].SizeOfField >> 2));
+                    int sizeOfField = argTypes[i].SizeOfField;
+                    if (sizeOfField > 0x3FFF)
+                    {
+                        throw new InvalidOperationException("Variables with size > 2^14 are not supported as arguments");
+                    }
+
+                    sequence.SendInt14(sizeOfField);
                 }
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);

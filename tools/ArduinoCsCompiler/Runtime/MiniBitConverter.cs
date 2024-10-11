@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Runtime.CompilerServices;
 using Iot.Device.Arduino;
 
 namespace ArduinoCsCompiler.Runtime
@@ -74,6 +75,12 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation("BitConverterUInt16BitsToHalf")]
         public static Half UInt16BitsToHalf(UInt16 value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("BitCountUint32BitsToSingle")]
+        public static float UInt32BitsToSingle(uint value)
         {
             throw new NotImplementedException();
         }

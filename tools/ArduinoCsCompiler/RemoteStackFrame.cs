@@ -43,7 +43,7 @@ namespace ArduinoCsCompiler
                 return $"Unknown token {RemoteToken} in call stack";
             }
 
-            return $"{Method.MethodSignature(false)} Offset 0x{Pc:X4}";
+            return $"{Method.MethodSignature(false)} (Token 0x{RemoteToken:X4}) Offset 0x{Pc:X4}";
         }
     }
 }

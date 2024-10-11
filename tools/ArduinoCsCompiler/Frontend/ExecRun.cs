@@ -27,7 +27,6 @@ internal class ExecRun : Run<ExecOptions>
 
         if (!compiler.QueryBoardCapabilities(true, out var caps))
         {
-            Logger.LogError("Couldn't query board capabilities. Possibly incompatible firmware");
             return false;
         }
 
