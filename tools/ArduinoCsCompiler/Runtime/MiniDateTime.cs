@@ -9,12 +9,6 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(DateTime), false, IncludingPrivates = true)]
     internal struct MiniDateTime
     {
-        [ArduinoImplementation]
-        public static bool SystemSupportsLeapSeconds()
-        {
-            return false;
-        }
-
         public static DateTime UtcNow
         {
             [ArduinoImplementation("DateTimeUtcNow")]
@@ -40,6 +34,12 @@ namespace ArduinoCsCompiler.Runtime
         public static IntPtr GetGetSystemTimeAsFileTimeFnPtr()
         {
             return IntPtr.Zero; // The returned function pointer(!) should not be used, because we have overriden UtcNow
+        }
+
+        [ArduinoImplementation]
+        public static bool GetSystemSupportsLeapSeconds()
+        {
+            return false;
         }
     }
 }

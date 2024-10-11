@@ -119,6 +119,12 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation]
+        public static void UninterruptibleSleep0()
+        {
+            Yield();
+        }
+
+        [ArduinoImplementation]
         public static void SpinWait(int micros)
         {
             // No op, we're not fast enough
@@ -149,6 +155,12 @@ namespace ArduinoCsCompiler.Runtime
         public static unsafe void StartInternal(IntPtr t, int stackSize, int priority, char* pThreadName)
         {
             throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation]
+        public static void MemoryBarrier()
+        {
+            // Nothing to do here
         }
 
         [ArduinoImplementation("ThreadInitialize")]
