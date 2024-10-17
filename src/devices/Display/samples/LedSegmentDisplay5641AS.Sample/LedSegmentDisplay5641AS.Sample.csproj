@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>$(DefaultSampleTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Button\Button.csproj" />
+    <ProjectReference Include="..\..\Display.csproj" />
+    <Compile Include="Program.cs" />
+    <Compile Include="SegmentStopwatch.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ReadMe.md" />
+  </ItemGroup>
+
+</Project>
