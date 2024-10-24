@@ -24,7 +24,7 @@ namespace Iot.Device.Board
         private readonly HashSet<int> _openPins;
 
         public ManagedGpioController(Board board, GpioDriver driver)
-        : base(PinNumberingScheme.Logical, driver)
+        : base(driver)
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));

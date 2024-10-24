@@ -27,11 +27,6 @@ namespace System.Device.Analog
         }
 
         /// <summary>
-        /// The numbering scheme used to represent pins provided by the controller.
-        /// </summary>
-        public PinNumberingScheme NumberingScheme { get; }
-
-        /// <summary>
         /// The number of pins provided by the controller.
         /// </summary>
         public abstract int PinCount

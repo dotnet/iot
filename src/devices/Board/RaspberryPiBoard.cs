@@ -566,7 +566,7 @@ namespace Iot.Device.Board
                 throw new NotSupportedException("Alternate pin mode setting not supported by driver");
             }
 
-            var modeToSet = GetHardwareModeForPinUsage(pinNumber, usage, PinNumberingScheme.Logical);
+            var modeToSet = GetHardwareModeForPinUsage(pinNumber, usage);
             if (modeToSet != RaspberryPi3Driver.AltMode.Unknown)
             {
                 _raspberryPi3Driver.SetAlternatePinMode(pinNumber, modeToSet);
