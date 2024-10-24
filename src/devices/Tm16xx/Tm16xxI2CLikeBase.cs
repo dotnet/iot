@@ -112,7 +112,7 @@ namespace Iot.Device.Tm16xx
         /// <param name="clockWidthMicroseconds">Waiting time between clock up and down.</param>
         /// <param name="controller">The instance of the Gpio controller which will not be disposed with this object.</param>
         protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds, GpioController controller)
-            : this(pinClk, pinDio, clockWidthMicroseconds, PinNumberingScheme.Logical, controller, false)
+            : this(pinClk, pinDio, clockWidthMicroseconds, controller, false)
         {
         }
 
@@ -123,19 +123,7 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinDio">The data pin.</param>
         /// <param name="clockWidthMicroseconds">Waiting time between clock up and down.</param>
         protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds)
-            : this(pinClk, pinDio, clockWidthMicroseconds, PinNumberingScheme.Logical, null, true)
-        {
-        }
-
-        /// <summary>
-        /// Initializes an instance with new Gpio controller which will be disposed with this object.
-        /// </summary>
-        /// <param name="pinClk">The clock pin.</param>
-        /// <param name="pinDio">The data pin.</param>
-        /// <param name="clockWidthMicroseconds">Waiting time between clock up and down.</param>
-        /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
-        protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
-            : this(pinClk, pinDio, clockWidthMicroseconds, pinNumberingScheme, null, true)
+            : this(pinClk, pinDio, clockWidthMicroseconds, null, true)
         {
         }
 
@@ -145,17 +133,15 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
         /// <param name="clockWidthMicroseconds">Waiting time between clock up and down.</param>
-        /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
         /// <param name="gpioController">The instance of the gpio controller. Set to <see langword="null" /> to create a new one.</param>
         /// <param name="shouldDispose">Sets to <see langword="true" /> to dispose the Gpio controller with this object. If the <paramref name="gpioController"/> is set to <see langword="null"/>, this parameter will be ignored and the new created Gpio controller will always be disposed with this object.</param>
         protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds,
-            PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical,
             GpioController? gpioController = null, bool shouldDispose = true)
         {
             PinClk = pinClk;
             PinDio = pinDio;
             _clockWidthMicroseconds = clockWidthMicroseconds;
-            Controller = gpioController ?? new GpioController(pinNumberingScheme);
+            Controller = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
             Controller.OpenPin(pinClk, PinMode.Output);
             Controller.OpenPin(pinDio, PinMode.Output);

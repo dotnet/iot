@@ -90,7 +90,7 @@ namespace Iot.Device.Pn5180
             _logger = this.GetCurrentClassLogger();
             _logger.LogDebug($"Opening PN5180, pin busy: {pinBusy}, pin NSS: {pinNss}");
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
-            _gpioController = gpioController ?? new GpioController(PinNumberingScheme.Logical);
+            _gpioController = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
             _pinBusy = pinBusy;
             _pinNss = pinNss;
