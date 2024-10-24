@@ -263,10 +263,10 @@ namespace Iot.Device.Nrf24l01
 #if NET5_0_OR_GREATER
         [MemberNotNull(nameof(_gpio))]
 #endif
-        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel, GpioController? gpioController)
+        private void Initialize(OutputPower outputPower, DataRate dataRate, byte channel, GpioController? gpioController)
         {
             // open pins
-            _gpio = gpioController ?? new GpioController(pinNumberingScheme);
+            _gpio = gpioController ?? new GpioController();
             _gpio.OpenPin(_ce, PinMode.Output);
             _gpio.OpenPin(_irq, PinMode.Input);
             _gpio.RegisterCallbackForPinValueChangedEvent(_irq, PinEventTypes.Falling, Irq_ValueChanged);

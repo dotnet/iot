@@ -19,8 +19,8 @@ namespace Iot.Device.Arduino
         private readonly IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations;
 
         public ArduinoAnalogController(ArduinoBoard board,
-            IReadOnlyList<SupportedPinConfiguration> supportedPinConfigurations, PinNumberingScheme scheme)
-            : base(scheme)
+            IReadOnlyList<SupportedPinConfiguration> supportedPinConfigurations)
+            : base()
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));
             _supportedPinConfigurations = supportedPinConfigurations ?? throw new ArgumentNullException(nameof(supportedPinConfigurations));
