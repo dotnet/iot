@@ -36,7 +36,7 @@ void UsingMcp()
     int registerSelectPin = 1;
     int enablePin = 2;
     int backlight = 7;
-    using Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: new GpioController(PinNumberingScheme.Logical, driver));
+    using Lcd1602 lcd = new Lcd1602(registerSelectPin, enablePin, dataPins, backlight, controller: new GpioController(driver));
     lcd.Clear();
 
     lcd.Write("Hello World");

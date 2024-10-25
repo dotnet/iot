@@ -101,7 +101,7 @@ void TestSpi()
 void TestGpio()
 {
     const int Gpio2 = 2;
-    using GpioController gpioController = new(PinNumberingScheme.Board, new Ft4222Gpio());
+    using GpioController gpioController = new(new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);
@@ -130,7 +130,7 @@ void TestGpio()
 void TestEvents()
 {
     const int Gpio2 = 2;
-    using GpioController gpioController = new(PinNumberingScheme.Board, new Ft4222Gpio());
+    using GpioController gpioController = new(new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);

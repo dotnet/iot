@@ -41,7 +41,7 @@ namespace DeviceApiTester.Commands.Gpio
                 OnValue = 1;
             }
 
-            Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, LedPin ={LedPin}, Count={Count}, TimeOn={TimeOn} ms, TimeOff={TimeOff} ms");
+            Console.WriteLine($"Driver={Driver}, LedPin ={LedPin}, Count={Count}, TimeOn={TimeOn} ms, TimeOff={TimeOff} ms");
 
             using (GpioController controller = CreateGpioController())
             {

@@ -22,6 +22,4 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     }
 
     protected override GpioDriver GetTestDriver() => new LibGpiodDriver(ChipNumber, LibGpiodDriverVersion.V2);
-
-    protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 }

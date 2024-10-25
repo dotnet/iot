@@ -21,15 +21,14 @@ namespace Iot.Device.Hcsr501
         /// Creates a new instance of the HC-SCR501.
         /// </summary>
         /// <param name="outPin">OUT Pin</param>
-        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Hcsr501(int outPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
+        public Hcsr501(int outPin, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _outPin = outPin;
 
             _shouldDispose = shouldDispose || gpioController is null;
-            _controller = gpioController ?? new GpioController(pinNumberingScheme);
+            _controller = gpioController ?? new GpioController();
             _controller.OpenPin(outPin, PinMode.Input);
             _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Falling, Sensor_ValueChanged);
             _controller.RegisterCallbackForPinValueChangedEvent(outPin, PinEventTypes.Rising, Sensor_ValueChanged);

@@ -130,7 +130,6 @@ namespace Iot.Device.Tm16xx
         /// </summary>
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
-        /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
         /// <param name="gpioController">The instance of the gpio controller. Set to <see langword="null" /> to create a new one.</param>
         /// <param name="shouldDispose">Sets to <see langword="true" /> to dispose the Gpio controller with this object. If the <paramref name="gpioController"/> is set to <see langword="null"/>, this parameter will be ignored and the new created Gpio controller will always be disposed with this object.</param>
         public Tm1637(int pinClk, int pinDio, GpioController? gpioController = null, bool shouldDispose = true)

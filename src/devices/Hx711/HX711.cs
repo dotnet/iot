@@ -59,7 +59,6 @@ namespace Iot.Device.Hx711
         /// <param name="pinPdSck">Trigger pulse input. (Power Down control and Serial Clock input)</param>
         /// <param name="options">How to use the Hx711 module.</param>
         /// <param name="gpioController">GPIO controller related with the pins.</param>
-        /// <param name="pinNumberingScheme">Scheme and numeration used by controller.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
         public Hx711(int pinDout, int pinPdSck, Hx711Options? options = null, GpioController? gpioController = null, bool shouldDispose = true)
         {

@@ -52,7 +52,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             {
                 Device = device;
                 ChipMock = chipMock;
-                Controller = new GpioController(PinNumberingScheme.Logical, Device);
+                Controller = new GpioController(Device);
             }
         }
 
