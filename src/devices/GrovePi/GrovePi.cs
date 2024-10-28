@@ -175,20 +175,13 @@ namespace Iot.Device.GrovePiDevice
         public PinValue DigitalRead(GrovePort pin)
         {
             WriteCommand(GrovePiCommand.DigitalRead, pin, 0, 0);
-            try
-            {
-                var data = ReadCommand(GrovePiCommand.DigitalRead, pin);
-                if (data is null || data.Length < 2)
-                {
-                    return (PinValue)(-1);
-                }
-
-                return (PinValue)data[1];
-            }
-            catch (IOException)
+            var data = ReadCommand(GrovePiCommand.DigitalRead, pin);
+            if (data is null || data.Length < 2)
             {
                 return (PinValue)(-1);
             }
+
+            return (PinValue)data[1];
         }
 
         /// <summary>
