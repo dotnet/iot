@@ -22,7 +22,7 @@ powershell -ExecutionPolicy ByPass -command "%~dp0common\Build.ps1" -restore -bu
 set ArduinoRootDir=%1\Documents\Arduino
 set acspath=%~dp0\..\artifacts\bin\Frontend\%2\net6.0\acs.exe
 
-git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\libraries\ConfigurableFirmata
+git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\libraries\ConfigurableFirmata --branch BuildIssueEsp
 git clone https://github.com/pgrawehr/ExtendedConfigurableFirmata %ArduinoRootDir%\ExtendedConfigurableFirmata
 arduino-cli core install esp32:esp32
 
