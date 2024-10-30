@@ -9,6 +9,8 @@ using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests;
 
+#pragma warning disable SDGPIO0001
+
 [Trait("feature", "gpio")]
 [Trait("feature", "gpio-libgpiod")]
 [Trait("SkipOnTestRun", "Windows_NT")]

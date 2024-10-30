@@ -96,6 +96,7 @@ public class GpioControllerSoftwareTests : IDisposable
     }
 
     [Fact]
+    [Obsolete("Tests an obsolete feature")]
     public void UsingBoardNumberingWorks()
     {
         // Our mock driver maps physical pin 2 to logical pin 1
@@ -107,7 +108,7 @@ public class GpioControllerSoftwareTests : IDisposable
         _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
         _mockedGpioDriver.Setup(x => x.ReadEx(1)).Returns(PinValue.High);
         _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
-        var ctrl = new GpioController(_mockedGpioDriver.Object);
+        var ctrl = new GpioController(PinNumberingScheme.Board, _mockedGpioDriver.Object);
         ctrl.OpenPin(2, PinMode.Output);
         ctrl.Write(2, PinValue.High);
         Assert.Equal(PinValue.High, ctrl.Read(2));
