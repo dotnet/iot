@@ -20,7 +20,6 @@ namespace Iot.Device.Arduino
 
         public ArduinoAnalogController(ArduinoBoard board,
             IReadOnlyList<SupportedPinConfiguration> supportedPinConfigurations)
-            : base()
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));
             _supportedPinConfigurations = supportedPinConfigurations ?? throw new ArgumentNullException(nameof(supportedPinConfigurations));
