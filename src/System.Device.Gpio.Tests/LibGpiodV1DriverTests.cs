@@ -9,6 +9,8 @@ using Xunit.Abstractions;
 
 namespace System.Device.Gpio.Tests;
 
+#pragma warning disable SDGPIO0001
+
 [Trait("feature", "gpio")]
 [Trait("feature", "gpio-libgpiod")]
 [Trait("SkipOnTestRun", "Windows_NT")]
@@ -21,12 +23,10 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
 
     protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0, LibGpiodDriverVersion.V1);
 
-    protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
-
     [Fact]
     public void SetPinModeSetsDefaultValue()
     {
-        using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+        using (GpioController controller = new GpioController(GetTestDriver()))
         {
             int testPin = OutputPin;
             // Set value to low prior to test, so that we have a defined start situation
@@ -59,7 +59,7 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     [Fact]
     public void UnregisterPinValueChangedShallNotThrow()
     {
-        using var gc = new GpioController(GetTestNumberingScheme(), GetTestDriver());
+        using var gc = new GpioController(GetTestDriver());
         gc.OpenPin(InputPin, PinMode.Input);
 
         static void PinChanged(object sender, PinValueChangedEventArgs args)
@@ -80,21 +80,21 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     [Fact]
     public void LeakingDriverDoesNotCrash()
     {
-        GpioController controller1 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        GpioController controller1 = new GpioController(new LibGpiodDriver());
         controller1.OpenPin(10, PinMode.Output);
-        GpioController controller2 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        GpioController controller2 = new GpioController(new LibGpiodDriver());
         controller2.OpenPin(11, PinMode.Output);
-        GpioController controller3 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        GpioController controller3 = new GpioController(new LibGpiodDriver());
         controller3.OpenPin(12, PinMode.Output);
-        GpioController controller4 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        GpioController controller4 = new GpioController(new LibGpiodDriver());
         controller4.OpenPin(13, PinMode.Output);
-        GpioController controller5 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+        GpioController controller5 = new GpioController(new LibGpiodDriver());
         controller5.OpenPin(14, PinMode.Output);
 
         for (int i = 0; i < 10; i++)
         {
             GC.Collect();
-            GpioController controller6 = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+            GpioController controller6 = new GpioController(new LibGpiodDriver());
             controller6.OpenPin(15, PinMode.Output);
             controller6.ClosePin(15);
             controller6.Dispose();

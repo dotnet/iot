@@ -59,16 +59,14 @@ namespace Iot.Device.Hx711
         /// <param name="pinPdSck">Trigger pulse input. (Power Down control and Serial Clock input)</param>
         /// <param name="options">How to use the Hx711 module.</param>
         /// <param name="gpioController">GPIO controller related with the pins.</param>
-        /// <param name="pinNumberingScheme">Scheme and numeration used by controller.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
-        public Hx711(int pinDout, int pinPdSck, Hx711Options? options = null, GpioController? gpioController = null,
-            PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+        public Hx711(int pinDout, int pinPdSck, Hx711Options? options = null, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _pinDout = pinDout;
             _pinPdSck = pinPdSck;
 
             _shouldDispose = shouldDispose || gpioController is null;
-            _gpioController = gpioController ?? new(pinNumberingScheme);
+            _gpioController = gpioController ?? new();
 
             // Mutex for reading from the Hx711, in case multiple threads in client
             // software try to access get values from the class at the same time.

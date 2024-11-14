@@ -725,7 +725,7 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(_firmata));
             }
 
-            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(_firmata, _supportedPinConfigurations));
+            return new GpioController(new ArduinoGpioControllerDriver(_firmata, _supportedPinConfigurations));
         }
 
         /// <inheritdoc />
@@ -841,7 +841,7 @@ namespace Iot.Device.Arduino
         {
             Initialize();
 
-            return new ArduinoAnalogController(this, SupportedPinConfigurations, PinNumberingScheme.Logical);
+            return new ArduinoAnalogController(this, SupportedPinConfigurations);
         }
 
         /// <summary>

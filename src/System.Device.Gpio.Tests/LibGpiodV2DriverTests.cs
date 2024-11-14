@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
+#pragma warning disable SDGPIO0001
 namespace System.Device.Gpio.Tests;
 
 [Trait("feature", "gpio")]
@@ -22,6 +23,4 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     }
 
     protected override GpioDriver GetTestDriver() => new LibGpiodDriver(ChipNumber, LibGpiodDriverVersion.V2);
-
-    protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 }

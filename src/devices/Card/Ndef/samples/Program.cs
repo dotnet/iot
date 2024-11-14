@@ -418,7 +418,7 @@ Pn5180 Ft4222Pn5180()
 
     var ftSpi = new Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = Pn5180.MaximumSpiClockFrequency, Mode = Pn5180.DefaultSpiMode, DataFlow = DataFlow.MsbFirst });
 
-    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+    var gpioController = new GpioController(new Ft4222Gpio());
 
     // REset the device
     gpioController.OpenPin(0, PinMode.Output);

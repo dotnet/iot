@@ -28,7 +28,7 @@ namespace Iot.Device.Ili934x.Tests
             _imageFactoryMock = new Mock<IImageFactory>(MockBehavior.Strict);
             BitmapImage.RegisterImageFactory(_imageFactoryMock.Object);
             _gpioDriverMock.CallBase = true;
-            _gpioController = new GpioController(PinNumberingScheme.Logical, _gpioDriverMock.Object);
+            _gpioController = new GpioController(_gpioDriverMock.Object);
         }
 
         public void Dispose()

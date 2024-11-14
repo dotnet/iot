@@ -54,7 +54,7 @@ else if (platformChoice.KeyChar == '2')
     using (var i2cBus = Ft4222Device.GetFt4222()[0].CreateOrGetI2cBus(0))
     {
         int deviceAddress = addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress;
-        var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+        var gpioController = new GpioController(new Ft4222Gpio());
         using (var ccs811 = new Ccs811Sensor(i2cBus.CreateDevice(deviceAddress), gpioController, pinWake, pinInterrupt, pinReset, false))
         {
             Sample(ccs811);
