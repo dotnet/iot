@@ -784,8 +784,8 @@ namespace Iot.Device.FtCommon
             GpioLowDir = (byte)((GpioLowDir & MaskGpio) | 0x03);
             // clock, MOSI and MISO to 0
             GpioLowData = (byte)(GpioLowData & MaskGpio);
-            toSend[idx++] = GpioLowDir;
             toSend[idx++] = GpioLowData;
+            toSend[idx++] = GpioLowDir;
             // The SK clock frequency can be worked out by below algorithm with divide by 5 set as off
             // TCK period = 60MHz / (( 1 + [ (0xValueH * 256) OR 0xValueL] ) * 2)
             // Command to set clock divisor
