@@ -32,24 +32,14 @@ namespace Iot.Device.Gpio
         /// <summary>
         /// Initializes a new instance of the <see cref="VirtualGpioController"/> class.
         /// </summary>
-        /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-        public VirtualGpioController(PinNumberingScheme numberingScheme)
-        {
-            // Nothing on purpose, as only logical is suported
-            if (numberingScheme != PinNumberingScheme.Logical)
-            {
-                throw new ArgumentException("Only PinNumberingScheme Logical is supported.");
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="VirtualGpioController"/> class.
-        /// </summary>
         public VirtualGpioController(Dictionary<int, GpioPin> pins)
         {
             foreach (var pin in pins)
             {
-                _pins.TryAdd(pin.Key, pin.Value);
+                if (!_pins.TryAdd(pin.Key, pin.Value))
+                {
+                    throw new ArgumentException($"Duplicate virtual pin number in collection: {pin.Key}.");
+                }
             }
         }
 
@@ -70,7 +60,8 @@ namespace Iot.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number.</param>
         /// <param name="gpioPin">The <see cref="GpioPin"/> to add.</param>
-        public void Add(int pinNumber, GpioPin gpioPin) => _pins.TryAdd(pinNumber, gpioPin);
+        /// <returns>True on success, false if the pin number is in use already</returns>
+        public bool Add(int pinNumber, GpioPin gpioPin) => _pins.TryAdd(pinNumber, gpioPin);
 
         /// <summary>
         /// Adds a new <see cref="GpioPin"/>. The number is done automatically by adding after the last element.
@@ -87,34 +78,14 @@ namespace Iot.Device.Gpio
         public override int PinCount => _pins.Count;
 
         /// <summary>
-        /// This removes the pin for the virtual controller. It does not close the pin as the pin has been opened by another controller.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public override void ClosePin(int pinNumber)
-        {
-            if (!IsPinOpen(pinNumber))
-            {
-                throw new InvalidOperationException($"Can not close pin {pinNumber} because it is not open.");
-            }
-
-            GpioPins.TryRemove(pinNumber, out _);
-        }
-
-        /// <summary>
         /// Disposes this instance and removes all pins associated with this virtual controller.
         /// </summary>
         /// <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
         protected override void Dispose(bool disposing)
         {
-            foreach (int pin in GpioPins.Keys)
-            {
-                // The list contains the pin in the current NumberingScheme
-                ClosePin(pin);
-            }
-
+            base.Dispose(disposing);
             // We're just emptying the lists
             _pins.Clear();
-            GpioPins.Clear();
         }
 
         /// <inheritdoc/>
@@ -134,24 +105,6 @@ namespace Iot.Device.Gpio
             return _pins[pinNumber].IsPinModeSupported(mode);
         }
 
-        /// <summary>
-        /// Opens a pin in order for it to be ready to use.
-        /// The driver attempts to open the pin without changing its mode or value.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public override GpioPin OpenPin(int pinNumber)
-        {
-            if (IsPinOpen(pinNumber))
-            {
-                return GpioPins[pinNumber];
-            }
-
-            VirtualGpioPin pin = new VirtualGpioPin(_pins[pinNumber], pinNumber);
-
-            GpioPins.TryAdd(pinNumber, pin);
-            return GpioPins[pinNumber];
-        }
-
         /// <inheritdoc/>
         public override ComponentInformation QueryComponentInformation()
         {
@@ -161,8 +114,6 @@ namespace Iot.Device.Gpio
             {
                 self.AddSubComponent(cp);
             }
-
-            self.Properties["OpenPins"] = string.Join(", ", GpioPins.Select(x => x.Key));
 
             return self;
         }

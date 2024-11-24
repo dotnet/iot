@@ -33,11 +33,7 @@ public class GpioController : IDisposable
     /// If a pin element exists, that pin is open. Uses current controller's numbering scheme
     /// </summary>
     private readonly ConcurrentDictionary<int, PinValue?> _openPins;
-
-    /// <summary>
-    /// The GPIO pins open in the GpioController.
-    /// </summary>
-    protected readonly ConcurrentDictionary<int, GpioPin> GpioPins;
+    private readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
     private GpioDriver _driver;
 
     /// <summary>
@@ -77,7 +73,7 @@ public class GpioController : IDisposable
         _driver = driver;
         NumberingScheme = numberingScheme;
         _openPins = new ConcurrentDictionary<int, PinValue?>();
-        GpioPins = new ConcurrentDictionary<int, GpioPin>();
+        _gpioPins = new ConcurrentDictionary<int, GpioPin>();
     }
 
     /// <summary>
@@ -116,7 +112,7 @@ public class GpioController : IDisposable
     {
         get
         {
-            return GpioPins.Values;
+            return _gpioPins.Values;
         }
     }
 
@@ -137,17 +133,17 @@ public class GpioController : IDisposable
     /// The driver attempts to open the pin without changing its mode or value.
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-    public virtual GpioPin OpenPin(int pinNumber)
+    public GpioPin OpenPin(int pinNumber)
     {
         if (IsPinOpen(pinNumber))
         {
-            return GpioPins[pinNumber];
+            return _gpioPins[pinNumber];
         }
 
         OpenPinCore(pinNumber);
         _openPins.TryAdd(pinNumber, null);
-        GpioPins[pinNumber] = new GpioPin(pinNumber, _driver);
-        return GpioPins[pinNumber];
+        _gpioPins[pinNumber] = new GpioPin(pinNumber, _driver);
+        return _gpioPins[pinNumber];
     }
 
     /// <summary>
@@ -194,7 +190,7 @@ public class GpioController : IDisposable
     /// If allowed by the driver, the state of the pin is not changed.
     /// </summary>
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-    public virtual void ClosePin(int pinNumber)
+    public void ClosePin(int pinNumber)
     {
         if (!IsPinOpen(pinNumber))
         {
@@ -213,7 +209,7 @@ public class GpioController : IDisposable
     {
         int logicalPinNumber = GetLogicalPinNumber(pinNumber);
         _driver.ClosePin(logicalPinNumber);
-        GpioPins.TryRemove(pinNumber, out _);
+        _gpioPins.TryRemove(pinNumber, out _);
     }
 
     /// <summary>
@@ -454,7 +450,7 @@ public class GpioController : IDisposable
         }
 
         _openPins.Clear();
-        GpioPins.Clear();
+        _gpioPins.Clear();
         _driver?.Dispose();
         _driver = null!;
     }
