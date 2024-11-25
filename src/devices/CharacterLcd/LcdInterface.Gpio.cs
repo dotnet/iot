@@ -66,7 +66,7 @@ namespace Iot.Device.CharacterLcd
                 }
 
                 _shouldDispose = shouldDispose || controller is null;
-                _controller = controller ?? new GpioController(PinNumberingScheme.Logical);
+                _controller = controller ?? new GpioController();
 
                 Initialize();
             }

@@ -100,10 +100,10 @@ namespace Iot.Device.Nmea0183.Sentences
             if (Valid)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append(Starboard.ToString("F1", CultureInfo.InvariantCulture) + ",A,");
+                sb.Append(Starboard.Degrees.ToString("F1", CultureInfo.InvariantCulture) + ",A,");
                 if (Port.HasValue)
                 {
-                    sb.Append(Port.Value.ToString("F1", CultureInfo.InvariantCulture) + ",A");
+                    sb.Append(Port.Value.Degrees.ToString("F1", CultureInfo.InvariantCulture) + ",A");
                 }
                 else
                 {

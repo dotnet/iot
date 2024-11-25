@@ -25,7 +25,7 @@ namespace Iot.Device.Seatalk1
     /// </remarks>
     public class AutoPilotRemoteController : MarshalByRefObject
     {
-        private const double AngleEpsilon = 1.1; // The protocol can only give angles in whole degrees
+        private const double AngleEpsilon = 0.9; // The protocol can only give angles in whole degrees
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(6);
         private readonly SeatalkInterface _parentInterface;
         private readonly object _lock = new object();
@@ -249,6 +249,7 @@ namespace Iot.Device.Seatalk1
         {
             if (Status == newStatus && CourseComputerStatus == 0)
             {
+                _logger.LogInformation("Not setting status {NewStatus} because already set.", newStatus);
                 return true; // nothing to do
             }
 
@@ -266,12 +267,15 @@ namespace Iot.Device.Seatalk1
                 _ => throw new ArgumentException($"Status {newStatus} is not valid", nameof(newStatus)),
             };
 
+            _logger.LogInformation("Setting status {Status} by pressing button(s) {Button}", newStatus, buttonToPress);
+
             // For setting wind or track modes, we need to first set auto mode.
             // Setting wind mode without auto works (and is returned as status 0x4), but has no visible effect.
             if (newStatus == AutopilotStatus.Wind || newStatus == AutopilotStatus.Track)
             {
                 if (!SendMessageAndVerifyStatus(new Keystroke(AutopilotButtons.Auto, 1), timeout, () => Status is AutopilotStatus.Auto or AutopilotStatus.Wind or AutopilotStatus.Track))
                 {
+                    _logger.LogInformation($"Could not transition from Auto to {newStatus} mode");
                     return false;
                 }
             }
@@ -308,6 +312,15 @@ namespace Iot.Device.Seatalk1
                 }
 
                 ret = Status == AutopilotStatus.Track && CourseComputerStatus == CourseComputerWarnings.None;
+            }
+
+            if (ret)
+            {
+                _logger.LogInformation($"Status {Status} set successfully");
+            }
+            else
+            {
+                _logger.LogError("Status was not set correctly");
             }
 
             return ret;
@@ -478,17 +491,7 @@ namespace Iot.Device.Seatalk1
                 return true;
             }
 
-            if (angle1 >= Angle.FromDegrees(359) && angle2 <= Angle.FromDegrees(1))
-            {
-                return true;
-            }
-
-            if (angle2 >= Angle.FromDegrees(359) && angle1 <= Angle.FromDegrees(1))
-            {
-                return true;
-            }
-
-            return false;
+            return UnitMath.Abs(AngleExtensions.Difference(angle1, angle2)) < Angle.FromDegrees(1.5);
         }
 
         /// <summary>
@@ -525,7 +528,7 @@ namespace Iot.Device.Seatalk1
         {
             if (timeout > MaximumTimeout)
             {
-                throw new ArgumentOutOfRangeException(nameof(timeout), $"The maximum timeout is {MaximumTimeout}, see remarks in documentation");
+                throw new ArgumentOutOfRangeException(nameof(timeout), $"The maximum timeout is {MaximumTimeout}, see remarks on AutoPilotRemoteController.SetStatus in the documentation");
             }
 
             _buttonOnApPressed = false;
@@ -554,9 +557,11 @@ namespace Iot.Device.Seatalk1
         {
             lock (_lock)
             {
-                if (_lastUpdateTime + TimeSpan.FromSeconds(5) < DateTime.UtcNow)
+                // Netstandard 2.0 doesn't support the multiply operator on timespan
+                TimeSpan twice = new TimeSpan(DefaultTimeout.Ticks * 2);
+                if (_lastUpdateTime + twice < DateTime.UtcNow)
                 {
-                    // The autopilot hasn't sent anything for 5 seconds. Assume it's offline
+                    // The autopilot hasn't sent anything for several seconds. Assume it's offline
                     if (Status != AutopilotStatus.Offline) // don't repeat message
                     {
                         _logger.LogWarning("Autopilot connection timed out. Assuming it's offline");

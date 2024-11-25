@@ -26,14 +26,14 @@ public class GpioControllerSoftwareTests : IDisposable
     [Fact]
     public void PinCountReportedCorrectly()
     {
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         Assert.Equal(28, ctrl.PinCount);
     }
 
     [Fact]
     public void OpenTwiceGpioPinAndClosedTwiceThrows()
     {
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
         _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
         GpioPin gpioPin1 = ctrl.OpenPin(1);
@@ -50,7 +50,7 @@ public class GpioControllerSoftwareTests : IDisposable
         _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, It.IsAny<PinMode>())).Returns(true);
         _mockedGpioDriver.Setup(x => x.SetPinModeEx(1, It.IsAny<PinMode>()));
         _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Input);
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
 
         ctrl.OpenPin(1, PinMode.Input);
         ctrl.Write(1, PinValue.High);
@@ -64,7 +64,7 @@ public class GpioControllerSoftwareTests : IDisposable
         _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
         _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
         _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         Assert.NotNull(ctrl);
         ctrl.OpenPin(1, PinMode.Output);
         Assert.True(ctrl.IsPinOpen(1));
@@ -77,7 +77,7 @@ public class GpioControllerSoftwareTests : IDisposable
     public void IsPinModeSupported()
     {
         _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Input)).Returns(true);
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         Assert.NotNull(ctrl);
         Assert.True(ctrl.IsPinModeSupported(1, PinMode.Input));
     }
@@ -87,7 +87,7 @@ public class GpioControllerSoftwareTests : IDisposable
     {
         _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
         _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         Assert.NotNull(ctrl);
         // Not open
         Assert.Throws<InvalidOperationException>(() => ctrl.GetPinMode(1));
@@ -96,6 +96,7 @@ public class GpioControllerSoftwareTests : IDisposable
     }
 
     [Fact]
+    [Obsolete("Tests an obsolete feature")]
     public void UsingBoardNumberingWorks()
     {
         // Our mock driver maps physical pin 2 to logical pin 1
@@ -122,7 +123,7 @@ public class GpioControllerSoftwareTests : IDisposable
         _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
         _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
         _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         ctrl.OpenPin(1, PinMode.Output);
         ctrl.Write(1, PinValue.High);
         // No close on the pin here, we want to check that the Controller's Dispose works correctly
@@ -130,6 +131,7 @@ public class GpioControllerSoftwareTests : IDisposable
     }
 
     [Fact]
+    [Obsolete("Tests obsolete features")]
     public void UsingBoardNumberingDisposesTheRightPin()
     {
         // Our mock driver maps physical pin 2 to logical pin 1
@@ -151,7 +153,7 @@ public class GpioControllerSoftwareTests : IDisposable
         _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
         _mockedGpioDriver.Setup(x => x.AddCallbackForPinValueChangedEventEx(1,
             PinEventTypes.Rising, It.IsAny<PinChangeEventHandler>()));
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         ctrl.OpenPin(1); // logical pin 1 on our test board
         bool callbackSeen = false;
         PinChangeEventHandler eventHandler = (sender, args) =>
@@ -183,7 +185,7 @@ public class GpioControllerSoftwareTests : IDisposable
         _mockedGpioDriver.Setup(x => x.WriteEx(2, PinValue.Low));
         _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
         _mockedGpioDriver.Setup(x => x.ClosePinEx(2));
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         Assert.NotNull(ctrl);
         ctrl.OpenPin(1, PinMode.Output);
         ctrl.OpenPin(2, PinMode.Output);
@@ -208,7 +210,7 @@ public class GpioControllerSoftwareTests : IDisposable
         _mockedGpioDriver.Setup(x => x.ReadEx(2)).Returns(PinValue.High);
         _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
         _mockedGpioDriver.Setup(x => x.ClosePinEx(2));
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         Assert.NotNull(ctrl);
         ctrl.OpenPin(1, PinMode.Input);
         ctrl.OpenPin(2, PinMode.Input);
@@ -238,7 +240,7 @@ public class GpioControllerSoftwareTests : IDisposable
     [Fact]
     public async Task WaitForEventAsyncFail()
     {
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
         _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Input)).Returns(true);
         _mockedGpioDriver.Setup(x => x.WaitForEventEx(1, PinEventTypes.Rising | PinEventTypes.Falling, It.IsAny<CancellationToken>()))
@@ -260,7 +262,7 @@ public class GpioControllerSoftwareTests : IDisposable
     [Fact]
     public void WaitForEventSuccess()
     {
-        var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+        var ctrl = new GpioController(_mockedGpioDriver.Object);
         _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
         _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Input)).Returns(true);
         _mockedGpioDriver.Setup(x => x.WaitForEventEx(1, PinEventTypes.Rising | PinEventTypes.Falling, It.IsAny<CancellationToken>()))

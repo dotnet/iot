@@ -18,11 +18,10 @@ namespace Iot.Device.DHTxx
         /// Create a DHT11 sensor
         /// </summary>
         /// <param name="pin">The pin number (GPIO number)</param>
-        /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Dht11(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
-            : base(pin, pinNumberingScheme, gpioController, shouldDispose)
+        public Dht11(int pin, GpioController? gpioController = null, bool shouldDispose = true)
+            : base(pin, gpioController, shouldDispose)
         {
         }
 

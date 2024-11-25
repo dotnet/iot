@@ -29,7 +29,7 @@ Console.WriteLine($"Let's blink some LEDs!");
 
 using Seesaw seesawDevice = new Seesaw(I2cDevice.Create(new I2cConnectionSettings(1, 0x49)));
 using SeesawGpioDriver seesawGpioDevice = new SeesawGpioDriver(seesawDevice);
-using GpioController controller = new GpioController(PinNumberingScheme.Logical, seesawGpioDevice);
+using GpioController controller = new GpioController(seesawGpioDevice);
 // this line should only be enabled if a trimpot is connected
 volume = Volume.EnableVolume(seesawDevice);
 

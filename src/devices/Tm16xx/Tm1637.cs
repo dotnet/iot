@@ -121,31 +121,19 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
         public Tm1637(int pinClk, int pinDio)
-            : this(pinClk, pinDio, PinNumberingScheme.Logical, null, true)
+            : this(pinClk, pinDio, null, true)
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of TM1637 with new Gpio controller which will be disposed with this object.
-        /// </summary>
-        /// <param name="pinClk">The clock pin.</param>
-        /// <param name="pinDio">The data pin.</param>
-        /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
-        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
-            : this(pinClk, pinDio, pinNumberingScheme, null, true)
-        {
-        }
-
-        /// <summary>
+                /// <summary>
         /// Initializes an instance of TM1637.
         /// </summary>
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
-        /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
         /// <param name="gpioController">The instance of the gpio controller. Set to <see langword="null" /> to create a new one.</param>
         /// <param name="shouldDispose">Sets to <see langword="true" /> to dispose the Gpio controller with this object. If the <paramref name="gpioController"/> is set to <see langword="null"/>, this parameter will be ignored and the new created Gpio controller will always be disposed with this object.</param>
-        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
-            : base(pinClk, pinDio, ClockWidthMicroseconds, pinNumberingScheme, gpioController, shouldDispose)
+        public Tm1637(int pinClk, int pinDio, GpioController? gpioController = null, bool shouldDispose = true)
+            : base(pinClk, pinDio, ClockWidthMicroseconds, gpioController, shouldDispose)
         {
             _maxCharacters = 6;
             _brightness = 7;

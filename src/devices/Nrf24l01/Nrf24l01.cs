@@ -145,11 +145,10 @@ namespace Iot.Device.Nrf24l01
         /// <param name="channel">Working Channel</param>
         /// <param name="outputPower">Output Power</param>
         /// <param name="dataRate">Send Data Rate</param>
-        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Nrf24l01(SpiDevice sensor, int ce, int irq, byte packetSize, byte channel = 2,
-            OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
+            OutputPower outputPower = OutputPower.N00dBm, DataRate dataRate = DataRate.Rate2Mbps, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
             _ce = ce;
@@ -157,7 +156,7 @@ namespace Iot.Device.Nrf24l01
             PacketSize = packetSize;
             _shouldDispose = shouldDispose || gpioController is null;
 
-            Initialize(pinNumberingScheme, outputPower, dataRate, channel, gpioController);
+            Initialize(outputPower, dataRate, channel, gpioController);
             InitializePipe();
 #if !NET5_0_OR_GREATER
             if (_gpio is null ||
@@ -263,10 +262,10 @@ namespace Iot.Device.Nrf24l01
 #if NET5_0_OR_GREATER
         [MemberNotNull(nameof(_gpio))]
 #endif
-        private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel, GpioController? gpioController)
+        private void Initialize(OutputPower outputPower, DataRate dataRate, byte channel, GpioController? gpioController)
         {
             // open pins
-            _gpio = gpioController ?? new GpioController(pinNumberingScheme);
+            _gpio = gpioController ?? new GpioController();
             _gpio.OpenPin(_ce, PinMode.Output);
             _gpio.OpenPin(_irq, PinMode.Input);
             _gpio.RegisterCallbackForPinValueChangedEvent(_irq, PinEventTypes.Falling, Irq_ValueChanged);

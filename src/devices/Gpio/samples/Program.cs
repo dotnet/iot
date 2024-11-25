@@ -18,7 +18,7 @@ namespace Sunxi.Gpio.Samples
 
             Console.WriteLine($"Let's blink an on-board LED!");
 
-            using GpioController controller = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
+            using GpioController controller = new GpioController(new OrangePiZeroDriver());
             using BoardLed led = new BoardLed("orangepi:red:status");
 
             controller.OpenPin(pin, PinMode.InputPullUp);

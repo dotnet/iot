@@ -16,6 +16,4 @@ public class WindowsDriverTests : GpioControllerTestBase
     }
 
     protected override GpioDriver GetTestDriver() => new Windows10Driver();
-
-    protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 }

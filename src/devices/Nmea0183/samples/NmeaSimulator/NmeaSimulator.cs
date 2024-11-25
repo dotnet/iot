@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using Iot.Device;
@@ -16,6 +18,7 @@ using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1;
 using UnitsNet;
 using CommandLine;
+using Microsoft.Extensions.Logging;
 
 namespace Nmea.Simulator
 {
@@ -64,6 +67,20 @@ namespace Nmea.Simulator
                 return 1;
             }
 
+            if (parsed.Value.Debug)
+            {
+                Console.WriteLine("Waiting for debugger...");
+                while (!Debugger.IsAttached)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+
+            if (parsed.Value.Verbose)
+            {
+                LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory(LogLevel.Trace);
+            }
+
             var sim = new Simulator();
             if (!string.IsNullOrWhiteSpace(parsed.Value.ReplayFiles))
             {
@@ -102,9 +119,44 @@ namespace Nmea.Simulator
                 _tcpServer.StartDecode();
                 _tcpServer.OnNewSequence += OnNewSequenceFromServer;
 
+                // This code block tries to determine the broadcast address of the local master ethernet adapter.
+                // This needs adjustment if the main adapter is a WIFI port.
+                string broadcastAddress = "255.255.255.255";
+                var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (var a in interfaces)
+                {
+                    if (a.OperationalStatus == OperationalStatus.Up && a.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                    {
+                        var properties = a.GetIPProperties();
+                        foreach (var unicast in properties.UnicastAddresses)
+                        {
+                            if (unicast.Address.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                byte[] ipBytes = unicast.Address.GetAddressBytes();
+                                // A virtual address usually looks like a router address, that means it's last part is .1
+                                if (ipBytes[3] == 1)
+                                {
+                                    continue;
+                                }
+
+                                byte[] maskBytes = unicast.IPv4Mask.GetAddressBytes();
+                                for (int i = 0; i < ipBytes.Length; i++)
+                                {
+                                    // Make all bits 1 that are NOT set in the mask
+                                    ipBytes[i] |= (byte)~maskBytes[i];
+                                }
+
+                                broadcastAddress = new IPAddress(ipBytes).ToString();
+                            }
+                        }
+
+                        break;
+                    }
+                }
+
                 // Outgoing port is 10110, the incoming port is irrelevant (but we choose it differently here, so that a
                 // receiver can bind to 10110 on the same computer)
-                _udpServer = new NmeaUdpServer("UdpServer", 10111, 10110);
+                _udpServer = new NmeaUdpServer("UdpServer", 10110, 10110, broadcastAddress);
                 _udpServer.StartDecode();
                 _udpServer.OnNewSequence += OnNewSequenceFromServer;
 
@@ -205,6 +257,15 @@ namespace Nmea.Simulator
                 SeaSmartEngineDetail detail = new SeaSmartEngineDetail(engineData);
                 SendSentence(detail);
 
+                GeographicPosition target = new GeographicPosition(47.54, 9.48, 0);
+                GreatCircle.DistAndDir(data.Position, target, out var distance, out var direction);
+                Speed vmg = Math.Cos(AngleExtensions.Difference(data.Course, direction).Radians) * data.SpeedOverGround;
+                Length xtError = Length.FromNauticalMiles(0.2);
+                var rmb = new RecommendedMinimumNavToDestination(zda.DateTime, xtError, "Start", "FH", target, distance, direction, vmg, false);
+                SendSentence(rmb);
+
+                var xte = new CrossTrackError(xtError);
+                SendSentence(xte);
                 // Test Seatalk message (understood by some OpenCPN plugins)
                 ////RawSentence sentence = new RawSentence(new TalkerId('S', 'T'), new SentenceId("ALK"), new string[]
                 ////{

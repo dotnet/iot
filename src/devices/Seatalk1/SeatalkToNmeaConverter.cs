@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
@@ -25,6 +27,9 @@ namespace Iot.Device.Seatalk1
         private SeatalkInterface _seatalkInterface;
         private bool _isDisposed;
         private ILogger _logger;
+        private BlockingCollection<Action> _sendQueue;
+        private Thread? _sendThread;
+        private CancellationTokenSource _terminatingCancellationTokenSource;
 
         /// <summary>
         /// Construct an instance of this class.
@@ -34,6 +39,8 @@ namespace Iot.Device.Seatalk1
         public SeatalkToNmeaConverter(string interfaceName, string portName)
             : base(interfaceName)
         {
+            _terminatingCancellationTokenSource = new CancellationTokenSource();
+            _sendQueue = new BlockingCollection<Action>();
             _sentencesToTranslate = new();
             _logger = this.GetCurrentClassLogger();
             _seatalkInterface = new SeatalkInterface(portName);
@@ -50,12 +57,13 @@ namespace Iot.Device.Seatalk1
         /// RSA (Seatalk->Nmea)
         /// MWV (Nmea->Seatalk)
         /// RMB (Nmea->Seatalk)
+        /// HTC (Nmea->Seatalk, translated into commands)
         /// </remarks>
         public List<SentenceId> SentencesToTranslate => _sentencesToTranslate;
 
         private void SeatalkMessageReceived(SeatalkMessage stalk)
         {
-            var nmeaMsg = new SeatalkNmeaMessage(stalk.CreateDatagram(), DateTimeOffset.UtcNow);
+            var nmeaMsg = new SeatalkNmeaMessageWithDecoding(stalk.CreateDatagram(), stalk, DateTimeOffset.UtcNow);
             _logger.LogDebug($"Received Seatalk message: {stalk}");
             DispatchSentenceEvents(nmeaMsg);
 
@@ -97,7 +105,27 @@ namespace Iot.Device.Seatalk1
                 throw new ObjectDisposedException(nameof(SeatalkToNmeaConverter));
             }
 
+            _sendThread = new Thread(ProcessSendQueue);
+            _sendThread.Start();
             _seatalkInterface.StartDecode();
+        }
+
+        private void ProcessSendQueue()
+        {
+            try
+            {
+                while (!_terminatingCancellationTokenSource.IsCancellationRequested)
+                {
+                    if (_sendQueue.TryTake(out var item, -1, _terminatingCancellationTokenSource.Token))
+                    {
+                        item();
+                    }
+                }
+            }
+            catch (OperationCanceledException x)
+            {
+                _logger.LogDebug(x, "Send task terminating, caught OperationCancelledException");
+            }
         }
 
         /// <summary>
@@ -126,6 +154,7 @@ namespace Iot.Device.Seatalk1
                 }
             }
 
+            // Translations NMEA->Seatalk
             if (DoTranslate(sentence, out WindSpeedAndAngle? mwv) && mwv != null)
             {
                 ApparentWindAngle awa = new ApparentWindAngle()
@@ -147,6 +176,59 @@ namespace Iot.Device.Seatalk1
                 NavigationToWaypoint nwp = new NavigationToWaypoint(rmb.CrossTrackError, rmb.BearingToWayPoint, true, rmb.DistanceToWayPoint);
                 _seatalkInterface.SendMessage(nwp);
             }
+
+            if (DoTranslate(sentence, out HeadingAndTrackControl? htc) && htc != null)
+            {
+                // Empty the queue when this (rare) message arrives, so we can directly issue its commands
+                while (_sendQueue.TryTake(out var dispose, TimeSpan.FromSeconds(0.5)))
+                {
+                    // Wait
+                }
+
+                var ap = _seatalkInterface.GetAutopilotRemoteController();
+
+                AutopilotStatus desiredStatus = htc.Status switch
+                {
+                    "M" => AutopilotStatus.Standby,
+                    "S" => AutopilotStatus.Auto,
+                    "W" => AutopilotStatus.Wind,
+                    "T" => AutopilotStatus.Track,
+
+                    _ => AutopilotStatus.Undefined,
+                };
+
+                _sendQueue.Add(() =>
+                {
+                    TurnDirection? confirm = null;
+
+                    if (desiredStatus == AutopilotStatus.Track)
+                    {
+                        if (!ap.SetStatus(desiredStatus, ref confirm))
+                        {
+                            ap.SetStatus(desiredStatus, ref confirm);
+                        }
+                    }
+                    else
+                    {
+                        ap.SetStatus(desiredStatus, ref confirm);
+                    }
+
+                    if (ap.IsOperating && htc.DesiredHeading.HasValue)
+                    {
+                        ap.TurnTo(htc.DesiredHeading.Value, null);
+                    }
+                });
+
+                if (ap.DeadbandMode == DeadbandMode.Automatic && htc.OffHeadingLimit.HasValue && htc.OffHeadingLimit.Value.Equals(Angle.Zero, Angle.FromDegrees(0.5)))
+                {
+                    _sendQueue.Add(() => ap.SetDeadbandMode(DeadbandMode.Minimal));
+                }
+
+                if (ap.DeadbandMode == DeadbandMode.Minimal && htc.OffHeadingLimit.HasValue && !htc.OffHeadingLimit.Value.Equals(Angle.Zero, Angle.FromDegrees(0.5)))
+                {
+                    _sendQueue.Add(() => ap.SetDeadbandMode(DeadbandMode.Automatic));
+                }
+            }
         }
 
         private bool DoTranslate<T>(NmeaSentence sentence, out T? convertedSentence)
@@ -167,7 +249,24 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         public override void StopDecode()
         {
-            _seatalkInterface.Dispose();
+            _terminatingCancellationTokenSource.Cancel();
+            if (!_isDisposed)
+            {
+                if (!_sendQueue.IsAddingCompleted)
+                {
+                    _sendQueue.CompleteAdding();
+                }
+
+                if (_sendThread != null)
+                {
+                    _sendThread.Join();
+                    _sendThread = null;
+                }
+
+                _sendQueue.Dispose();
+                _seatalkInterface.Dispose();
+            }
+
             _isDisposed = true;
         }
     }

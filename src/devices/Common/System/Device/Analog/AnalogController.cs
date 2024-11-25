@@ -19,17 +19,10 @@ namespace System.Device.Analog
         /// <summary>
         /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme and driver.
         /// </summary>
-        /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-        protected AnalogController(PinNumberingScheme numberingScheme)
+        protected AnalogController()
         {
-            NumberingScheme = numberingScheme;
             _openPins = new List<AnalogInputPin>();
         }
-
-        /// <summary>
-        /// The numbering scheme used to represent pins provided by the controller.
-        /// </summary>
-        public PinNumberingScheme NumberingScheme { get; }
 
         /// <summary>
         /// The number of pins provided by the controller.
