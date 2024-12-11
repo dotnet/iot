@@ -10,8 +10,10 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ArduinoCsCompiler;
 using ArduinoCsCompiler.Runtime;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Graphics;
@@ -214,6 +216,11 @@ namespace Iot.Device.Arduino.Tests
         public static double ModD(double a, double b)
         {
             return a % b;
+        }
+
+        public static double Truncate(double a, double b)
+        {
+            return Math.Truncate(a);
         }
 
         public static double LoadDoubleConstant(double a, double b)
@@ -755,9 +762,9 @@ namespace Iot.Device.Arduino.Tests
         public static int EnumGetValues2(int arg1, int arg2)
         {
             var array = Enum.GetValues<TestEnum>();
-            MiniAssert.That(array.Count() == 4);
-            MiniAssert.That(array[0] == TestEnum.None);
-            MiniAssert.That(array[1] == TestEnum.One);
+            MiniAssert.AreEqual(4, array.Length);
+            MiniAssert.That(array[0] == TestEnum.None, $"None is not first element of array, but {array[0]} is");
+            MiniAssert.That(array[1] == TestEnum.One, $"One is not second element of array, but {array[1]} is");
             return 1;
         }
 
@@ -1478,6 +1485,90 @@ namespace Iot.Device.Arduino.Tests
             MiniAssert.False("abcd".StartsWith("AB", StringComparison.CurrentCulture));
             MiniAssert.That("abcd".StartsWith("AB", StringComparison.InvariantCultureIgnoreCase));
             return 1;
+        }
+
+        [ArduinoCompileTimeConstant]
+        public static string GetRuntimeVersionAtCompileTime()
+        {
+            return RuntimeInformation.FrameworkDescription;
+        }
+
+        /// <summary>
+        /// This verifies that the compiler uses the same major runtime version than we're emulating (see also implementation of <see cref="MiniRuntimeInformation"/>)
+        /// </summary>
+        public static int CompareRuntimeVersion(int major, int minor)
+        {
+            string v1 = GetRuntimeVersionAtCompileTime();
+            int idx1 = v1.LastIndexOf(" ", StringComparison.Ordinal);
+            MiniAssert.That(idx1 >= 0);
+            v1 = v1.Substring(idx1);
+            Version hostVersion = Version.Parse(v1);
+            string v2 = RuntimeInformation.FrameworkDescription;
+            v2 = v2.Substring(v2.LastIndexOf(" ", StringComparison.Ordinal));
+            Version ourVersion = Version.Parse(v2);
+            MiniAssert.AreEqual(hostVersion.Major, ourVersion.Major);
+            MiniAssert.AreEqual(hostVersion.Minor, ourVersion.Minor);
+            MiniAssert.That(hostVersion.Build >= ourVersion.Build);
+            return 1;
+        }
+
+        public static int CallByValueIntTest(int arg1, int arg2)
+        {
+            int v1 = arg1;
+            MiniAssert.AreNotEqual(arg1, arg2);
+            UpdateVariable(ref v1, arg2);
+            MiniAssert.AreEqual(v1, arg2);
+            return 1;
+        }
+
+        public static int CallByValueShortTest(int arg1, int arg2)
+        {
+            short v1 = (short)arg1;
+            UpdateShortVariable(ref v1, -2);
+            MiniAssert.AreEqual(v1, -2); // Verify sign extension
+            return 1;
+        }
+
+        public static int CallByValueObjectTest(int arg1, int arg2)
+        {
+            List<int>? l = null;
+            CreateOrAddToList(ref l, 1);
+            MiniAssert.AreEqual(1, l!.Count);
+            CreateOrAddToList(ref l, 2);
+            MiniAssert.AreEqual(2, l!.Count);
+            MiniAssert.AreEqual(2, l[1]);
+            return 1;
+        }
+
+        public static void UpdateVariable(ref int arg, int withValue)
+        {
+            arg = withValue;
+        }
+
+        public static void UpdateShortVariable(ref short arg, short withValue)
+        {
+            arg = withValue;
+        }
+
+        public static void CreateOrAddToList(ref List<int>? list, int item)
+        {
+            if (list == null)
+            {
+                list = new List<int>();
+            }
+
+            list.Add(item);
+        }
+
+        public static int HasShortArgument(short s1, short s2)
+        {
+            return s1 + s2;
+        }
+
+        public static int UseShortArgument(int arg1, int arg2)
+        {
+            int result = HasShortArgument((short)arg1, (short)arg2);
+            return result;
         }
     }
 }

@@ -15,7 +15,7 @@ using Xunit;
 
 #pragma warning disable SA1405 // Debug.Assert without description
 #pragma warning disable SA1204 // Static members first
-namespace Iot.Device.Tests
+namespace Iot.Device.Arduino.Tests
 {
     public class FrameworkBehaviorTests
     {

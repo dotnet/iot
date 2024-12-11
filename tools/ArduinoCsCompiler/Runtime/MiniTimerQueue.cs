@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 #pragma warning disable SX1309 // Inconsistent naming (names must match the CLR)
 namespace ArduinoCsCompiler.Runtime
 {
-    [ArduinoReplacement("System.Threading.TimerQueue", "System.Private.Corelib.dll", false, typeof(string), IncludingPrivates = true)]
+    // [ArduinoReplacement("System.Threading.TimerQueue", "System.Private.Corelib.dll", false, typeof(string), IncludingPrivates = true)]
     internal class MiniTimerQueue
     {
         // Implementation partially copied from the CLR, minus debugging stuff and minus native timers

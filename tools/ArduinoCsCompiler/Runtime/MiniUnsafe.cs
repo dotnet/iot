@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Runtime.CompilerServices;
 using Iot.Device.Arduino;
 
 namespace ArduinoCsCompiler.Runtime
 {
-    [ArduinoReplacement("Internal.Runtime.CompilerServices.Unsafe", "System.Private.CoreLib.dll", true, IncludingPrivates = true)]
+    [ArduinoReplacement("System.Runtime.CompilerServices.Unsafe", "System.Private.CoreLib.dll", true, IncludingPrivates = true)]
     internal unsafe class MiniUnsafe
     {
         /// <summary>
@@ -45,13 +46,13 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// Determines the byte offset from origin to target from the given references.
         /// </summary>
-        [ArduinoImplementation("UnsafeByteOffset", 0x22, CompareByParameterNames = true)]
+        [ArduinoImplementation("UnsafeByteOffset", 0x22, CompareByParameterNames = true, MergeGenericImplementations = true)]
         public static IntPtr ByteOffset<T>(ref T origin, ref T target)
         {
             throw new PlatformNotSupportedException();
         }
 
-        [ArduinoImplementation("UnsafeAreSame", 0x23, CompareByParameterNames = true)]
+        [ArduinoImplementation("UnsafeAreSame", 0x23, CompareByParameterNames = true, MergeGenericImplementations = true)]
         public static bool AreSame<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();
@@ -60,6 +61,25 @@ namespace ArduinoCsCompiler.Runtime
             // ldarg.1
             // ceq
             // ret
+        }
+
+        /// <summary>
+        /// Reinterprets the given value of type <typeparamref name="TFrom" /> as a value of type <typeparamref name="TTo" />.
+        /// </summary>
+        /// <exception cref="NotSupportedException">The size of <typeparamref name="TFrom" /> and <typeparamref name="TTo" /> are not the same.</exception>
+        [ArduinoImplementation]
+        public static TTo BitCast<TFrom, TTo>(TFrom source)
+            where TFrom : struct
+            where TTo : struct
+        {
+#pragma warning disable CS8500 // Erfasst die Adresse, ermittelt die Größe oder deklariert einen Zeiger auf einen verwalteten Typ.
+            if (sizeof(TFrom) != sizeof(TTo))
+            {
+                throw new NotSupportedException();
+            }
+#pragma warning restore CS8500 // Erfasst die Adresse, ermittelt die Größe oder deklariert einen Zeiger auf einen verwalteten Typ.
+
+            return ReadUnaligned<TTo>(ref As<TFrom, byte>(ref source));
         }
 
         [ArduinoImplementation(CompareByParameterNames = true, MergeGenericImplementations = true)]
@@ -80,6 +100,7 @@ namespace ArduinoCsCompiler.Runtime
             return ref AddByteOffset(ref source, (IntPtr)(elementOffset * (int)SizeOf<T>()));
         }
 
+        [ArduinoImplementation]
         public static void* Add<T>(void* source, int elementOffset)
         {
             return (byte*)source + (elementOffset * (int)SizeOf<T>());
@@ -88,9 +109,37 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// Adds an element offset to the given reference.
         /// </summary>
+        [ArduinoImplementation]
         public static ref T Add<T>(ref T source, IntPtr elementOffset)
         {
             return ref AddByteOffset(ref source, (IntPtr)((uint)elementOffset * (uint)SizeOf<T>()));
+        }
+
+        public static ref T Subtract<T>(ref T source, UIntPtr elementOffset)
+        {
+            return ref SubtractByteOffset(ref source, (nuint)(elementOffset * (uint)SizeOf<T>()));
+
+            // ldarg .0
+            // ldarg .1
+            // sizeof !!T
+            // mul
+            // sub
+            // ret
+        }
+
+        public static ref T SubtractByteOffset<T>(ref T source, nuint byteOffset)
+        {
+            return ref SubtractByteOffset(ref source, (IntPtr)(void*)byteOffset);
+            // ldarg .0
+            // ldarg .1
+            // sub
+            // ret
+        }
+
+        [ArduinoImplementation("UnsafeSubtractByteOffset", MergeGenericImplementations = true)]
+        public static ref T SubtractByteOffset<T>(ref T source, IntPtr byteOffset)
+        {
+            throw new PlatformNotSupportedException();
         }
 
         [ArduinoImplementation("UnsafeAddByteOffset", 0x24, MergeGenericImplementations = true)]
@@ -131,6 +180,7 @@ namespace ArduinoCsCompiler.Runtime
             return ref As<byte, T>(ref *(byte*)source);
         }
 
+        [ArduinoImplementation]
         public static ref T AsRef<T>(in T source)
         {
             throw new PlatformNotSupportedException();
@@ -144,12 +194,6 @@ namespace ArduinoCsCompiler.Runtime
             // ldc.i4.0
             // conv.u
             // ret
-        }
-
-        [ArduinoImplementation(CompareByParameterNames = true)]
-        public static T ReadUnaligned<T>(void* source)
-        {
-            return As<byte, T>(ref *(byte*)source);
         }
 
         [ArduinoImplementation(CompareByParameterNames = true)]
@@ -221,6 +265,13 @@ namespace ArduinoCsCompiler.Runtime
             As<byte, T>(ref destination) = value;
         }
 
+        [ArduinoImplementation]
+        public static T ReadUnaligned<T>(void* source)
+        {
+            return As<byte, T>(ref *(byte*)source);
+        }
+
+        [ArduinoImplementation]
         public static T ReadUnaligned<T>(ref byte source)
         {
             return As<byte, T>(ref source);
@@ -230,6 +281,19 @@ namespace ArduinoCsCompiler.Runtime
         public static void SkipInit<T>(out T value)
         {
             throw new PlatformNotSupportedException();
+        }
+
+        [ArduinoImplementation("UnsafeCopyBlockUnaligned", 0x29)]
+        public static void CopyBlockUnaligned(ref byte destination, ref readonly byte source, uint byteCount)
+        {
+            throw new PlatformNotSupportedException();
+
+            // ldarg .0
+            // ldarg .1
+            // ldarg .2
+            // unaligned. 0x1
+            // cpblk
+            // ret
         }
     }
 }

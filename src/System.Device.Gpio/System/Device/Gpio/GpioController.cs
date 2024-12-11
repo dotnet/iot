@@ -574,11 +574,11 @@ public class GpioController : IDisposable
 
         if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
         {
-            return new HummingBoardDriver();
+            throw new PlatformNotSupportedException();
         }
 
         // Default for Windows IoT Core on a non-specific device
-        return new Windows10Driver();
+        throw new PlatformNotSupportedException();
     }
 
     /// <summary>

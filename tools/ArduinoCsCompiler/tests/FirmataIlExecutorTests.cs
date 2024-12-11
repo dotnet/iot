@@ -9,6 +9,8 @@ using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using ArduinoCsCompiler;
@@ -40,7 +42,7 @@ namespace Iot.Device.Arduino.Tests
                     CreateKernelForFlashing = false,
                     UseFlashForKernel = false
                 };
-                settings.AdditionalSuppressions.Add("System.Number");
+                // settings.AdditionalSuppressions.Add("System.Number");
                 settings.AdditionalSuppressions.Add("System.SR");
             }
 
@@ -178,7 +180,15 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.RshUnS), -8, 1, 2147483644)]
         public void TestArithmeticOperationSigned(string methodName, int argument1, int argument2, int expected)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false,
+                SkipIterativeCompletion = true
+            };
+
+            settings.AdditionalSuppressions.Add("System.SR");
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, settings);
         }
 
         [Theory]
@@ -233,10 +243,19 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.ModD), 10, 2, 0)]
         [InlineData(nameof(TestMethods.ModD), 11, 2, 1)]
         [InlineData(nameof(TestMethods.ModD), -11, 2, -1)]
+        [InlineData(nameof(TestMethods.Truncate), 1.11, 0, 1)]
+        [InlineData(nameof(TestMethods.Truncate), -1.11, 0, -1)]
         [InlineData(nameof(TestMethods.LoadDoubleConstant), 0.0, 0.0, 2.0)] // tests the LDC.R8 instruction
         public void TestArithmeticOperationSignedDouble(string methodName, double argument1, double argument2, double expected)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false,
+                SkipIterativeCompletion = true
+            };
+
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, settings);
         }
 
         [Theory]
@@ -262,8 +281,15 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.RshUnU), -8u, 1, 0x7FFFFFFCu)]
         public void TestArithmeticOperationUnsigned(string methodName, Int64 argument1, Int64 argument2, Int64 expected)
         {
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false,
+                SkipIterativeCompletion = true
+            };
+
             // Method signature as above, otherwise the test data conversion fails
-            LoadCodeMethod(typeof(TestMethods), methodName, (uint)argument1, (uint)argument2, (uint)expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, (uint)argument1, (uint)argument2, (uint)expected, settings);
         }
 
         [Theory]
@@ -316,6 +342,7 @@ namespace Iot.Device.Arduino.Tests
 
         [Theory]
         [InlineData(nameof(TestMethods.CastClassTest), 0, 0, 1)]
+        [InlineData(nameof(TestMethods.UseShortArgument), -5, 6, 1)]
         public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = false, UseFlashForKernel = false });
@@ -324,6 +351,22 @@ namespace Iot.Device.Arduino.Tests
         [Theory]
         [InlineData(nameof(TestMethods.SpanImplementationBehavior), 5, 1, 1)]
         public void SpanTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
+        {
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false,
+                SkipIterativeCompletion = true
+            };
+
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, settings);
+        }
+
+        [Theory]
+        [InlineData(nameof(TestMethods.CallByValueIntTest), 5, 10, 1)]
+        [InlineData(nameof(TestMethods.CallByValueShortTest), 5, 10, 1)]
+        [InlineData(nameof(TestMethods.CallByValueObjectTest), 5, 10, 1)]
+        public void ByRefTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
@@ -507,6 +550,22 @@ namespace Iot.Device.Arduino.Tests
             };
 
             LoadCodeMethod(typeof(ThreadingTests), methodName, a, b, expected, settings);
+        }
+
+        /// <summary>
+        /// Checks that the emulated runtime version is the same as the one on the host
+        /// </summary>
+        [Fact]
+        public void VerifyRuntimeVersion()
+        {
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false
+            };
+
+            // We can't pass on string types as arguments to the runtime at this time
+            LoadCodeMethod(typeof(TestMethods), nameof(TestMethods.CompareRuntimeVersion), 0, 0, 1, settings);
         }
     }
 }

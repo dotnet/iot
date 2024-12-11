@@ -2,18 +2,12 @@
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Pn532.AsTarget.TargetBaudRateInialized</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>.NETStandard,Version=v2.0</Target>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Tm1637.Character</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net6.0</Target>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>

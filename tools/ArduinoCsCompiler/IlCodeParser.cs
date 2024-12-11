@@ -45,9 +45,8 @@ namespace ArduinoCsCompiler
             return opcode;
         }
 
-        public static IlCode FindAndPatchTokens(ExecutionSet set, EquatableMethod method)
+        public static IlCode FindAndPatchTokens(ExecutionSet set, EquatableMethod method, AnalysisStack analysisStack)
         {
-            // We need to copy the code, because we're going to patch it
             var body = method.GetMethodBody();
             if (body == null)
             {
@@ -55,8 +54,16 @@ namespace ArduinoCsCompiler
                 return new IlCode(method, null);
             }
 
+            if (set.TryGetCachedCode(method, out IlCode? code))
+            {
+                return code;
+            }
+
+            // We need to copy the code, because we're going to patch it
             var byteCode = body.GetILAsByteArray()!.ToArray();
-            return FindAndPatchTokens(set, method, byteCode);
+            var result = FindAndPatchTokens(set, method, analysisStack, byteCode);
+            set.TryAddCachedCode(method, result);
+            return result;
         }
 
         public static IlInstruction GetNextInstruction(ArduinoMethodDeclaration method, ExecutionSet set, int currentPc)
@@ -207,7 +214,7 @@ namespace ArduinoCsCompiler
         /// method depends on (fields, classes and other methods). Then we do a lookup and patch the token with a replacement token that
         /// is unique within our program. So we do not have to care about module boundaries.
         /// </summary>
-        public static IlCode FindAndPatchTokens(ExecutionSet set, EquatableMethod method, byte[] byteCode)
+        public static IlCode FindAndPatchTokens(ExecutionSet set, EquatableMethod method, AnalysisStack analysisStack, byte[] byteCode)
         {
             // We need to copy the code, because we're going to patch it
             if (byteCode == null)
@@ -228,6 +235,10 @@ namespace ArduinoCsCompiler
             int idx = 0;
             IlInstruction? methodStart = null;
             IlInstruction? current = null;
+
+            // when we see CONSTRAINED CALL, it's a call to a "static abstract" method through an interface, and we have to resolve at compile time
+            TypeInfo? staticAbstractType = null;
+
             var m = method.Method;
             while (idx < byteCode.Length - 5) // If less than 5 byte remain, there can't be a token within it
             {
@@ -316,9 +327,64 @@ namespace ArduinoCsCompiler
                             // These opcodes are followed by a method token
                             var methodTarget = ResolveMember(m, token)!;
                             MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
-                            patchValue = set.GetOrAddMethodToken(mb, method);
-                            // Do an inverse lookup again - might have changed due to replacement
-                            methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
+                            analysisStack.Push(mb);
+                            if (staticAbstractType != null && opCode == OpCode.CEE_CALL)
+                            {
+                                // Resolve the method using the static type of the type argument
+                                MethodInfo? targetMethod = null;
+
+                                IEnumerable<MethodInfo> targetMethods = staticAbstractType.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                                bool first = true;
+                                var genericArgs = mb.GetGenericArguments();
+                                while (targetMethod == null)
+                                {
+                                    targetMethods = targetMethods.Where(x =>
+                                    {
+                                        var g2 = x.GetGenericArguments();
+                                        return genericArgs.Length == g2.Length;
+                                    });
+
+                                    if (genericArgs.Length > 0)
+                                    {
+                                        targetMethods = targetMethods.Select(x =>
+                                        {
+                                            return x.MakeGenericMethod(genericArgs);
+                                        });
+                                    }
+
+                                    targetMethod = targetMethods.SingleOrDefault(x => EquatableMethod.MethodsHaveSameSignature(x, mb, true)
+                                                                                      || EquatableMethod.AreSameOperatorMethods(x, mb, true));
+                                    if (targetMethod != null)
+                                    {
+                                        break;
+                                    }
+
+                                    // If it's not only static abstract, but static virtual, the implementation can be found in the interface.
+                                    if (mb.DeclaringType != null && first == true)
+                                    {
+                                        targetMethods = mb.DeclaringType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                                    }
+                                    else
+                                    {
+                                        throw new InvalidOperationException($"Unable to find implementation for {mb.MemberInfoSignature()} on {staticAbstractType} via static target resolver");
+                                    }
+
+                                    first = false;
+                                }
+
+                                patchValue = set.GetOrAddMethodToken(targetMethod, analysisStack);
+                                methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
+                            }
+                            else
+                            {
+                                patchValue = set.GetOrAddMethodToken(mb, analysisStack);
+                                // Do an inverse lookup again - might have changed due to replacement
+                                methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
+                            }
+
+                            staticAbstractType = null;
+                            analysisStack.Pop();
+
                             break;
                         }
 
@@ -445,6 +511,21 @@ namespace ArduinoCsCompiler
                             TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
                             patchValue = set.GetOrAddClassToken(mb);
                             typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                            if (opCode == OpCode.CEE_CONSTRAINED_)
+                            {
+                                int tempPc = idx;
+                                OpCode nextOpCode = DecodeOpcode(byteCode, ref tempPc);
+                                // According to the ECMA specification, CONSTRAINED is only allowed immediately before CALLVIRT,
+                                // but to implement "static virtual" methods, it now is also used before CALL. In the later case,
+                                // we will patch the call site with a static call to the target method and remove the CONSTRAINED
+                                // prefix (by just setting its argument token to 0, which makes it a NOP)
+                                if (nextOpCode == OpCode.CEE_CALL)
+                                {
+                                    staticAbstractType = mb;
+                                    patchValue = 0; // We don't later need to care about this one.
+                                }
+                            }
+
                             break;
                         }
 
@@ -476,6 +557,12 @@ namespace ArduinoCsCompiler
             // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
             // Note that this returns valueName if there's no equal sign in the string.
             string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
+            int alignment = length.IndexOf("_Align", StringComparison.Ordinal);
+            if (alignment > 0)
+            {
+                length = length.Substring(0, alignment);
+            }
+
             int len;
             if (length == "Int32")
             {

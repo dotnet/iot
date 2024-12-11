@@ -147,6 +147,7 @@ public class LibGpiodDriver : UnixDriver
         var ret = new ComponentInformation(this, "Libgpiod Wrapper driver");
 #pragma warning disable SDGPIO0001
         ret.Properties.Add("Version", Version.ToString());
+#pragma warning restore SDGPIO0001
         ret.AddSubComponent(GetDriver().QueryComponentInformation());
 #pragma warning restore SDGPIO0001
         return ret;
