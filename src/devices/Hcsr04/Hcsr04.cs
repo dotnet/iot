@@ -61,9 +61,8 @@ namespace Iot.Device.Hcsr04
         /// </summary>
         /// <param name="triggerPin">Trigger pulse input.</param>
         /// <param name="echoPin">Trigger pulse output.</param>
-        /// <param name="pinNumberingScheme">Pin Numbering Scheme</param>
-        public Hcsr04(int triggerPin, int echoPin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
-            : this(new GpioController(pinNumberingScheme), triggerPin, echoPin)
+        public Hcsr04(int triggerPin, int echoPin)
+            : this(new GpioController(), triggerPin, echoPin)
         {
         }
 

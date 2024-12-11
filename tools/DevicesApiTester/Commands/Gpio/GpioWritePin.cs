@@ -26,7 +26,7 @@ namespace DeviceApiTester.Commands.Gpio
         /// </remarks>
         public int Execute()
         {
-            Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, Pin={Pin}, Value={Value}");
+            Console.WriteLine($"Driver={Driver}, Pin={Pin}, Value={Value}");
 
             using (GpioController controller = CreateGpioController())
             {

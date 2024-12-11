@@ -63,7 +63,7 @@ namespace ArduinoCsCompiler
 
         public override GpioController CreateGpioController()
         {
-            return new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
+            return new GpioController(new ArduinoNativeGpioDriver());
         }
 
         protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins)

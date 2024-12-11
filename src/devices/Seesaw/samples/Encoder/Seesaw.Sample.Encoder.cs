@@ -13,7 +13,7 @@ const byte AdafruitSeesawRotaryEncoderPushSwitchPin = 24;
 const int EncoderPositionInitialValue = 100;
 const int HostInterruptPin = 6;
 
-using GpioController gpioController = new(PinNumberingScheme.Logical);
+using GpioController gpioController = new();
 using Seesaw seesawDevice = new(I2cDevice.Create(new I2cConnectionSettings(AdafruitSeesawRotaryEncoderI2cBus, AdafruitSeesawRotaryEncoderI2cAddress)));
 
 // set initial encoder position value

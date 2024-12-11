@@ -41,17 +41,17 @@ namespace DeviceApiTester.Commands.Gpio
 
             if (LedPin != null)
             {
-                Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, LedPin={LedPin}, PressedValue={PressedValue}, OnValue={OnValue}");
+                Console.WriteLine($"Driver={Driver}, ButtonPin={ButtonPin}, LedPin={LedPin}, PressedValue={PressedValue}, OnValue={OnValue}");
             }
             else
             {
-                Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, PressedValue={PressedValue}, OnValue={OnValue}");
+                Console.WriteLine($"Driver={Driver}, ButtonPin={ButtonPin}, PressedValue={PressedValue}, OnValue={OnValue}");
             }
 
             using GpioController controller = CreateGpioController();
             using var cancelEvent = new ManualResetEvent(false);
             int count = 0;
-            Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
+            Console.WriteLine($"Listening for button presses on GPIO pin {ButtonPin} . . .");
 
             // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler.
             Console.CancelKeyPress += Console_CancelKeyPress;

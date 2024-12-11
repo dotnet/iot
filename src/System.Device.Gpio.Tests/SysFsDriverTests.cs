@@ -19,6 +19,4 @@ public class SysFsDriverTests : GpioControllerTestBase
     }
 
     protected override GpioDriver GetTestDriver() => new SysFsDriver();
-
-    protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 }

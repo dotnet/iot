@@ -54,7 +54,7 @@ namespace Iot.Device.Arduino.Tests
 
             public static int RunBlink(int pin, int delay)
             {
-                var gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
+                var gpioController = new GpioController(new ArduinoNativeGpioDriver());
                 SimpleLedBinding blink = new SimpleLedBinding(gpioController, pin, delay);
                 blink.Loop();
                 return 1;

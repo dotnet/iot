@@ -65,7 +65,7 @@ namespace Iot.Device.LEDMatrix
             _deviceRows = height / chainRows;
 
             _gpio = new Gpio(mapping, _deviceRows);
-            _controller = new GpioController(PinNumberingScheme.Logical, _gpio);
+            _controller = new GpioController(_gpio);
 
             OpenAndWriteToPin(_mapping.A, PinValue.Low);
             OpenAndWriteToPin(_mapping.B, PinValue.Low);

@@ -25,8 +25,6 @@ public class RaspberryPiDriverTests : GpioControllerTestBase
 
     protected override GpioDriver GetTestDriver() => new RaspberryPi3Driver();
 
-    protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
-
     private bool IsRaspi4()
     {
         if (File.Exists("/proc/device-tree/model"))
@@ -47,7 +45,7 @@ public class RaspberryPiDriverTests : GpioControllerTestBase
     [Fact]
     public void InputPullResistorsWork()
     {
-        using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+        using (GpioController controller = new GpioController(GetTestDriver()))
         {
             controller.OpenPin(OpenPin, PinMode.InputPullUp);
             Assert.Equal(PinValue.High, controller.Read(OpenPin));
@@ -71,7 +69,7 @@ public class RaspberryPiDriverTests : GpioControllerTestBase
     public void OpenPinDefaultsModeToLastModeIncludingPulls()
     {
         // This is only fully supported on the Pi4
-        using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+        using (GpioController controller = new GpioController(GetTestDriver()))
         {
             controller.OpenPin(OutputPin);
             controller.SetPinMode(OutputPin, PinMode.InputPullDown);
@@ -91,7 +89,7 @@ public class RaspberryPiDriverTests : GpioControllerTestBase
     [Fact]
     public void HighPulledPinDoesNotChangeToLowWhenChangedToOutput()
     {
-        using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+        using (GpioController controller = new GpioController(GetTestDriver()))
         {
             bool didTriggerToLow = false;
             int testPin = OutputPin;

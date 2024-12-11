@@ -62,7 +62,7 @@ while (true)
 
 GpioController GetGpioControllerFromFt4222()
 {
-    return new GpioController(PinNumberingScheme.Logical, new Ft4222Gpio());
+    return new GpioController(new Ft4222Gpio());
 }
 
 SpiDevice GetSpiFromFt4222()

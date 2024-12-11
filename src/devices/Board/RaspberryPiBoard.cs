@@ -374,11 +374,10 @@ namespace Iot.Device.Board
         /// </summary>
         /// <param name="pinNumber">Pin number to use</param>
         /// <param name="usage">Requested usage</param>
-        /// <param name="pinNumberingScheme">Pin numbering scheme for the pin provided (logical or physical)</param>
         /// <param name="bus">Optional bus argument, for SPI and I2C pins</param>
         /// <returns>
         /// A member of <see cref="RaspberryPi3Driver.AltMode"/> describing the mode the pin is in.</returns>
-        private RaspberryPi3Driver.AltMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
+        private RaspberryPi3Driver.AltMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, int bus = 0)
         {
             if (pinNumber >= PinCount)
             {
@@ -566,7 +565,7 @@ namespace Iot.Device.Board
                 throw new NotSupportedException("Alternate pin mode setting not supported by driver");
             }
 
-            var modeToSet = GetHardwareModeForPinUsage(pinNumber, usage, PinNumberingScheme.Logical);
+            var modeToSet = GetHardwareModeForPinUsage(pinNumber, usage);
             if (modeToSet != RaspberryPi3Driver.AltMode.Unknown)
             {
                 _raspberryPi3Driver.SetAlternatePinMode(pinNumber, modeToSet);
@@ -607,19 +606,19 @@ namespace Iot.Device.Board
 
             // Do some heuristics: If the given pin number can be used for I2C with the same Alt mode, we can assume that's what it
             // it set to.
-            var possibleAltMode = GetHardwareModeForPinUsage(pinNumber, PinUsage.I2c, DefaultPinNumberingScheme);
+            var possibleAltMode = GetHardwareModeForPinUsage(pinNumber, PinUsage.I2c);
             if (possibleAltMode == pinMode)
             {
                 return PinUsage.I2c;
             }
 
-            possibleAltMode = GetHardwareModeForPinUsage(pinNumber, PinUsage.Spi, DefaultPinNumberingScheme);
+            possibleAltMode = GetHardwareModeForPinUsage(pinNumber, PinUsage.Spi);
             if (possibleAltMode == pinMode)
             {
                 return PinUsage.Spi;
             }
 
-            possibleAltMode = GetHardwareModeForPinUsage(pinNumber, PinUsage.Pwm, DefaultPinNumberingScheme);
+            possibleAltMode = GetHardwareModeForPinUsage(pinNumber, PinUsage.Pwm);
             if (possibleAltMode == pinMode)
             {
                 return PinUsage.Pwm;

@@ -185,7 +185,7 @@ namespace Iot.Device.Ili934x.Samples
 
         private static GpioController GetGpioControllerFromFt4222()
         {
-            return new GpioController(PinNumberingScheme.Logical, new Ft4222Gpio());
+            return new GpioController(new Ft4222Gpio());
         }
 
         private static SpiDevice GetSpiFromFt4222()

@@ -84,7 +84,7 @@ if (platformChoice.KeyChar == '1')
 }
 else
 {
-    gpio = new(PinNumberingScheme.Logical, new Ft4222Gpio());
+    gpio = new(new Ft4222Gpio());
     Ft4222Spi ft4222Spi = new(spiConnection);
     SoftwarePwmChannel? softPwm = pwmPin >= 0 ? new(pwmPin, 1000, usePrecisionTimer: true, controller: gpio, shouldDispose: false, dutyCycle: 0) : null;
     lcd = new(dataCommandPin, ft4222Spi, resetPin, softPwm, gpio, false);

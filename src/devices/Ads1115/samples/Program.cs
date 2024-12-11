@@ -72,7 +72,7 @@ using (var adc = new Iot.Device.Ads1115.Ads1115(device, InputMultiplexer.AIN0, M
 // Provide a callback that triggers each time the ADC has a new value available. The DataRate parameter will define the sample rate.
 // We are using pin 23 as interrupt input from the ADC, but note that the trigger signal from the ADC may be to short to be properly recognized by the Raspberry Pi and
 // some extra electronics is required to make this reliably work (see readme).
-using (var controller = new GpioController(PinNumberingScheme.Logical))
+using (var controller = new GpioController())
 {
     Console.Clear();
     Console.WriteLine("This triggers an interrupt each time a new value is available on AIN0");
@@ -107,7 +107,7 @@ using (var controller = new GpioController(PinNumberingScheme.Logical))
 }
 
 // Use an interrupt handler, but this time when the value on AIN1 exceeds a threshold
-using (var controller = new GpioController(PinNumberingScheme.Logical))
+using (var controller = new GpioController())
 {
     Console.Clear();
     Console.WriteLine("This triggers an interrupt as long as the value is above 2.0V (and then stays above 1.8V)");

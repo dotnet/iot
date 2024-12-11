@@ -28,7 +28,7 @@ namespace Iot.Device.Mcp23xxx.Tests
             _callbackNo = 0;
             _mockI2c = new I2cDeviceMock(2, null);
             _driverMock = new GpioDriverMock();
-            _gpioController = new GpioController(PinNumberingScheme.Logical, _driverMock);
+            _gpioController = new GpioController(_driverMock);
             _device = new Mcp23017(_mockI2c, -1, 11, 22, _gpioController, false);
         }
 
@@ -42,7 +42,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         [Fact]
         public void AddEventHandlerPortA()
         {
-            GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
+            GpioController theDeviceController = new GpioController(_device);
             theDeviceController.OpenPin(1, PinMode.Input);
             theDeviceController.RegisterCallbackForPinValueChangedEvent(1, PinEventTypes.Rising, Callback);
 
@@ -59,7 +59,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         [Fact]
         public void AddEventHandlerPortB()
         {
-            GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
+            GpioController theDeviceController = new GpioController(_device);
             theDeviceController.OpenPin(10, PinMode.Input);
             theDeviceController.RegisterCallbackForPinValueChangedEvent(10, PinEventTypes.Rising, Callback);
 
@@ -77,7 +77,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         public void AddMultipleEventHandlers()
         {
             _callbackNo = 0;
-            GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
+            GpioController theDeviceController = new GpioController(_device);
             theDeviceController.OpenPin(0, PinMode.Input);
             theDeviceController.RegisterCallbackForPinValueChangedEvent(0, PinEventTypes.Rising | PinEventTypes.Falling, Callback2);
 
@@ -94,7 +94,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         [Fact]
         public void AddRemoveEventHandler()
         {
-            GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
+            GpioController theDeviceController = new GpioController(_device);
             theDeviceController.OpenPin(1, PinMode.Input);
             theDeviceController.RegisterCallbackForPinValueChangedEvent(1, PinEventTypes.Rising, Callback);
             theDeviceController.UnregisterCallbackForPinValueChangedEvent(1, Callback);

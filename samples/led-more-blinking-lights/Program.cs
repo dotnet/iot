@@ -23,7 +23,7 @@ Volume? volume = null;
 volume = Volume.EnableVolume();
 
 Console.WriteLine($"Let's blink some LEDs!");
-using GpioController controller = new GpioController(PinNumberingScheme.Logical);
+using GpioController controller = new GpioController();
 controller.OpenPin(ledOne, PinMode.Output);
 controller.OpenPin(ledTwo, PinMode.Output);
 controller.OpenPin(ledThree, PinMode.Output);

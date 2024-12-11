@@ -36,16 +36,16 @@ namespace DeviceApiTester.Commands.Gpio
         {
             if (LedPin != null)
             {
-                Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, LedPin={LedPin}, PressedValue={PressedValue}, OnValue={OnValue}");
+                Console.WriteLine($"Driver={Driver}, ButtonPin={ButtonPin}, LedPin={LedPin}, PressedValue={PressedValue}, OnValue={OnValue}");
             }
             else
             {
-                Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, PressedValue={PressedValue}, OnValue={OnValue}");
+                Console.WriteLine($"Driver={Driver}, ButtonPin={ButtonPin}, PressedValue={PressedValue}, OnValue={OnValue}");
             }
 
             using GpioController controller = CreateGpioController();
             using CancellationTokenSource cancellationTokenSource = new();
-            Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
+            Console.WriteLine($"Listening for button presses on GPIO pin {ButtonPin} . . .");
 
             // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler.
             Console.CancelKeyPress += Console_CancelKeyPress;
@@ -71,7 +71,7 @@ namespace DeviceApiTester.Commands.Gpio
                 if (!waitResult.TimedOut)
                 {
                     var pressedOrReleased = waitResult.EventTypes == PressedValue ? "pressed" : "released";
-                    Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventTypes}");
+                    Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO pin number {ButtonPin}, ChangeType={waitResult.EventTypes}");
 
                     if (LedPin != null)
                     {
