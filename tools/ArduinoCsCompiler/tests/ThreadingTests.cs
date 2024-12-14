@@ -26,6 +26,7 @@ namespace Iot.Device.Arduino.Tests
             Thread t = new Thread(MyStaticThreadStart1);
             t.Start();
             t.Join();
+            Assert.False(t.IsThreadPoolThread);
             return s_data;
         }
 
