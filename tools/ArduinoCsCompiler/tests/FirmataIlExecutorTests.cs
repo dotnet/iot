@@ -151,7 +151,14 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.SmallerOrEqualS), -2, -2, true)]
         public void TestBooleanOperation(string methodName, int argument1, int argument2, bool expected)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false,
+                SkipIterativeCompletion = true
+            };
+
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, settings);
         }
 
         [Theory]
