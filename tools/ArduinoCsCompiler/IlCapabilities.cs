@@ -38,6 +38,12 @@ namespace ArduinoCsCompiler
             init;
         }
 
+        public int ProtocolVersion
+        {
+            get;
+            init;
+        }
+
         public override string ToString()
         {
             return @$"

@@ -36,6 +36,12 @@ namespace ArduinoCsCompiler.Runtime
             return 0;
         }
 
+        [ArduinoImplementation]
+        public static int TryGetHashCode(object? obj)
+        {
+            return GetHashCode(obj);
+        }
+
         [ArduinoImplementation(CompareByParameterNames = true)]
         public static bool IsPrimitiveType(CorElementType et)
         {
@@ -43,6 +49,7 @@ namespace ArduinoCsCompiler.Runtime
             return ((1 << (int)et) & 0b_0011_0000_0000_0011_1111_1111_1100) != 0;
         }
 
+        [ArduinoImplementation]
         public static bool IsReferenceOrContainsReferences<T>()
         {
             return IsReferenceOrContainsReferencesCore(typeof(T));
@@ -79,7 +86,8 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        internal static bool IsBitwiseEquatable<T>()
+        [ArduinoImplementation]
+        public static bool IsBitwiseEquatable<T>()
         {
             return IsBitwiseEquatableCore(typeof(T));
         }
@@ -153,6 +161,24 @@ namespace ArduinoCsCompiler.Runtime
         public static System.Boolean TryEnsureSufficientExecutionStack()
         {
             return true;
+        }
+
+        [ArduinoImplementation]
+        public static unsafe System.ReadOnlySpan<T> CreateSpan<T>(RuntimeFieldHandle handle)
+        {
+            return new ReadOnlySpan<T>(GetSpanDataFrom(handle, typeof(T), out int length), length);
+        }
+
+        [ArduinoImplementation("RuntimeHelpersGetSpanDataFrom")]
+        public static unsafe void* GetSpanDataFrom(RuntimeFieldHandle handle, Type type, out int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation]
+        public static bool IsKnownConstant(Char t)
+        {
+            return false;
         }
     }
 }

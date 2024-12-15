@@ -292,14 +292,28 @@ namespace ArduinoCsCompiler.Runtime
                 return 1; // Only disk files supported
             }
 
-            internal static Boolean SetEvent(Microsoft.Win32.SafeHandles.SafeWaitHandle handle)
+            [ArduinoImplementation("Interop_Kernel32SetEvent")]
+            internal static Boolean SetEventInternal(IntPtr handle)
             {
-                return true;
+                throw new NotImplementedException();
             }
 
-            internal static Boolean ResetEvent(Microsoft.Win32.SafeHandles.SafeWaitHandle handle)
+            [ArduinoImplementation]
+            public static Boolean SetEvent(Microsoft.Win32.SafeHandles.SafeWaitHandle handle)
             {
-                return true;
+                return SetEventInternal(handle.DangerousGetHandle());
+            }
+
+            [ArduinoImplementation("Interop_Kernel32ResetEvent")]
+            internal static Boolean ResetEventInternal(IntPtr handle)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation]
+            public static Boolean ResetEvent(Microsoft.Win32.SafeHandles.SafeWaitHandle handle)
+            {
+                return ResetEventInternal(handle.DangerousGetHandle());
             }
 
             [ArduinoImplementation("Interop_Kernel32SetEndOfFile", 0x207)]
@@ -342,19 +356,19 @@ namespace ArduinoCsCompiler.Runtime
             [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2", 0x210)]
             internal static unsafe Int32 WriteFile(IntPtr handle, Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, Int32 offset)
             {
-                return 0;
+                throw new NotImplementedException();
             }
 
             [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped", 0x209)]
             internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, System.IntPtr numBytesWritten_mustBeZero, NativeOverlapped* lpOverlapped)
             {
-                return 0;
+                throw new NotImplementedException();
             }
 
             [ArduinoImplementation("Interop_Kernel32ReadFileOverlapped2", 0x211)]
             internal static unsafe Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToReade, ref Int32 numBytesRead, NativeOverlapped* lpOverlapped)
             {
-                return 0;
+                throw new NotImplementedException();
             }
 
             [ArduinoImplementation("Interop_Kernel32GetOverlappedResult", 0x212)]
@@ -364,7 +378,7 @@ namespace ArduinoCsCompiler.Runtime
                 ref int lpNumberOfBytesTransferred,
                 bool bWait)
             {
-                return false;
+                throw new NotImplementedException();
             }
 
             // TODO: Probably better rewrite managed
@@ -374,6 +388,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
+            [ArduinoImplementation]
             internal static SafeWaitHandle CreateEventEx(
                 IntPtr lpSecurityAttributes,
                 string name,
@@ -393,6 +408,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
+            [ArduinoImplementation]
             internal static SafeWaitHandle OpenMutex(
                 uint desiredAccess,
                 bool inheritHandle,
@@ -591,21 +607,55 @@ namespace ArduinoCsCompiler.Runtime
                 return true;
             }
 
-            internal static bool PostQueuedCompletionStatus(
+            [ArduinoImplementation]
+            public static bool PostQueuedCompletionStatus(
                 IntPtr CompletionPort,
-                int dwNumberOfBytesTransferred,
+                uint dwNumberOfBytesTransferred,
                 UIntPtr CompletionKey,
                 IntPtr lpOverlapped)
             {
                 throw new NotImplementedException();
             }
 
-            internal static bool GetQueuedCompletionStatus(
+            [ArduinoImplementation]
+            public static bool GetQueuedCompletionStatus(
                 IntPtr CompletionPort,
-                out int lpNumberOfBytes,
+                out uint lpNumberOfBytesTransferred,
                 out UIntPtr CompletionKey,
                 out IntPtr lpOverlapped,
                 int dwMilliseconds)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            internal static unsafe bool GetQueuedCompletionStatusEx(System.IntPtr CompletionPort, void* lpCompletionPortEntries,
+                System.Int32 ulCount, ref System.Int32 ulNumEntriesRemoved, System.Int32 dwMilliseconds, System.Boolean fAlertable)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static unsafe SafeHandle CreateThreadpoolIo(SafeHandle fl, void* pfnio, IntPtr context, IntPtr pcbe)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static void CancelThreadpoolIo(SafeHandle pio)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static void StartThreadpoolIo(SafeHandle pio)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation]
+            public static unsafe System.Boolean DeviceIoControl(SafeHandle hDevice, UInt32 dwIoControlCode, void* lpInBuffer,
+                UInt32 nInBufferSize, void* lpOutBuffer, UInt32 nOutBufferSize, ref UInt32 lpBytesReturned, System.IntPtr lpOverlapped)
             {
                 throw new NotImplementedException();
             }
@@ -687,6 +737,39 @@ namespace ArduinoCsCompiler.Runtime
                 return count;
                 */
                 return 0;
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static unsafe IntPtr CreateThreadpoolTimer(void* pfnti, IntPtr pv, IntPtr pcbe)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation]
+            public static unsafe System.IntPtr SetThreadpoolTimer(System.IntPtr pti, System.Int64* pftDueTime, System.UInt32 msPeriod, System.UInt32 msWindowLength)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static unsafe IntPtr CreateThreadpoolWork(void* pfnwk, IntPtr pv, IntPtr pcbe)
+            {
+                // Shouldn't be called, because we use the portable thread pool
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static void CloseThreadpoolWork(IntPtr pwk)
+            {
+                // Shouldn't be called, because we use the portable thread pool
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static void SubmitThreadpoolWork(IntPtr pwk)
+            {
+                // Shouldn't be called, because we use the portable thread pool
+                throw new NotImplementedException();
             }
         }
 

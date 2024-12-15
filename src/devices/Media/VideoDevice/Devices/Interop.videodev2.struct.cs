@@ -241,7 +241,7 @@ internal partial class InteropVideodev2
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    internal unsafe struct fmt
+    internal unsafe struct V412_Fmt
     {
         [FieldOffset(0)]
         public v4l2_pix_format pix;
@@ -263,7 +263,7 @@ internal partial class InteropVideodev2
     internal struct v4l2_format
     {
         public v4l2_buf_type type;
-        public fmt fmt;
+        public V412_Fmt fmt;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -339,7 +339,9 @@ internal partial class InteropVideodev2
         public v4l2_field field;
 
         [StructLayout(LayoutKind.Sequential)]
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
         public struct timeval
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
         {
             public nint tv_sec;
             public nint tv_usec;

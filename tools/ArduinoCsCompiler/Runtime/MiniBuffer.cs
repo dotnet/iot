@@ -4,6 +4,7 @@
 using System;
 using Iot.Device.Arduino;
 
+#pragma warning disable SA1300 // Element should begin with an uppercase letter
 namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(System.Buffer), true, IncludingPrivates = true)]
@@ -15,6 +16,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation]
         public static unsafe void Memmove(ref byte dest, ref byte src, uint len)
         {
             fixed (byte* srcPointer = &src)
@@ -26,7 +28,8 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        internal static void Memmove<T>(ref T destination, ref T source, uint elementCount)
+        [ArduinoImplementation]
+        public static void Memmove<T>(ref T destination, ref T source, uint elementCount)
         {
             // Blittable memmove. The standard CLR uses a different implementation if the element
             // to be copied contains references, without actually specifying why, though. I guess because
@@ -52,30 +55,30 @@ namespace ArduinoCsCompiler.Runtime
             Memmove(dest, src, len);
         }
 
-        public static unsafe void ZeroMemory(ref byte b, uint byteLength)
+        public static unsafe void _ZeroMemory(ref byte b, uint byteLength)
         {
             fixed (byte* bytePointer = &b)
             {
-                ZeroMemory(bytePointer, byteLength);
+                __ZeroMemory((void*)bytePointer, byteLength);
             }
         }
 
         [ArduinoImplementation("BufferZeroMemory")]
-        public static unsafe void ZeroMemory(void* b, uint byteLength)
+        public static unsafe void __ZeroMemory(void* b, uint byteLength)
         {
             throw new NotImplementedException();
         }
 
         [ArduinoImplementation]
-        public static unsafe void ZeroMemory(void* b, UIntPtr length)
+        public static unsafe void __ZeroMemory(void* b, UIntPtr length)
         {
-            ZeroMemory(b, (uint)length);
+            __ZeroMemory(b, (uint)length);
         }
 
         [ArduinoImplementation]
-        public static unsafe void ZeroMemory(byte* b, UIntPtr length)
+        public static unsafe void _ZeroMemory(byte* b, UIntPtr length)
         {
-            ZeroMemory((void*)b, (uint)length);
+            __ZeroMemory((void*)b, (uint)length);
         }
 
         // Copies from one primitive array to another primitive array without

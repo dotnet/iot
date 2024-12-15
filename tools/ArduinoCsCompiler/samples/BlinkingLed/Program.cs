@@ -10,6 +10,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace BlinkingLed
         /// <returns>Program exit code</returns>
         public static int Main(string[] args)
         {
+            RunTest();
             ArduinoBoard? board;
             string portName;
             Console.WriteLine("Starting...");
@@ -102,6 +104,15 @@ namespace BlinkingLed
             {
                 board.Dispose();
             }
+        }
+
+        private static void RunTest()
+        {
+            string v1 = ".NET 8.0.5";
+            int idx1 = v1.LastIndexOf(" ", StringComparison.Ordinal);
+            v1 = v1.Substring(idx1);
+            Version hostVersion = Version.Parse(v1);
+            Console.WriteLine(hostVersion);
         }
 
         /// <summary>

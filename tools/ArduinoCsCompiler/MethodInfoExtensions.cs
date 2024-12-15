@@ -173,6 +173,12 @@ namespace ArduinoCsCompiler
 
         private static string ClassSignature(this Type t, Type[] genericParametersToUse, Type[] genericArguments, bool useFullNamespaces = true)
         {
+            if (t.IsUnmanagedFunctionPointer)
+            {
+                // The name of these is null, thus invent something
+                return "fnptr*";
+            }
+
             if (t.IsGenericType == false)
             {
                 if (useFullNamespaces)
