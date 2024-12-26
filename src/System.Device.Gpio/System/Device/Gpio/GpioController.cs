@@ -142,7 +142,7 @@ public class GpioController : IDisposable
 
         OpenPinCore(pinNumber);
         _openPins.TryAdd(pinNumber, null);
-        _gpioPins[pinNumber] = new GpioPin(pinNumber, _driver);
+        _gpioPins[pinNumber] = new GpioPin(pinNumber, this);
         return _gpioPins[pinNumber];
     }
 

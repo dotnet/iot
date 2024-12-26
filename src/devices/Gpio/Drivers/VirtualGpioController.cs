@@ -17,13 +17,13 @@ namespace Iot.Device.Gpio
     /// </summary>
     public class VirtualGpioController : GpioController
     {
-        private readonly ConcurrentDictionary<int, GpioPin> _pins = new ConcurrentDictionary<int, GpioPin>();
+        private readonly ConcurrentDictionary<int, VirtualGpioPin> _pins = new ConcurrentDictionary<int, VirtualGpioPin>();
         private readonly ConcurrentDictionary<int, PinEvent> _callbackEvents = new ConcurrentDictionary<int, PinEvent>();
 
         private record PinEvent(PinEventTypes PinEventTypes, PinChangeEventHandler? Callbacks);
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="VirtualGpioController"/> class.
+        /// Initializes a new empty instance of the <see cref="VirtualGpioController"/> class.
         /// </summary>
         public VirtualGpioController()
         {
@@ -36,7 +36,7 @@ namespace Iot.Device.Gpio
         {
             foreach (var pin in pins)
             {
-                if (!_pins.TryAdd(pin.Key, pin.Value))
+                if (!_pins.TryAdd(pin.Key, new VirtualGpioPin(pin.Value, pin.Key, this)))
                 {
                     throw new ArgumentException($"Duplicate virtual pin number in collection: {pin.Key}.");
                 }
@@ -51,7 +51,8 @@ namespace Iot.Device.Gpio
             int inc = 0;
             foreach (var pin in pins)
             {
-                _pins.TryAdd(inc++, pin);
+                _pins.TryAdd(inc, new VirtualGpioPin(pin, inc, this));
+                inc++;
             }
         }
 
@@ -61,7 +62,7 @@ namespace Iot.Device.Gpio
         /// <param name="pinNumber">The pin number.</param>
         /// <param name="gpioPin">The <see cref="GpioPin"/> to add.</param>
         /// <returns>True on success, false if the pin number is in use already</returns>
-        public bool Add(int pinNumber, GpioPin gpioPin) => _pins.TryAdd(pinNumber, gpioPin);
+        public bool Add(int pinNumber, GpioPin gpioPin) => _pins.TryAdd(pinNumber, new VirtualGpioPin(gpioPin, pinNumber, this));
 
         /// <summary>
         /// Adds a new <see cref="GpioPin"/>. The number is done automatically by adding after the last element.
@@ -71,7 +72,7 @@ namespace Iot.Device.Gpio
         {
             // Find the last number of the pin and assign the new number to it
             int newPin = _pins.Count > 0 ? _pins.Keys.Max() + 1 : 0;
-            _pins.TryAdd(newPin, gpioPin);
+            _pins.TryAdd(newPin, new VirtualGpioPin(gpioPin, newPin, this));
         }
 
         /// <inheritdoc/>
@@ -86,6 +87,13 @@ namespace Iot.Device.Gpio
             base.Dispose(disposing);
             // We're just emptying the lists
             _pins.Clear();
+        }
+
+        /// <inheritdoc />
+        protected override void OpenPinCore(int pinNumber)
+        {
+            // Not clear what this should do
+            throw new InvalidOperationException("Cannot open a pin on the VirtualGpioController, as they're already open when constructed");
         }
 
         /// <inheritdoc/>
