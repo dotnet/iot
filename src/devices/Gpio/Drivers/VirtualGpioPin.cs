@@ -30,6 +30,8 @@ namespace Iot.Device.Gpio
 
         internal int OldPinNumber => _oldPin.PinNumber;
 
+        internal GpioController OldController => _oldPin.Controller;
+
         public override event PinChangeEventHandler ValueChanged
         {
             add

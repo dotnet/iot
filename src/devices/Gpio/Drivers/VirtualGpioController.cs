@@ -144,9 +144,16 @@ namespace Iot.Device.Gpio
         {
             ComponentInformation self = new ComponentInformation(this, "Virtual GPIO Controller");
 
-            foreach (var cp in self.SubComponents)
+            HashSet<GpioController> controllers = new HashSet<GpioController>();
+            foreach (var pin in _pins)
             {
-                self.AddSubComponent(cp);
+                controllers.Add(pin.Value.OldController);
+                self.Properties.Add($"PinMapping{pin.Key}", pin.Value.OldPinNumber.ToString());
+            }
+
+            foreach (var c in controllers)
+            {
+                self.AddSubComponent(c.QueryComponentInformation());
             }
 
             return self;
@@ -270,13 +277,15 @@ namespace Iot.Device.Gpio
         /// <inheritdoc/>
         public override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var pin = _pins[pinNumber];
+            return pin.OldController.WaitForEvent(pin.OldPinNumber, eventTypes, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken token)
+        public override async ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken token)
         {
-            throw new NotImplementedException();
+            var pin = _pins[pinNumber];
+            return await pin.OldController.WaitForEventAsync(pin.OldPinNumber, eventTypes, token);
         }
     }
 }

@@ -8,6 +8,8 @@ using System.Device.Gpio.Tests;
 using System.Device.I2c;
 using System.Device.Spi;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Moq;
 using Xunit;
 
@@ -171,15 +173,76 @@ namespace Iot.Device.Gpio.Tests
             controller.SetPinMode(7, PinMode.Input);
             bool wasCalled = false;
             int callbackAsNo = 0;
-            controller.RegisterCallbackForPinValueChangedEvent(7, PinEventTypes.Falling, (o, e) =>
+
+            void Callback(object o, PinValueChangedEventArgs e)
             {
                 wasCalled = true;
                 callbackAsNo = e.PinNumber;
-            });
+            }
+
+            controller.RegisterCallbackForPinValueChangedEvent(7, PinEventTypes.Falling, Callback);
 
             _mockedGpioDriver.Object.FireEventHandler(1, PinEventTypes.Rising);
             // We expect no callback when we expect a Falling event but a Rising event is triggered
             Assert.False(wasCalled);
+            controller.UnregisterCallbackForPinValueChangedEvent(7, Callback);
+        }
+
+        [Fact]
+        public async Task WaitForEventAsync()
+        {
+            VirtualGpioController controller = new VirtualGpioController();
+            var myPin = _baseController.OpenPin(1);
+            controller.Add(7, myPin);
+            _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Input)).Returns(true);
+            controller.SetPinMode(7, PinMode.Input);
+            _mockedGpioDriver.Setup(x => x.WaitForEventEx(1, PinEventTypes.Rising | PinEventTypes.Falling, It.IsAny<CancellationToken>()))
+                .Returns(new WaitForEventResult() { EventTypes = PinEventTypes.Falling, TimedOut = false });
+            var ret = controller.WaitForEventAsync(7, PinEventTypes.Rising | PinEventTypes.Falling, TimeSpan.FromMinutes(1));
+            WaitForEventResult result = await ret;
+            Assert.False(result.TimedOut);
+            Assert.Equal(PinEventTypes.Falling, result.EventTypes);
+        }
+
+        [Fact]
+        public void CtorCall()
+        {
+            var myPin1 = _baseController.OpenPin(99);
+            var myPin2 = _baseController.OpenPin(100);
+            VirtualGpioController controller = new VirtualGpioController(new GpioPin[] { myPin1, myPin2 });
+            Assert.NotNull(controller.GetOpenPin(0));
+            Assert.NotNull(controller.GetOpenPin(1));
+        }
+
+        [Fact]
+        public void CtorCall2()
+        {
+            var myPin1 = _baseController.OpenPin(99);
+            var myPin2 = _baseController.OpenPin(100);
+            VirtualGpioController controller = new VirtualGpioController(new Dictionary<int, GpioPin>
+            {
+                { 5, myPin1 },
+                { 9, myPin2 }
+            });
+            Assert.NotNull(controller.GetOpenPin(5));
+            Assert.NotNull(controller.GetOpenPin(9));
+            Assert.Throws<InvalidOperationException>(() => controller.GetOpenPin(0));
+        }
+
+        [Fact]
+        public void QueryComponentInformation()
+        {
+            var myPin1 = _baseController.OpenPin(99);
+            var myPin2 = _baseController.OpenPin(100);
+            VirtualGpioController controller = new VirtualGpioController(new Dictionary<int, GpioPin>
+            {
+                { 5, myPin1 },
+                { 9, myPin2 }
+            });
+
+            var result = controller.QueryComponentInformation();
+            Assert.NotNull(result);
+            Assert.NotEmpty(result.SubComponents);
         }
     }
 }
