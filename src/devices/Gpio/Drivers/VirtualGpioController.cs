@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Device.Gpio;
 using System;
 using System.Device;
+using Iot.Device.Board;
 
 namespace Iot.Device.Gpio
 {
@@ -26,6 +27,7 @@ namespace Iot.Device.Gpio
         /// Initializes a new empty instance of the <see cref="VirtualGpioController"/> class.
         /// </summary>
         public VirtualGpioController()
+            : base(new DummyGpioDriver())
         {
         }
 
@@ -33,6 +35,7 @@ namespace Iot.Device.Gpio
         /// Initializes a new instance of the <see cref="VirtualGpioController"/> class.
         /// </summary>
         public VirtualGpioController(Dictionary<int, GpioPin> pins)
+            : this()
         {
             foreach (var pin in pins)
             {
@@ -47,6 +50,7 @@ namespace Iot.Device.Gpio
         /// Initializes a new instance of the <see cref="VirtualGpioController"/> class.
         /// </summary>
         public VirtualGpioController(IEnumerable<GpioPin> pins)
+            : this()
         {
             int inc = 0;
             foreach (var pin in pins)
@@ -94,6 +98,28 @@ namespace Iot.Device.Gpio
         {
             // Not clear what this should do
             throw new InvalidOperationException("Cannot open a pin on the VirtualGpioController, as they're already open when constructed");
+        }
+
+        /// <summary>
+        /// Closes the given pin
+        /// </summary>
+        /// <param name="pinNumber">The pin number</param>
+        /// <exception cref="InvalidOperationException">There is no such virtual pin number registered or it was already closed</exception>
+        protected override void ClosePinCore(int pinNumber)
+        {
+            if (!_pins.TryGetValue(pinNumber, out var pin))
+            {
+                throw new InvalidOperationException($"Virtual pin {pinNumber} does not exist");
+            }
+
+            pin.Close();
+            _pins.Remove(pinNumber, out _);
+        }
+
+        /// <inheritdoc />
+        public override bool IsPinOpen(int pinNumber)
+        {
+            return _pins.ContainsKey(pinNumber);
         }
 
         /// <inheritdoc/>

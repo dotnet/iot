@@ -10,7 +10,6 @@ namespace Iot.Device.Gpio
     /// </summary>
     internal class VirtualGpioPin : GpioPin
     {
-        private readonly int _newPinNumber;
         private readonly GpioController _virtualController;
         private readonly GpioPin _oldPin;
 
@@ -23,24 +22,25 @@ namespace Iot.Device.Gpio
         protected internal VirtualGpioPin(GpioPin oldPin, int newPinNumber, GpioController virtualController)
             : base(newPinNumber, virtualController)
         {
-            _newPinNumber = newPinNumber;
             _virtualController = virtualController;
             _oldPin = oldPin;
         }
 
         private event PinChangeEventHandler? InternalValueChanged;
 
+        internal int OldPinNumber => _oldPin.PinNumber;
+
         public override event PinChangeEventHandler ValueChanged
         {
             add
             {
-                _virtualController.RegisterCallbackForPinValueChangedEvent(_oldPin.PinNumber, PinEventTypes.Falling | PinEventTypes.Rising, OldValueChanged);
+                _oldPin.Controller.RegisterCallbackForPinValueChangedEvent(_oldPin.PinNumber, PinEventTypes.Falling | PinEventTypes.Rising, OldValueChanged);
                 InternalValueChanged += value;
             }
 
             remove
             {
-                _virtualController.UnregisterCallbackForPinValueChangedEvent(_oldPin.PinNumber, OldValueChanged);
+                _oldPin.Controller.UnregisterCallbackForPinValueChangedEvent(_oldPin.PinNumber, OldValueChanged);
                 InternalValueChanged -= value;
             }
         }
@@ -50,7 +50,7 @@ namespace Iot.Device.Gpio
             if (pinvaluechangedeventargs.PinNumber == _oldPin.PinNumber)
             {
                 // Forward the event, but with the new number
-                var toForward = new PinValueChangedEventArgs(pinvaluechangedeventargs.ChangeType, _newPinNumber);
+                var toForward = new PinValueChangedEventArgs(pinvaluechangedeventargs.ChangeType, PinNumber);
                 InternalValueChanged?.Invoke(sender, toForward);
             }
         }
@@ -85,5 +85,19 @@ namespace Iot.Device.Gpio
             _oldPin.Write(value);
         }
 
+        public override void Close()
+        {
+            _oldPin.Close();
+        }
+
+        public override bool Equals(GpioPin? other)
+        {
+            if (other is VirtualGpioPin otherPin)
+            {
+                return base.Equals(other) && _oldPin.Equals(otherPin._oldPin);
+            }
+
+            return false;
+        }
     }
 }

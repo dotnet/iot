@@ -6,7 +6,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) pin.
     /// </summary>
-    public class Gpio​Pin : MarshalByRefObject
+    public class Gpio​Pin : MarshalByRefObject, IEquatable<GpioPin>, IDisposable
     {
         private readonly int _pinNumber;
         private readonly GpioController _controller;
@@ -30,6 +30,11 @@ namespace System.Device.Gpio
         /// The pin number of the GPIO pin.
         /// </value>
         public virtual int PinNumber => _pinNumber;
+
+        /// <summary>
+        /// The GPIO Controller this pin is assigned to
+        /// </summary>
+        public GpioController Controller => _controller;
 
         /// <summary>
         /// Gets the current pin mode for the general-purpose I/O (GPIO) pin. The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.
@@ -95,5 +100,76 @@ namespace System.Device.Gpio
         /// Toggles the output of the general purpose I/O (GPIO) pin if the pin is configured as an output.
         /// </summary>
         public virtual void Toggle() => _controller.Toggle(_pinNumber);
+
+        /// <inheritdoc />
+        public virtual bool Equals(GpioPin? other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return PinNumber == other.PinNumber && ReferenceEquals(_controller, other._controller);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj is GpioPin other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return _controller.GetHashCode() ^ _pinNumber;
+        }
+
+        /// <summary>
+        /// Closes the pin
+        /// </summary>
+        public virtual void Close()
+        {
+            // Avoid an exception when called multiple times
+            if (_controller.IsPinOpen(_pinNumber))
+            {
+                _controller.ClosePin(_pinNumber);
+            }
+        }
+
+        /// <summary>
+        /// Disposes (closes) the pin
+        /// </summary>
+        /// <param name="disposing">Should always be true</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Close();
+            }
+        }
+
+        /// <summary>
+        /// Standard Dispose pattern
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }
