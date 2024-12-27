@@ -231,7 +231,7 @@ namespace Iot.Device.Gpio
                         return;
                     }
 
-                    if (pinEvent.PinEventTypes == pinValueChangedEventArgs.ChangeType)
+                    if ((pinEvent.PinEventTypes & pinValueChangedEventArgs.ChangeType) != 0)
                     {
                         pinEvent.Callbacks?.Invoke(this, new PinValueChangedEventArgs(pinValueChangedEventArgs.ChangeType, pin.Key));
                     }
@@ -249,6 +249,22 @@ namespace Iot.Device.Gpio
             {
                 _pins[pinNumber].ValueChanged -= PinValueChanged;
             }
+        }
+
+        /// <summary>
+        /// Gets a reference to an open pin
+        /// </summary>
+        /// <param name="pinNumber">The pin number</param>
+        /// <returns>A <see cref="GpioPin"/> instance representing the given pin</returns>
+        /// <exception cref="InvalidOperationException">The pin number is invalid</exception>
+        public GpioPin GetOpenPin(int pinNumber)
+        {
+            if (_pins.TryGetValue(pinNumber, out var pin))
+            {
+                return pin;
+            }
+
+            throw new InvalidOperationException($"No such pin: {pinNumber}");
         }
 
         /// <inheritdoc/>
