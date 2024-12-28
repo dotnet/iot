@@ -98,7 +98,7 @@ namespace Iot.Device.Blinkt
                 int r = pixel.R;
                 int g = pixel.G;
                 int b = pixel.B;
-                int brightness = (int)(31.0 * (pixel.A / 255)) & 0b11111;
+                int brightness = (int)(31.0 * (pixel.A / 255.0)) & 0b11111;
                 WriteByte(0b11100000 | brightness);
                 WriteByte(b);
                 WriteByte(g);
