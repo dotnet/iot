@@ -13,57 +13,57 @@ namespace Iot.Device.Bmp180
         /// <summary>
         /// trim DigX1 data
         /// </summary>
-        public byte DigX1 { get; set; }
+        public sbyte DigX1 { get; set; }
 
         /// <summary>
         /// trim DigY1 data
         /// </summary>
-        public byte DigY1 { get; set; }
+        public sbyte DigY1 { get; set; }
 
         /// <summary>
         /// trim DigX2 data
         /// </summary>
-        public byte DigX2 { get; set; }
+        public sbyte DigX2 { get; set; }
 
         /// <summary>
         /// trim DigY2 data
         /// </summary>
-        public byte DigY2 { get; set; }
+        public sbyte DigY2 { get; set; }
 
         /// <summary>
         /// trim DigZ1 data
         /// </summary>
-        public int DigZ1 { get; set; }
+        public ushort DigZ1 { get; set; }
 
         /// <summary>
         /// trim DigZ2 data
         /// </summary>
-        public int DigZ2 { get; set; }
+        public short DigZ2 { get; set; }
 
         /// <summary>
         /// trim DigZ3 data
         /// </summary>
-        public int DigZ3 { get; set; }
+        public short DigZ3 { get; set; }
 
         /// <summary>
         /// trim DigZ4 data
         /// </summary>
-        public int DigZ4 { get; set; }
+        public short DigZ4 { get; set; }
 
         /// <summary>
         /// trim DigXy1 data
         /// </summary>
-        public int DigXy1 { get; set; }
+        public byte DigXy1 { get; set; }
 
         /// <summary>
         /// trim DigXy2 data
         /// </summary>
-        public int DigXy2 { get; set; }
+        public sbyte DigXy2 { get; set; }
 
         /// <summary>
         /// trim DigXyz1 data
         /// </summary>
-        public int DigXyz1 { get; set; }
+        public ushort DigXyz1 { get; set; }
 
         /// <summary>
         /// Creates a new instace
@@ -80,17 +80,20 @@ namespace Iot.Device.Bmp180
         /// <param name="trimXy1Xy2Data">trimXy1Xy2Data bytes</param>
         public Bmm150TrimRegisterData(Span<Byte> trimX1y1Data, Span<Byte> trimXyzData, Span<Byte> trimXy1Xy2Data)
         {
-            DigX1 = (byte)trimX1y1Data[0];
-            DigY1 = (byte)trimX1y1Data[1];
-            DigX2 = (byte)trimXyzData[2];
-            DigY2 = (byte)trimXyzData[3];
-            DigZ1 = trimXy1Xy2Data[3] << 8 | trimXy1Xy2Data[2];
-            DigZ2 = (short)(trimXy1Xy2Data[1] << 8 | trimXy1Xy2Data[0]);
-            DigZ3 = (short)(trimXy1Xy2Data[7] << 8 | trimXy1Xy2Data[6]);
-            DigZ4 = (short)(trimXyzData[1] << 8 | trimXyzData[0]);
-            DigXy1 = trimXy1Xy2Data[9];
-            DigXy2 = (sbyte)trimXy1Xy2Data[8];
-            DigXyz1 = ((trimXy1Xy2Data[5] & 0x7F) << 8) | trimXy1Xy2Data[4];
+            unchecked
+            {
+                DigX1 = (sbyte)trimX1y1Data[0];
+                DigY1 = (sbyte)trimX1y1Data[1];
+                DigX2 = (sbyte)trimXyzData[2];
+                DigY2 = (sbyte)trimXyzData[3];
+                DigZ1 = (ushort)(trimXy1Xy2Data[3] << 8 | trimXy1Xy2Data[2]);
+                DigZ2 = (short)(trimXy1Xy2Data[1] << 8 | trimXy1Xy2Data[0]);
+                DigZ3 = (short)(trimXy1Xy2Data[7] << 8 | trimXy1Xy2Data[6]);
+                DigZ4 = (short)(trimXyzData[1] << 8 | trimXyzData[0]);
+                DigXy1 = trimXy1Xy2Data[9];
+                DigXy2 = (sbyte)trimXy1Xy2Data[8];
+                DigXyz1 = (ushort)(((trimXy1Xy2Data[5] & 0x7F) << 8) | trimXy1Xy2Data[4]);
+            }
         }
     }
 }

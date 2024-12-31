@@ -4,29 +4,49 @@
 using System;
 using System.Device.I2c;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Numerics;
+using Iot.Device.Arduino;
 using Iot.Device.Bmp180;
 
-// The I2C pins 21 and 22 in the sample below are ESP32 specific and may differ from other platforms.
-// Please double check your device datasheet.
-I2cConnectionSettings mpui2CConnectionSettingmpus = new(1, Bmm150.SecondaryI2cAddress);
+using ArduinoBoard board = new ArduinoBoard("COM5", 115200);
+I2cConnectionSettings settings = new(0, Bmm150.PrimaryI2cAddress);
 
-using Bmm150 bmm150 = new Bmm150(I2cDevice.Create(mpui2CConnectionSettingmpus));
+using Bmm150 bmm150 = new Bmm150(board.CreateI2cDevice(settings));
 
 Console.WriteLine($"Please move your device in all directions...");
 
-bmm150.CalibrateMagnetometer();
+////bmm150.CalibrateMagnetometer(new Feedback(), 100);
 
+Console.WriteLine();
 Console.WriteLine($"Calibration completed.");
 
 while (!Console.KeyAvailable)
 {
-    Vector3 magne = bmm150.ReadMagnetometer(true, TimeSpan.FromMilliseconds(11));
+    Vector3 magne;
+    try
+    {
+        magne = bmm150.ReadMagnetometerWithoutCorrection(true, TimeSpan.FromMilliseconds(11));
+    }
+    catch (Exception x) when (x is TimeoutException || x is IOException)
+    {
+        Console.WriteLine(x.Message);
+        Thread.Sleep(100);
+        continue;
+    }
 
     var head_dir = Math.Atan2(magne.X, magne.Y) * 180.0 / Math.PI;
 
     Console.WriteLine($"Mag data: X={magne.X,15}, Y={magne.Y,15}, Z={magne.Z,15}, head_dir: {head_dir}");
 
     Thread.Sleep(100);
+}
+
+internal class Feedback : IProgress<double>
+{
+    public void Report(double value)
+    {
+        Console.Write($"\r{value:F1}% done");
+    }
 }

@@ -133,23 +133,35 @@ namespace Iot.Device.Bmp180
         }
 
         /// <summary>
-        /// Get the device information
-        /// </summary>
-        /// <returns>The device information</returns>
-        public byte GetDeviceInfo() => ReadByte(Bmp180Register.INFO);
-
-        /// <summary>
         /// Calibrate the magnetometer.
         /// Please make sure you are not close to any magnetic field like magnet or phone
         /// Please make sure you are moving the magnetometer all over space, rotating it.
         /// </summary>
         /// <param name="numberOfMeasurements">Number of measurement for the calibration, default is 100</param>
         // https://platformio.org/lib/show/12697/M5_BMM150
+        [Obsolete("Prefer another overload")]
         public void CalibrateMagnetometer(int numberOfMeasurements = 100)
+        {
+            CalibrateMagnetometer(null, numberOfMeasurements);
+        }
+
+        /// <summary>
+        /// Calibrate the magnetometer.
+        /// Please make sure you are not close to any magnetic field like magnet or phone
+        /// Please make sure you are moving the magnetometer all over space, rotating it.
+        /// </summary>
+        /// <param name="progress">A progress provider (returns a value in percent)</param>
+        /// <param name="numberOfMeasurements">Number of measurement for the calibration, default is 100</param>
+        // https://platformio.org/lib/show/12697/M5_BMM150
+        public void CalibrateMagnetometer(IProgress<double>? progress, int numberOfMeasurements)
         {
             Vector3 mag_min = new Vector3() { X = 9000, Y = 9000, Z = 30000 };
             Vector3 mag_max = new Vector3() { X = -9000, Y = -9000, Z = -30000 };
             Vector3 rawMagnetometerData;
+            if (numberOfMeasurements <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(numberOfMeasurements), "The number of measurements must be > 0");
+            }
 
             for (int i = 0; i < numberOfMeasurements; i++)
             {
@@ -182,6 +194,17 @@ namespace Iot.Device.Bmp180
                 {
                     // skip this reading
                 }
+
+                if (progress != null)
+                {
+                    double percentDone = ((double)i / numberOfMeasurements) * 100.0;
+                    progress.Report(percentDone);
+                }
+            }
+
+            if (progress != null)
+            {
+                progress.Report(100.0);
             }
 
             // Refresh CalibrationCompensation vector
@@ -239,28 +262,41 @@ namespace Iot.Device.Bmp180
 
             Vector3 magnetoRaw = new Vector3();
 
-            // Shift the MSB data to left by 5 bits
-            // Multiply by 32 to get the shift left by 5 value
-            magnetoRaw.X = (rawData[1] & 0x7F) << 5 | rawData[0] >> 3;
-            if ((rawData[1] & 0x80) == 0x80)
+            // Because we mix and match signed and unsigned below
+            unchecked
             {
-                magnetoRaw.X = -magnetoRaw.X;
-            }
+                int temp;
+                // Shift the MSB data to left by 5 bits
+                // Multiply by 32 to get the shift left by 5 value
+                // X and Y have 13 significant bits each
+                temp = (rawData[1]) << 5 | rawData[0] >> 3;
+                if ((rawData[1] & 0x80) == 0x80)
+                {
+                    temp = temp | (int)0xFFFFE000;
+                }
 
-            // Shift the MSB data to left by 5 bits
-            // Multiply by 32 to get the shift left by 5 value
-            magnetoRaw.Y = (rawData[3] & 0x07F) << 5 | rawData[2] >> 3;
-            if ((rawData[3] & 0x80) == 0x80)
-            {
-                magnetoRaw.Y = -magnetoRaw.Y;
-            }
+                magnetoRaw.X = temp;
 
-            // Shift the MSB data to left by 7 bits
-            // Multiply by 128 to get the shift left by 7 value
-            magnetoRaw.Z = (rawData[5] & 0x07F) << 7 | rawData[4] >> 1;
-            if ((rawData[5] & 0x80) == 0x80)
-            {
-                magnetoRaw.Z = -magnetoRaw.Z;
+                // Shift the MSB data to left by 5 bits
+                // Multiply by 32 to get the shift left by 5 value
+                temp = (rawData[3]) << 5 | rawData[2] >> 3;
+                if ((rawData[3] & 0x80) == 0x80)
+                {
+                    temp = temp | (int)0xFFFFE000;
+                }
+
+                magnetoRaw.Y = temp;
+
+                // Shift the MSB data to left by 7 bits
+                // Multiply by 128 to get the shift left by 7 value
+                // The Z value has 15 significant bits
+                temp = (rawData[5]) << 7 | rawData[4] >> 1;
+                if ((rawData[5] & 0x80) == 0x80)
+                {
+                    temp = temp | (int)0xFFFF8000;
+                }
+
+                magnetoRaw.Z = temp;
             }
 
             _rHall = (uint)(rawData[7] << 6 | rawData[6] >> 2);

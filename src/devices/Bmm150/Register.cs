@@ -29,11 +29,6 @@ namespace Iot.Device.Bmp180
         WIA = 0x40,
 
         /// <summary>
-        /// INFO: Information
-        /// </summary>
-        INFO = 0x01,
-
-        /// <summary>
         /// DATA_READY_STATUS: Page 25, data ready status
         /// </summary>
         DATA_READY_STATUS = 0x48,
