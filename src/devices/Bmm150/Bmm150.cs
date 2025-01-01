@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Threading;
+using UnitsNet;
 
 namespace Iot.Device.Bmp180
 {
@@ -310,7 +311,7 @@ namespace Iot.Device.Bmp180
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
         [Telemetry("Magnetometer")]
-        public Vector3 ReadMagnetometer(bool waitForData = true) => ReadMagnetometer(waitForData, DefaultTimeout);
+        public MagneticField[] ReadMagnetometer(bool waitForData = true) => ReadMagnetometer(waitForData, DefaultTimeout);
 
         /// <summary>
         /// Read the magnetometer with compensation calculation and can wait for new data to be present
@@ -318,15 +319,16 @@ namespace Iot.Device.Bmp180
         /// <param name="waitForData">true to wait for new data</param>
         /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout)
+        public MagneticField[] ReadMagnetometer(bool waitForData, TimeSpan timeout)
         {
             var magn = ReadMagnetometerWithoutCorrection(waitForData, timeout);
 
-            magn.X = (float)Bmm150Compensation.CompensateX(magn.X - CalibrationCompensation.X, _rHall, _trimData);
-            magn.Y = (float)Bmm150Compensation.CompensateY(magn.Y - CalibrationCompensation.Y, _rHall, _trimData);
-            magn.Z = (float)Bmm150Compensation.CompensateZ(magn.Z - CalibrationCompensation.Z, _rHall, _trimData);
+            MagneticField[] ret = new MagneticField[3];
+            ret[0] = MagneticField.FromMilliteslas(Bmm150Compensation.CompensateX((int)magn.X, _rHall, _trimData) - CalibrationCompensation.X);
+            ret[1] = MagneticField.FromMilliteslas(Bmm150Compensation.CompensateY((int)magn.Y, _rHall, _trimData) - CalibrationCompensation.Y);
+            ret[0] = MagneticField.FromMilliteslas(Bmm150Compensation.CompensateZ((int)magn.Z, _rHall, _trimData) - CalibrationCompensation.Z);
 
-            return magn;
+            return ret;
         }
 
         private void WriteRegister(Bmp180Register reg, byte data) => _bmm150Interface.WriteRegister(_i2cDevice, (byte)reg, data);

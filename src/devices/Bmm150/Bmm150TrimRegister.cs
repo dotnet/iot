@@ -82,17 +82,17 @@ namespace Iot.Device.Bmp180
         {
             unchecked
             {
-                DigX1 = (sbyte)trimX1y1Data[0];
-                DigY1 = (sbyte)trimX1y1Data[1];
-                DigX2 = (sbyte)trimXyzData[2];
-                DigY2 = (sbyte)trimXyzData[3];
-                DigZ1 = (ushort)(trimXy1Xy2Data[3] << 8 | trimXy1Xy2Data[2]);
-                DigZ2 = (short)(trimXy1Xy2Data[1] << 8 | trimXy1Xy2Data[0]);
-                DigZ3 = (short)(trimXy1Xy2Data[7] << 8 | trimXy1Xy2Data[6]);
-                DigZ4 = (short)(trimXyzData[1] << 8 | trimXyzData[0]);
-                DigXy1 = trimXy1Xy2Data[9];
-                DigXy2 = (sbyte)trimXy1Xy2Data[8];
-                DigXyz1 = (ushort)(((trimXy1Xy2Data[5] & 0x7F) << 8) | trimXy1Xy2Data[4]);
+            DigX1 = (sbyte)trimX1y1Data[0];
+            DigY1 = (sbyte)trimX1y1Data[1];
+            DigX2 = (sbyte)trimXyzData[2];
+            DigY2 = (sbyte)trimXyzData[3];
+            DigZ1 = (ushort)(trimXy1Xy2Data[3] << 8 | trimXy1Xy2Data[2]);
+            DigZ2 = (short)(trimXy1Xy2Data[1] << 8 | trimXy1Xy2Data[0]);
+            DigZ3 = (short)(trimXy1Xy2Data[7] << 8 | trimXy1Xy2Data[6]);
+            DigZ4 = (short)(trimXyzData[1] << 8 | trimXyzData[0]);
+            DigXy1 = trimXy1Xy2Data[9];
+            DigXy2 = (sbyte)trimXy1Xy2Data[8];
+            DigXyz1 = (ushort)(((trimXy1Xy2Data[5] & 0x7F) << 8) | trimXy1Xy2Data[4]);
             }
         }
     }
