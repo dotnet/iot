@@ -113,7 +113,7 @@ namespace Iot.Device.Gpio
             }
 
             pin.Close();
-            _pins.Remove(pinNumber, out _);
+            _pins.TryRemove(pinNumber, out _);
         }
 
         /// <inheritdoc />

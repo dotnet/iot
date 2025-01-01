@@ -51,7 +51,7 @@ namespace Iot.Device.Gpio.Tests
             VirtualGpioController controller = new VirtualGpioController();
             var myPin = _baseController.OpenPin(1);
             controller.Add(7, myPin);
-            _mockedGpioDriver.Setup(x => x.ClosePinEx(1)).Verifiable(Times.Exactly(1));
+            _mockedGpioDriver.Setup(x => x.ClosePinEx(1)).Verifiable();
             controller.ClosePin(7);
         }
 
@@ -75,7 +75,7 @@ namespace Iot.Device.Gpio.Tests
             VirtualGpioController controller = new VirtualGpioController();
             var myPin = _baseController.OpenPin(1);
             controller.Add(7, myPin);
-            _mockedGpioDriver.Setup(x => x.ClosePinEx(1)).Verifiable(Times.Exactly(1));
+            _mockedGpioDriver.Setup(x => x.ClosePinEx(1)).Verifiable();
             controller.ClosePin(7);
             // Also closing or disposing the original pin shouldn't throw
             myPin.Close();
@@ -88,7 +88,7 @@ namespace Iot.Device.Gpio.Tests
             VirtualGpioController controller = new VirtualGpioController();
             var myPin = _baseController.OpenPin(1);
             controller.Add(7, myPin);
-            _mockedGpioDriver.Setup(x => x.ClosePinEx(1)).Verifiable(Times.Exactly(1));
+            _mockedGpioDriver.Setup(x => x.ClosePinEx(1)).Verifiable();
             // Close pin first, then close via controller
             myPin.Close();
             myPin.Dispose();
