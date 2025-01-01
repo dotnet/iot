@@ -6,6 +6,7 @@ using System.Device.I2c;
 using System.Device.Spi;
 using Iot.Device.Bmp180;
 using Moq;
+using UnitsNet;
 using Xunit;
 
 namespace Iot.Device.Bmm150.Tests
@@ -39,6 +40,41 @@ namespace Iot.Device.Bmm150.Tests
             Assert.True(Double.IsNaN(x));
             Assert.True(Double.IsNaN(y));
             Assert.True(Double.IsNaN(z));
+        }
+
+        [Fact]
+        public void CalculateHeading()
+        {
+            MagnetometerData m = new MagnetometerData(MagneticField.FromMicroteslas(18.5), MagneticField.FromMicroteslas(0), MagneticField.Zero);
+            Assert.Equal(0, m.Heading.Degrees, 3);
+
+            m = new MagnetometerData(MagneticField.FromMicroteslas(18.5), MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(16.31));
+            Assert.Equal(0, m.Heading.Degrees, 3);
+
+            m = new MagnetometerData(MagneticField.FromMicroteslas(-18.5), MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(16.31));
+            Assert.Equal(180, m.Heading.Degrees, 3);
+
+            m = new MagnetometerData(MagneticField.FromMicroteslas(18.5), MagneticField.FromMicroteslas(1), MagneticField.FromMicroteslas(16.31));
+            Assert.Equal(356.90594194, m.Heading.Degrees, 3);
+
+            m = new MagnetometerData(MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(18.5), MagneticField.FromMicroteslas(16.31));
+            Assert.Equal(270, m.Heading.Degrees, 3);
+        }
+
+        [Fact]
+        public void CalculateInclination()
+        {
+            MagnetometerData m = new MagnetometerData(MagneticField.FromMicroteslas(18.5), MagneticField.FromMicroteslas(0), MagneticField.Zero);
+            Assert.Equal(0, m.Inclination.Degrees, 3);
+
+            m = new MagnetometerData(MagneticField.FromMicroteslas(18.5), MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(18.5));
+            Assert.Equal(45, m.Inclination.Degrees, 3);
+
+            m = new MagnetometerData(MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(16.31));
+            Assert.Equal(90, m.Inclination.Degrees, 3);
+
+            m = new MagnetometerData(MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(0), MagneticField.FromMicroteslas(-16.31));
+            Assert.Equal(-90, m.Inclination.Degrees, 3);
         }
 
         private Bmm150TrimRegisterData GetTestTrimData()

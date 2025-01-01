@@ -24,10 +24,10 @@ Console.WriteLine($"Calibration completed.");
 
 while (!Console.KeyAvailable)
 {
-    Vector3 magne;
+    MagnetometerData magne;
     try
     {
-        magne = bmm150.ReadMagnetometerWithoutCorrection(true, TimeSpan.FromMilliseconds(11));
+        magne = bmm150.ReadMagnetometer(true, TimeSpan.FromMilliseconds(11));
     }
     catch (Exception x) when (x is TimeoutException || x is IOException)
     {
@@ -36,11 +36,9 @@ while (!Console.KeyAvailable)
         continue;
     }
 
-    var head_dir = Math.Atan2(magne.X, magne.Y) * 180.0 / Math.PI;
+    Console.WriteLine($"Mag data: X={magne.FieldX}, Y={magne.FieldY}, Z={magne.FieldZ}, Heading: {magne.Heading}, Inclination: {magne.Inclination}");
 
-    Console.WriteLine($"Mag data: X={magne.X,15}, Y={magne.Y,15}, Z={magne.Z,15}, head_dir: {head_dir}");
-
-    Thread.Sleep(100);
+    Thread.Sleep(500);
 }
 
 internal class Feedback : IProgress<double>

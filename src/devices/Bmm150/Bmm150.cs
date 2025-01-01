@@ -140,7 +140,7 @@ namespace Iot.Device.Bmp180
         /// </summary>
         /// <param name="numberOfMeasurements">Number of measurement for the calibration, default is 100</param>
         // https://platformio.org/lib/show/12697/M5_BMM150
-        [Obsolete("Prefer another overload")]
+        [Obsolete("Not a reliable way of calibration. Use a calibration determined with MagneticDeviationCorrection instead")]
         public void CalibrateMagnetometer(int numberOfMeasurements = 100)
         {
             CalibrateMagnetometer(null, numberOfMeasurements);
@@ -154,6 +154,7 @@ namespace Iot.Device.Bmp180
         /// <param name="progress">A progress provider (returns a value in percent)</param>
         /// <param name="numberOfMeasurements">Number of measurement for the calibration, default is 100</param>
         // https://platformio.org/lib/show/12697/M5_BMM150
+        [Obsolete("Not a reliable way of calibration. Use a calibration determined with MagneticDeviationCorrection instead")]
         public void CalibrateMagnetometer(IProgress<double>? progress, int numberOfMeasurements)
         {
             Vector3 mag_min = new Vector3() { X = 9000, Y = 9000, Z = 30000 };
@@ -311,7 +312,7 @@ namespace Iot.Device.Bmp180
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
         [Telemetry("Magnetometer")]
-        public MagneticField[] ReadMagnetometer(bool waitForData = true) => ReadMagnetometer(waitForData, DefaultTimeout);
+        public MagnetometerData ReadMagnetometer(bool waitForData = true) => ReadMagnetometer(waitForData, DefaultTimeout);
 
         /// <summary>
         /// Read the magnetometer with compensation calculation and can wait for new data to be present
@@ -319,14 +320,14 @@ namespace Iot.Device.Bmp180
         /// <param name="waitForData">true to wait for new data</param>
         /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public MagneticField[] ReadMagnetometer(bool waitForData, TimeSpan timeout)
+        public MagnetometerData ReadMagnetometer(bool waitForData, TimeSpan timeout)
         {
             var magn = ReadMagnetometerWithoutCorrection(waitForData, timeout);
 
-            MagneticField[] ret = new MagneticField[3];
-            ret[0] = MagneticField.FromMilliteslas(Bmm150Compensation.CompensateX((int)magn.X, _rHall, _trimData) - CalibrationCompensation.X);
-            ret[1] = MagneticField.FromMilliteslas(Bmm150Compensation.CompensateY((int)magn.Y, _rHall, _trimData) - CalibrationCompensation.Y);
-            ret[0] = MagneticField.FromMilliteslas(Bmm150Compensation.CompensateZ((int)magn.Z, _rHall, _trimData) - CalibrationCompensation.Z);
+            MagnetometerData ret = new MagnetometerData(
+                MagneticField.FromMicroteslas(Bmm150Compensation.CompensateX((int)magn.X, _rHall, _trimData) - CalibrationCompensation.X),
+                MagneticField.FromMicroteslas(Bmm150Compensation.CompensateY((int)magn.Y, _rHall, _trimData) - CalibrationCompensation.Y),
+                MagneticField.FromMicroteslas(Bmm150Compensation.CompensateZ((int)magn.Z, _rHall, _trimData) - CalibrationCompensation.Z));
 
             return ret;
         }
