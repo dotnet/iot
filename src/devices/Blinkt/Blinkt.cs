@@ -20,9 +20,8 @@ namespace Iot.Device.Blinkt
     /// </summary>
     public class Blinkt : IDisposable
     {
-        private const int DAT = 23;
-        private const int CLK = 24;
-        private const int BRIGHTNESS = 7;
+        private readonly GpioPin _datPin;
+        private readonly GpioPin _clkPin;
 
         /// <summary>
         /// The number of pixels in the Blinkt strip
@@ -31,21 +30,30 @@ namespace Iot.Device.Blinkt
 
         private readonly Color[] _pixels = new Color[NUMBER_OF_PIXELS];
         private readonly int _sleepTime = 0;
-        private readonly GpioController _gpio;
-
-        private bool _gpioSetup = false;
+        private readonly bool _shouldDispose;
+        private GpioController _gpioController;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Blinkt"/> class.
         /// </summary>
-        public Blinkt()
+        /// <param name="datPin">The GPIO pin number for the data pin. This defaults to 23,
+        /// and you should only change this if you connect the blinkt using cables instead of sitting it on the GPIO pins using the provided socket.</param>
+        /// <param name="clkPin">The GPIO pin number for the clock pin. This defaults to 24,
+        /// and you should only change this if you connect the blinkt using cables instead of sitting it on the GPIO pins using the provided socket.</param>
+        /// <param name="gpioController">The GPIO controller to use with the Blinkt. If not provided, a new controller is created.</param>
+        /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
+        public Blinkt(int datPin = 23, int clkPin = 24, GpioController? gpioController = null, bool shouldDispose = true)
         {
             for (int i = 0; i < NUMBER_OF_PIXELS; i++)
             {
                 _pixels[i] = Color.Empty;
             }
 
-            _gpio = new GpioController();
+            _shouldDispose = shouldDispose || gpioController is null;
+            _gpioController = gpioController ?? new();
+
+            _datPin = _gpioController.OpenPin(datPin, PinMode.Output);
+            _clkPin = _gpioController.OpenPin(clkPin, PinMode.Output);
         }
 
         /// <inheritdoc />
@@ -54,7 +62,12 @@ namespace Iot.Device.Blinkt
             Clear();
             Show();
 
-            _gpio.Dispose();
+            // this condition only applies to GPIO devices
+            if (_shouldDispose)
+            {
+                _gpioController?.Dispose();
+                _gpioController = null!;
+            }
         }
 
         /// <summary>
@@ -84,13 +97,6 @@ namespace Iot.Device.Blinkt
         /// </summary>
         public void Show()
         {
-            if (!_gpioSetup)
-            {
-                _gpio.OpenPin(DAT, PinMode.Output);
-                _gpio.OpenPin(CLK, PinMode.Output);
-                _gpioSetup = true;
-            }
-
             Sof();
 
             foreach (Color pixel in _pixels)
@@ -158,35 +164,35 @@ namespace Iot.Device.Blinkt
         {
             for (var i = 0; i < 8; i++)
             {
-                _gpio.Write(DAT, (b & 0b10000000) != 0);
-                _gpio.Write(CLK, PinValue.High);
+                _datPin.Write((b & 0b10000000) != 0);
+                _clkPin.Write(PinValue.High);
                 Thread.Sleep(_sleepTime);
                 b <<= 1;
-                _gpio.Write(CLK, PinValue.Low);
+                _clkPin.Write(PinValue.Low);
                 Thread.Sleep(_sleepTime);
             }
         }
 
         private void Eof()
         {
-            _gpio.Write(DAT, PinValue.Low);
+            _datPin.Write(PinValue.Low);
             for (var i = 0; i < 36; i++)
             {
-                _gpio.Write(CLK, PinValue.High);
+                _clkPin.Write(PinValue.High);
                 Thread.Sleep(_sleepTime);
-                _gpio.Write(CLK, PinValue.Low);
+                _clkPin.Write(PinValue.Low);
                 Thread.Sleep(_sleepTime);
             }
         }
 
         private void Sof()
         {
-            _gpio.Write(DAT, PinValue.Low);
+            _datPin.Write(PinValue.Low);
             for (var i = 0; i < 32; i++)
             {
-                _gpio.Write(CLK, PinValue.High);
+                _clkPin.Write(PinValue.High);
                 Thread.Sleep(_sleepTime);
-                _gpio.Write(CLK, PinValue.Low);
+                _clkPin.Write(PinValue.Low);
                 Thread.Sleep(_sleepTime);
             }
         }
