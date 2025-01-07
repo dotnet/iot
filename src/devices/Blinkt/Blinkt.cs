@@ -23,15 +23,22 @@ namespace Iot.Device.Blinkt
         private readonly GpioPin _datPin;
         private readonly GpioPin _clkPin;
 
+        private readonly Color[] _pixels = new Color[NUMBER_OF_PIXELS];
+        private readonly bool _shouldDispose;
+        private GpioController _gpioController;
+
         /// <summary>
         /// The number of pixels in the Blinkt strip
         /// </summary>
         public const int NUMBER_OF_PIXELS = 8;
 
-        private readonly Color[] _pixels = new Color[NUMBER_OF_PIXELS];
-        private readonly int _sleepTime = 0;
-        private readonly bool _shouldDispose;
-        private GpioController _gpioController;
+        /// <summary>
+        /// The sleep time in milliseconds between each bit written to the Blinkt.
+        /// 
+        /// The default value of 0 should be enough for most cases and works on the RPi 4 and 5,
+        /// but you can increase this if you experience issues with the Blinkt on faster CPUs.
+        /// </summary>
+        public int SleepTime { get; set; } = 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Blinkt"/> class.
@@ -166,10 +173,10 @@ namespace Iot.Device.Blinkt
             {
                 _datPin.Write((b & 0b10000000) != 0);
                 _clkPin.Write(PinValue.High);
-                Thread.Sleep(_sleepTime);
+                Thread.Sleep(SleepTime);
                 b <<= 1;
                 _clkPin.Write(PinValue.Low);
-                Thread.Sleep(_sleepTime);
+                Thread.Sleep(SleepTime);
             }
         }
 
@@ -179,9 +186,9 @@ namespace Iot.Device.Blinkt
             for (var i = 0; i < 36; i++)
             {
                 _clkPin.Write(PinValue.High);
-                Thread.Sleep(_sleepTime);
+                Thread.Sleep(SleepTime);
                 _clkPin.Write(PinValue.Low);
-                Thread.Sleep(_sleepTime);
+                Thread.Sleep(SleepTime);
             }
         }
 
@@ -191,9 +198,9 @@ namespace Iot.Device.Blinkt
             for (var i = 0; i < 32; i++)
             {
                 _clkPin.Write(PinValue.High);
-                Thread.Sleep(_sleepTime);
+                Thread.Sleep(SleepTime);
                 _clkPin.Write(PinValue.Low);
-                Thread.Sleep(_sleepTime);
+                Thread.Sleep(SleepTime);
             }
         }
     }
