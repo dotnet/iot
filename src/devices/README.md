@@ -203,7 +203,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
-* [Blinkt - 8-LED indicator strip](Blinkt/README.md)
 * [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
 * [GUI Support](Gui/README.md)
 * [Holtek HT1632 - 32×8 & 24×16 LED Driver](Ht1632/README.md)

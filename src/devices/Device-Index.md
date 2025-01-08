@@ -20,7 +20,6 @@
 * [AXP192 - Enhanced single Cell Li-Battery and Power System Management IC](Axp192/README.md)
 * [Bh1745 - RGB Sensor](Bh1745/README.md)
 * [BH1750FVI - Ambient Light Sensor](Bh1750fvi/README.md)
-* [Blinkt - 8-LED indicator strip](Blinkt/README.md)
 * [Bmm150 - Magnetometer](Bmm150/README.md)
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
