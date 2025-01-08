@@ -23,14 +23,14 @@ namespace Iot.Device.Blinkt
         private readonly GpioPin _datPin;
         private readonly GpioPin _clkPin;
 
-        private readonly Color[] _pixels = new Color[NUMBER_OF_PIXELS];
+        private readonly Color[] _pixels = new Color[NumberOfPixels];
         private readonly bool _shouldDispose;
         private GpioController _gpioController;
 
         /// <summary>
         /// The number of pixels in the Blinkt strip
         /// </summary>
-        public const int NUMBER_OF_PIXELS = 8;
+        public const int NumberOfPixels = 8;
 
         /// <summary>
         /// The sleep time in milliseconds between each bit written to the Blinkt.
@@ -51,7 +51,7 @@ namespace Iot.Device.Blinkt
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
         public Blinkt(int datPin = 23, int clkPin = 24, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            for (int i = 0; i < NUMBER_OF_PIXELS; i++)
+            for (int i = 0; i < NumberOfPixels; i++)
             {
                 _pixels[i] = Color.Empty;
             }
@@ -83,7 +83,7 @@ namespace Iot.Device.Blinkt
         /// <param name="brightness">The brightess for the pixels</param>
         public void SetBrightness(byte brightness)
         {
-            for (var i = 0; i < NUMBER_OF_PIXELS; i++)
+            for (var i = 0; i < NumberOfPixels; i++)
             {
                 _pixels[i] = Color.FromArgb(brightness, _pixels[i]);
             }
@@ -128,7 +128,7 @@ namespace Iot.Device.Blinkt
         /// <param name="color">The color to set the pixel to</param>
         public void SetAll(Color color)
         {
-            for (var i = 0; i < NUMBER_OF_PIXELS; i++)
+            for (var i = 0; i < NumberOfPixels; i++)
             {
                 SetPixel(i, color);
             }
@@ -142,9 +142,9 @@ namespace Iot.Device.Blinkt
         /// <returns>The color of the pixel </returns>
         public Color GetPixel(int pixel)
         {
-            if (pixel < 0 || pixel >= NUMBER_OF_PIXELS)
+            if (pixel < 0 || pixel >= NumberOfPixels)
             {
-                throw new ArgumentOutOfRangeException(nameof(pixel), $"Pixel must be between 0 and {NUMBER_OF_PIXELS - 1}");
+                throw new ArgumentOutOfRangeException(nameof(pixel), $"Pixel must be between 0 and {NumberOfPixels - 1}");
             }
 
             return _pixels[pixel];
@@ -159,9 +159,9 @@ namespace Iot.Device.Blinkt
         /// <exception cref="ArgumentOutOfRangeException">The value of pixel must be between 0 and 7, otherwise this exception is thrown</exception>
         public void SetPixel(int pixel, Color color)
         {
-            if (pixel < 0 || pixel >= NUMBER_OF_PIXELS)
+            if (pixel < 0 || pixel >= NumberOfPixels)
             {
-                throw new ArgumentOutOfRangeException(nameof(pixel), $"Pixel must be between 0 and {NUMBER_OF_PIXELS - 1}");
+                throw new ArgumentOutOfRangeException(nameof(pixel), $"Pixel must be between 0 and {NumberOfPixels - 1}");
             }
 
             _pixels[pixel] = color;
