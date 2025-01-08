@@ -1,4 +1,4 @@
-﻿# Blinkt
+# Blinkt - 8-LED indicator strip
 
 ## Summary
 
