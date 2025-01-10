@@ -35,14 +35,14 @@ while (true)
     Color color = Color.FromArgb(new Random().Next(0, 255), new Random().Next(0, 255), new Random().Next(0, 255));
 
     // Loop through the pixels, lighting them in the given color
-    for (int i = 0; i < Blinkt.NUMBER_OF_PIXELS; i++)
+    for (int i = 0; i < Blinkt.NumberOfPixels; i++)
     {
         SetOnePixel(blinkt, color, i);
     }
 
     // Loop through the pixels in reverse order, lighting them in the given color
     // We skip the first pixel so there is a more pleasing bounce effect
-    for (int i = Blinkt.NUMBER_OF_PIXELS - 2; i >= 0; i--)
+    for (int i = Blinkt.NumberOfPixels - 2; i >= 0; i--)
     {
         SetOnePixel(blinkt, color, i);
     }
