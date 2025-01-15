@@ -26,34 +26,33 @@ namespace Iot.Device.Tca955x
 
         private bool _shouldDispose;
 
-        private byte _adress = 0x20;
-        private I2cDevice _bus;
+        private I2cDevice _busDevice;
 
         private object _interruptHandlerLock = new object();
 
         private ushort _gpioOutputCache;
 
         /// <summary>
+        /// Default Adress of the Tca955X Family.
+        /// </summary>
+        public const byte DefaultI2cAdress = 0x20;
+
+        /// <summary>
         /// Constructor for the Tca9555 I2C I/O Expander.
         /// </summary>
-        /// <param name="bus">The I2C Bus the device is connected to.</param>
+        /// <param name="device">The I2C device used for communication.</param>
         /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
         /// <param name="gpioController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
-        /// <param name="adress">
-        /// The device address for the connection on the I2C bus.
-        /// Start with 0x20 and ends with 0x27
-        /// </param>
-        protected Tca955x(I2cDevice bus, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true, byte adress = 0x20)
+        protected Tca955x(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            _bus = bus;
+            _busDevice = device;
             _interrupt = interrupt;
-            _adress = adress;
 
-            if (adress < 0x20 ||
-                adress > 0x27)
+            if (_busDevice.ConnectionSettings.DeviceAddress < DefaultI2cAdress ||
+                _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAdress + 7)
             {
-                new ArgumentOutOfRangeException(nameof(adress), "Adress should be in Range 0x20 to 0x28");
+                new ArgumentOutOfRangeException(nameof(device), "Adress should be in Range 0x20 to 0x27");
             }
 
             if (_interrupt != -1)
@@ -80,7 +79,7 @@ namespace Iot.Device.Tca955x
         protected void InternalRead(byte register, Span<byte> buffer)
         {
             // First send write then read.
-            _bus.WriteRead(new ReadOnlySpan<byte>(new byte[1] { register }), buffer);
+            _busDevice.WriteRead(new ReadOnlySpan<byte>(new byte[1] { register }), buffer);
         }
 
         /// <summary>
@@ -90,7 +89,7 @@ namespace Iot.Device.Tca955x
         /// <param name="data">The data to write to the registers.</param>
         protected void InternalWrite(byte register, byte data)
         {
-            _bus.Write(new ReadOnlySpan<byte>(new byte[2] { register, data }));
+            _busDevice.Write(new ReadOnlySpan<byte>(new byte[2] { register, data }));
         }
 
         /// <summary>
@@ -135,8 +134,8 @@ namespace Iot.Device.Tca955x
             }
 
             _pinValues.Clear();
-            _bus?.Dispose();
-            _bus = null!;
+            _busDevice?.Dispose();
+            _busDevice = null!;
             base.Dispose(disposing);
         }
 

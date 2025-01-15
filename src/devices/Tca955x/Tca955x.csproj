@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Content Include="category.txt" />
+    <None Include="category.txt" />
     <None Include="README.md" />
   </ItemGroup>
 

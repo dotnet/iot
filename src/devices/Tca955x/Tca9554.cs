@@ -14,16 +14,12 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Constructor for the Tca9554 I2C I/O Expander.
         /// </summary>
-        /// <param name="bus">The I2C Bus the device is connected to.</param>
+        /// <param name="device">The I2C device used for communication</param>
         /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
         /// <param name="gpioController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
-        /// <param name="adress">
-        /// The device address for the connection on the I2C bus.
-        /// Start with 0x20 and ends with 0x27
-        /// </param>
-        public Tca9554(I2cDevice bus, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true, byte adress = 0x20)
-            : base(bus, interrupt, gpioController, shouldDispose, adress)
+        public Tca9554(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
+            : base(device, interrupt, gpioController, shouldDispose)
         {
         }
 
