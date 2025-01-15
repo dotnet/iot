@@ -2,10 +2,9 @@
 
 ## Example 1
 
-Use the Tca9554 or Tca9555 class directlc and write to the specific register.
-First write to the configuration register to define either input or output (an high bit stands for an input).
-Read Inputs with the input register or write output with the output register.
-
+Use the Tca9554 or Tca9555 class directly and write to the specific register.
+First, write to the configuration register to define either input or output (a high bit stands for an input).
+Read inputs with the input register or write outputs with the output register.
 ```csharp
 I2cConnectionSettings i2cConnectionSettings = new(1, 0x20);
 I2cDevice i2cDevice = I2cDevice.Create(i2cConnectionSettings);
@@ -19,8 +18,8 @@ tca9554.WriteByte(Register.OutputPort, 0xF0);
 ## Example 2
 
 Use the GPIO Controller to open and close pins.
-With the read and write the current state of the Pin can be read or write.
-Also intterupts with a callback can be used.
+With the read and write methods, the current state of the pin can be read or written.
+Also, interrupts with a callback can be used.
 
 ```csharp
 // Gpio controller from parent device (eg. Raspberry Pi)
