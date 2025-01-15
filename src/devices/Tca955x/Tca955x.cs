@@ -60,26 +60,16 @@ namespace Iot.Device.Tca955x
             {
                 _shouldDispose = shouldDispose || gpioController is null;
                 _controller = gpioController ?? new GpioController();
+                if (!_controller.IsPinOpen(_interrupt))
+                {
+                    _controller.OpenPin(_interrupt);
+                }
 
-                _controller.OpenPin(_interrupt, PinMode.Input);
+                if (_controller.GetPinMode(_interrupt) != PinMode.Input)
+                {
+                    _controller.SetPinMode(interrupt, PinMode.Input);
+                }
             }
-        }
-
-        private byte GetSlaveAdress(bool write = false)
-        {
-            // Fixed value
-            byte returnValue = 64;
-
-            if (write)
-            {
-                returnValue += (byte)((_adress - 0x20) << 1);
-            }
-            else
-            {
-                returnValue += (byte)(((_adress - 0x20) << 1) + 1);
-            }
-
-            return returnValue;
         }
 
         /// <summary>
@@ -90,8 +80,7 @@ namespace Iot.Device.Tca955x
         protected void InternalRead(byte register, Span<byte> buffer)
         {
             // First send write then read.
-            _bus.Write(new ReadOnlySpan<byte>(new byte[2] { GetSlaveAdress(true), register }));
-            _bus.WriteRead(new ReadOnlySpan<byte>(new byte[1] { GetSlaveAdress(false) }), buffer);
+            _bus.WriteRead(new ReadOnlySpan<byte>(new byte[1] { register }), buffer);
         }
 
         /// <summary>
@@ -101,7 +90,7 @@ namespace Iot.Device.Tca955x
         /// <param name="data">The data to write to the registers.</param>
         protected void InternalWrite(byte register, byte data)
         {
-            _bus.Write(new ReadOnlySpan<byte>(new byte[3] { GetSlaveAdress(true), register, data }));
+            _bus.Write(new ReadOnlySpan<byte>(new byte[2] { register, data }));
         }
 
         /// <summary>
@@ -190,11 +179,11 @@ namespace Iot.Device.Tca955x
                 byte value;
                 if (mode == PinMode.Output)
                 {
-                    value = ClearBit(InternalReadByte(configurationRegister), pinNumber);
+                    value = ClearBit(InternalReadByte(configurationRegister), GetBitNumber(pinNumber));
                 }
                 else
                 {
-                    value = SetBit(InternalReadByte(configurationRegister), pinNumber);
+                    value = SetBit(InternalReadByte(configurationRegister), GetBitNumber(pinNumber));
                 }
 
                 InternalWriteByte(configurationRegister, value);
@@ -202,11 +191,11 @@ namespace Iot.Device.Tca955x
                 byte value2;
                 if (mode == PinMode.InputPullUp)
                 {
-                    value2 = SetBit(InternalReadByte(polarityInversionRegister), pinNumber);
+                    value2 = SetBit(InternalReadByte(polarityInversionRegister), GetBitNumber(pinNumber));
                 }
                 else
                 {
-                    value2 = ClearBit(InternalReadByte(polarityInversionRegister), pinNumber);
+                    value2 = ClearBit(InternalReadByte(polarityInversionRegister), GetBitNumber(pinNumber));
                 }
 
                 InternalWriteByte(polarityInversionRegister, value2);
@@ -220,6 +209,13 @@ namespace Iot.Device.Tca955x
         /// <param name="registerType">The register byte.</param>
         /// <returns>The register byte.</returns>
         protected abstract byte GetRegisterIndex(int pinNumber, Register registerType);
+
+        /// <summary>
+        /// Converts the pin number to the Bit number.
+        /// </summary>
+        /// <param name="pinNumber">The  pin number.</param>
+        /// <returns>The bit position.</returns>
+        protected abstract int GetBitNumber(int pinNumber);
 
         /// <summary>
         /// Mask the right byte from an input based on the pinnumber.
@@ -270,7 +266,7 @@ namespace Iot.Device.Tca955x
                     int pin = pinValuePairs[i].PinNumber;
                     byte register = GetRegisterIndex(pin, Register.InputPort);
                     byte result = InternalReadByte(register);
-                    pinValuePairs[i] = new PinValuePair(pin, result & (1 << pin));
+                    pinValuePairs[i] = new PinValuePair(pin, result & (1 << GetBitNumber(pin)));
                     _pinValues[pin] = pinValuePairs[i].PinValue;
                 }
             }
@@ -387,15 +383,18 @@ namespace Iot.Device.Tca955x
                     {
                         PinValue newValue = Read(interruptPin.Key);
                         PinValue lastValue = _interruptLastInputValues[interruptPin.Key];
-                        if ((interruptPin.Value == PinEventTypes.Rising &&
+
+                        if ((interruptPin.Value.HasFlag(PinEventTypes.Rising) &&
                             lastValue == PinValue.Low &&
                             newValue == PinValue.High) ||
-                            (interruptPin.Value == PinEventTypes.Falling &&
+                            (interruptPin.Value.HasFlag(PinEventTypes.Falling) &&
                             lastValue == PinValue.High &&
                             newValue == PinValue.Low))
                         {
                             CallHandlerOnPin(interruptPin.Key, interruptPin.Value);
                         }
+
+                        _interruptLastInputValues[interruptPin.Key] = newValue;
                     }
                 }
             }
@@ -437,7 +436,7 @@ namespace Iot.Device.Tca955x
 
             _interruptPins.Add(pinNumber, eventType);
             _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
-            _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, eventType, InterruptHandler);
+            _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
 
             _eventHandlers[pinNumber] = callback;
         }
@@ -455,7 +454,7 @@ namespace Iot.Device.Tca955x
             {
                 _interruptPins.Remove(pinNumber);
                 _interruptLastInputValues.Remove(pinNumber);
-                _controller.UnregisterCallbackForPinValueChangedEvent(pinNumber, InterruptHandler);
+                _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
             }
         }
 

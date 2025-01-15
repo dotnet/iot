@@ -49,6 +49,23 @@ namespace Iot.Device.Tca955x
         }
 
         /// <inheritdoc/>
+        protected override int GetBitNumber(int pinNumber)
+        {
+            if (pinNumber >= 0 &&
+                pinNumber <= 7)
+            {
+                return pinNumber;
+            }
+            else if (pinNumber >= 8 &&
+                     pinNumber <= 15)
+            {
+                return pinNumber - 8;
+            }
+
+            return 0;
+        }
+
+        /// <inheritdoc/>
         protected override byte GetRegisterIndex(int pinNumber, Register registerType)
         {
             byte register = (byte)registerType;

@@ -9,7 +9,7 @@ The TCA955X device family provides 8/16-bit, general purpose I/O expansion for I
 The family contains the TCA9554 (8-bit) and the TCA9555 (16-bit) device. Both devices are compatible with 400kHz Bus speed.
 
 - **TCA9554**: [datasheet](https://www.ti.com/lit/ds/symlink/tca9554.pdf?ts=1732457066799)
-- **TCA9555**: [datasheet](https://www.ti.com/lit/ds/symlink/tca9554.pdf?ts=1732457066799)
+- **TCA9555**: [datasheet](https://www.ti.com/lit/ds/symlink/tca9555.pdf?ts=1732457066799)
 
 ## Interrupt support
 
