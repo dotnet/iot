@@ -20,7 +20,7 @@ Console.WriteLine($"Current input state: {readInputs.ToString("X2")}");
 tca9554.WriteByte(Register.OutputPort, 0xF0);
 
 // Enable Interrupt on pin 1
-GpioController controller = new GpioController(PinNumberingScheme.Logical, tca9554);
+GpioController controller = new GpioController(tca9554);
 controller.RegisterCallbackForPinValueChangedEvent(0, PinEventTypes.Rising, Interrupt);
 
 void Interrupt(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
