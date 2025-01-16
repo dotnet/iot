@@ -63,7 +63,7 @@ namespace Iot.Device.Button
         public bool IsDoublePressEnabled { get; set; } = false;
 
         /// <summary>
-        /// Define if single press event is enabled or disabled on the button.
+        /// Indicates if the button is currently pressed.
         /// </summary>
         public bool IsPressed { get; set; } = false;
 
