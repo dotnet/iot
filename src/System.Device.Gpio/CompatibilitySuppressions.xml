@@ -236,6 +236,27 @@
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
   </Suppression>
   <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:System.Device.Gpio.GpioPin</Target>
+    <Left>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:System.Device.Gpio.GpioPin</Target>
+    <Left>lib/net6.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0/System.Device.Gpio.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:System.Device.Gpio.GpioPin</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/netstandard2.0/System.Device.Gpio.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0008</DiagnosticId>
     <Target>T:System.Device.Gpio.Drivers.GpiodException</Target>
     <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
