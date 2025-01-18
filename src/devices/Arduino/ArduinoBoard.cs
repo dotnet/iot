@@ -96,6 +96,7 @@ namespace Iot.Device.Arduino
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
+            _serialPort.ReadTimeout = int.MaxValue - 10;
             StreamUsesHardwareFlowControl = false; // Would need to configure the serial port externally for this to work
             _logger = this.GetCurrentClassLogger();
         }
