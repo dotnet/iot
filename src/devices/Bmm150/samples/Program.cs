@@ -15,12 +15,14 @@ I2cConnectionSettings settings = new(0, Bmm150.PrimaryI2cAddress);
 
 using Bmm150 bmm150 = new Bmm150(board.CreateI2cDevice(settings));
 
+/* Calibration commented out, this is impractical and - the way it's implemented - most of the time just incorrect.
 Console.WriteLine($"Please move your device in all directions...");
 
-////bmm150.CalibrateMagnetometer(new Feedback(), 100);
+bmm150.CalibrateMagnetometer(new Feedback(), 100);
 
 Console.WriteLine();
 Console.WriteLine($"Calibration completed.");
+*/
 
 while (!Console.KeyAvailable)
 {
@@ -41,10 +43,3 @@ while (!Console.KeyAvailable)
     Thread.Sleep(500);
 }
 
-internal class Feedback : IProgress<double>
-{
-    public void Report(double value)
-    {
-        Console.Write($"\r{value:F1}% done");
-    }
-}
