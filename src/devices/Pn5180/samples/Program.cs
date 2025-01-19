@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -51,6 +52,7 @@ Console.WriteLine($"4 Radio Frequency operations");
 Console.WriteLine($"5 Pull ISO 14443 Type A and B cards, display information");
 Console.WriteLine($"6 Pull ISO 14443 B cards, display information");
 Console.WriteLine($"7 dump Ultralight card and various tests");
+Console.WriteLine($"8 Pull ISO 15693 cards, display information");
 choice = Console.ReadKey().KeyChar;
 Console.WriteLine();
 Console.WriteLine();
@@ -82,6 +84,10 @@ else if (choice == '6')
 else if (choice == '7')
 {
     ProcessUltralight();
+}
+else if (choice == '8')
+{
+    ICode();
 }
 else
 {
@@ -588,5 +594,20 @@ void ProcessUltralight()
     else
     {
         Console.WriteLine("Error writing NDEF data on card");
+    }
+}
+
+void ICode()
+{
+    Console.WriteLine();
+    // Poll the data for 20 seconds
+    if (pn5180.ListenToCardIso15693(TransmitterRadioFrequencyConfiguration.Iso15693_ASK100_26, ReceiverRadioFrequencyConfiguration.Iso15693_26, out IList<Data26_53kbps>? cards, 20000))
+    {
+        foreach (Data26_53kbps card in cards)
+        {
+            Console.WriteLine($"Target number: {card.TargetNumber}");
+            Console.WriteLine($"UID: {BitConverter.ToString(card.NfcId)}");
+            Console.WriteLine($"DSFID: {card.Dsfid}");
+        }
     }
 }
