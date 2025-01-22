@@ -5,6 +5,7 @@
 Use the Tca9554 or Tca9555 class directly and write to the specific register.
 First, write to the configuration register to define either input or output (a high bit stands for an input).
 Read inputs with the input register or write outputs with the output register.
+
 ```csharp
 I2cConnectionSettings i2cConnectionSettings = new(1, 0x20);
 I2cDevice i2cDevice = I2cDevice.Create(i2cConnectionSettings);
