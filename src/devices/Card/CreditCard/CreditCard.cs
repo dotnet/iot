@@ -5,6 +5,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
@@ -454,8 +455,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 // 0x9F37 Unpredictable number
                                 else if (dol.TagNumber == 0x9F37)
                                 {
-                                    var rand = new Random();
-                                    rand.NextBytes(toSend.Slice(index, dol.Data[0]));
+                                    RandomNumberGenerator.Fill(toSend.Slice(index, dol.Data[0]));
                                 }
 
                                 // Currency
