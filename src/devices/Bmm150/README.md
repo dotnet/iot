@@ -9,15 +9,13 @@ Documentation for the Bmm150 can be [found here](https://www.bosch-sensortec.com
 
 ## Usage
 
-You can find an example in the [sample](./samples/Program.cs) directory. Usage is straight forward. The "Calibration" provided
-needs conceptual review and is therefore currently not recommended. Also, when using the magnetometer in a real-world application,
-it is not reasonable to turn it around all axes at every startup (try that with a car!).
+You can find an example in the [sample](./samples/Program.cs) directory. Usage is straight forward. The previous "Calibration" method
+was removed, as it would need to be completely rewritten to do something useful.
 
 ```csharp
 I2cConnectionSettings mpui2CConnectionSettingmpus = new(1, Bmm150.DefaultI2cAddress);
 
 using Bmm150 bmm150 = new Bmm150(I2cDevice.Create(mpui2CConnectionSettingmpus));
-
 
 while (!Console.KeyAvailable)
 {
