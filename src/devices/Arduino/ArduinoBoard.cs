@@ -79,6 +79,11 @@ namespace Iot.Device.Arduino
         /// <remarks>
         /// The device is initialized when the first command is sent. The constructor always succeeds.
         /// </remarks>
+        /// <remarks>
+        /// The stream must have a blocking read operation, or the connection might fail. Some serial port drivers incorrectly
+        /// return immediately when no data is available and the <code>ReadTimeout</code> is set to infinite (the default). In such a case, set the
+        /// ReadTimeout to a large value (such as <code>Int.Max - 10</code>), which will simulate a blocking call.
+        /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
         : this(serialPortStream, false)
@@ -96,6 +101,8 @@ namespace Iot.Device.Arduino
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
+            // Set the timeout to a long time, but not infinite. See the note for the constructor above.
+            _serialPort.ReadTimeout = int.MaxValue - 10;
             StreamUsesHardwareFlowControl = false; // Would need to configure the serial port externally for this to work
             _logger = this.GetCurrentClassLogger();
         }

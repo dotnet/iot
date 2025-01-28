@@ -4,6 +4,7 @@
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Arduino\Arduino.csproj" />
     <ProjectReference Include="..\Bmm150.csproj" />
   </ItemGroup>
 </Project>
