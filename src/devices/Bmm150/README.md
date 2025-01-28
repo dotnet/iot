@@ -35,6 +35,7 @@ while (!Console.KeyAvailable)
 
     Thread.Sleep(500);
 }
+```
 
 ### Expected output
 
