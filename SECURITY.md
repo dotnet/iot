@@ -2,7 +2,15 @@
 
 ## Supported Versions
 
-The .NET Core and ASP.NET Core support policy, including supported versions can be found at the [.NET Core Support Policy Page](https://dotnet.microsoft.com/platform/support/policy/dotnet-core).
+We only provide support for the latest version of `System.Device.Gpio`. Issues and contributions related to `Iot.Device.Bindings` are community-driven and not officially supported by the maintainers.
+
+## Considerations
+
+- Default Trust: By default, many IoT devices assume inputs are from trusted sources. This is a risky assumption because attackers can inject malicious data or manipulate signals.
+- Security Vulnerabilities: Attackers may craft inputs to exploit buffer overflows, force unexpected states, or gain unauthorized access to device functions.
+- Mitigation:
+  - Input Validation: Perform rigorous checks (e.g., sanitization, length checks, type validation) on every input—whether it’s sensor data, network traffic, or user-supplied information.
+  - Least Privilege: Run IoT components with minimal permissions. Ensure that any compromised part of the system cannot escalate privileges or affect other parts.
 
 ## Reporting a Vulnerability
 
