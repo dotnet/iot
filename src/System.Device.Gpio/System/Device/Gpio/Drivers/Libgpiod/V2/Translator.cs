@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 
-[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal static class Translator
 {
     public static (GpiodLineDirection? _direction, GpiodLineBias? _bias) Translate(PinMode pinMode)

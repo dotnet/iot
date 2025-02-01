@@ -13,7 +13,6 @@ namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 /// <summary>
 /// Class that observes libgpiod line requests for events.
 /// </summary>
-[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal sealed class LibGpiodV2EventObserver : IDisposable
 {
     private readonly Dictionary<EventSubscription, List<PinChangeEventHandler>> _handlersBySubscription = new();

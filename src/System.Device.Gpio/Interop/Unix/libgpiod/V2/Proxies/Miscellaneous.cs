@@ -12,7 +12,6 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// Contains functions that are not part of any specific concept.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__misc.html"/>
-[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class Miscellaneous
 {
     /// <summary>
