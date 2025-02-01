@@ -13,7 +13,6 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// as well as a snapshot of line's status in the form of a line-info object.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__watch.html"/>
-[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class LineSettings : LibGpiodProxyBase
 {
     internal LineSettingsSafeHandle Handle { get; }
