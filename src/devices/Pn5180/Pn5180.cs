@@ -13,6 +13,7 @@ using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Card;
 using Iot.Device.Card.Mifare;
+using Iot.Device.Card.Icode;
 using Iot.Device.Common;
 using Iot.Device.Rfid;
 using Microsoft.Extensions.Logging;
@@ -439,6 +440,31 @@ namespace Iot.Device.Pn5180
 
                     default:
                         return TransceiveBuffer(dataToSend, dataFromCard);
+                }
+            }
+            else if (protocol == NfcProtocol.Iso15693)
+            {
+                switch ((IcodeCardCommand)dataToSend[1])
+                {
+                    case IcodeCardCommand.ReadSingleBlock:
+                    case IcodeCardCommand.WriteSingleBlock:
+                    case IcodeCardCommand.LockBlock:
+                    case IcodeCardCommand.ReadMultipleBlocks:
+                    case IcodeCardCommand.WriteMultipleBlocks:
+                    case IcodeCardCommand.StayQuiet:
+                    case IcodeCardCommand.Select:
+                    case IcodeCardCommand.ResettoRead:
+                    case IcodeCardCommand.LockAFI:
+                    case IcodeCardCommand.LockDSFID:
+                    case IcodeCardCommand.GetSystemInformation:
+                        var ret = SendDataToCard(dataToSend.ToArray());
+                        if (!ret)
+                        {
+                            return -1;
+                        }
+
+                        Thread.Sleep(2 + dataToSend.Length / 3);
+                        return ReadWithTimeout(dataFromCard, 2 + dataFromCard.Length / 3);
                 }
             }
 
@@ -1531,8 +1557,6 @@ namespace Iot.Device.Pn5180
                     SendDataToCard(new Span<byte> { });
                 }
 
-                SetRadioFrequency(false);
-
                 if (cards.Count > 0)
                 {
                     return true;
@@ -1548,6 +1572,25 @@ namespace Iot.Device.Pn5180
             }
         }
 
+        /// <summary>
+        /// reset PN5180 RF Configuration and some Register
+        /// </summary>
+        /// <param name="transmitter">The transmitter configuration</param>
+        /// <param name="receiver">The receiver configuration</param>
+        /// <returns></returns>
+        public bool ResetPN5180Configuration(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver)
+        {
+            var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);
+            // Switch on the radio frequence field and check it
+            ret &= SetRadioFrequency(true);
+            // Clears all interrupt
+            SpiWriteRegister(Command.WRITE_REGISTER, Register.IRQ_CLEAR, new byte[] { 0xFF, 0xFF, 0x0F, 0x00 });
+            // Sets the PN5180 into IDLE state
+            SpiWriteRegister(Command.WRITE_REGISTER_AND_MASK, Register.SYSTEM_CONFIG, new byte[] { 0xF8, 0xFF, 0xFF, 0xFF });
+            // Activates TRANSCEIVE routine
+            SpiWriteRegister(Command.WRITE_REGISTER_OR_MASK, Register.SYSTEM_CONFIG, new byte[] { 0x03, 0x00, 0x00, 0x00 });
+            return ret;
+        }
         #endregion
 
         #region SPI primitives
