@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Iot.Device.Card.CreditCardProcessing;
+using Iot.Device.Card.Icode;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Card.Ultralight;
 using Iot.Device.Ft4222;
@@ -603,11 +604,46 @@ void ICode()
     // Poll the data for 20 seconds
     if (pn5180.ListenToCardIso15693(TransmitterRadioFrequencyConfiguration.Iso15693_ASK100_26, ReceiverRadioFrequencyConfiguration.Iso15693_26, out IList<Data26_53kbps>? cards, 20000))
     {
+        pn5180.ResetPN5180Configuration(TransmitterRadioFrequencyConfiguration.Iso15693_ASK100_26, ReceiverRadioFrequencyConfiguration.Iso15693_26);
         foreach (Data26_53kbps card in cards)
         {
             Console.WriteLine($"Target number: {card.TargetNumber}");
             Console.WriteLine($"UID: {BitConverter.ToString(card.NfcId)}");
             Console.WriteLine($"DSFID: {card.Dsfid}");
+            if (card.NfcId[6] == 0x04)
+            {
+                IcodeCard icodeCard = new IcodeCard(pn5180, card.TargetNumber)
+                {
+                    Uid = card.NfcId,
+                    Capacity = IcodeCardCapacity.ICODESLIX,
+                };
+
+                icodeCard.GetSystemInformation();
+                Console.WriteLine($"SystemInfo data is :{BitConverter.ToString(icodeCard.Data)}");
+                icodeCard.Data = new byte[] { 0x1c, 0x1b, 0x1b, 0x1b };
+                // icodeCard.LockBlock(27);
+                icodeCard.WriteSingleBlock(2);
+                Console.WriteLine($"write data response is :{BitConverter.ToString(icodeCard.Data)}");
+                icodeCard.ReadMultipleBlocks(0, 3);
+                Console.WriteLine($"block 0~3 data is :{BitConverter.ToString(icodeCard.Data)}");
+                for (byte i = 0; i < 28; i++)
+                {
+                    icodeCard.Command = IcodeCardCommand.ReadSingleBlock;
+                    icodeCard.BlockNumber = i;
+                    if (icodeCard.RunIcodeCardCommand() >= 0)
+                    {
+                        Console.WriteLine($"Block {i} data is :{BitConverter.ToString(icodeCard.Data)}");
+                    }
+                    else
+                    {
+                        icodeCard.Data = new byte[] { };
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Only Icode cards are supported");
+            }
         }
     }
 }
