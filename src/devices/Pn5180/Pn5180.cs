@@ -463,8 +463,10 @@ namespace Iot.Device.Pn5180
                             return -1;
                         }
 
-                        Thread.Sleep(2 + dataToSend.Length / 3);
-                        return ReadWithTimeout(dataFromCard, 2 + dataFromCard.Length / 3);
+                        // Transfer speed is 26.48kbps and bit encoding is 1/4, about 1.2 ms are needed to transfer 1 byte
+                        return ReadWithTimeout(dataFromCard, dataToSend.Length * 6 / 5);
+                    default:
+                        throw new NotImplementedException();
                 }
             }
 
