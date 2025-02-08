@@ -170,4 +170,14 @@ public abstract class GpioDriver : IDisposable
     {
         return new ComponentInformation(this, "Gpio Driver");
     }
+
+    /// <summary>
+    /// Gets information about the current chip
+    /// </summary>
+    /// <returns>An instance of the <see cref="GpioChipInfo"/> record</returns>
+    /// <exception cref="NotSupportedException">The current driver does not support this data</exception>
+    public virtual GpioChipInfo GetChipInfo()
+    {
+        throw new NotImplementedException();
+    }
 }
