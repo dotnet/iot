@@ -136,7 +136,6 @@ namespace Iot.Device.Card.Icode
         private byte[] Serialize()
         {
             byte[]? ser = null;
-            // Span<byte> crc = new Span<byte>(new byte[] { 0xff, 0xff });
             switch (Command)
             {
                 case IcodeCardCommand.ReadSingleBlock:
@@ -146,8 +145,6 @@ namespace Iot.Device.Card.Icode
                     ser[10] = BlockNumber;
                     Uid?.CopyTo(ser, 2);
                     _responseSize = 5;
-                    // CalculateCrc15693(ser.AsSpan<byte>().Slice(0, 11), crc);
-                    // crc.CopyTo(ser.AsSpan<byte>().Slice(11));
                     return ser;
                 case IcodeCardCommand.WriteSingleBlock:
                     ser = new byte[2 + 8 + 1 + 4];
@@ -157,8 +154,6 @@ namespace Iot.Device.Card.Icode
                     Uid?.CopyTo(ser, 2);
                     Data.CopyTo(ser, 11);
                     _responseSize = 2;
-                    // CalculateCrc15693(ser.AsSpan<byte>().Slice(0, 15), crc);
-                    // crc.CopyTo(ser.AsSpan<byte>().Slice(15));
                     return ser;
                 case IcodeCardCommand.LockBlock:
                     ser = new byte[2 + 8 + 1];
