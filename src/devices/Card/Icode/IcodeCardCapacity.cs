@@ -17,26 +17,26 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// ICODE SLIX
         /// </summary>
-        ICODESLIX = 896,
+        IcodeSlix = 896,
 
         /// <summary>
         /// ICODE SLIX2
         /// </summary>
-        ICODESLIX2 = 2528,
+        IcodeSlix2 = 2528,
 
         /// <summary>
         /// ICODE DNA
         /// </summary>
-        ICODEDNA = 2016,
+        IcodeDna = 2016,
 
         /// <summary>
         /// ICODE 3
         /// </summary>
-        ICODE3 = 2400,
+        Icode3 = 2400,
 
         /// <summary>
         /// ICODE 3 TagTamper
         /// </summary>
-        ICODE3TagTamper = 2400
+        Icode3TagTamper = 2400
     }
 }
