@@ -13,7 +13,7 @@ namespace System.Device.Gpio.Drivers;
 /// <summary>
 /// A GPIO driver for Unix.
 /// </summary>
-public class SysFsDriver : UnixDriver
+public partial class SysFsDriver : UnixDriver
 {
     private const int ERROR_CODE_EINTR = 4; // Interrupted system call
 
@@ -22,13 +22,14 @@ public class SysFsDriver : UnixDriver
     private const string GpioLabel = "/label";
     private const string GpioContoller = "pinctrl";
     private const string GpioOffsetBase = "/base";
+    private const string GpioCount = "/ngpio";
     private const int PollingTimeout = 50;
-
-    private static readonly int s_pinOffset = ReadOffset();
 
     private readonly List<int> _exportedPins = new List<int>();
     private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
     private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
+    private readonly int _pinOffset;
+
     private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
     private int _pollFileDescriptor = -1;
     private Thread? _eventDetectionThread;
@@ -37,12 +38,13 @@ public class SysFsDriver : UnixDriver
 
     private bool _isDisposed;
 
-    private static int ReadOffset()
+    private static int ReadOffset(int chip)
     {
         IEnumerable<string> fileNames = Directory.EnumerateFileSystemEntries(GpioBasePath);
         foreach (string name in fileNames)
         {
-            if (name.Contains(GpioChip))
+            if (name.Contains(GpioChip + chip.ToString(CultureInfo.InvariantCulture)) ||
+                (chip == 0 && name.Contains(GpioChip))) // If the chip is specified as 0, take the first entry (legacy behavior)
             {
                 try
                 {
@@ -76,6 +78,23 @@ public class SysFsDriver : UnixDriver
         }
 
         _isDisposed = false;
+        _pinOffset = ReadOffset(0);
+    }
+
+    /// <summary>
+    /// Creates a SysFsDriver instance for the provided chip number
+    /// </summary>
+    /// <param name="chip">The chip number to select (use <see cref="GetAvailableChips"/> to query the list of available values)</param>
+    /// <exception cref="PlatformNotSupportedException"></exception>
+    public SysFsDriver(int chip)
+    {
+        if (Environment.OSVersion.Platform != PlatformID.Unix)
+        {
+            throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
+        }
+
+        _isDisposed = false;
+        _pinOffset = ReadOffset(chip);
     }
 
     /// <summary>
@@ -91,6 +110,65 @@ public class SysFsDriver : UnixDriver
         {
             _statusUpdateSleepTime = value;
         }
+    }
+
+    /// <summary>
+    /// Returns the list of available chips.
+    /// This can be used to determine the correct gpio chip for constructor calls to <see cref="LibGpiodDriver"/>
+    /// </summary>
+    /// <returns>A list of chips detected</returns>
+    public static IList<GpioChipInfo> GetAvailableChips()
+    {
+        string[] fileNames = Directory.GetFileSystemEntries(GpioBasePath);
+        List<GpioChipInfo> list = new List<GpioChipInfo>();
+
+        if (fileNames.Length > 0)
+        {
+            // Add the default entry (the first entry, but we name it "0")
+            var temp = GetChipInfoForName(fileNames.First());
+            list.Add(temp with
+            {
+                Id = 0
+            });
+        }
+
+        foreach (string name in fileNames)
+        {
+            if (name.Contains(GpioChip))
+            {
+                try
+                {
+                    GpioChipInfo entry = GetChipInfoForName(name);
+                    list.Add(entry);
+                }
+                catch (IOException)
+                {
+                    // Ignoring file not found or any other IO exceptions as it is not guaranteed the folder would have files "label" "base"
+                    // And don't want to throw in this case just continue to load the gpiochip with default offset = 0
+                }
+            }
+        }
+
+        return list;
+    }
+
+    private static GpioChipInfo GetChipInfoForName(string name)
+    {
+        var idString = name.Substring(0, GpioChip.Length);
+        if (!Int32.TryParse(idString, out int id))
+        {
+            id = 0;
+        }
+
+        var label = File.ReadAllText($"{name}{GpioLabel}");
+        var numPins = File.ReadAllText($"{name}{GpioCount}");
+        if (!int.TryParse(numPins, out int pins))
+        {
+            pins = 0;
+        }
+
+        var entry = new GpioChipInfo(id, name, label, pins);
+        return entry;
     }
 
     /// <summary>
@@ -113,9 +191,9 @@ public class SysFsDriver : UnixDriver
     protected internal override void OpenPin(int pinNumber)
     {
         CheckValidDriver();
-        int pinOffset = pinNumber + s_pinOffset;
+        int pinOffset = pinNumber + _pinOffset;
         string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
-        // If the directory exists, this becomes a no-op since the pin might have been opened already by the some controller or somebody else.
+        // If the directory exists, this becomes a no-op since the pin might have been opened already by some controller or somebody else.
         if (!Directory.Exists(pinPath))
         {
             try
@@ -142,7 +220,7 @@ public class SysFsDriver : UnixDriver
     protected internal override void ClosePin(int pinNumber)
     {
         CheckValidDriver();
-        int pinOffset = pinNumber + s_pinOffset;
+        int pinOffset = pinNumber + _pinOffset;
         string pinPath = $"{GpioBasePath}/gpio{pinOffset}";
         // If the directory doesn't exist, this becomes a no-op since the pin was closed already.
         if (Directory.Exists(pinPath))
@@ -183,7 +261,7 @@ public class SysFsDriver : UnixDriver
             throw new PlatformNotSupportedException("This driver is generic so it does not support Input Pull Down or Input Pull Up modes.");
         }
 
-        string directionPath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/direction";
+        string directionPath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/direction";
         string sysFsMode = ConvertPinModeToSysFsMode(mode);
         if (File.Exists(directionPath))
         {
@@ -242,7 +320,7 @@ public class SysFsDriver : UnixDriver
     {
         CheckValidDriver();
         PinValue result = default;
-        string valuePath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/value";
+        string valuePath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/value";
         if (File.Exists(valuePath))
         {
             try
@@ -285,7 +363,7 @@ public class SysFsDriver : UnixDriver
     protected internal override void Write(int pinNumber, PinValue value)
     {
         CheckValidDriver();
-        string valuePath = $"{GpioBasePath}/gpio{pinNumber + s_pinOffset}/value";
+        string valuePath = $"{GpioBasePath}/gpio{pinNumber + _pinOffset}/value";
         if (File.Exists(valuePath))
         {
             try
@@ -373,7 +451,7 @@ public class SysFsDriver : UnixDriver
 
     private void SetPinEventsToDetect(int pinNumber, PinEventTypes eventTypes)
     {
-        string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+        string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "edge");
         // Even though the pin is open, we might sometimes need to wait for access
         SysFsHelpers.EnsureReadWriteAccessToPath(edgePath);
         string stringValue = PinEventTypeToStringValue(eventTypes);
@@ -382,7 +460,7 @@ public class SysFsDriver : UnixDriver
 
     private PinEventTypes GetPinEventsToDetect(int pinNumber)
     {
-        string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "edge");
+        string edgePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "edge");
         // Even though the pin is open, we might sometimes need to wait for access
         SysFsHelpers.EnsureReadWriteAccessToPath(edgePath);
         string stringValue = File.ReadAllText(edgePath);
@@ -441,7 +519,7 @@ public class SysFsDriver : UnixDriver
 
         if (valueFileDescriptor == -1)
         {
-            string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "value");
+            string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + _pinOffset}", "value");
             valueFileDescriptor = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
             if (valueFileDescriptor < 0)
             {
@@ -603,6 +681,12 @@ public class SysFsDriver : UnixDriver
 
         _isDisposed = true;
         base.Dispose(disposing);
+    }
+
+    /// <inheritdoc />
+    public override GpioChipInfo GetChipInfo()
+    {
+        throw new NotImplementedException();
     }
 
     private void CheckValidDriver()
@@ -770,7 +854,7 @@ public class SysFsDriver : UnixDriver
     protected internal override PinMode GetPinMode(int pinNumber)
     {
         CheckValidDriver();
-        pinNumber += s_pinOffset;
+        pinNumber += _pinOffset;
         string directionPath = $"{GpioBasePath}/gpio{pinNumber}/direction";
         if (File.Exists(directionPath))
         {
