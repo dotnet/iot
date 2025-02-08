@@ -615,7 +615,7 @@ void ICode()
                 IcodeCard icodeCard = new IcodeCard(pn5180, card.TargetNumber)
                 {
                     Uid = card.NfcId,
-                    Capacity = IcodeCardCapacity.ICODESLIX,
+                    Capacity = IcodeCardCapacity.IcodeSlix,
                 };
 
                 icodeCard.GetSystemInformation();
