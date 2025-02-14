@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
+using System.Device.Gpio.Drivers.Libgpiod.V2;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Xunit;
@@ -23,5 +24,5 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     }
 
 #pragma warning disable SDGPIO0001
-    protected override GpioDriver GetTestDriver() => new LibGpiodDriver(ChipNumber, new Version(2, 0));
+    protected override GpioDriver GetTestDriver() => new LibGpiodV2Driver(ChipNumber);
 }

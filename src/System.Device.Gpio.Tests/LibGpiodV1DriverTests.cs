@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
+using System.Device.Gpio.Drivers.Libgpiod;
 using System.Device.Gpio.Drivers.Libgpiod.V1;
+using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,7 +23,7 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     {
     }
 
-    protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0, new Version(1, 0));
+    protected override GpioDriver GetTestDriver() => new LibGpiodV1Driver(0);
 
     [Fact]
     public void SetPinModeSetsDefaultValue()

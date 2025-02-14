@@ -13,7 +13,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chip__info.html"/>
 [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
-internal class ChipInfo : LibGpiodProxyBase
+internal class LibGpiodChipInfo : LibGpiodProxyBase
 {
     private readonly int _chipNumber;
     private readonly ChipInfoSafeHandle _handle;
