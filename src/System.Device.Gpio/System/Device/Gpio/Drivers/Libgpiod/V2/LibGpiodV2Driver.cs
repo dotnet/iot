@@ -13,9 +13,13 @@ namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 
 /// <summary>
 /// Driver that uses libgpiod V2 for GPIO control.
+/// <remarks>
+/// At the time of this writing, this driver is only available when compiling from source. See instructions at
+/// https://libgpiod.readthedocs.io/en/latest/building.html.
+/// </remarks>
 /// </summary>
 [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
-internal sealed class LibGpiodV2Driver : UnixDriver
+public sealed class LibGpiodV2Driver : UnixDriver
 {
     private static readonly string ConsumerId = $"C#-{nameof(LibGpiodV2Driver)}-{Process.GetCurrentProcess().Id}";
 
@@ -28,11 +32,11 @@ internal sealed class LibGpiodV2Driver : UnixDriver
     /// <summary>
     /// Creates a driver instance for the specified GPIO chip.
     /// </summary>
-    /// <param name="chip">Chip proxy object to drive.</param>
+    /// <param name="chipNumber">Chip number to use.</param>
     /// <param name="waitEdgeEventsTimeout">Timeout to wait for edge events. Primarily used for testing.</param>
-    public LibGpiodV2Driver(Chip chip, TimeSpan? waitEdgeEventsTimeout = null)
+    public LibGpiodV2Driver(int chipNumber, TimeSpan? waitEdgeEventsTimeout = null)
     {
-        _chip = chip;
+        _chip = LibGpiodProxyFactory.CreateChip(chipNumber);
         _eventObserver = new LibGpiodV2EventObserver { WaitEdgeEventsTimeout = waitEdgeEventsTimeout ?? TimeSpan.FromMilliseconds(100) };
     }
 
