@@ -15,18 +15,6 @@ public class LibGpiodDriver : UnixDriver
     private GpioDriver _driver;
 
     /// <summary>
-    /// Creates an instance of the LibGpiodDriver for the most suitable chip
-    /// </summary>
-    /// <remarks>
-    /// The driver version is chosen based on the installed libgpiod version on the system. To select a specific library version use another
-    /// constructor or specify the environment variable DOTNET_IOT_LIBGPIOD_DRIVER_VERSION, see documentation
-    /// </remarks>
-    public LibGpiodDriver()
-    {
-        _driver = LibGpiodDriverFactory.Instance.Create();
-    }
-
-    /// <summary>
     /// Creates an instance of the LibGpiodDriver
     /// </summary>
     /// <param name="gpioChip">The number of the GPIO chip to drive</param>
@@ -34,7 +22,7 @@ public class LibGpiodDriver : UnixDriver
     /// The driver version is chosen based on the installed libgpiod version on the system. To select a specific library version use the
     /// other constructor or specify the environment variable DOTNET_IOT_LIBGPIOD_DRIVER_VERSION, see documentation
     /// </remarks>
-    public LibGpiodDriver(int gpioChip)
+    public LibGpiodDriver(int gpioChip = 0)
     {
         var versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip);
         _driver = versionedLibgpiodDriver;
