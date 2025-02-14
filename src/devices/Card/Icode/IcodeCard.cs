@@ -25,15 +25,13 @@ namespace Iot.Device.Card.Icode
         // the size of response
         private ushort _responseSize;
 
+        // The command to execute on the card
+        private IcodeCardCommand _command;
+
         /// <summary>
         /// The tag number detected by the reader
         /// </summary>
         public byte Target { get; set; }
-
-        /// <summary>
-        /// The command to execute on the card
-        /// </summary>
-        public IcodeCardCommand Command { get; set; }
 
         /// <summary>
         /// unique identifier of the card
@@ -61,6 +59,16 @@ namespace Iot.Device.Card.Icode
         public byte[] Data { get; set; } = new byte[0];
 
         /// <summary>
+        /// AFI (Application family identifier) represents the type of application targeted by the VCD
+        /// </summary>
+        public byte Afi { get; set; }
+
+        /// <summary>
+        /// The Data storage format identifier indicates how the data is structured in the VICC memory
+        /// </summary>
+        public byte Dsfid { get; set; }
+
+        /// <summary>
         /// Constructor for IcodeCard
         /// </summary>
         /// <param name="rfid">A card transceiver class</param>
@@ -74,14 +82,15 @@ namespace Iot.Device.Card.Icode
 
         /// <summary>
         /// Provide a calculation of CRC for ISO15693
+        /// The PN5180 module seems to have implemented crc and does not need to calculate when coding
         /// </summary>
         /// <param name="buffer">The buffer to process</param>
         /// <param name="crc">The CRC, Must be a 2 bytes buffer</param>
-        public void CalculateCrc15693(ReadOnlySpan<byte> buffer, Span<byte> crc)
+        public void CalculateCrcIso15693(ReadOnlySpan<byte> buffer, Span<byte> crc)
         {
             if (crc.Length != 2)
             {
-                throw new ArgumentException($"Value must be 2 bytes.", nameof(crc));
+                throw new ArgumentException($"The length of crc must be 2 bytes.", nameof(crc));
             }
 
             ushort polynomial = 0x8408;
@@ -112,13 +121,13 @@ namespace Iot.Device.Card.Icode
         /// Run the last setup command. In case of reading bytes, they are automatically pushed into the Data property
         /// </summary>
         /// <returns>-1 if the process fails otherwise the number of bytes read</returns>
-        public int RunIcodeCardCommand()
+        private int RunIcodeCardCommand()
         {
             byte[] requestData = Serialize();
             byte[] dataOut = new byte[_responseSize];
 
             var ret = _rfid.Transceive(Target, requestData, dataOut.AsSpan(), NfcProtocol.Iso15693);
-            _logger.LogDebug($"{nameof(RunIcodeCardCommand)}: {Command}, Target: {Target}, Data: {BitConverter.ToString(Serialize())}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}");
+            _logger.LogDebug($"{nameof(RunIcodeCardCommand)}: {_command}, Target: {Target}, Data: {BitConverter.ToString(requestData)}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}");
             if (ret > 0)
             {
                 Data = dataOut;
@@ -128,54 +137,58 @@ namespace Iot.Device.Card.Icode
         }
 
         /// <summary>
-        /// Depending on the command, serialize the needed data
-        /// Reading data will just serialize the command
-        /// Writing data will serialize the data as well
+        /// Serialize request data according to the protocol
+        /// Request format: SOF, Flags, Command code, Parameters (opt.), Data (opt.), CRC16, EOF
         /// </summary>
         /// <returns>The serialized bits</returns>
         private byte[] Serialize()
         {
             byte[]? ser = null;
-            switch (Command)
+            switch (_command)
             {
                 case IcodeCardCommand.ReadSingleBlock:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte), BlockNumber(1 byte)
                     ser = new byte[2 + 8 + 1];
                     ser[0] = 0x22;
-                    ser[1] = (byte)Command;
+                    ser[1] = (byte)_command;
                     ser[10] = BlockNumber;
                     Uid?.CopyTo(ser, 2);
                     _responseSize = 5;
                     return ser;
                 case IcodeCardCommand.WriteSingleBlock:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte), BlockNumber(1 byte),Data to write(4 byte)
                     ser = new byte[2 + 8 + 1 + 4];
                     ser[0] = 0x22;
-                    ser[1] = (byte)Command;
+                    ser[1] = (byte)_command;
                     ser[10] = BlockNumber;
                     Uid?.CopyTo(ser, 2);
                     Data.CopyTo(ser, 11);
                     _responseSize = 2;
                     return ser;
                 case IcodeCardCommand.LockBlock:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte), BlockNumber(1 byte)
                     ser = new byte[2 + 8 + 1];
                     ser[0] = 0x22;
-                    ser[1] = (byte)Command;
+                    ser[1] = (byte)_command;
                     ser[10] = BlockNumber;
                     Uid?.CopyTo(ser, 2);
                     _responseSize = 2;
                     return ser;
                 case IcodeCardCommand.ReadMultipleBlocks:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte), FirstBlockNumber(1 byte), NumBlocks
                     ser = new byte[2 + 8 + 2];
                     ser[0] = 0x22;
-                    ser[1] = (byte)Command;
+                    ser[1] = (byte)_command;
                     ser[10] = BlockNumber;
                     ser[11] = BlockCount;
                     Uid?.CopyTo(ser, 2);
                     _responseSize = (ushort)(1 + (BlockCount + 1) * 4);
                     return ser;
                 case IcodeCardCommand.WriteMultipleBlocks:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte), FirstBlockNumber(1 byte), numBlocks, Data to write
                     ser = new byte[2 + 8 + 2 + Data.Length];
                     ser[0] = 0x22;
-                    ser[1] = (byte)Command;
+                    ser[1] = (byte)_command;
                     ser[10] = BlockNumber;
                     ser[11] = (byte)(Data.Length / 4);
                     Uid?.CopyTo(ser, 2);
@@ -185,20 +198,40 @@ namespace Iot.Device.Card.Icode
                 case IcodeCardCommand.StayQuiet:
                 case IcodeCardCommand.Select:
                 case IcodeCardCommand.ResettoRead:
-                case IcodeCardCommand.LockAFI:
-                case IcodeCardCommand.LockDSFID:
+                case IcodeCardCommand.LockAfi:
+                case IcodeCardCommand.LockDsfid:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte)
                     ser = new byte[2 + 8];
                     ser[0] = 0x22;
-                    ser[1] = (byte)Command;
+                    ser[1] = (byte)_command;
                     Uid?.CopyTo(ser, 2);
                     _responseSize = 2;
                     return ser;
                 case IcodeCardCommand.GetSystemInformation:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte)
                     ser = new byte[2 + 8];
                     ser[0] = 0x22;
-                    ser[1] = (byte)Command;
+                    ser[1] = (byte)_command;
                     Uid?.CopyTo(ser, 2);
                     _responseSize = 15;
+                    return ser;
+                case IcodeCardCommand.WriteAfi:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte), AFI(1 byte)
+                    ser = new byte[2 + 8 + 1];
+                    ser[0] = 0x22;
+                    ser[1] = (byte)_command;
+                    ser[10] = Afi;
+                    Uid?.CopyTo(ser, 2);
+                    _responseSize = 2;
+                    return ser;
+                case IcodeCardCommand.WriteDsfid:
+                    // Flags(1 byte), Command code(1 byte), UID(8 byte), DSFID(1 byte)
+                    ser = new byte[2 + 8 + 1];
+                    ser[0] = 0x22;
+                    ser[1] = (byte)_command;
+                    ser[10] = Dsfid;
+                    Uid?.CopyTo(ser, 2);
+                    _responseSize = 2;
                     return ser;
                 default:
                     return new byte[0];
@@ -213,7 +246,7 @@ namespace Iot.Device.Card.Icode
         public bool ReadSingleBlock(byte block)
         {
             BlockNumber = block;
-            Command = IcodeCardCommand.ReadSingleBlock;
+            _command = IcodeCardCommand.ReadSingleBlock;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -225,8 +258,14 @@ namespace Iot.Device.Card.Icode
         /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
         public bool WriteSingleBlock(byte block)
         {
+            if (Data.Length < 1 || Data.Length > 4)
+            {
+                _logger.LogDebug("Length of data must be larger than zero and less than or equal four.");
+                return false;
+            }
+
             BlockNumber = block;
-            Command = IcodeCardCommand.WriteSingleBlock;
+            _command = IcodeCardCommand.WriteSingleBlock;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -239,7 +278,7 @@ namespace Iot.Device.Card.Icode
         public bool LockBlock(byte block)
         {
             BlockNumber = block;
-            Command = IcodeCardCommand.LockBlock;
+            _command = IcodeCardCommand.LockBlock;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -254,7 +293,7 @@ namespace Iot.Device.Card.Icode
         {
             BlockNumber = block;
             BlockCount = count;
-            Command = IcodeCardCommand.ReadMultipleBlocks;
+            _command = IcodeCardCommand.ReadMultipleBlocks;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -266,8 +305,14 @@ namespace Iot.Device.Card.Icode
         /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
         public bool WriteMultipleBlocks(byte block)
         {
+            if (Data.Length < 1)
+            {
+                _logger.LogDebug("Length of data must be larger than zero.");
+                return false;
+            }
+
             BlockNumber = block;
-            Command = IcodeCardCommand.WriteMultipleBlocks;
+            _command = IcodeCardCommand.WriteMultipleBlocks;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -284,7 +329,7 @@ namespace Iot.Device.Card.Icode
                 return false;
             }
 
-            Command = IcodeCardCommand.StayQuiet;
+            _command = IcodeCardCommand.StayQuiet;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -303,7 +348,7 @@ namespace Iot.Device.Card.Icode
             }
 
             Uid = uid;
-            Command = IcodeCardCommand.Select;
+            _command = IcodeCardCommand.Select;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -314,7 +359,18 @@ namespace Iot.Device.Card.Icode
         /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
         public bool ResettoRead()
         {
-            Command = IcodeCardCommand.ResettoRead;
+            _command = IcodeCardCommand.ResettoRead;
+            var ret = RunIcodeCardCommand();
+            return ret >= 0;
+        }
+
+        /// <summary>
+        /// Write AFI
+        /// </summary>
+        /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
+        public bool WriteAfi()
+        {
+            _command = IcodeCardCommand.WriteAfi;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -323,9 +379,20 @@ namespace Iot.Device.Card.Icode
         /// Lock the AFI
         /// </summary>
         /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
-        public bool LockAFI()
+        public bool LockAfi()
         {
-            Command = IcodeCardCommand.LockAFI;
+            _command = IcodeCardCommand.LockAfi;
+            var ret = RunIcodeCardCommand();
+            return ret >= 0;
+        }
+
+        /// <summary>
+        /// Write DSFID
+        /// </summary>
+        /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
+        public bool WriteDsfid()
+        {
+            _command = IcodeCardCommand.WriteDsfid;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -334,9 +401,9 @@ namespace Iot.Device.Card.Icode
         /// Lock the DSFID
         /// </summary>
         /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
-        public bool LockDSFID()
+        public bool LockDsfid()
         {
-            Command = IcodeCardCommand.LockDSFID;
+            _command = IcodeCardCommand.LockDsfid;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }
@@ -347,7 +414,7 @@ namespace Iot.Device.Card.Icode
         /// <returns>True if success. This only means whether the communication between VCD and VICC is successful or not</returns>
         public bool GetSystemInformation()
         {
-            Command = IcodeCardCommand.GetSystemInformation;
+            _command = IcodeCardCommand.GetSystemInformation;
             var ret = RunIcodeCardCommand();
             return ret >= 0;
         }

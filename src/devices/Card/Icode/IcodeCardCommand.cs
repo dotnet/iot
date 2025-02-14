@@ -6,7 +6,7 @@ namespace Iot.Device.Card.Icode
     /// <summary>
     /// List of commands available for the Icode cards
     /// </summary>
-    public enum IcodeCardCommand
+    internal enum IcodeCardCommand
     {
         /// <summary>
         /// Inventory cards
@@ -56,22 +56,22 @@ namespace Iot.Device.Card.Icode
         /// <summary>
         /// Write AFI
         /// </summary>
-        WriteAFI = 0x27,
+        WriteAfi = 0x27,
 
         /// <summary>
         /// Lock AFI
         /// </summary>
-        LockAFI = 0x28,
+        LockAfi = 0x28,
 
         /// <summary>
         /// Write DSFID
         /// </summary>
-        WriteDSFID = 0x29,
+        WriteDsfid = 0x29,
 
         /// <summary>
         /// Lock DSFID
         /// </summary>
-        LockDSFID = 0x2A,
+        LockDsfid = 0x2A,
 
         /// <summary>
         /// Get system information

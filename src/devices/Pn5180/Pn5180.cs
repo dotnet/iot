@@ -444,30 +444,14 @@ namespace Iot.Device.Pn5180
             }
             else if (protocol == NfcProtocol.Iso15693)
             {
-                switch ((IcodeCardCommand)dataToSend[1])
+                var ret = SendDataToCard(dataToSend.ToArray());
+                if (!ret)
                 {
-                    case IcodeCardCommand.ReadSingleBlock:
-                    case IcodeCardCommand.WriteSingleBlock:
-                    case IcodeCardCommand.LockBlock:
-                    case IcodeCardCommand.ReadMultipleBlocks:
-                    case IcodeCardCommand.WriteMultipleBlocks:
-                    case IcodeCardCommand.StayQuiet:
-                    case IcodeCardCommand.Select:
-                    case IcodeCardCommand.ResettoRead:
-                    case IcodeCardCommand.LockAFI:
-                    case IcodeCardCommand.LockDSFID:
-                    case IcodeCardCommand.GetSystemInformation:
-                        var ret = SendDataToCard(dataToSend.ToArray());
-                        if (!ret)
-                        {
-                            return -1;
-                        }
-
-                        // Transfer speed is 26.48kbps and bit encoding is 1/4, about 1.2 ms are needed to transfer 1 byte
-                        return ReadWithTimeout(dataFromCard, dataToSend.Length * 6 / 5);
-                    default:
-                        throw new NotImplementedException();
+                    return -1;
                 }
+
+                // Transfer speed is 26.48kbps and bit encoding is 1/4, about 1.2 ms are needed to transfer 1 byte
+                return ReadWithTimeout(dataFromCard, dataToSend.Length * 6 / 5);
             }
 
             return TransceiveClassic(targetNumber, dataToSend, dataFromCard);
