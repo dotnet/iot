@@ -14,6 +14,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// The line must be requested to access the line value.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__info.html"/>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class LineInfo : LibGpiodProxyBase
 {
     private readonly LineInfoSafeHandle _handle;

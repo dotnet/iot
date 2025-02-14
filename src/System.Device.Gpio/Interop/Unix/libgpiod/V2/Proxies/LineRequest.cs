@@ -17,6 +17,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// This object provides exclusive usage, i.e. reading or setting lines state.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__request.html#details"/>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class LineRequest : LibGpiodProxyBase
 {
     private readonly LineRequestSafeHandle _handle;

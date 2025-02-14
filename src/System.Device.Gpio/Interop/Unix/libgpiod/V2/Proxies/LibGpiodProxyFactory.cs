@@ -8,6 +8,7 @@ using LibgpiodV2 = Interop.LibgpiodV2;
 
 namespace System.Device.Gpio.Libgpiod.V2;
 
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal static class LibGpiodProxyFactory
 {
     /// <summary>

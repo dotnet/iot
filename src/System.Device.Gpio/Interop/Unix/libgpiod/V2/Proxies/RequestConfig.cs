@@ -13,6 +13,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// The mutators don't return error values. If the values are invalid, in general they are silently adjusted to acceptable ranges.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__request__config.html"/>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class RequestConfig : LibGpiodProxyBase
 {
     internal RequestConfigSafeHandle Handle { get; }
