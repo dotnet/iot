@@ -14,6 +14,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// allows callers to retrieve information about each line, watch lines for state changes and make line requests.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html"/>
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class Chip : LibGpiodProxyBase
 {
     private readonly int _chipNumber;

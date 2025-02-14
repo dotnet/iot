@@ -24,28 +24,41 @@ public class LibGpiodDriver : UnixDriver
     /// </remarks>
     public LibGpiodDriver(int gpioChip = 0)
     {
-        var versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip);
-        _driver = versionedLibgpiodDriver;
+#pragma warning disable SDGPIO0001 // Suppressing diagnostic for using experimental APIs from this same repository.
+        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip);
+        _driver = versionedLibgpiodDriver.LibGpiodDriver;
+        Version = versionedLibgpiodDriver.DriverVersion;
+#pragma warning restore SDGPIO0001 // Suppressing diagnostic for using experimental APIs from this same repository.
     }
 
     /// <summary>
     /// Creates an instance of the LigGpiodDriver that targets specific version/s of libgpiod
+    /// <see cref="LibGpiodDriverVersion.V1"/> supports libgpiod.so.1.x to libgpiod.so.2.x
+    /// and <see cref="LibGpiodDriverVersion.V2"/> supports libgpiod.so.3.x
     /// </summary>
     /// <param name="gpioChip">The number of the GPIO chip to drive</param>
     /// <param name="driverVersion">Version of the libgpiod driver to create</param>
     /// <remarks>Alternatively, specify the environment variable DOTNET_IOT_LIBGPIOD_DRIVER_VERSION, see documentation</remarks>
     [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
-    public LibGpiodDriver(int gpioChip, Version driverVersion)
+    public LibGpiodDriver(int gpioChip, LibGpiodDriverVersion driverVersion)
     {
-        var versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip, driverVersion);
-        _driver = versionedLibgpiodDriver;
+        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip, driverVersion);
+        _driver = versionedLibgpiodDriver.LibGpiodDriver;
+        Version = versionedLibgpiodDriver.DriverVersion;
     }
+
+    /// <summary>
+    /// Version of the libgpiod driver
+    /// </summary>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public LibGpiodDriverVersion Version { get; protected set; }
 
     /// <summary>
     /// A collection of driver versions that correspond to the installed versions of libgpiod on this system. Each driver is dependent
     /// on specific libgpiod version/s. If the collection is empty, it indicates that libgpiod might not be installed or could not be detected.
     /// </summary>
-    public static Version[] GetAvailableVersions() => LibGpiodDriverFactory.Instance.DriverCandidates;
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public static LibGpiodDriverVersion[] GetAvailableVersions() => LibGpiodDriverFactory.Instance.DriverCandidates;
 
     /// <inheritdoc/>
     protected internal override int PinCount => GetDriver().PinCount;
@@ -132,7 +145,11 @@ public class LibGpiodDriver : UnixDriver
     public override ComponentInformation QueryComponentInformation()
     {
         var ret = new ComponentInformation(this, "Libgpiod Wrapper driver");
+#pragma warning disable SDGPIO0001
+        ret.Properties.Add("Version", Version.ToString());
+#pragma warning restore SDGPIO0001
         ret.AddSubComponent(GetDriver().QueryComponentInformation());
+#pragma warning restore SDGPIO0001
         return ret;
     }
 

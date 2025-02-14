@@ -12,7 +12,8 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// The chip info contains all the publicly available information about a chip.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chip__info.html"/>
-internal class LibGpiodChipInfo : LibGpiodProxyBase
+[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+internal class ChipInfo : LibGpiodProxyBase
 {
     private readonly int _chipNumber;
     private readonly ChipInfoSafeHandle _handle;
