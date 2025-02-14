@@ -86,11 +86,6 @@ internal sealed class LibGpiodDriverFactory
     /// </summary>
     public Version[] DriverCandidates => _driverCandidates;
 
-    public GpioDriver Create()
-    {
-        throw new NotImplementedException();
-    }
-
     public GpioDriver Create(int chipNumber)
     {
         if (!string.IsNullOrWhiteSpace(_driverVersionEnvVarValue))
