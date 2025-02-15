@@ -310,9 +310,7 @@ if (pn5180.ListenToCardIso15693(TransmitterRadioFrequencyConfiguration.Iso15693_
             Console.WriteLine($"block 0~3 data is :{BitConverter.ToString(icodeCard.Data)}");
             for (byte i = 0; i < 28; i++)
             {
-                icodeCard.Command = IcodeCardCommand.ReadSingleBlock;
-                icodeCard.BlockNumber = i;
-                if (icodeCard.RunIcodeCardCommand() >= 0)
+                if (icodeCard.ReadSingleBlock(i))
                 {
                     Console.WriteLine($"Block {i} data is :{BitConverter.ToString(icodeCard.Data)}");
                 }
