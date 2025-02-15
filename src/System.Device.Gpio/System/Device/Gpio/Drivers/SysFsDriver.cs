@@ -13,7 +13,7 @@ namespace System.Device.Gpio.Drivers;
 /// <summary>
 /// A GPIO driver for Unix.
 /// </summary>
-public partial class SysFsDriver : UnixDriver
+public class SysFsDriver : UnixDriver
 {
     private const int ERROR_CODE_EINTR = 4; // Interrupted system call
 
