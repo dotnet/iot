@@ -9,5 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Card\CardRfid.csproj" />
     <ProjectReference Include="..\Card\Mifare\Mifare.csproj" />
+    <ProjectReference Include="..\Card\Icode\Icode.csproj" />
   </ItemGroup>
 </Project>

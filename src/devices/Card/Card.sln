@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31105.61
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardRfid", "CardRfid.csproj", "{2B97523A-956B-4C88-8931-28C1AF88012C}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mifare", "Mifare\Mifare.csproj", "{81A964D2-BA4B-4769-A630-084D8C4BEBDA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{03F9B2A3-4B73-4D39-872B-BB0D81F3593E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Icode", "Icode\Icode.csproj", "{1A0C6CC9-D66D-4935-9880-644230F1C5B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,18 @@ Global
 		{03F9B2A3-4B73-4D39-872B-BB0D81F3593E}.Release|x64.Build.0 = Release|Any CPU
 		{03F9B2A3-4B73-4D39-872B-BB0D81F3593E}.Release|x86.ActiveCfg = Release|Any CPU
 		{03F9B2A3-4B73-4D39-872B-BB0D81F3593E}.Release|x86.Build.0 = Release|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Debug|x64.Build.0 = Debug|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Debug|x86.Build.0 = Debug|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Release|x64.ActiveCfg = Release|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Release|x64.Build.0 = Release|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Release|x86.ActiveCfg = Release|Any CPU
+		{1A0C6CC9-D66D-4935-9880-644230F1C5B9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
