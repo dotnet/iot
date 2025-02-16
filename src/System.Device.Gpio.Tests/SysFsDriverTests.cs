@@ -39,10 +39,7 @@ public class SysFsDriverTests : GpioControllerTestBase
             Assert.NotNull(ctrl);
             var driverInfo = driver.GetChipInfo();
             Assert.NotNull(driverInfo);
-            Assert.Equal(chip.Id, driverInfo.Id);
-            Assert.Equal(chip.Label, driverInfo.Label);
-            Assert.Equal(chip.Name, driverInfo.Name);
-            Assert.Equal(chip.NumLines, driverInfo.NumLines);
+            Assert.Equal(chip, driverInfo);
             ctrl.Dispose();
         }
     }
