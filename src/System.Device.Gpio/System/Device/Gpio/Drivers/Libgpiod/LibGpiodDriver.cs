@@ -102,7 +102,7 @@ public class LibGpiodDriver : UnixDriver
     public static IList<GpioChipInfo> GetAvailableChips()
     {
         List<GpioChipInfo> result = new List<GpioChipInfo>();
-        using var iterator = new SafeChipIteratorHandle(LibgpiodV1.gpiod_chip_iter_new());
+        var iterator = new SafeChipIteratorHandle(LibgpiodV1.gpiod_chip_iter_new());
         SafeChipHandle chip = new SafeChipHandle();
         int index = 0;
         while (!(chip = LibgpiodV1.gpiod_chip_iter_next(iterator)).IsInvalid)
@@ -118,6 +118,7 @@ public class LibGpiodDriver : UnixDriver
             }
         }
 
+        iterator.Dispose();
         return result;
     }
 
