@@ -29,6 +29,7 @@ public class SysFsDriver : UnixDriver
     private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
     private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
     private readonly int _pinOffset;
+    private readonly int _chipNumber;
 
     private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
     private int _pollFileDescriptor = -1;
@@ -78,6 +79,7 @@ public class SysFsDriver : UnixDriver
         }
 
         _isDisposed = false;
+        _chipNumber = 0;
         _pinOffset = ReadOffset(0);
     }
 
@@ -94,6 +96,7 @@ public class SysFsDriver : UnixDriver
         }
 
         _isDisposed = false;
+        _chipNumber = chip;
         _pinOffset = ReadOffset(chip);
     }
 
@@ -686,7 +689,7 @@ public class SysFsDriver : UnixDriver
     /// <inheritdoc />
     public override GpioChipInfo GetChipInfo()
     {
-        throw new NotImplementedException();
+        return GetAvailableChips().First(x => x.Id == _chipNumber);
     }
 
     private void CheckValidDriver()
