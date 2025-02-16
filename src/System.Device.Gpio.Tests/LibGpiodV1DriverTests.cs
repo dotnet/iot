@@ -5,6 +5,7 @@ using System.Device.Gpio.Drivers;
 using System.Device.Gpio.Drivers.Libgpiod;
 using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
+using System.Diagnostics;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -110,6 +111,12 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     [Fact]
     public void CheckAllChipsCanBeConstructed()
     {
+        while (!Debugger.IsAttached)
+        {
+            Logger.WriteLine($"Waiting for debugger on process {Process.GetCurrentProcess().Id}");
+            Thread.Sleep(1000);
+        }
+
         var chips = LibGpiodDriver.GetAvailableChips();
         foreach (var c in chips)
         {
