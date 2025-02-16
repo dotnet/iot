@@ -158,9 +158,10 @@ public class SysFsDriver : UnixDriver
     private static GpioChipInfo GetChipInfoForName(string name)
     {
         var idString = name.Substring(0, GpioChip.Length);
-        if (!Int32.TryParse(idString, out int id))
+        int id = 0;
+        if (!Int32.TryParse(idString, out id))
         {
-            id = 0;
+            throw new InvalidOperationException($"Unable to parse {idString} as number");
         }
 
         var label = File.ReadAllText($"{name}{GpioLabel}");
