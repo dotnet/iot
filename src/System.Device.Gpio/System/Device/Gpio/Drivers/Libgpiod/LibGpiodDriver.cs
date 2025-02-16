@@ -110,8 +110,12 @@ public class LibGpiodDriver : UnixDriver
             int numLines = LibgpiodV1.gpiod_chip_num_lines(chip);
             string name = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_name(chip)) ?? string.Empty;
             string label = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_label(chip)) ?? string.Empty;
-            result.Add(new GpioChipInfo(index, name, label, numLines));
-            index++;
+            if (!result.Any(x => x.Label == label && x.NumLines == numLines))
+            {
+                // The iterator may find duplicates, but we skip them here
+                result.Add(new GpioChipInfo(index, name, label, numLines));
+                index++;
+            }
         }
 
         return result;

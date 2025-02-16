@@ -111,12 +111,6 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     [Fact]
     public void CheckAllChipsCanBeConstructed()
     {
-        while (!Debugger.IsAttached)
-        {
-            Logger.WriteLine($"Waiting for debugger on process {Process.GetCurrentProcess().Id}");
-            Thread.Sleep(1000);
-        }
-
         var chips = LibGpiodDriver.GetAvailableChips();
         foreach (var c in chips)
         {
