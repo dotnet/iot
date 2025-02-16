@@ -108,8 +108,8 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
         GC.WaitForPendingFinalizers();
     }
 
-    // [Fact]
-    private void CheckAllChipsCanBeConstructed()
+    [Fact]
+    public void CheckAllChipsCanBeConstructed()
     {
         var chips = LibGpiodDriver.GetAvailableChips();
         foreach (var c in chips)
