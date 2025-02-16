@@ -218,11 +218,11 @@ internal partial class Interop
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern IntPtr gpiod_version_string();
 
-        [DllImport(LibgpiodLibrary, CharSet = CharSet.Auto)]
-        internal static extern string gpiod_chip_name(SafeChipHandle chip);
+        [DllImport(LibgpiodLibrary)]
+        internal static extern IntPtr gpiod_chip_name(SafeChipHandle chip);
 
-        [DllImport(LibgpiodLibrary, CharSet = CharSet.Auto)]
-        internal static extern string gpiod_chip_label(SafeChipHandle chip);
+        [DllImport(LibgpiodLibrary)]
+        internal static extern IntPtr gpiod_chip_label(SafeChipHandle chip);
     }
 }
 
