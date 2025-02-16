@@ -11,8 +11,8 @@ namespace System.Device.Gpio.Libgpiod.V1;
 /// </summary>
 internal class SafeChipIteratorHandle : SafeHandle
 {
-    public SafeChipIteratorHandle()
-        : base(IntPtr.Zero, true)
+    public SafeChipIteratorHandle(IntPtr handle)
+        : base(handle, true)
     {
     }
 

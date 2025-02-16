@@ -9,6 +9,7 @@ using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Device.Gpio.Drivers.Libgpiod.V2;
 using System.Device.Gpio.Libgpiod.V1;
 using System.Diagnostics;
+using System.Linq;
 using LibgpiodV1 = Interop.LibgpiodV1;
 
 namespace System.Device.Gpio.Drivers;
@@ -30,6 +31,7 @@ public class LibGpiodDriver : UnixDriver
     private readonly int _pinCount;
     private readonly ConcurrentDictionary<int, PinValue> _pinValue;
     private SafeChipHandle _chip;
+    private int _chipNumber;
 
     /// <inheritdoc />
     protected internal override int PinCount => _pinCount;
@@ -75,6 +77,7 @@ public class LibGpiodDriver : UnixDriver
         try
         {
             _pinNumberLock = new object();
+            _chipNumber = gpioChip;
             _chip = LibgpiodV1.gpiod_chip_open_by_number(gpioChip);
             if (_chip == null || _chip.IsInvalid || _chip.IsClosed)
             {
@@ -90,6 +93,28 @@ public class LibGpiodDriver : UnixDriver
         {
             throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodNotInstalled);
         }
+    }
+
+    /// <summary>
+    /// Returns the set of available chips for this driver
+    /// </summary>
+    /// <returns>A list of <see cref="GpioChipInfo"/> instances</returns>
+    public static IList<GpioChipInfo> GetAvailableChips()
+    {
+        List<GpioChipInfo> result = new List<GpioChipInfo>();
+        using var iterator = new SafeChipIteratorHandle(LibgpiodV1.gpiod_chip_iter_new());
+        SafeChipHandle chip = new SafeChipHandle();
+        int index = 0;
+        while (!(chip = LibgpiodV1.gpiod_chip_iter_next(iterator)).IsInvalid)
+        {
+            int numLines = LibgpiodV1.gpiod_chip_num_lines(chip);
+            string name = LibgpiodV1.gpiod_chip_name(chip);
+            string label = LibgpiodV1.gpiod_chip_label(chip);
+            result.Add(new GpioChipInfo(index, name, label, numLines));
+            index++;
+        }
+
+        return result;
     }
 
     /// <inheritdoc/>
@@ -401,6 +426,12 @@ public class LibGpiodDriver : UnixDriver
         string libgpiodVersion = Marshal.PtrToStringAnsi(libgpiodVersionPtr) ?? string.Empty;
         self.Properties["LibGpiodVersion"] = libgpiodVersion;
         return self;
+    }
+
+    /// <inheritdoc />
+    public override GpioChipInfo GetChipInfo()
+    {
+        return GetAvailableChips().First(x => x.Id == _chipNumber);
     }
 
     /// <inheritdoc/>
