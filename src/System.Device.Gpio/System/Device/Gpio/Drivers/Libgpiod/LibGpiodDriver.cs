@@ -105,8 +105,14 @@ public class LibGpiodDriver : UnixDriver
         var iterator = new SafeChipIteratorHandle(LibgpiodV1.gpiod_chip_iter_new());
         SafeChipHandle chip = new SafeChipHandle();
         int index = 0;
-        while (!(chip = LibgpiodV1.gpiod_chip_iter_next(iterator)).IsInvalid)
+        while (true)
         {
+            chip = LibgpiodV1.gpiod_chip_iter_next(iterator);
+            if (chip.IsInvalid)
+            {
+                break;
+            }
+
             int numLines = LibgpiodV1.gpiod_chip_num_lines(chip);
             string name = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_name(chip)) ?? string.Empty;
             string label = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_label(chip)) ?? string.Empty;
