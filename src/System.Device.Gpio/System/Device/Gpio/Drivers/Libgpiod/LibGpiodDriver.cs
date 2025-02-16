@@ -108,8 +108,8 @@ public class LibGpiodDriver : UnixDriver
         while (!(chip = LibgpiodV1.gpiod_chip_iter_next(iterator)).IsInvalid)
         {
             int numLines = LibgpiodV1.gpiod_chip_num_lines(chip);
-            string name = LibgpiodV1.gpiod_chip_name(chip);
-            string label = LibgpiodV1.gpiod_chip_label(chip);
+            string name = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_name(chip)) ?? string.Empty;
+            string label = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_label(chip)) ?? string.Empty;
             result.Add(new GpioChipInfo(index, name, label, numLines));
             index++;
         }
