@@ -107,7 +107,7 @@ public class LibGpiodDriver : UnixDriver
         int index = 0;
         while (true)
         {
-            chip = LibgpiodV1.gpiod_chip_iter_next(iterator);
+            chip = LibgpiodV1.gpiod_chip_iter_next_noclose(iterator);
             if (chip.IsInvalid)
             {
                 break;
@@ -122,6 +122,8 @@ public class LibGpiodDriver : UnixDriver
                 result.Add(new GpioChipInfo(index, name, label, numLines));
                 index++;
             }
+
+            chip.Dispose();
         }
 
         iterator.Dispose();
