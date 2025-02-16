@@ -60,6 +60,20 @@ internal partial class Interop
         internal static extern void gpiod_chip_iter_free(IntPtr iter);
 
         /// <summary>
+        /// Start an iteration over the list of gpio chips.
+        /// </summary>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern IntPtr gpiod_chip_iter_new();
+
+        /// <summary>
+        /// Iterate over a chip iterator.
+        /// </summary>
+        /// <param name="handle">Handle of a chip iterator</param>
+        /// <returns>The next chip handle or null if at the end of the iteration</returns>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern SafeChipHandle gpiod_chip_iter_next(SafeChipIteratorHandle handle);
+
+        /// <summary>
         /// Close a GPIO chip handle and release all allocated resources.
         /// </summary>
         /// <param name="chip">The GPIO chip pointer</param>
@@ -203,6 +217,12 @@ internal partial class Interop
         /// <returns>Human-readable string containing the library version.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern IntPtr gpiod_version_string();
+
+        [DllImport(LibgpiodLibrary, CharSet = CharSet.Auto)]
+        internal static extern string gpiod_chip_name(SafeChipHandle chip);
+
+        [DllImport(LibgpiodLibrary, CharSet = CharSet.Auto)]
+        internal static extern string gpiod_chip_label(SafeChipHandle chip);
     }
 }
 

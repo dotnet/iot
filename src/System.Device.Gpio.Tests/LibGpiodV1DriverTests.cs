@@ -106,4 +106,32 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
 
         GC.WaitForPendingFinalizers();
     }
+
+    [Fact]
+    public void CheckAllChipsCanBeConstructed()
+    {
+        var chips = LibGpiodDriver.GetAvailableChips();
+        foreach (var c in chips)
+        {
+            Logger.WriteLine(c.ToString());
+        }
+
+        Assert.NotEmpty(chips);
+        if (IsRaspi4())
+        {
+            // 2 real ones and the default 0 entry
+            Assert.Equal(3, chips.Count);
+        }
+
+        foreach (var chip in chips)
+        {
+            var driver = new LibGpiodDriver(chip.Id);
+            var ctrl = new GpioController(driver);
+            Assert.NotNull(ctrl);
+            var driverInfo = driver.GetChipInfo();
+            Assert.NotNull(driverInfo);
+            Assert.Equal(chip, driverInfo);
+            ctrl.Dispose();
+        }
+    }
 }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
-using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -47,19 +46,5 @@ public class SysFsDriverTests : GpioControllerTestBase
             Assert.Equal(chip, driverInfo);
             ctrl.Dispose();
         }
-    }
-
-    private bool IsRaspi4()
-    {
-        if (File.Exists("/proc/device-tree/model"))
-        {
-            string model = File.ReadAllText("/proc/device-tree/model", Text.Encoding.ASCII);
-            if (model.Contains("Raspberry Pi 4") || model.Contains("Raspberry Pi Compute Module 4"))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

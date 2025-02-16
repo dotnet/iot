@@ -25,20 +25,6 @@ public class RaspberryPiDriverTests : GpioControllerTestBase
 
     protected override GpioDriver GetTestDriver() => new RaspberryPi3Driver();
 
-    private bool IsRaspi4()
-    {
-        if (File.Exists("/proc/device-tree/model"))
-        {
-            string model = File.ReadAllText("/proc/device-tree/model", Text.Encoding.ASCII);
-            if (model.Contains("Raspberry Pi 4") || model.Contains("Raspberry Pi Compute Module 4"))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     /// <summary>
     /// Tests for setting the pull up/pull down resistors on the Raspberry Pi (supported on Pi3 and Pi4, but with different techniques)
     /// </summary>

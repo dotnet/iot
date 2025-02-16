@@ -3,6 +3,7 @@
 
 using System.Device.Gpio.Drivers;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -626,4 +627,18 @@ public abstract class GpioControllerTestBase
     }
 
     protected abstract GpioDriver GetTestDriver();
+
+    protected bool IsRaspi4()
+    {
+        if (File.Exists("/proc/device-tree/model"))
+        {
+            string model = File.ReadAllText("/proc/device-tree/model", Text.Encoding.ASCII);
+            if (model.Contains("Raspberry Pi 4") || model.Contains("Raspberry Pi Compute Module 4"))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

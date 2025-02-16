@@ -178,6 +178,6 @@ public abstract class GpioDriver : IDisposable
     /// <exception cref="NotSupportedException">The current driver does not support this data</exception>
     public virtual GpioChipInfo GetChipInfo()
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 }
