@@ -157,7 +157,8 @@ public class SysFsDriver : UnixDriver
 
     private static GpioChipInfo GetChipInfoForName(string name)
     {
-        var idString = name.Substring(0, GpioChip.Length);
+        int idx = name.IndexOf(GpioChip, StringComparison.Ordinal);
+        var idString = name.Substring(idx + GpioChip.Length);
         int id = 0;
         if (!Int32.TryParse(idString, out id))
         {
