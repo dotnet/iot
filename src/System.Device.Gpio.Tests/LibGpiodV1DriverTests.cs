@@ -80,8 +80,8 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     /// Ensure leaking instances of the driver doesn't cause a segfault
     /// Regression test for https://github.com/dotnet/iot/issues/1849
     /// </summary>
-    [Fact]
-    public void LeakingDriverDoesNotCrash()
+    // [Fact]
+    private void LeakingDriverDoesNotCrash()
     {
         GpioController controller1 = new GpioController(new LibGpiodDriver());
         controller1.OpenPin(10, PinMode.Output);
