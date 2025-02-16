@@ -23,6 +23,8 @@ public abstract class GpioControllerTestBase
         _testOutputHelper = testOutputHelper;
     }
 
+    protected ITestOutputHelper Logger => _testOutputHelper;
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

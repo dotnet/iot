@@ -25,6 +25,11 @@ public class SysFsDriverTests : GpioControllerTestBase
     public void CheckAllChipsCanBeConstructed()
     {
         var chips = SysFsDriver.GetAvailableChips();
+        foreach (var c in chips)
+        {
+            Logger.WriteLine(c.ToString());
+        }
+
         Assert.NotEmpty(chips);
         if (IsRaspi4())
         {
