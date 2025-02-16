@@ -19,6 +19,7 @@ internal class SafeChipIteratorHandle : SafeHandle
     protected override bool ReleaseHandle()
     {
         LibgpiodV1.gpiod_chip_iter_free(handle);
+        handle = IntPtr.Zero;
         return true;
     }
 
