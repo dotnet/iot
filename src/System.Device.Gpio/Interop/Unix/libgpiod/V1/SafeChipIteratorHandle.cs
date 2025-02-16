@@ -18,6 +18,7 @@ internal class SafeChipIteratorHandle : SafeHandle
 
     protected override bool ReleaseHandle()
     {
+        // We can't close the chip here, as this would possibly result in it being freed twice, which causes a crash
         LibgpiodV1.gpiod_chip_iter_free_noclose(handle);
         handle = IntPtr.Zero;
         return true;
