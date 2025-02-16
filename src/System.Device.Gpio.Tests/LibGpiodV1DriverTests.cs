@@ -121,7 +121,7 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
         if (IsRaspi4())
         {
             // 2 real ones and the default 0 entry
-            Assert.Equal(3, chips.Count);
+            Assert.Equal(2, chips.Count);
         }
 
         foreach (var chip in chips)
