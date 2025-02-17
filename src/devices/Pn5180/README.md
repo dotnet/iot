@@ -281,6 +281,7 @@ else
     }
 }
 ```
+
 This shows how to read and write ICODE SLIX (ISO 15693) card fully:
 
 ```csharp
