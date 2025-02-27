@@ -6,6 +6,8 @@ using System.Device.Gpio.Libgpiod;
 using System.Device.Gpio.Libgpiod.V2;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -51,6 +53,29 @@ public sealed class LibGpiodV2Driver : UnixDriver
                 return chipInfo.GetNumLines();
             }
         }
+    }
+
+    /// <summary>
+    /// Returns the list of available chips.
+    /// </summary>
+    /// <returns>A list of available chips. Can be used to determine the chipNumber when calling the constructor</returns>
+    public static IList<GpioChipInfo> GetAvailableChips()
+    {
+        var ret = new List<GpioChipInfo>();
+        var files = Directory.GetFiles("/dev", "gpiochip*", SearchOption.TopDirectoryOnly);
+        for (int i = 0; i < files.Length; i++)
+        {
+            string number = files[i].Replace("/dev/gpiochip", string.Empty);
+            if (Int32.TryParse(number, CultureInfo.InvariantCulture, out int chipNumber))
+            {
+                var c = LibGpiodProxyFactory.CreateChip(chipNumber, files[i]);
+                var info = c.GetInfo();
+                ret.Add(new GpioChipInfo(chipNumber, info.GetName(), info.GetLabel(), info.GetNumLines()));
+                c.Dispose();
+            }
+        }
+
+        return ret;
     }
 
     /// <inheritdoc/>
@@ -439,6 +464,13 @@ public sealed class LibGpiodV2Driver : UnixDriver
         _requestedLineByLineOffset[offset] = new RequestedLines(lineConfig, lineConfig.GetSettingsByLine(), lineRequest);
 
         return lineRequest;
+    }
+
+    /// <inheritdoc />
+    public override GpioChipInfo GetChipInfo()
+    {
+        var info = _chip.GetInfo();
+        return new GpioChipInfo(info.ChipNumber, info.GetName(), info.GetLabel(), info.GetNumLines());
     }
 
     #region Dispose
