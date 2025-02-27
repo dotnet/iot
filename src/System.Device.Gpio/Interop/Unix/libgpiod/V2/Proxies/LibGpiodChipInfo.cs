@@ -31,6 +31,8 @@ internal class LibGpiodChipInfo : LibGpiodProxyBase
         _handle = handle;
     }
 
+    public int ChipNumber => _chipNumber;
+
     /// <summary>
     /// Get the name of the chip as represented in the kernel
     /// </summary>
