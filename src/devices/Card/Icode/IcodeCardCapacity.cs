@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Card.Mifare
+namespace Iot.Device.Card.Icode
 {
     /// <summary>
     ///  Different storage capacity for ICODE cards
@@ -37,6 +37,6 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// ICODE 3 TagTamper
         /// </summary>
-        Icode3TagTamper = 2400
+        Icode3TagTamper = Icode3
     }
 }
