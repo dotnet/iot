@@ -35,8 +35,8 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
         Assert.NotEmpty(chips);
         if (IsRaspi4())
         {
-            // 2 real ones and the default 0 entry
-            Assert.Equal(2, chips.Count);
+            // 3 real ones and the default 0 entry
+            Assert.Equal(3, chips.Count);
         }
 
         foreach (var chip in chips)

@@ -120,7 +120,7 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
         Assert.NotEmpty(chips);
         if (IsRaspi4())
         {
-            // 2 real ones and the default 0 entry
+            // 2 entries. Here they're always named 0 and 1
             Assert.Equal(2, chips.Count);
         }
 
