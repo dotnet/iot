@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
-using Iot.Device.Card.Mifare;
 
 namespace Iot.Device.Card.Icode
 {
