@@ -284,7 +284,15 @@ public class LibGpiodDriver : UnixDriver
     }
 
     /// <inheritdoc/>
-    protected internal override void Toggle(int pinNumber) => Write(pinNumber, !_pinValue[pinNumber]);
+    protected internal override void Toggle(int pinNumber)
+    {
+        if (!_pinValue.TryGetValue(pinNumber, out PinValue oldValue))
+        {
+            // If the pin value was never set, we need to read it now
+            oldValue = Read(pinNumber);
+        }
+        Write(pinNumber, !oldValue);
+    }
 
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
