@@ -450,8 +450,9 @@ namespace Iot.Device.Pn5180
                     return -1;
                 }
 
-                // Transfer speed is 26.48kbps and bit encoding is 1/4, about 1.2 ms are needed to transfer 1 byte
-                return ReadWithTimeout(dataFromCard, dataToSend.Length * 6 / 5);
+                // ISO/IEC 15693-3:2001 page 25
+                // waiting time:(302μs) * number of bytes + eof(320.9μs) + 20ms
+                return ReadWithTimeout(dataFromCard, 1 + dataToSend.Length * 3 / 10 + 20);
             }
 
             return TransceiveClassic(targetNumber, dataToSend, dataFromCard);
