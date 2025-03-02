@@ -122,7 +122,7 @@ public class SysFsDriver : UnixDriver
     /// <returns>A list of chips detected</returns>
     public static IList<GpioChipInfo> GetAvailableChips()
     {
-        string[] fileNames = Directory.GetFileSystemEntries($"{GpioBasePath}/{GpioChip}*");
+        string[] fileNames = Directory.GetFileSystemEntries(GpioBasePath, $"{GpioChip}*", SearchOption.TopDirectoryOnly);
         List<GpioChipInfo> list = new List<GpioChipInfo>();
 
         if (fileNames.Length > 0)
