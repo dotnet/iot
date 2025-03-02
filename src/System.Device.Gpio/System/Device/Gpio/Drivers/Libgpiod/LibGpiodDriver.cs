@@ -291,6 +291,7 @@ public class LibGpiodDriver : UnixDriver
             // If the pin value was never set, we need to read it now
             oldValue = Read(pinNumber);
         }
+
         Write(pinNumber, !oldValue);
     }
 
