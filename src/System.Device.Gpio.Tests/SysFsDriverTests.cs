@@ -24,7 +24,7 @@ public class SysFsDriverTests : GpioControllerTestBase
     [Fact]
     public void CheckAllChipsCanBeConstructed()
     {
-        string[] fileNames = Directory.GetFileSystemEntries("/sys/class/gpio", $"gpiochip", SearchOption.TopDirectoryOnly);
+        string[] fileNames = Directory.GetFileSystemEntries("/sys/class/gpio", $"*", SearchOption.TopDirectoryOnly);
         Logger.WriteLine("Content of /sys/class/gpio:");
         foreach (var f in fileNames)
         {
