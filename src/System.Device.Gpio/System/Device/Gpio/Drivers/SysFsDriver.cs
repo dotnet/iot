@@ -122,7 +122,7 @@ public class SysFsDriver : UnixDriver
     /// <returns>A list of chips detected</returns>
     public static IList<GpioChipInfo> GetAvailableChips()
     {
-        string[] fileNames = Directory.GetFileSystemEntries(GpioBasePath);
+        string[] fileNames = Directory.GetFileSystemEntries($"{GpioBasePath}/{GpioChip}*");
         List<GpioChipInfo> list = new List<GpioChipInfo>();
 
         if (fileNames.Length > 0)
@@ -162,7 +162,7 @@ public class SysFsDriver : UnixDriver
         int id = 0;
         if (!Int32.TryParse(idString, out id))
         {
-            throw new InvalidOperationException($"Unable to parse {idString} as number");
+            throw new InvalidOperationException($"Unable to parse {idString} as number (path is {name})");
         }
 
         var label = File.ReadAllText($"{name}{GpioLabel}");
