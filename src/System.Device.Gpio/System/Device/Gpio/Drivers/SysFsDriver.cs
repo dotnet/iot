@@ -130,7 +130,7 @@ public class SysFsDriver : UnixDriver
             // Add the default entry (the first entry, but we name it "0")
             // There's no such actual entry on RPI4, but RPI3 indeed has a file /sys/class/gpio/gpiochip0, in which
             // case that one is the right one to use
-            string nullFile = $"/sys/class/gpio/gpiochip0";
+            string nullFile = Path.Combine(GpioBasePath, "gpiochip0");
             GpioChipInfo temp;
             if (Directory.Exists(nullFile))
             {
