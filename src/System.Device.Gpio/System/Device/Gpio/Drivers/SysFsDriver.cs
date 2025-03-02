@@ -128,7 +128,19 @@ public class SysFsDriver : UnixDriver
         if (fileNames.Length > 0)
         {
             // Add the default entry (the first entry, but we name it "0")
-            var temp = GetChipInfoForName(fileNames.First());
+            // There's no such actual entry on RPI4, but RPI3 indeed has a file /sys/class/gpio/gpiochip0, in which
+            // case that one is the right one to use
+            string nullFile = $"{GpioBasePath}/{GpioChip}0";
+            GpioChipInfo temp;
+            if (File.Exists(nullFile))
+            {
+                temp = GetChipInfoForName(nullFile);
+            }
+            else
+            {
+                temp = GetChipInfoForName(fileNames.First());
+            }
+
             list.Add(temp with
             {
                 Id = 0
