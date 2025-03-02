@@ -130,7 +130,7 @@ public class SysFsDriver : UnixDriver
             // Add the default entry (the first entry, but we name it "0")
             // There's no such actual entry on RPI4, but RPI3 indeed has a file /sys/class/gpio/gpiochip0, in which
             // case that one is the right one to use
-            string nullFile = $"{GpioBasePath}/{GpioChip}0";
+            string nullFile = $"/sys/class/gpio/gpiochip0";
             GpioChipInfo temp;
             if (File.Exists(nullFile))
             {
@@ -177,7 +177,7 @@ public class SysFsDriver : UnixDriver
             throw new InvalidOperationException($"Unable to parse {idString} as number (path is {name})");
         }
 
-        var label = File.ReadAllText($"{name}{GpioLabel}");
+        var label = File.ReadAllText($"{name}{GpioLabel}").Trim();
         var numPins = File.ReadAllText($"{name}{GpioCount}");
         if (!int.TryParse(numPins, out int pins))
         {
