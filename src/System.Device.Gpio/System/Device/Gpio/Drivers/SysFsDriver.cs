@@ -132,7 +132,7 @@ public class SysFsDriver : UnixDriver
             // case that one is the right one to use
             string nullFile = $"/sys/class/gpio/gpiochip0";
             GpioChipInfo temp;
-            if (File.Exists(nullFile))
+            if (Directory.Exists(nullFile))
             {
                 temp = GetChipInfoForName(nullFile);
             }
