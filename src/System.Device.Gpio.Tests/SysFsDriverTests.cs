@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
+using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,7 +24,15 @@ public class SysFsDriverTests : GpioControllerTestBase
     [Fact]
     public void CheckAllChipsCanBeConstructed()
     {
+        string[] fileNames = Directory.GetFileSystemEntries("/sys/class/gpio", $"gpiochip", SearchOption.TopDirectoryOnly);
+        Logger.WriteLine("Content of /sys/class/gpio:");
+        foreach (var f in fileNames)
+        {
+            Logger.WriteLine(f);
+        }
+
         var chips = SysFsDriver.GetAvailableChips();
+        Logger.WriteLine("Available chips:");
         foreach (var c in chips)
         {
             Logger.WriteLine(c.ToString());
