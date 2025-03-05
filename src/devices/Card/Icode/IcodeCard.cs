@@ -124,7 +124,11 @@ namespace Iot.Device.Card.Icode
             byte[] dataOut = new byte[_responseSize];
 
             var ret = _rfid.Transceive(Target, requestData, dataOut.AsSpan(), NfcProtocol.Iso15693);
-            _logger.LogDebug($"{nameof(RunIcodeCardCommand)}: {_command}, Target: {Target}, Data: {BitConverter.ToString(requestData)}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}");
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug($"{nameof(RunIcodeCardCommand)}: {_command}, Target: {Target}, Data: {BitConverter.ToString(requestData)}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}");
+            }
+
             if (ret > 0)
             {
                 Data = dataOut;
