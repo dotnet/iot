@@ -19,6 +19,7 @@ internal class SafeChipHandle : SafeHandle
     protected override bool ReleaseHandle()
     {
         LibgpiodV1.gpiod_chip_close(handle);
+        handle = IntPtr.Zero;
         return true;
     }
 

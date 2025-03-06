@@ -17,16 +17,19 @@ namespace System.Device.Gpio.Libgpiod.V2;
 [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class Chip : LibGpiodProxyBase
 {
+    private readonly int _chipNumber;
     private readonly ChipSafeHandle _handle;
 
     /// <summary>
     /// Constructor for a chip-proxy object. This call will try to open the chip.
     /// </summary>
+    /// <param name="chipNumber">The chip number</param>
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
-    public Chip(ChipSafeHandle handle)
+    public Chip(int chipNumber, ChipSafeHandle handle)
         : base(handle)
     {
+        _chipNumber = chipNumber;
         _handle = handle;
     }
 
@@ -46,7 +49,7 @@ internal class Chip : LibGpiodProxyBase
     /// </summary>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#gad65098ba48da0f22d1b0be149b4cf578"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public ChipInfo GetInfo()
+    public LibGpiodChipInfo GetInfo()
     {
         return CallLibgpiod(() =>
         {
@@ -57,7 +60,7 @@ internal class Chip : LibGpiodProxyBase
                 throw new GpiodException($"Could not get chip info: {LastErr.GetMsg()}");
             }
 
-            return new ChipInfo(chipInfoHandle);
+            return new LibGpiodChipInfo(_chipNumber, chipInfoHandle);
         });
     }
 
@@ -206,40 +209,5 @@ internal class Chip : LibGpiodProxyBase
 
             return new LineRequest(lineRequestHandle);
         });
-    }
-
-    /// <summary>
-    /// Helper function for capturing information and creating an immutable snapshot instance.
-    /// </summary>
-    /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
-    public Snapshot MakeSnapshot()
-    {
-        using var chipInfo = GetInfo();
-        var chipInfoSnapshot = chipInfo.MakeSnapshot();
-        int numLines = chipInfoSnapshot.NumLines;
-        List<LineInfo.Snapshot> lineInfos = new();
-        for (uint offset = 0; offset < numLines; offset++)
-        {
-            using var lineInfo = GetLineInfo(offset);
-            var lineInfoSnapshot = lineInfo.MakeSnapshot();
-            lineInfos.Add(lineInfoSnapshot);
-        }
-
-        return new Snapshot(chipInfoSnapshot, GetPath(), GetFileDescriptor(), lineInfos);
-    }
-
-    /// <summary>
-    /// Contains all readable information that was recorded at one and the same time
-    /// </summary>
-    public sealed record Snapshot(ChipInfo.Snapshot ChipInfo, string Path, int FileDescriptor, IEnumerable<LineInfo.Snapshot> LineInfos)
-    {
-        /// <summary>
-        /// Converts the whole snapshot to string
-        /// </summary>
-        public override string ToString()
-        {
-            return
-                $"{nameof(ChipInfo)}: {ChipInfo}, {nameof(Path)}: {Path}, {nameof(FileDescriptor)}: {FileDescriptor}, {nameof(LineInfos)}: {string.Join("\n", LineInfos)}";
-        }
     }
 }
