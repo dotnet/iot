@@ -78,7 +78,7 @@ public class LibGpiodDriver : UnixDriver
         {
             _pinNumberLock = new object();
             _chipNumber = gpioChip;
-            _chip = LibgpiodV1.gpiod_chip_open_by_number(gpioChip);
+            _chip = new SafeChipHandle(LibgpiodV1.gpiod_chip_open_by_number(gpioChip));
             if (_chip == null || _chip.IsInvalid || _chip.IsClosed)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
