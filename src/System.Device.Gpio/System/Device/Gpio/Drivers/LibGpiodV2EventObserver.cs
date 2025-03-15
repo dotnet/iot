@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Device.Gpio.Drivers.Libgpiod.V2;
+namespace System.Device.Gpio.Drivers;
 
 /// <summary>
 /// Class that observes libgpiod line requests for events.

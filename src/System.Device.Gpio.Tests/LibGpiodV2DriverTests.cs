@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
-using System.Device.Gpio.Drivers.Libgpiod.V2;
+using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Xunit;

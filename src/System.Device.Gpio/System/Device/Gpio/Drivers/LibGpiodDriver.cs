@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
-using System.Device.Gpio.Drivers.Libgpiod.V1;
-using System.Device.Gpio.Drivers.Libgpiod.V2;
 using System.Device.Gpio.Libgpiod.V1;
 using System.Diagnostics;
 using System.Linq;
@@ -27,7 +25,7 @@ public class LibGpiodDriver : UnixDriver
     private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
     private readonly object _pinNumberLock;
     private readonly ConcurrentDictionary<int, LineHandle> _pinNumberToSafeLineHandle;
-    private readonly ConcurrentDictionary<int, LibGpiodV1DriverEventHandler> _pinNumberToEventHandler;
+    private readonly ConcurrentDictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler;
     private readonly int _pinCount;
     private readonly ConcurrentDictionary<int, PinValue> _pinValue;
     private SafeChipHandle _chip;
@@ -85,7 +83,7 @@ public class LibGpiodDriver : UnixDriver
             }
 
             _pinCount = LibgpiodV1.gpiod_chip_num_lines(_chip);
-            _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodV1DriverEventHandler>();
+            _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodDriverEventHandler>();
             _pinNumberToSafeLineHandle = new ConcurrentDictionary<int, LineHandle>();
             _pinValue = new ConcurrentDictionary<int, PinValue>();
         }
@@ -134,7 +132,7 @@ public class LibGpiodDriver : UnixDriver
     {
         if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
         {
-            LibGpiodV1DriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+            LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
             if ((eventTypes & PinEventTypes.Rising) != 0)
             {
@@ -152,7 +150,7 @@ public class LibGpiodDriver : UnixDriver
         }
     }
 
-    private LibGpiodV1DriverEventHandler PopulateEventHandler(int pinNumber)
+    private LibGpiodDriverEventHandler PopulateEventHandler(int pinNumber)
     {
         lock (_pinNumberLock)
         {
@@ -165,7 +163,7 @@ public class LibGpiodDriver : UnixDriver
                 _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
             }
 
-            return new LibGpiodV1DriverEventHandler(pinNumber, pinHandle!);
+            return new LibGpiodDriverEventHandler(pinNumber, pinHandle!);
         }
     }
 
@@ -297,7 +295,7 @@ public class LibGpiodDriver : UnixDriver
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
     {
-        if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodV1DriverEventHandler? eventHandler))
+        if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodDriverEventHandler? eventHandler))
         {
             eventHandler.ValueFalling -= callback;
             eventHandler.ValueRising -= callback;
@@ -383,7 +381,7 @@ public class LibGpiodDriver : UnixDriver
     {
         if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
         {
-            LibGpiodV1DriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+            LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
             if ((eventTypes & PinEventTypes.Rising) != 0)
             {
@@ -460,9 +458,9 @@ public class LibGpiodDriver : UnixDriver
     {
         if (_pinNumberToEventHandler != null)
         {
-            foreach (KeyValuePair<int, LibGpiodV1DriverEventHandler> kv in _pinNumberToEventHandler)
+            foreach (KeyValuePair<int, LibGpiodDriverEventHandler> kv in _pinNumberToEventHandler)
             {
-                LibGpiodV1DriverEventHandler eventHandler = kv.Value;
+                LibGpiodDriverEventHandler eventHandler = kv.Value;
                 eventHandler.Dispose();
             }
 
