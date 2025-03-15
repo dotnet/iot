@@ -11,15 +11,15 @@ namespace System.Device.Gpio.Libgpiod.V1;
 /// </summary>
 internal class SafeChipHandle : SafeHandle
 {
-    public SafeChipHandle()
-        : base(IntPtr.Zero, true)
+    public SafeChipHandle(IntPtr h)
+        : base(h, true)
     {
     }
 
     protected override bool ReleaseHandle()
     {
         LibgpiodV1.gpiod_chip_close(handle);
-        handle = IntPtr.Zero;
+        SetHandle(IntPtr.Zero);
         return true;
     }
 

@@ -53,13 +53,6 @@ internal partial class Interop
         }
 
         /// <summary>
-        /// Release all resources allocated for the gpiochip iterator and close the most recently opened gpiochip(if any).
-        /// </summary>
-        /// <param name="iter">The gpiochip iterator object</param>
-        [DllImport(LibgpiodLibrary)]
-        internal static extern void gpiod_chip_iter_free(IntPtr iter);
-
-        /// <summary>
         /// Release all resources allocated for the gpiochip iterator but does not close the most recently opened gpiochip
         /// </summary>
         /// <param name="iter">The gpiochip iterator object</param>
@@ -73,20 +66,12 @@ internal partial class Interop
         internal static extern IntPtr gpiod_chip_iter_new();
 
         /// <summary>
-        /// Iterate over a chip iterator. Closes the previous chip.
-        /// </summary>
-        /// <param name="handle">Handle of a chip iterator</param>
-        /// <returns>The next chip handle or null if at the end of the iteration</returns>
-        [DllImport(LibgpiodLibrary)]
-        internal static extern SafeChipHandle gpiod_chip_iter_next(SafeChipIteratorHandle handle);
-
-        /// <summary>
         /// Iterate over a chip iterator. Does not close any previously opened chips.
         /// </summary>
         /// <param name="handle">Handle of a chip iterator</param>
         /// <returns>The next chip handle or null if at the end of the iteration</returns>
         [DllImport(LibgpiodLibrary)]
-        internal static extern SafeChipHandle gpiod_chip_iter_next_noclose(SafeChipIteratorHandle handle);
+        internal static extern IntPtr gpiod_chip_iter_next_noclose(SafeChipIteratorHandle handle);
 
         /// <summary>
         /// Close a GPIO chip handle and release all allocated resources.

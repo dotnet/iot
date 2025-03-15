@@ -103,11 +103,10 @@ public class LibGpiodDriver : UnixDriver
     {
         List<GpioChipInfo> result = new List<GpioChipInfo>();
         var iterator = new SafeChipIteratorHandle(LibgpiodV1.gpiod_chip_iter_new());
-        SafeChipHandle chip = new SafeChipHandle();
         int index = 0;
         while (true)
         {
-            chip = LibgpiodV1.gpiod_chip_iter_next_noclose(iterator);
+            SafeChipHandle chip = new SafeChipHandle(LibgpiodV1.gpiod_chip_iter_next_noclose(iterator));
             if (chip.IsInvalid)
             {
                 break;
