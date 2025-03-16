@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Buffers.Binary;
-using System.Device.Gpio.Drivers.Libgpiod;
-using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;

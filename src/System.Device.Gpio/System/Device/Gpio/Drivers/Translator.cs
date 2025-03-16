@@ -94,8 +94,8 @@ internal static class Translator
             return false;
         }
 
-        return pinEventTypes == PinEventTypes.Rising && presentEdgeDetection == GpiodLineEdge.Rising ||
-            pinEventTypes == PinEventTypes.Falling && presentEdgeDetection == GpiodLineEdge.Falling;
+        return (pinEventTypes == PinEventTypes.Rising && presentEdgeDetection == GpiodLineEdge.Rising) ||
+            (pinEventTypes == PinEventTypes.Falling && presentEdgeDetection == GpiodLineEdge.Falling);
     }
 
     public static PinEventTypes Translate(GpiodEdgeEventType gpiodEdgeEventType)

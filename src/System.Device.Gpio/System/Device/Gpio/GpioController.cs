@@ -4,7 +4,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Device.Gpio.Drivers;
-using System.Device.Gpio.Drivers.Libgpiod;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
