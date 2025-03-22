@@ -8,6 +8,8 @@ using System.Collections.Concurrent;
 using System.Device.Gpio.Libgpiod.V1;
 using System.Diagnostics;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
+
 using LibgpiodV1 = Interop.LibgpiodV1;
 
 namespace System.Device.Gpio.Drivers;
@@ -94,9 +96,20 @@ public class LibGpiodDriver : UnixDriver
     }
 
     /// <summary>
+    /// Construct an instance of this driver with the provided chip.
+    /// </summary>
+    /// <param name="chip">The chip to use. Should be one of the elements returned by <see cref="GetAvailableChips"/></param>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public LibGpiodDriver(GpioChipInfo chip)
+        : this(chip.Id)
+    {
+    }
+
+    /// <summary>
     /// Returns the set of available chips for this driver
     /// </summary>
     /// <returns>A list of <see cref="GpioChipInfo"/> instances</returns>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public static IList<GpioChipInfo> GetAvailableChips()
     {
         List<GpioChipInfo> result = new List<GpioChipInfo>();
@@ -448,6 +461,7 @@ public class LibGpiodDriver : UnixDriver
     }
 
     /// <inheritdoc />
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public override GpioChipInfo GetChipInfo()
     {
         return GetAvailableChips().First(x => x.Id == _chipNumber);

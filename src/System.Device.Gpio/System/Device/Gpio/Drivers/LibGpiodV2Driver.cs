@@ -36,11 +36,20 @@ public sealed class LibGpiodV2Driver : UnixDriver
     /// Creates a driver instance for the specified GPIO chip.
     /// </summary>
     /// <param name="chipNumber">Chip number to use.</param>
-    /// <param name="waitEdgeEventsTimeout">Timeout to wait for edge events. Primarily used for testing.</param>
-    public LibGpiodV2Driver(int chipNumber, TimeSpan? waitEdgeEventsTimeout = null)
+    public LibGpiodV2Driver(int chipNumber)
     {
         _chip = LibGpiodProxyFactory.CreateChip(chipNumber);
-        _eventObserver = new LibGpiodV2EventObserver { WaitEdgeEventsTimeout = waitEdgeEventsTimeout ?? TimeSpan.FromMilliseconds(100) };
+        _eventObserver = new LibGpiodV2EventObserver { WaitEdgeEventsTimeout = TimeSpan.FromMilliseconds(100) };
+    }
+
+    /// <summary>
+    /// Construct an instance of this driver with the provided chip.
+    /// </summary>
+    /// <param name="chip">The chip to use. Should be one of the elements returned by <see cref="GetAvailableChips"/></param>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public LibGpiodV2Driver(GpioChipInfo chip)
+        : this(chip.Id)
+    {
     }
 
     /// <inheritdoc/>

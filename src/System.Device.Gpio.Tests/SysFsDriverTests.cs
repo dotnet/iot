@@ -6,6 +6,7 @@ using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
+#pragma warning disable SDGPIO0001
 namespace System.Device.Gpio.Tests;
 
 [Trait("requirement", "root")]
@@ -47,7 +48,7 @@ public class SysFsDriverTests : GpioControllerTestBase
 
         foreach (var chip in chips)
         {
-            var driver = new SysFsDriver(chip.Id);
+            var driver = new SysFsDriver(chip);
             var ctrl = new GpioController(driver);
             Assert.NotNull(ctrl);
             var driverInfo = driver.GetChipInfo();

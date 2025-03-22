@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -86,9 +87,10 @@ public class SysFsDriver : UnixDriver
     /// <summary>
     /// Creates a SysFsDriver instance for the provided chip number
     /// </summary>
-    /// <param name="chip">The chip number to select (use <see cref="GetAvailableChips"/> to query the list of available values)</param>
+    /// <param name="chip">The chip to select (use <see cref="GetAvailableChips"/> to query the list of available values)</param>
     /// <exception cref="PlatformNotSupportedException"></exception>
-    public SysFsDriver(int chip)
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public SysFsDriver(GpioChipInfo chip)
     {
         if (Environment.OSVersion.Platform != PlatformID.Unix)
         {
@@ -96,8 +98,8 @@ public class SysFsDriver : UnixDriver
         }
 
         _isDisposed = false;
-        _chipNumber = chip;
-        _pinOffset = ReadOffset(chip);
+        _chipNumber = chip.Id;
+        _pinOffset = ReadOffset(chip.Id);
     }
 
     /// <summary>
@@ -120,6 +122,7 @@ public class SysFsDriver : UnixDriver
     /// This can be used to determine the correct gpio chip for constructor calls to <see cref="LibGpiodDriver"/>
     /// </summary>
     /// <returns>A list of chips detected</returns>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public static IList<GpioChipInfo> GetAvailableChips()
     {
         string[] fileNames = Directory.GetFileSystemEntries(GpioBasePath, $"{GpioChip}*", SearchOption.TopDirectoryOnly);
@@ -167,6 +170,7 @@ public class SysFsDriver : UnixDriver
         return list;
     }
 
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     private static GpioChipInfo GetChipInfoForName(string name)
     {
         int idx = name.IndexOf(GpioChip, StringComparison.Ordinal);
@@ -701,6 +705,7 @@ public class SysFsDriver : UnixDriver
     }
 
     /// <inheritdoc />
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public override GpioChipInfo GetChipInfo()
     {
         return GetAvailableChips().First(x => x.Id == _chipNumber);
