@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using static Interop;
 
 namespace System.Device.Gpio.Drivers;
 
@@ -894,5 +895,15 @@ public class SysFsDriver : UnixDriver
         {
             throw new InvalidOperationException("There was an attempt to get a mode to a pin that is not open.");
         }
+    }
+
+    /// <inheritdoc />
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "SysFsDriver");
+#pragma warning disable SDGPIO0001
+        self.Properties["ChipInfo"] = GetChipInfo().ToString();
+#pragma warning restore SDGPIO0001
+        return self;
     }
 }

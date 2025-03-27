@@ -457,6 +457,9 @@ public class LibGpiodDriver : UnixDriver
         IntPtr libgpiodVersionPtr = LibgpiodV1.gpiod_version_string();
         string libgpiodVersion = Marshal.PtrToStringAnsi(libgpiodVersionPtr) ?? string.Empty;
         self.Properties["LibGpiodVersion"] = libgpiodVersion;
+#pragma warning disable SDGPIO0001
+        self.Properties["ChipInfo"] = GetChipInfo().ToString();
+#pragma warning restore SDGPIO0001
         return self;
     }
 
