@@ -46,7 +46,6 @@ public sealed class LibGpiodV2Driver : UnixDriver
     /// Construct an instance of this driver with the provided chip.
     /// </summary>
     /// <param name="chip">The chip to use. Should be one of the elements returned by <see cref="GetAvailableChips"/></param>
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public LibGpiodV2Driver(GpioChipInfo chip)
         : this(chip.Id)
     {

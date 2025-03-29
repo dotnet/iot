@@ -900,7 +900,7 @@ public class SysFsDriver : UnixDriver
     /// <inheritdoc />
     public override ComponentInformation QueryComponentInformation()
     {
-        var self = new ComponentInformation(this, "SysFsDriver");
+        var self = new ComponentInformation(this, nameof(SysFsDriver));
 #pragma warning disable SDGPIO0001
         self.Properties["ChipInfo"] = GetChipInfo().ToString();
 #pragma warning restore SDGPIO0001
