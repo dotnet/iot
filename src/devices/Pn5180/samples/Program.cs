@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Iot.Device.Card.CreditCardProcessing;
+using Iot.Device.Card.Icode;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Card.Ultralight;
 using Iot.Device.Ft4222;
@@ -51,6 +53,7 @@ Console.WriteLine($"4 Radio Frequency operations");
 Console.WriteLine($"5 Pull ISO 14443 Type A and B cards, display information");
 Console.WriteLine($"6 Pull ISO 14443 B cards, display information");
 Console.WriteLine($"7 dump Ultralight card and various tests");
+Console.WriteLine($"8 Pull ISO 15693 cards, display information");
 choice = Console.ReadKey().KeyChar;
 Console.WriteLine();
 Console.WriteLine();
@@ -82,6 +85,10 @@ else if (choice == '6')
 else if (choice == '7')
 {
     ProcessUltralight();
+}
+else if (choice == '8')
+{
+    ICode();
 }
 else
 {
@@ -588,5 +595,53 @@ void ProcessUltralight()
     else
     {
         Console.WriteLine("Error writing NDEF data on card");
+    }
+}
+
+void ICode()
+{
+    Console.WriteLine();
+    // Poll the data for 20 seconds
+    if (pn5180.ListenToCardIso15693(TransmitterRadioFrequencyConfiguration.Iso15693_ASK100_26, ReceiverRadioFrequencyConfiguration.Iso15693_26, out IList<Data26_53kbps>? cards, 20000))
+    {
+        pn5180.ResetPN5180Configuration(TransmitterRadioFrequencyConfiguration.Iso15693_ASK100_26, ReceiverRadioFrequencyConfiguration.Iso15693_26);
+        foreach (Data26_53kbps card in cards)
+        {
+            Console.WriteLine($"Target number: {card.TargetNumber}");
+            Console.WriteLine($"UID: {BitConverter.ToString(card.NfcId)}");
+            Console.WriteLine($"DSFID: {card.Dsfid}");
+            if (card.NfcId[6] == 0x04)
+            {
+                IcodeCard icodeCard = new IcodeCard(pn5180, card.TargetNumber)
+                {
+                    Uid = card.NfcId,
+                    Capacity = IcodeCardCapacity.IcodeSlix,
+                };
+
+                icodeCard.GetSystemInformation();
+                Console.WriteLine($"SystemInfo data is :{BitConverter.ToString(icodeCard.Data)}");
+                icodeCard.Data = new byte[] { 0x1c, 0x1b, 0x1b, 0x1b };
+                // icodeCard.LockBlock(27);
+                icodeCard.WriteSingleBlock(2);
+                Console.WriteLine($"write data response is :{BitConverter.ToString(icodeCard.Data)}");
+                icodeCard.ReadMultipleBlocks(0, 3);
+                Console.WriteLine($"block 0~3 data is :{BitConverter.ToString(icodeCard.Data)}");
+                for (byte i = 0; i < 28; i++)
+                {
+                    if (icodeCard.ReadSingleBlock(i))
+                    {
+                        Console.WriteLine($"Block {i} data is :{BitConverter.ToString(icodeCard.Data)}");
+                    }
+                    else
+                    {
+                        icodeCard.Data = new byte[] { };
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Only Icode cards are supported");
+            }
+        }
     }
 }

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(DefaultTestTfms)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net48</TargetFrameworks>
     <LangVersion>9</LangVersion>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>

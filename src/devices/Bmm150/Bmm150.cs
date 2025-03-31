@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Threading;
+using UnitsNet;
 
 namespace Iot.Device.Bmp180
 {
@@ -133,67 +134,6 @@ namespace Iot.Device.Bmp180
         }
 
         /// <summary>
-        /// Get the device information
-        /// </summary>
-        /// <returns>The device information</returns>
-        public byte GetDeviceInfo() => ReadByte(Bmp180Register.INFO);
-
-        /// <summary>
-        /// Calibrate the magnetometer.
-        /// Please make sure you are not close to any magnetic field like magnet or phone
-        /// Please make sure you are moving the magnetometer all over space, rotating it.
-        /// </summary>
-        /// <param name="numberOfMeasurements">Number of measurement for the calibration, default is 100</param>
-        // https://platformio.org/lib/show/12697/M5_BMM150
-        public void CalibrateMagnetometer(int numberOfMeasurements = 100)
-        {
-            Vector3 mag_min = new Vector3() { X = 9000, Y = 9000, Z = 30000 };
-            Vector3 mag_max = new Vector3() { X = -9000, Y = -9000, Z = -30000 };
-            Vector3 rawMagnetometerData;
-
-            for (int i = 0; i < numberOfMeasurements; i++)
-            {
-                try
-                {
-                    rawMagnetometerData = ReadMagnetometerWithoutCorrection();
-
-                    if (rawMagnetometerData.X != 0)
-                    {
-                        mag_min.X = (rawMagnetometerData.X < mag_min.X) ? rawMagnetometerData.X : mag_min.X;
-                        mag_max.X = (rawMagnetometerData.X > mag_max.X) ? rawMagnetometerData.X : mag_max.X;
-                    }
-
-                    if (rawMagnetometerData.Y != 0)
-                    {
-                        mag_max.Y = (rawMagnetometerData.Y > mag_max.Y) ? rawMagnetometerData.Y : mag_max.Y;
-                        mag_min.Y = (rawMagnetometerData.Y < mag_min.Y) ? rawMagnetometerData.Y : mag_min.Y;
-                    }
-
-                    if (rawMagnetometerData.Z != 0)
-                    {
-                        mag_min.Z = (rawMagnetometerData.Z < mag_min.Z) ? rawMagnetometerData.Z : mag_min.Z;
-                        mag_max.Z = (rawMagnetometerData.Z > mag_max.Z) ? rawMagnetometerData.Z : mag_max.Z;
-                    }
-
-                    // Wait for 100ms until next reading
-                    Wait(100);
-                }
-                catch
-                {
-                    // skip this reading
-                }
-            }
-
-            // Refresh CalibrationCompensation vector
-            CalibrationCompensation = new Vector3()
-            {
-                X = (mag_max.X + mag_min.X) / 2,
-                Y = (mag_max.Y + mag_min.Y) / 2,
-                Z = (mag_max.Z + mag_min.Z) / 2
-            };
-        }
-
-        /// <summary>
         /// True if there is a data to read
         /// </summary>
         public bool HasDataToRead => (ReadByte(Bmp180Register.DATA_READY_STATUS) & 0x01) == 0x01;
@@ -239,28 +179,41 @@ namespace Iot.Device.Bmp180
 
             Vector3 magnetoRaw = new Vector3();
 
-            // Shift the MSB data to left by 5 bits
-            // Multiply by 32 to get the shift left by 5 value
-            magnetoRaw.X = (rawData[1] & 0x7F) << 5 | rawData[0] >> 3;
-            if ((rawData[1] & 0x80) == 0x80)
+            // Because we mix and match signed and unsigned below
+            unchecked
             {
-                magnetoRaw.X = -magnetoRaw.X;
-            }
+                int temp;
+                // Shift the MSB data to left by 5 bits
+                // Multiply by 32 to get the shift left by 5 value
+                // X and Y have 13 significant bits each
+                temp = (rawData[1]) << 5 | rawData[0] >> 3;
+                if ((rawData[1] & 0x80) == 0x80)
+                {
+                    temp = temp | (int)0xFFFFE000;
+                }
 
-            // Shift the MSB data to left by 5 bits
-            // Multiply by 32 to get the shift left by 5 value
-            magnetoRaw.Y = (rawData[3] & 0x07F) << 5 | rawData[2] >> 3;
-            if ((rawData[3] & 0x80) == 0x80)
-            {
-                magnetoRaw.Y = -magnetoRaw.Y;
-            }
+                magnetoRaw.X = temp;
 
-            // Shift the MSB data to left by 7 bits
-            // Multiply by 128 to get the shift left by 7 value
-            magnetoRaw.Z = (rawData[5] & 0x07F) << 7 | rawData[4] >> 1;
-            if ((rawData[5] & 0x80) == 0x80)
-            {
-                magnetoRaw.Z = -magnetoRaw.Z;
+                // Shift the MSB data to left by 5 bits
+                // Multiply by 32 to get the shift left by 5 value
+                temp = (rawData[3]) << 5 | rawData[2] >> 3;
+                if ((rawData[3] & 0x80) == 0x80)
+                {
+                    temp = temp | (int)0xFFFFE000;
+                }
+
+                magnetoRaw.Y = temp;
+
+                // Shift the MSB data to left by 7 bits
+                // Multiply by 128 to get the shift left by 7 value
+                // The Z value has 15 significant bits
+                temp = (rawData[5]) << 7 | rawData[4] >> 1;
+                if ((rawData[5] & 0x80) == 0x80)
+                {
+                    temp = temp | (int)0xFFFF8000;
+                }
+
+                magnetoRaw.Z = temp;
             }
 
             _rHall = (uint)(rawData[7] << 6 | rawData[6] >> 2);
@@ -274,7 +227,7 @@ namespace Iot.Device.Bmp180
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
         [Telemetry("Magnetometer")]
-        public Vector3 ReadMagnetometer(bool waitForData = true) => ReadMagnetometer(waitForData, DefaultTimeout);
+        public MagnetometerData ReadMagnetometer(bool waitForData = true) => ReadMagnetometer(waitForData, DefaultTimeout);
 
         /// <summary>
         /// Read the magnetometer with compensation calculation and can wait for new data to be present
@@ -282,15 +235,16 @@ namespace Iot.Device.Bmp180
         /// <param name="waitForData">true to wait for new data</param>
         /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout)
+        public MagnetometerData ReadMagnetometer(bool waitForData, TimeSpan timeout)
         {
             var magn = ReadMagnetometerWithoutCorrection(waitForData, timeout);
 
-            magn.X = (float)Bmm150Compensation.CompensateX(magn.X - CalibrationCompensation.X, _rHall, _trimData);
-            magn.Y = (float)Bmm150Compensation.CompensateY(magn.Y - CalibrationCompensation.Y, _rHall, _trimData);
-            magn.Z = (float)Bmm150Compensation.CompensateZ(magn.Z - CalibrationCompensation.Z, _rHall, _trimData);
+            MagnetometerData ret = new MagnetometerData(
+                MagneticField.FromMicroteslas(Bmm150Compensation.CompensateX((int)magn.X, _rHall, _trimData) - CalibrationCompensation.X),
+                MagneticField.FromMicroteslas(Bmm150Compensation.CompensateY((int)magn.Y, _rHall, _trimData) - CalibrationCompensation.Y),
+                MagneticField.FromMicroteslas(Bmm150Compensation.CompensateZ((int)magn.Z, _rHall, _trimData) - CalibrationCompensation.Z));
 
-            return magn;
+            return ret;
         }
 
         private void WriteRegister(Bmp180Register reg, byte data) => _bmm150Interface.WriteRegister(_i2cDevice, (byte)reg, data);

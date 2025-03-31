@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <LangVersion>10</LangVersion>
     <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);BUILDING_IOT_DEVICE_BINDINGS</DefineConstants>
@@ -40,9 +40,6 @@
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
     <!-- This package is only used for windows specific stuff. -->
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
-  </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../devices/CharacterLcd/BigFontMap.txt" />

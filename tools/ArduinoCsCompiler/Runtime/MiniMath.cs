@@ -80,5 +80,18 @@ namespace ArduinoCsCompiler.Runtime
         {
             return Math.Abs(d);
         }
+
+        [ArduinoImplementation]
+        public static double Truncate(double d)
+        {
+            if (d > 0)
+            {
+                return Floor(d);
+            }
+            else
+            {
+                return Ceiling(d);
+            }
+        }
     }
 }

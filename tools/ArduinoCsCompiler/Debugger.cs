@@ -136,7 +136,7 @@ Use -1 to allow breaking on all threads.")
                 return;
             }
 
-            var methods = _set.Methods().Where(x => x.Name.Contains(args[1])).ToList();
+            var methods = _set.Methods().Values.Where(x => x.Name.Contains(args[1])).ToList();
             if (methods.Count == 0)
             {
                 Console.WriteLine($"No method matches the search string {args[1]}");

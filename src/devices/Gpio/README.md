@@ -1,4 +1,4 @@
-# GpioDriver for other boards
+# GpioDriver for other boards and virtual GpioController and virtual GpioPin
 
 This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO drivers, and it can provide faster GPIO access.
 
@@ -6,6 +6,26 @@ This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO dr
 
 * For Allwinner SoCs: [SunxiDriver](Drivers/Sunxi/README.md)
 * For Rockchip SoCs: [RockchipDriver](Drivers/Rockchip/README.md)
+
+## Usage of virtual GpioController and virtual GpioPin
+
+When you have multiple GpioControllers and want to use them together in a specific binding, the `VirtualGpioController` allows to create a GpioController from a set of `GpioPin`s already open from different controllers. Usage is straight forward and the class is fully compatible with a normal `GpioController`.
+
+```csharp
+// Create pins from 2 different GpioControllers
+var pinFromA = gpioControllerA.Open(42, PinMode.Output);
+var pinFromB = gpioControllerB.Open(24, PinMode.Input);
+var pinFromC = gpioControllerC.Open(12, PinMode.Input);
+VirtualGpioController gpio = new();
+// pin number will be 0 in this case
+gpio.Add(pinFromA);
+// pin number will be 12 in this case
+gpio.Add(12, pinFromB);
+// the pin number will be 13 in this case
+gpio.Add(pinFromC);
+```
+
+When adding an existing GpioPin, by default, the new pin allocation will directly follow the higher pin number already existing. You can also use this method to change the numbering of your board. Note that the VirtualGpioController is only operating in the logical numbering.
 
 ## Board specific drivers
 

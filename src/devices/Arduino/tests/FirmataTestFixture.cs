@@ -27,7 +27,7 @@ namespace Iot.Device.Arduino.Tests
                 var loggerFactory = LoggerFactory.Create(builder =>
                 {
                     builder.AddProvider(new DebuggerOutputLoggerProvider())
-                        .SetMinimumLevel(LogLevel.Trace);
+                        .SetMinimumLevel(LogLevel.Debug);
                 });
 
                 // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.

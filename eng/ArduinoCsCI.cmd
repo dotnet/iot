@@ -5,7 +5,7 @@ REM Second argument is either "Debug" or "Release"
 if %1!==! goto :usage
 
 REM Defines the revision to check out in the ExtendedConfigurableFirmata repo
-set FIRMATA_SIMULATOR_CHECKOUT_REVISION=18ef6b3a890b34904904663fb2cece9141600849
+set FIRMATA_SIMULATOR_CHECKOUT_REVISION=a354343cebc35964450dfa01dba2cd996065fd5c
 set RUN_COMPILER_TESTS=FALSE
 
 choco install -y --no-progress arduino-cli
@@ -20,9 +20,9 @@ REM directly execute PS, we can ignore any test errors.
 powershell -ExecutionPolicy ByPass -command "%~dp0common\Build.ps1" -restore -build -ci -configuration %2 -preparemachine
 
 set ArduinoRootDir=%1\Documents\Arduino
-set acspath=%~dp0\..\artifacts\bin\Frontend\%2\net6.0\acs.exe
+set acspath=%~dp0\..\artifacts\bin\Frontend\%2\net8.0\acs.exe
 
-git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\libraries\ConfigurableFirmata --branch BuildIssueEsp
+git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\libraries\ConfigurableFirmata
 git clone https://github.com/pgrawehr/ExtendedConfigurableFirmata %ArduinoRootDir%\ExtendedConfigurableFirmata
 arduino-cli core install esp32:esp32
 
@@ -77,7 +77,7 @@ if errorlevel 1 goto error
 echo on
 echo Run full compiler against simple example
 REM The current directory is tools/ArduinoCsCompiler
-%acspath% compile --run %~dp0\..\artifacts\bin\BlinkingLed\%2\net6.0\BlinkingLed.exe --network localhost --mapfile BlinkingLed-tokenmap.txt
+%acspath% compile --run %~dp0\..\artifacts\bin\BlinkingLed\%2\net8.0\BlinkingLed.exe --network localhost --mapfile BlinkingLed-tokenmap.txt
 if errorlevel 1 goto error
 
 REM copy token map to output (so we have something to compare the history of sizes, if something changes unexpectedly)

@@ -73,12 +73,12 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// BLahafasel
+        /// List of NMEA sentences used to perform the calibration.
         /// </summary>
         public List<NmeaSentence> SentencesUsed => _interestingSentences;
 
         /// <summary>
-        /// Tries to calculate a correction from the given recorded file.
+        /// Tries to calculate a correction from the given recorded NMEA logfile.
         /// The recorded file should contain a data set where the vessel is turning two slow circles, one with the clock and one against the clock,
         /// in calm conditions and with no current.
         /// </summary>
@@ -100,7 +100,7 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Tries to calculate a correction from the given recorded files, indicating the timespan where the calibration loops were performed.
+        /// Tries to calculate a correction from the given recorded files, indicating the timespan when the calibration loops were performed.
         /// The recorded file should contain a data set where the vessel is turning two slow circles, one with the clock and one against the clock,
         /// in calm conditions and with no current.
         /// </summary>
@@ -126,7 +126,7 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// Tries to calculate a correction from the given recorded file strems, indicating the timespan where the calibration loops were performed.
         /// The recorded file should contain a data set where the vessel is turning two slow circles, one with the clock and one against the clock,
-        /// in calm conditions and with no current.
+        /// in calm conditions and with no current. RMC and HDM messages must be available for this timespan.
         /// </summary>
         /// <param name="fileSet">The recorded nmea files (from a logged session)</param>
         /// <param name="beginCalibration">The start time of the calibration loops</param>

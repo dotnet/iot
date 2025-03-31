@@ -741,12 +741,19 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
-            Span<byte> rawData = stackalloc byte[512];
-
-            int bytesRead = _firmataStream.Read(rawData);
-            for (int i = 0; i < bytesRead; i++)
+            try
             {
-                _dataQueue.Enqueue(rawData[i]);
+                Span<byte> rawData = stackalloc byte[512];
+
+                int bytesRead = _firmataStream.Read(rawData);
+                for (int i = 0; i < bytesRead; i++)
+                {
+                    _dataQueue.Enqueue(rawData[i]);
+                }
+            }
+            catch (TimeoutException x)
+            {
+                _logger.LogWarning(x, "Input stream reported timeout - likely and incorrectly configured driver and thus ignoring.");
             }
 
             return _dataQueue.Count > 0;

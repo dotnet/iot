@@ -18,7 +18,7 @@ namespace ArduinoCsCompiler
             Name = name;
         }
 
-        public ClassMember(FieldInfo field, VariableKind variableType, int token, int sizeOfField, int offset, int staticFieldSize)
+        public ClassMember(FieldInfo field, VariableKind variableType, int token, int sizeOfField, int staticFieldSize)
         {
             VariableType = variableType;
             Token = token;

@@ -33,6 +33,11 @@ namespace Iot.Device.Gui.Tests
                 {
                     _testOutputHelper.WriteLine($"Cannot run test, because libX11.so is missing: {x}");
                 }
+                catch (NotSupportedException y)
+                {
+                    // This exception is thrown e.g. when no display is available
+                    _testOutputHelper.WriteLine($"Cannot run test: {y}");
+                }
             }
             else if (os.Platform == PlatformID.Win32NT)
             {
@@ -47,8 +52,8 @@ namespace Iot.Device.Gui.Tests
         private static void DoRunTest()
         {
             SkiaSharpAdapter.Register();
-            var screenCapture = new ScreenCapture();
             var os = Environment.OSVersion;
+            var screenCapture = new ScreenCapture();
             if (os.Platform == PlatformID.Win32NT || os.Platform == PlatformID.Unix)
             {
                 var size = screenCapture.ScreenSize();

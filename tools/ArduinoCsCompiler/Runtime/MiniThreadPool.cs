@@ -9,10 +9,13 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(ThreadPool), IncludingPrivates = true)]
     internal sealed class MiniThreadPool
     {
-        [ArduinoImplementation]
-        public static bool GetEnableWorkerTracking()
+        public static bool UseWindowsThreadPool
         {
-            return false;
+            [ArduinoImplementation]
+            get
+            {
+                return false;
+            }
         }
 
         /// <summary>

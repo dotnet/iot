@@ -13,6 +13,7 @@ using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Card;
 using Iot.Device.Card.Mifare;
+using Iot.Device.Card.Icode;
 using Iot.Device.Common;
 using Iot.Device.Rfid;
 using Microsoft.Extensions.Logging;
@@ -440,6 +441,18 @@ namespace Iot.Device.Pn5180
                     default:
                         return TransceiveBuffer(dataToSend, dataFromCard);
                 }
+            }
+            else if (protocol == NfcProtocol.Iso15693)
+            {
+                var ret = SendDataToCard(dataToSend.ToArray());
+                if (!ret)
+                {
+                    return -1;
+                }
+
+                // ISO/IEC 15693-3:2001 page 25
+                // waiting time:(302μs) * number of bytes + eof(320.9μs) + 20ms
+                return ReadWithTimeout(dataFromCard, 1 + dataToSend.Length * 3 / 10 + 20);
             }
 
             return TransceiveClassic(targetNumber, dataToSend, dataFromCard);
@@ -1465,6 +1478,106 @@ namespace Iot.Device.Pn5180
             return true;
         }
 
+        /// <summary>
+        /// Listen to 15693 cards with 16 slots
+        /// </summary>
+        /// <param name="transmitter">The transmitter configuration, should be compatible with 15693 card</param>
+        /// <param name="receiver">The receiver configuration, should be compatible with 15693 card</param>
+        /// <param name="cards">The 15693 cards once detected</param>
+        /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
+        /// <returns>True if a 15693 card has been detected</returns>
+        public bool ListenToCardIso15693(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
+#if NET5_0_OR_GREATER
+        [NotNullWhen(true)]
+#endif
+        out IList<Data26_53kbps>? cards, int timeoutPollingMilliseconds)
+        {
+            cards = new List<Data26_53kbps>();
+            var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);
+            // Switch on the radio frequence field and check it
+            ret &= SetRadioFrequency(true);
+
+            Span<byte> inventoryResponse = stackalloc byte[10];
+            Span<byte> dsfid = stackalloc byte[1];
+            Span<byte> uid = stackalloc byte[8];
+
+            int numBytes = 0;
+
+            DateTime dtTimeout = DateTime.Now.AddMilliseconds(timeoutPollingMilliseconds);
+
+            try
+            {
+                // Clears all interrupt
+                SpiWriteRegister(Command.WRITE_REGISTER, Register.IRQ_CLEAR, new byte[] { 0xFF, 0xFF, 0x0F, 0x00 });
+                // Sets the PN5180 into IDLE state
+                SpiWriteRegister(Command.WRITE_REGISTER_AND_MASK, Register.SYSTEM_CONFIG, new byte[] { 0xF8, 0xFF, 0xFF, 0xFF });
+                // Activates TRANSCEIVE routine
+                SpiWriteRegister(Command.WRITE_REGISTER_OR_MASK, Register.SYSTEM_CONFIG, new byte[] { 0x03, 0x00, 0x00, 0x00 });
+                // Sends an inventory command with 16 slots
+                ret = SendDataToCard(new byte[] { 0x06, 0x01, 0x00 });
+                if (dtTimeout < DateTime.Now)
+                {
+                    return false;
+                }
+
+                for (byte slotCounter = 0; slotCounter < 16; slotCounter++)
+                {
+                    (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
+                    if (numBytes > 0)
+                    {
+                        ret &= ReadDataFromCard(inventoryResponse, inventoryResponse.Length);
+                        if (ret)
+                        {
+                            cards.Add(new Data26_53kbps(slotCounter, 0, 0, inventoryResponse[1], inventoryResponse.Slice(2, 8).ToArray()));
+                        }
+                    }
+
+                    // Send only EOF (End of Frame) without data at the next RF communication
+                    SpiWriteRegister(Command.WRITE_REGISTER_AND_MASK, Register.TX_CONFIG, new byte[] { 0x3F, 0xFB, 0xFF, 0xFF });
+                    // Sets the PN5180 into IDLE state
+                    SpiWriteRegister(Command.WRITE_REGISTER_AND_MASK, Register.SYSTEM_CONFIG, new byte[] { 0xF8, 0xFF, 0xFF, 0xFF });
+                    // Activates TRANSCEIVE routine
+                    SpiWriteRegister(Command.WRITE_REGISTER_OR_MASK, Register.SYSTEM_CONFIG, new byte[] { 0x03, 0x00, 0x00, 0x00 });
+                    // Clears the interrupt register IRQ_STATUS
+                    SpiWriteRegister(Command.WRITE_REGISTER, Register.IRQ_CLEAR, new byte[] { 0xFF, 0xFF, 0x0F, 0x00 });
+                    // Send EOF
+                    SendDataToCard(new Span<byte> { });
+                }
+
+                if (cards.Count > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (TimeoutException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// reset PN5180 RF Configuration and some Register
+        /// </summary>
+        /// <param name="transmitter">The transmitter configuration</param>
+        /// <param name="receiver">The receiver configuration</param>
+        /// <returns></returns>
+        public bool ResetPN5180Configuration(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver)
+        {
+            var ret = LoadRadioFrequencyConfiguration(transmitter, receiver);
+            // Switch on the radio frequence field and check it
+            ret &= SetRadioFrequency(true);
+            // Clears all interrupt
+            SpiWriteRegister(Command.WRITE_REGISTER, Register.IRQ_CLEAR, new byte[] { 0xFF, 0xFF, 0x0F, 0x00 });
+            // Sets the PN5180 into IDLE state
+            SpiWriteRegister(Command.WRITE_REGISTER_AND_MASK, Register.SYSTEM_CONFIG, new byte[] { 0xF8, 0xFF, 0xFF, 0xFF });
+            // Activates TRANSCEIVE routine
+            SpiWriteRegister(Command.WRITE_REGISTER_OR_MASK, Register.SYSTEM_CONFIG, new byte[] { 0x03, 0x00, 0x00, 0x00 });
+            return ret;
+        }
         #endregion
 
         #region SPI primitives

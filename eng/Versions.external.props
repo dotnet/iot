@@ -1,7 +1,7 @@
 <Project>
   <!-- These references to third-party libraries are included in all projects except System.Device.Gpio and the build wrapper project -->
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'System.Device.Gpio' And '$(MSBuildProjectName)' != 'build'">
-    <PackageReference Include="UnitsNet" Version="5.31.0" />
+    <PackageReference Include="UnitsNet" Version="5.42.0" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -10,13 +10,17 @@
 
   <!-- Automatically include these assemblies in all test projects -->
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
-     <PackageReference Include="Moq" Version="4.16.1" />
-     <PackageReference Include="xunit" Version="2.6.3" />
-     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.5">
+     <PackageReference Include="Moq" Version="4.20.70" />
+     <PackageReference Include="xunit" Version="2.9.0" />
+     <!-- Need to reference the internal package versions directly or we get package conflict errors -->
+     <PackageReference Include="xunit.core" Version="2.9.0" />
+     <PackageReference Include="xunit.assert" Version="2.9.0" />
+     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
        <PrivateAssets>all</PrivateAssets>
        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="xunit.runner.utility" Version="2.6.3" />
+    <PackageReference Include="xunit.runner.utility" Version="2.9.0" />
+    <PackageReference Include="xunit.analyzers" Version="1.15.0" />
     <PackageReference Include="Shouldly" Version="4.2.1" />
   </ItemGroup>
 </Project>

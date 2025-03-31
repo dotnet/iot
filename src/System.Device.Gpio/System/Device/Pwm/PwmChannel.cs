@@ -60,11 +60,7 @@ public abstract partial class PwmChannel : IDisposable
     {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
-            return CreateWindows10PwmChannel(
-                chip,
-                channel,
-                frequency,
-                dutyCyclePercentage);
+            throw new PlatformNotSupportedException();
         }
         else if (IsBeagleBoneKernel())
         {

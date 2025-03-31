@@ -28,7 +28,6 @@ namespace Iot.Device.Board
         private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
         private const string RaspberryPi2Product = "Raspberry Pi 2";
         private const string RaspberryPi3Product = "Raspberry Pi 3";
-        private const string HummingBoardProduct = "HummingBoard-Edge";
 
         private readonly object _pinReservationsLock;
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
@@ -391,13 +390,8 @@ namespace Iot.Device.Board
                 return new RaspberryPi3Driver();
             }
 
-            if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
-            {
-                return new HummingBoardDriver();
-            }
-
             // Default for Windows IoT Core on a non-specific device
-            return new Windows10Driver();
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
