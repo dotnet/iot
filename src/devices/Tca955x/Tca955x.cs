@@ -239,7 +239,6 @@ namespace Iot.Device.Tca955x
                     new PinValuePair(pinNumber, default)
                 };
                 Read(pinValuePairs);
-                _pinValues[pinNumber] = pinValuePairs[0].PinValue;
                 return _pinValues[pinNumber];
             }
         }
@@ -367,7 +366,7 @@ namespace Iot.Device.Tca955x
             bool IsBitSet(byte data, int bitNumber) => (data & (1 << bitNumber)) != 0;
 
             byte register = GetRegisterIndex(pinNumber, Register.ConfigurationPort);
-            return IsBitSet(InternalReadByte(register), pinNumber)
+            return IsBitSet(InternalReadByte(register), GetBitNumber(pinNumber))
                 ? PinMode.Input
                     : PinMode.Output;
         }
