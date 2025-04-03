@@ -8,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using LibgpiodV1 = Interop.LibgpiodV1;
 
-namespace System.Device.Gpio.Drivers.Libgpiod.V1;
+namespace System.Device.Gpio.Drivers;
 
-internal sealed class LibGpiodV1DriverEventHandler : IDisposable
+internal sealed class LibGpiodDriverEventHandler : IDisposable
 {
     private const int ERROR_CODE_EINTR = 4; // Interrupted system call
 
@@ -24,7 +24,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
     private readonly Task _task;
     private bool _disposing;
 
-    public LibGpiodV1DriverEventHandler(int pinNumber, LineHandle safeLineHandle)
+    public LibGpiodDriverEventHandler(int pinNumber, LineHandle safeLineHandle)
     {
         _pinNumber = pinNumber;
         _cancellationTokenSource = new CancellationTokenSource();
@@ -53,8 +53,8 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
                 // WaitEventResult can be TimedOut, EventOccured or Error, in case of TimedOut will continue waiting
                 TimeSpec timeout = new TimeSpec
                 {
-                    TvSec = new IntPtr(0),
-                    TvNsec = new IntPtr(50_000_000)
+                    TvSec = new nint(0),
+                    TvNsec = new nint(50_000_000)
                 };
 
                 WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle.Handle, ref timeout);
@@ -79,7 +79,7 @@ internal sealed class LibGpiodV1DriverEventHandler : IDisposable
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());
                     }
 
-                    PinEventTypes eventType = (eventResult.event_type == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
+                    PinEventTypes eventType = eventResult.event_type == 1 ? PinEventTypes.Rising : PinEventTypes.Falling;
                     this?.OnPinValueChanged(new PinValueChangedEventArgs(eventType, _pinNumber), eventType);
                 }
             }

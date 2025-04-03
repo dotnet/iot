@@ -13,20 +13,25 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chip__info.html"/>
 [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
-internal class ChipInfo : LibGpiodProxyBase
+internal class LibGpiodChipInfo : LibGpiodProxyBase
 {
+    private readonly int _chipNumber;
     private readonly ChipInfoSafeHandle _handle;
 
     /// <summary>
     /// Constructor for a chip-info-proxy object that points to an existing gpiod chip-info object using a safe handle.
     /// </summary>
+    /// <param name="chipNumber">The chip number (for identification)</param>
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chip__info.html"/>
-    public ChipInfo(ChipInfoSafeHandle handle)
+    public LibGpiodChipInfo(int chipNumber, ChipInfoSafeHandle handle)
         : base(handle)
     {
+        _chipNumber = chipNumber;
         _handle = handle;
     }
+
+    public int ChipNumber => _chipNumber;
 
     /// <summary>
     /// Get the name of the chip as represented in the kernel
@@ -65,22 +70,8 @@ internal class ChipInfo : LibGpiodProxyBase
     /// </summary>
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
-    public Snapshot MakeSnapshot()
+    public GpioChipInfo MakeSnapshot()
     {
-        return new Snapshot(GetName(), GetLabel(), GetNumLines());
-    }
-
-    /// <summary>
-    /// Contains all readable information that was recorded at one and the same time
-    /// </summary>
-    public sealed record Snapshot(string Name, string Label, int NumLines)
-    {
-        /// <summary>
-        /// Converts the whole snapshot to string
-        /// </summary>
-        public override string ToString()
-        {
-            return $"{nameof(Name)}: {Name}, {nameof(Label)}: {Label}, {nameof(NumLines)}: {NumLines}";
-        }
+        return new GpioChipInfo(_chipNumber, GetName(), GetLabel(), GetNumLines());
     }
 }

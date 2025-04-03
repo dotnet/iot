@@ -7,24 +7,31 @@ using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Device.Gpio.Libgpiod.V1;
 using System.Diagnostics;
+using System.Linq;
+using System.Diagnostics.CodeAnalysis;
+
 using LibgpiodV1 = Interop.LibgpiodV1;
 
-namespace System.Device.Gpio.Drivers.Libgpiod.V1;
+namespace System.Device.Gpio.Drivers;
 
 /// <summary>
 /// This driver uses libgpiod v0/1 to get user-level access to the gpio ports.
 /// It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
 /// "sudo apt install -y libgpiod-dev".
+/// <remarks>
+/// This driver uses the older (V1) libgpiod infrastructure. To use the new V2 infrastructure, use <see cref="LibGpiodV2Driver"/>.
+/// At the time of this writing, that one was only available from source, not as apt package.</remarks>
 /// </summary>
-internal class LibGpiodV1Driver : UnixDriver
+public class LibGpiodDriver : UnixDriver
 {
     private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
     private readonly object _pinNumberLock;
     private readonly ConcurrentDictionary<int, LineHandle> _pinNumberToSafeLineHandle;
-    private readonly ConcurrentDictionary<int, LibGpiodV1DriverEventHandler> _pinNumberToEventHandler;
+    private readonly ConcurrentDictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler;
     private readonly int _pinCount;
     private readonly ConcurrentDictionary<int, PinValue> _pinValue;
     private SafeChipHandle _chip;
+    private int _chipNumber;
 
     /// <inheritdoc />
     protected internal override int PinCount => _pinCount;
@@ -60,7 +67,7 @@ internal class LibGpiodV1Driver : UnixDriver
     /// Construct an instance
     /// </summary>
     /// <param name="gpioChip">Number of the gpio Chip. Default 0</param>
-    public LibGpiodV1Driver(int gpioChip = 0)
+    public LibGpiodDriver(int gpioChip = 0)
     {
         if (Environment.OSVersion.Platform != PlatformID.Unix)
         {
@@ -70,14 +77,15 @@ internal class LibGpiodV1Driver : UnixDriver
         try
         {
             _pinNumberLock = new object();
-            _chip = LibgpiodV1.gpiod_chip_open_by_number(gpioChip);
+            _chipNumber = gpioChip;
+            _chip = new SafeChipHandle(LibgpiodV1.gpiod_chip_open_by_number(gpioChip));
             if (_chip == null || _chip.IsInvalid || _chip.IsClosed)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
             }
 
             _pinCount = LibgpiodV1.gpiod_chip_num_lines(_chip);
-            _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodV1DriverEventHandler>();
+            _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodDriverEventHandler>();
             _pinNumberToSafeLineHandle = new ConcurrentDictionary<int, LineHandle>();
             _pinValue = new ConcurrentDictionary<int, PinValue>();
         }
@@ -87,12 +95,57 @@ internal class LibGpiodV1Driver : UnixDriver
         }
     }
 
+    /// <summary>
+    /// Construct an instance of this driver with the provided chip.
+    /// </summary>
+    /// <param name="chip">The chip to use. Should be one of the elements returned by <see cref="GetAvailableChips"/></param>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public LibGpiodDriver(GpioChipInfo chip)
+        : this(chip.Id)
+    {
+    }
+
+    /// <summary>
+    /// Returns the set of available chips for this driver
+    /// </summary>
+    /// <returns>A list of <see cref="GpioChipInfo"/> instances</returns>
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public static IList<GpioChipInfo> GetAvailableChips()
+    {
+        List<GpioChipInfo> result = new List<GpioChipInfo>();
+        var iterator = new SafeChipIteratorHandle(LibgpiodV1.gpiod_chip_iter_new());
+        int index = 0;
+        while (true)
+        {
+            SafeChipHandle chip = new SafeChipHandle(LibgpiodV1.gpiod_chip_iter_next_noclose(iterator));
+            if (chip.IsInvalid)
+            {
+                break;
+            }
+
+            int numLines = LibgpiodV1.gpiod_chip_num_lines(chip);
+            string name = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_name(chip)) ?? string.Empty;
+            string label = Marshal.PtrToStringAnsi(LibgpiodV1.gpiod_chip_label(chip)) ?? string.Empty;
+            if (!result.Any(x => x.Label == label && x.NumLines == numLines))
+            {
+                // The iterator may find duplicates, but we skip them here
+                result.Add(new GpioChipInfo(index, name, label, numLines));
+                index++;
+            }
+
+            chip.Dispose();
+        }
+
+        iterator.Dispose();
+        return result;
+    }
+
     /// <inheritdoc/>
     protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
     {
         if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
         {
-            LibGpiodV1DriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+            LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
             if ((eventTypes & PinEventTypes.Rising) != 0)
             {
@@ -110,7 +163,7 @@ internal class LibGpiodV1Driver : UnixDriver
         }
     }
 
-    private LibGpiodV1DriverEventHandler PopulateEventHandler(int pinNumber)
+    private LibGpiodDriverEventHandler PopulateEventHandler(int pinNumber)
     {
         lock (_pinNumberLock)
         {
@@ -123,7 +176,7 @@ internal class LibGpiodV1Driver : UnixDriver
                 _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
             }
 
-            return new LibGpiodV1DriverEventHandler(pinNumber, pinHandle!);
+            return new LibGpiodDriverEventHandler(pinNumber, pinHandle!);
         }
     }
 
@@ -241,12 +294,21 @@ internal class LibGpiodV1Driver : UnixDriver
     }
 
     /// <inheritdoc/>
-    protected internal override void Toggle(int pinNumber) => Write(pinNumber, !_pinValue[pinNumber]);
+    protected internal override void Toggle(int pinNumber)
+    {
+        if (!_pinValue.TryGetValue(pinNumber, out PinValue oldValue))
+        {
+            // If the pin value was never set, we need to read it now
+            oldValue = Read(pinNumber);
+        }
+
+        Write(pinNumber, !oldValue);
+    }
 
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
     {
-        if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodV1DriverEventHandler? eventHandler))
+        if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodDriverEventHandler? eventHandler))
         {
             eventHandler.ValueFalling -= callback;
             eventHandler.ValueRising -= callback;
@@ -332,7 +394,7 @@ internal class LibGpiodV1Driver : UnixDriver
     {
         if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
         {
-            LibGpiodV1DriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+            LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
             if ((eventTypes & PinEventTypes.Rising) != 0)
             {
@@ -395,7 +457,17 @@ internal class LibGpiodV1Driver : UnixDriver
         IntPtr libgpiodVersionPtr = LibgpiodV1.gpiod_version_string();
         string libgpiodVersion = Marshal.PtrToStringAnsi(libgpiodVersionPtr) ?? string.Empty;
         self.Properties["LibGpiodVersion"] = libgpiodVersion;
+#pragma warning disable SDGPIO0001
+        self.Properties["ChipInfo"] = GetChipInfo().ToString();
+#pragma warning restore SDGPIO0001
         return self;
+    }
+
+    /// <inheritdoc />
+    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
+    public override GpioChipInfo GetChipInfo()
+    {
+        return GetAvailableChips().First(x => x.Id == _chipNumber);
     }
 
     /// <inheritdoc/>
@@ -403,9 +475,9 @@ internal class LibGpiodV1Driver : UnixDriver
     {
         if (_pinNumberToEventHandler != null)
         {
-            foreach (KeyValuePair<int, LibGpiodV1DriverEventHandler> kv in _pinNumberToEventHandler)
+            foreach (KeyValuePair<int, LibGpiodDriverEventHandler> kv in _pinNumberToEventHandler)
             {
-                LibGpiodV1DriverEventHandler eventHandler = kv.Value;
+                LibGpiodDriverEventHandler eventHandler = kv.Value;
                 eventHandler.Dispose();
             }
 

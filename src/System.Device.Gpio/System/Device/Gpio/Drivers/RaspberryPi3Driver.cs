@@ -284,6 +284,9 @@ public class RaspberryPi3Driver : GpioDriver
     {
         var ret = new ComponentInformation(this, "Generic Raspberry Pi Wrapper driver");
         ret.AddSubComponent(_internalDriver.QueryComponentInformation());
+#pragma warning disable SDGPIO0001
+        ret.Properties["ChipInfo"] = _internalDriver.GetChipInfo().ToString();
+#pragma warning restore SDGPIO0001
         return ret;
     }
 }

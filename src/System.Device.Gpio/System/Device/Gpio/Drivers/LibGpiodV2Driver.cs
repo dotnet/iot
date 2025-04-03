@@ -2,20 +2,27 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Device.Gpio.Drivers;
 using System.Device.Gpio.Libgpiod;
 using System.Device.Gpio.Libgpiod.V2;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace System.Device.Gpio.Drivers.Libgpiod.V2;
+namespace System.Device.Gpio.Drivers;
 
 /// <summary>
 /// Driver that uses libgpiod V2 for GPIO control.
+/// <remarks>
+/// At the time of this writing, this driver is only available when compiling from source. See instructions at
+/// https://libgpiod.readthedocs.io/en/latest/building.html.
+/// </remarks>
 /// </summary>
 [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
-internal sealed class LibGpiodV2Driver : UnixDriver
+public sealed class LibGpiodV2Driver : UnixDriver
 {
     private static readonly string ConsumerId = $"C#-{nameof(LibGpiodV2Driver)}-{Process.GetCurrentProcess().Id}";
 
@@ -28,12 +35,20 @@ internal sealed class LibGpiodV2Driver : UnixDriver
     /// <summary>
     /// Creates a driver instance for the specified GPIO chip.
     /// </summary>
-    /// <param name="chip">Chip proxy object to drive.</param>
-    /// <param name="waitEdgeEventsTimeout">Timeout to wait for edge events. Primarily used for testing.</param>
-    public LibGpiodV2Driver(Chip chip, TimeSpan? waitEdgeEventsTimeout = null)
+    /// <param name="chipNumber">Chip number to use.</param>
+    public LibGpiodV2Driver(int chipNumber)
     {
-        _chip = chip;
-        _eventObserver = new LibGpiodV2EventObserver { WaitEdgeEventsTimeout = waitEdgeEventsTimeout ?? TimeSpan.FromMilliseconds(100) };
+        _chip = LibGpiodProxyFactory.CreateChip(chipNumber);
+        _eventObserver = new LibGpiodV2EventObserver { WaitEdgeEventsTimeout = TimeSpan.FromMilliseconds(100) };
+    }
+
+    /// <summary>
+    /// Construct an instance of this driver with the provided chip.
+    /// </summary>
+    /// <param name="chip">The chip to use. Should be one of the elements returned by <see cref="GetAvailableChips"/></param>
+    public LibGpiodV2Driver(GpioChipInfo chip)
+        : this(chip.Id)
+    {
     }
 
     /// <inheritdoc/>
@@ -47,6 +62,29 @@ internal sealed class LibGpiodV2Driver : UnixDriver
                 return chipInfo.GetNumLines();
             }
         }
+    }
+
+    /// <summary>
+    /// Returns the list of available chips.
+    /// </summary>
+    /// <returns>A list of available chips. Can be used to determine the chipNumber when calling the constructor</returns>
+    public static IList<GpioChipInfo> GetAvailableChips()
+    {
+        var ret = new List<GpioChipInfo>();
+        var files = Directory.GetFiles("/dev", "gpiochip*", SearchOption.TopDirectoryOnly);
+        for (int i = 0; i < files.Length; i++)
+        {
+            string number = files[i].Replace("/dev/gpiochip", string.Empty);
+            if (Int32.TryParse(number, CultureInfo.InvariantCulture, out int chipNumber))
+            {
+                var c = LibGpiodProxyFactory.CreateChip(chipNumber, files[i]);
+                var info = c.GetInfo();
+                ret.Add(new GpioChipInfo(chipNumber, info.GetName(), info.GetLabel(), info.GetNumLines()));
+                c.Dispose();
+            }
+        }
+
+        return ret;
     }
 
     /// <inheritdoc/>
@@ -435,6 +473,13 @@ internal sealed class LibGpiodV2Driver : UnixDriver
         _requestedLineByLineOffset[offset] = new RequestedLines(lineConfig, lineConfig.GetSettingsByLine(), lineRequest);
 
         return lineRequest;
+    }
+
+    /// <inheritdoc />
+    public override GpioChipInfo GetChipInfo()
+    {
+        var info = _chip.GetInfo();
+        return new GpioChipInfo(info.ChipNumber, info.GetName(), info.GetLabel(), info.GetNumLines());
     }
 
     #region Dispose

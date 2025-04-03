@@ -534,7 +534,16 @@ public class GpioController : IDisposable
                 // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
                 // We need to create a new driver for the Raspberry Pi 5,
                 // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
-                return new LibGpiodDriver(4);
+#pragma warning disable SDGPIO0001
+                var chips = LibGpiodDriver.GetAvailableChips();
+                // The RP1 chip reports 54 lines
+                GpioChipInfo? selectedChip = chips.FirstOrDefault(x => x.NumLines == 54);
+                if (selectedChip is null)
+                {
+                    throw new NotSupportedException("Couldn't find the default GPIO chip. You might need to create the LibGpiodDriver explicitly");
+                }
+#pragma warning restore SDGPIO0001
+                return new LibGpiodDriver(selectedChip.Id);
 
             default:
 

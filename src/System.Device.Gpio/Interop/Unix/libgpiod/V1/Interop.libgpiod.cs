@@ -53,11 +53,25 @@ internal partial class Interop
         }
 
         /// <summary>
-        /// Release all resources allocated for the gpiochip iterator and close the most recently opened gpiochip(if any).
+        /// Release all resources allocated for the gpiochip iterator but does not close the most recently opened gpiochip
         /// </summary>
         /// <param name="iter">The gpiochip iterator object</param>
         [DllImport(LibgpiodLibrary)]
-        internal static extern void gpiod_chip_iter_free(IntPtr iter);
+        internal static extern void gpiod_chip_iter_free_noclose(IntPtr iter);
+
+        /// <summary>
+        /// Start an iteration over the list of gpio chips.
+        /// </summary>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern IntPtr gpiod_chip_iter_new();
+
+        /// <summary>
+        /// Iterate over a chip iterator. Does not close any previously opened chips.
+        /// </summary>
+        /// <param name="handle">Handle of a chip iterator</param>
+        /// <returns>The next chip handle or null if at the end of the iteration</returns>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern IntPtr gpiod_chip_iter_next_noclose(SafeChipIteratorHandle handle);
 
         /// <summary>
         /// Close a GPIO chip handle and release all allocated resources.
@@ -195,7 +209,7 @@ internal partial class Interop
         /// </summary>
         /// <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern SafeChipHandle gpiod_chip_open_by_number(int number);
+        internal static extern IntPtr gpiod_chip_open_by_number(int number);
 
         /// <summary>
         /// Get the API version of the library as a human-readable string.
@@ -203,6 +217,12 @@ internal partial class Interop
         /// <returns>Human-readable string containing the library version.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern IntPtr gpiod_version_string();
+
+        [DllImport(LibgpiodLibrary)]
+        internal static extern IntPtr gpiod_chip_name(SafeChipHandle chip);
+
+        [DllImport(LibgpiodLibrary)]
+        internal static extern IntPtr gpiod_chip_label(SafeChipHandle chip);
     }
 }
 
