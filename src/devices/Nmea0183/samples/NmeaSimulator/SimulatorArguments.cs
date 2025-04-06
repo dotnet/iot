@@ -40,5 +40,12 @@ namespace Nmea.Simulator
             get;
             set;
         }
+
+        [Option('l', "loop", HelpText = "Loop forever. Restarts playback at the beginning when at the end of the stream. Only useful together with --replay")]
+        public bool Loop
+        {
+            get;
+            set;
+        }
     }
 }

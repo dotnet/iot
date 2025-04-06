@@ -28,6 +28,8 @@ namespace Iot.Device.Ili934x
 
         private readonly int _interruptPin;
         private readonly bool _shouldDispose;
+        private readonly bool _flipScreen;
+
         private GpioController? _gpioController;
         private I2cDevice _i2c;
 
@@ -38,7 +40,6 @@ namespace Iot.Device.Ili934x
         private Point[] _lastPoints;
         private Point _initialTouchPoint;
         private Point[] _points;
-        private int _point0finger;
 
         private int _activeTouches;
         private int _lastActiveTouches;
@@ -81,14 +82,28 @@ namespace Iot.Device.Ili934x
         /// <param name="gpioController">The gpio controller the interrupt pin is attached to</param>
         /// <param name="shouldDispose">True to dispose the gpio controller on close</param>
         public Chsc6440(I2cDevice device, Size screenSize, int interruptPin = -1, GpioController? gpioController = null, bool shouldDispose = true)
+            : this(device, screenSize, false, interruptPin, gpioController, shouldDispose)
+        {
+        }
+
+        /// <summary>
+        /// Create a controller from the given I2C device
+        /// </summary>
+        /// <param name="device">An I2C device</param>
+        /// <param name="screenSize">Size of the screen. Used to filter out invalid readings</param>"/>
+        /// <param name="flipScreen">Rotate screen upside down (replace x with width-x and y with height-y)</param>
+        /// <param name="interruptPin">The interrupt pin to use, -1 to disable</param>
+        /// <param name="gpioController">The gpio controller the interrupt pin is attached to</param>
+        /// <param name="shouldDispose">True to dispose the gpio controller on close</param>
+        public Chsc6440(I2cDevice device, Size screenSize, bool flipScreen, int interruptPin = -1, GpioController? gpioController = null, bool shouldDispose = true)
         {
             ScreenSize = screenSize;
             _i2c = device;
+            _flipScreen = flipScreen;
             _interruptPin = interruptPin;
             _gpioController = gpioController;
             _shouldDispose = shouldDispose;
             _wasRead = false;
-            _point0finger = 0;
             _points = new Point[2];
             _lastPoints = new Point[2];
             _initialTouchPoint = Point.Empty;
@@ -147,6 +162,16 @@ namespace Iot.Device.Ili934x
             set;
         }
 
+        private Point FlipPointIfNeeded(Point pt)
+        {
+            if (_flipScreen)
+            {
+                return new Point(ScreenSize.Width - pt.X, ScreenSize.Height - pt.Y);
+            }
+
+            return pt;
+        }
+
         private void OnInterrupt(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
             // The pin is low as long as the screen is being touched.
@@ -195,7 +220,6 @@ namespace Iot.Device.Ili934x
                 p[0] = default;
                 p[1] = default;
                 byte pts = 0;
-                int p0f = 0;
                 Span<byte> register = stackalloc byte[1]
                 {
                     0x02
@@ -225,7 +249,6 @@ namespace Iot.Device.Ili934x
                         // Read the data. Never mind trying to read the "weight" and
                         // "size" properties or using the built-in gestures: they
                         // are always set to zero.
-                        p0f = (data[3] >> 4 != 0) ? 1 : 0;
                         p[0].X = ((data[1] << 8) | data[2]) & 0x0fff;
                         p[0].Y = ((data[3] << 8) | data[4]) & 0x0fff;
                         if (pts == 2)
@@ -249,13 +272,9 @@ namespace Iot.Device.Ili934x
                     _activeTouches = 0;
                 }
 
-                if (p[0] != _points[0] || p[1] != _points[1])
-                {
-                    _points[0] = p[0];
-                    _points[1] = p[1];
-                    _point0finger = p0f;
-                    _activeTouches = pts;
-                }
+                _points[0] = FlipPointIfNeeded(p[0]);
+                _points[1] = FlipPointIfNeeded(p[1]);
+                _activeTouches = pts;
 
                 _wasRead = true;
             }

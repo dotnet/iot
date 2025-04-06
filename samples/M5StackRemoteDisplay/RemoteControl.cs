@@ -321,12 +321,12 @@ namespace Iot.Device.Ili934x.Samples
                     _screenMode = ScreenMode.Mirror;
                     return;
                 }
-                if (point.X > _screen.ScreenWidth - 50)
+                if (point.X > _screen.ScreenWidth / 2)
                 {
                     _selectedDataSet = (_selectedDataSet + 1) % _dataSets.Count;
                     _forceUpdate = true;
                 }
-                else if (point.X < 50)
+                else if (point.X < _screen.ScreenWidth / 2)
                 {
                     _selectedDataSet = (_selectedDataSet) > 0 ? _selectedDataSet - 1 : _dataSets.Count - 1;
                     _forceUpdate = true;
