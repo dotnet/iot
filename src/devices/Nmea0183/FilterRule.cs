@@ -49,7 +49,7 @@ namespace Iot.Device.Nmea0183
         /// types would be implicitly duplicated on forwarding</param>
         /// <param name="continueAfterMatch">True to continue processing after a match, false to stop processing this message</param>
         public FilterRule(string sourceName, TalkerId talkerId, SentenceId sentenceId, IEnumerable<string> sinks,
-            Func<NmeaSinkAndSource, NmeaSinkAndSource, NmeaSentence, NmeaSentence> forwardingAction, bool rawMessagesOnly = true,
+            Func<NmeaSinkAndSource, NmeaSinkAndSource, NmeaSentence, NmeaSentence?> forwardingAction, bool rawMessagesOnly = true,
             bool continueAfterMatch = false)
         {
             _rawMessagesOnly = rawMessagesOnly;
@@ -85,8 +85,9 @@ namespace Iot.Device.Nmea0183
         /// If non-null, this action can modify the message before it is being sent to the
         /// indicated sink.
         /// Note that the input message shall not be modified, clone it if necessary.
+        /// The return value can be null to suppress the message. That way, advanced filter testing can be done using this callback.
         /// </summary>
-        public Func<NmeaSinkAndSource, NmeaSinkAndSource, NmeaSentence, NmeaSentence>? ForwardingAction { get; }
+        public Func<NmeaSinkAndSource, NmeaSinkAndSource, NmeaSentence, NmeaSentence?>? ForwardingAction { get; }
 
         /// <summary>
         /// If this is true, filter testing is continued even after a match.

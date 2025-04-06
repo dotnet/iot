@@ -995,7 +995,7 @@ namespace Iot.Device.Nmea0183
                     {
                         // Warn if the ship will be closer than the warning distance in less than the WarningTime
                         SendWarningMessage(new AisMessageId(AisWarningType.DangerousVessel, difference.To.Mmsi), difference.To.Mmsi,
-                            $"PROXIMITY WARN: CPA {cpa.Value.NauticalMiles:F2}; TCPA {tcpa.Value:mm\\:ss}",
+                            $"CPA {cpa.Value.NauticalMiles:F2}; TCPA {tcpa.Value:mm\\:ss}",
                             time, difference.To);
                     }
 
