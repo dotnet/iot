@@ -62,6 +62,7 @@ namespace Iot.Device.Nmea0183
             StoreRawSentences = false;
             _logger = this.GetCurrentClassLogger();
             _source.OnNewSequence += OnNewSequence;
+            MaxDataAge = TimeSpan.FromSeconds(30);
         }
 
         /// <summary>
@@ -70,6 +71,15 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         public bool StoreRawSentences
         {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Maximum age after which any message is discarded. Default 30 Seconds
+        /// </summary>
+        public TimeSpan MaxDataAge
+        { 
             get;
             set;
         }
@@ -395,6 +405,21 @@ namespace Iot.Device.Nmea0183
                 sats.Reverse();
                 return sats.Count > 0;
             }
+        }
+
+        private void CleanOutdatedEntries()
+        {
+	        lock (_lock)
+	        {
+		        foreach (var entry in _sentences)
+		        {
+                    if (entry.Value.Age > MaxDataAge)
+                    {
+                        // Not a good idea
+                        _sentences.Remove(entry.Key);
+                    }
+		        }
+	        }
         }
     }
 }
