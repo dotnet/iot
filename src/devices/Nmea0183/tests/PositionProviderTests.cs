@@ -178,7 +178,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.True(heading.HasValue);
             Assert.Equal(35.9, heading!.Value.Degrees);
 
-            Assert.True(_cache.TryGetLastSentence(MeteorologicalComposite.Id, out MeteorologicalComposite sentence));
+            Assert.True(_cache.TryGetLastSentence(MeteorologicalComposite.Id, out MeteorologicalComposite? sentence));
             Assert.NotNull(sentence);
             Assert.Equal(26.6, sentence.WaterTemperature!.Value.DegreesCelsius);
 
