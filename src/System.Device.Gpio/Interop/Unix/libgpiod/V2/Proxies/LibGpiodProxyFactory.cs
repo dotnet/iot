@@ -14,10 +14,11 @@ internal static class LibGpiodProxyFactory
     /// <summary>
     /// Creates a chip-proxy object. This call will try to open the chip.
     /// </summary>
+    /// <param name="chipNumber">The chip number</param>
     /// <param name="devicePath">File system path to the chip device, e.g. '/dev/gpiochip4'</param>
     /// <exception cref="GpiodException">The chip does not exist or an unexpected error happened while opening chip</exception>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
-    public static Chip CreateChip(string devicePath)
+    public static Chip CreateChip(int chipNumber, string devicePath)
     {
         var handle = LibGpiodProxyBase.CallLibgpiod(() => LibgpiodV2.gpiod_chip_open(Marshal.StringToHGlobalAuto(devicePath)));
 
@@ -26,7 +27,7 @@ internal static class LibGpiodProxyFactory
             throw new GpiodException($"Could not open gpio chip at path '{devicePath}': {LastErr.GetMsg()}");
         }
 
-        return new Chip(handle);
+        return new Chip(chipNumber, handle);
     }
 
     /// <summary>
@@ -37,7 +38,7 @@ internal static class LibGpiodProxyFactory
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
     public static Chip CreateChip(int chipNumber)
     {
-        return CreateChip($"/dev/gpiochip{chipNumber}");
+        return CreateChip(chipNumber, $"/dev/gpiochip{chipNumber}");
     }
 
     /// <summary>

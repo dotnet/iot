@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
-using System.Device.Gpio.Drivers.Libgpiod.V1;
+using System.Diagnostics;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,9 +21,7 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     {
     }
 
-#pragma warning disable SDGPIO0001
-    protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0, LibGpiodDriverVersion.V1);
-#pragma warning restore SDGPIO0001
+    protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0);
 
     [Fact]
     public void SetPinModeSetsDefaultValue()
@@ -105,5 +103,33 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
         }
 
         GC.WaitForPendingFinalizers();
+    }
+
+    [Fact]
+    public void CheckAllChipsCanBeConstructed()
+    {
+        var chips = LibGpiodDriver.GetAvailableChips();
+        foreach (var c in chips)
+        {
+            Logger.WriteLine(c.ToString());
+        }
+
+        Assert.NotEmpty(chips);
+        if (IsRaspi4())
+        {
+            // 2 entries. Here they're always named 0 and 1
+            Assert.Equal(2, chips.Count);
+        }
+
+        foreach (var chip in chips)
+        {
+            var driver = new LibGpiodDriver(chip.Id);
+            var ctrl = new GpioController(driver);
+            Assert.NotNull(ctrl);
+            var driverInfo = driver.GetChipInfo();
+            Assert.NotNull(driverInfo);
+            Assert.Equal(chip, driverInfo);
+            ctrl.Dispose();
+        }
     }
 }
