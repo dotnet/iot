@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\..\System.Device.Gpio.Tests\MockableGpioDriver.cs" Link="MockableGpioDriver.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Tca955x.csproj" />
   </ItemGroup>
 

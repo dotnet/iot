@@ -79,7 +79,7 @@ namespace Iot.Device.Tca955x
         protected void InternalRead(byte register, Span<byte> buffer)
         {
             // First send write then read.
-            _busDevice.WriteRead(new ReadOnlySpan<byte>(new byte[1] { register }), buffer);
+            _busDevice.WriteRead(stackalloc byte[1] { register }, buffer);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Iot.Device.Tca955x
         /// <param name="data">The data to write to the registers.</param>
         protected void InternalWrite(byte register, byte data)
         {
-            _busDevice.Write(new ReadOnlySpan<byte>(new byte[2] { register, data }));
+            _busDevice.Write(stackalloc byte[2] { register, data });
         }
 
         /// <summary>
