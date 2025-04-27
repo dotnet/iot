@@ -125,7 +125,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Speed trough water", s =>
             {
-                if (s.TryGetLastSentence(WaterSpeedAndAngle.Id, out WaterSpeedAndAngle sentence))
+                if (s.TryGetLastSentence(WaterSpeedAndAngle.Id, out WaterSpeedAndAngle? sentence))
                 {
                     return sentence.Speed.ToUnit(SpeedUnit.Knot);
                 }
@@ -145,7 +145,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Heading", s =>
             {
-                if (s.TryGetLastSentence(HeadingTrue.Id, out HeadingTrue sentence))
+                if (s.TryGetLastSentence(HeadingTrue.Id, out HeadingTrue? sentence))
                 {
                     return sentence.Angle;
                 }
@@ -155,7 +155,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Depth below Surface", s =>
             {
-                if (s.TryGetLastSentence(DepthBelowSurface.Id, out DepthBelowSurface sentence))
+                if (s.TryGetLastSentence(DepthBelowSurface.Id, out DepthBelowSurface? sentence))
                 {
                     return sentence.Depth.ToUnit(LengthUnit.Meter);
                 }
@@ -165,7 +165,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Engine RPM", s =>
             {
-                if (s.TryGetLastDinSentence(SeaSmartEngineFast.HexId, out SeaSmartEngineFast sentence))
+                if (s.TryGetLastDinSentence(SeaSmartEngineFast.HexId, out SeaSmartEngineFast? sentence))
                 {
                     return sentence.RotationalSpeed.ToUnit(RotationalSpeedUnit.RevolutionPerMinute);
                 }
@@ -175,7 +175,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Pitch", s =>
             {
-                if (s.TryGetTransducerData("PITCH", out TransducerDataSet set))
+                if (s.TryGetTransducerData("PITCH", out TransducerDataSet? set))
                 {
                     return Angle.FromDegrees(set.Value);
                 }
@@ -185,7 +185,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Roll", s =>
             {
-                if (s.TryGetTransducerData("ROLL", out TransducerDataSet set))
+                if (s.TryGetTransducerData("ROLL", out TransducerDataSet? set))
                 {
                     return Angle.FromDegrees(set.Value);
                 }
@@ -195,7 +195,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Distance to WP", s =>
             {
-                if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination rmb))
+                if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination? rmb))
                 {
                     return rmb.DistanceToWayPoint;
                 }
@@ -205,7 +205,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Est Time to WP", s =>
             {
-                if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination rmb))
+                if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination? rmb))
                 {
                     if (UnitMath.Abs(rmb.ApproachSpeed.GetValueOrDefault(Speed.Zero)) < Speed.FromKnots(0.1))
                     {
