@@ -139,13 +139,16 @@ namespace Iot.Device.Nmea0183
 
         private void ForwardDecoded(NmeaSinkAndSource source, NmeaSentence sentence)
         {
+            if (!DoForwardSequence(sentence))
+            {
+                return;
+            }
+
             DispatchSentenceEvents(source, sentence);
         }
 
-        private void ForwardDecodedRealTime(NmeaSinkAndSource source, NmeaSentence sentence)
+        private bool DoForwardSequence(NmeaSentence sentence)
         {
-            var now = DateTimeOffset.UtcNow;
-            bool firstRound = false;
             if (sentence is RawSentence &&
                 (sentence.SentenceId == TimeDate.Id ||
                  sentence.SentenceId == RecommendedMinimumNavigationInformation.Id ||
@@ -154,6 +157,21 @@ namespace Iot.Device.Nmea0183
                  sentence.SentenceId == PositionFastUpdate.Id))
             {
                 // Do not forward these raw sentences, as these can only be used with a patched time.
+                return false;
+            }
+
+            sentence.DateTime = DateTime.UtcNow;
+
+            return true;
+        }
+
+        private void ForwardDecodedRealTime(NmeaSinkAndSource source, NmeaSentence sentence)
+        {
+            var now = DateTimeOffset.UtcNow;
+            bool firstRound = false;
+
+            if (!DoForwardSequence(sentence))
+            {
                 return;
             }
 
