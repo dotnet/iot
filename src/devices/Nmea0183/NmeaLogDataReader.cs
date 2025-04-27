@@ -146,6 +146,17 @@ namespace Iot.Device.Nmea0183
         {
             var now = DateTimeOffset.UtcNow;
             bool firstRound = false;
+            if (sentence is RawSentence &&
+                (sentence.SentenceId == TimeDate.Id ||
+                 sentence.SentenceId == RecommendedMinimumNavigationInformation.Id ||
+                 sentence.SentenceId == BearingAndDistanceToWayPoint.Id ||
+                 sentence.SentenceId == GlobalPositioningSystemFixData.Id ||
+                 sentence.SentenceId == PositionFastUpdate.Id))
+            {
+                // Do not forward these raw sentences, as these can only be used with a patched time.
+                return;
+            }
+
             if (_referenceTimeInLog == null)
             {
                 if (sentence.SentenceId != TimeDate.Id || sentence.Valid == false)
