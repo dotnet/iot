@@ -117,7 +117,7 @@ namespace Nmea.Simulator
                     _simulatorThread.Start();
                 }
 
-                _tcpServer = new NmeaTcpServer("TcpServer");
+                _tcpServer = new NmeaTcpServer("TcpServer", IPAddress.Any, _arguments.TcpPort);
                 _tcpServer.StartDecode();
                 _tcpServer.OnNewSequence += OnNewSequenceFromServer;
 
@@ -158,7 +158,7 @@ namespace Nmea.Simulator
 
                 // Outgoing port is 10110, the incoming port is irrelevant (but we choose it differently here, so that a
                 // receiver can bind to 10110 on the same computer)
-                _udpServer = new NmeaUdpServer("UdpServer", 10110, 10110, broadcastAddress);
+                _udpServer = new NmeaUdpServer("UdpServer", _arguments.UdpPort, _arguments.UdpPort, broadcastAddress);
                 _udpServer.StartDecode();
                 _udpServer.OnNewSequence += OnNewSequenceFromServer;
 
