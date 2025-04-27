@@ -1,11 +1,11 @@
 <Project>
   <!-- These references to third-party libraries are included in all projects except System.Device.Gpio and the build wrapper project -->
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'System.Device.Gpio' And '$(MSBuildProjectName)' != 'build'">
-    <PackageReference Include="UnitsNet" Version="5.42.0" />
+    <PackageReference Include="UnitsNet" Version="5.74.0" />
   </ItemGroup>
 
   <PropertyGroup>
-    <MicrosoftNETTestSdkVersion>17.8.0</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>17.13.0</MicrosoftNETTestSdkVersion>
   </PropertyGroup>
 
   <!-- Automatically include these assemblies in all test projects -->
