@@ -5,29 +5,36 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(Configuration)=='Release'">
     <PackageReference Include="Iot.Device.Bindings" Version="3.1.0" />
     <PackageReference Include="System.Device.Gpio" Version="3.1.0" />
     <PackageReference Include="Iot.Device.Bindings.SkiaSharpAdapter" Version="3.1.0" />
   </ItemGroup>
+  
+  <PropertyGroup Condition="$(Configuration)!='Release'">
+    <!-- Defaults to false by base Directory.Builds.props. The name is a bit confusing, as it includes
+    does _not_ include the project references if it is set to true-->
+    <PreferPackageReference>true</PreferPackageReference>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(Configuration)!='Release'">
+    <ProjectReference Include="..\..\src\devices\Common\Common.csproj" />
+    <ProjectReference Include="..\..\src\devices\Board\Board.csproj" />
+    <ProjectReference Include="..\..\src\devices\Nmea0183\Nmea0183.csproj" />
+    <ProjectReference Include="..\..\src\devices\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\src\devices\M5Stack\M5Stack.csproj" />
+    <ProjectReference Include="..\..\src\devices\Gui\Gui.csproj" />
+    <ProjectReference Include="..\..\src\devices\Ft4222\Ft4222.csproj" />
+    <ProjectReference Include="..\..\src\devices\Ili934x\Ili934x.csproj" />
+    <ProjectReference Include="..\..\src\devices\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
-    <None Update="images\Landscape.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="images\MenuBar.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="images\MenuBarLeftMouse.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="images\MenuBarRightMouse.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="images\OpenMenu.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="images\test.png">
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="images\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

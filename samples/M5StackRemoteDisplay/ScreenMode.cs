@@ -15,5 +15,6 @@ namespace Iot.Device.Ili934x.Samples
         Mirror,
         Battery,
         NmeaValue,
+        MainMenu
     }
 }

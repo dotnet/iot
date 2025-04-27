@@ -37,11 +37,14 @@ namespace Iot.Device.Ili934x.Samples
         private readonly BitmapImage _leftMouseMenuBar;
         private readonly BitmapImage _rightMouseMenuBar;
         private readonly BitmapImage _openMenu;
+        private readonly BitmapImage _zoomIn;
+        private readonly BitmapImage _zoomOut;
 
         private readonly ScreenCapture _capture;
-        private readonly string _nmeaSourceAddress;
+        private readonly Arguments _commandLine;
 
-        private bool _menuMode;
+        private bool _overlayMenu;
+        private bool _nightMode;
         private float _left;
         private float _top;
         private float _scale;
@@ -52,35 +55,63 @@ namespace Iot.Device.Ili934x.Samples
         private IPointingDevice _clickSimulator;
         private NmeaTcpClient _tcpClient;
         private SentenceCache _cache;
-
+        private AutoResetEvent _waitForClick;
         private List<NmeaDataSet> _dataSets;
         private int _selectedDataSet;
 
         private bool _forceUpdate;
         private PositionProvider _positionProvider;
+        private AutopilotController _autopilotController;
+        private MessageRouter _messageRouter;
 
-        public RemoteControl(Chsc6440? touch, Ili9342 screen, M5ToughPowerControl? powerControl, IPointingDevice deviceSimulator, ScreenCapture capture, string nmeaSourceAddress)
+        private List<MenuItem> _menuItems;
+        private MenuItem? _menuItemSelected;
+
+        public RemoteControl(Chsc6440? touch, Ili9342 screen, M5ToughPowerControl? powerControl, IPointingDevice deviceSimulator, ScreenCapture capture, Arguments commandLine)
         {
             _touch = touch;
             _screen = screen;
             _powerControl = powerControl;
-            _menuMode = false;
+            _overlayMenu = false;
             _left = 0;
             _top = 0;
             _scale = 1.0f;
+            _waitForClick = new AutoResetEvent(false);
             _screenMode = ScreenMode.Mirror;
             _backLight = ElectricPotential.FromMillivolts(3000);
             _mouseButtonsToPress = MouseButton.None;
             _clickSimulator = deviceSimulator ?? throw new ArgumentNullException(nameof(deviceSimulator));
             _capture = capture;
-            _nmeaSourceAddress = nmeaSourceAddress;
+            _commandLine = commandLine;
             _dataSets = new List<NmeaDataSet>();
             _forceUpdate = true;
+            _menuItemSelected = null;
+            _menuItems = new List<MenuItem>();
+            _nightMode = false;
+            CreateMenuItems();
 
-            _tcpClient = new NmeaTcpClient("TcpClient", nmeaSourceAddress, 10100);
+            _messageRouter = new MessageRouter(new LoggingConfiguration());
+            _tcpClient = new NmeaTcpClient("TcpClient", _commandLine.NmeaServer, _commandLine.NmeaPort);
             _tcpClient.OnNewSequence += OnNewSequence;
-            _cache = new SentenceCache(_tcpClient);
+            _cache = new SentenceCache(_messageRouter);
             _positionProvider = new PositionProvider(_cache);
+
+            _autopilotController = new AutopilotController(_messageRouter, _messageRouter, _cache);
+
+            _messageRouter.AddEndPoint(_tcpClient);
+
+            // The local sink gets everything from the server
+            _messageRouter.AddFilterRule(new FilterRule(_tcpClient.InterfaceName, TalkerId.Any, SentenceId.Any, new List<string>() { _messageRouter.InterfaceName },
+                false, true));
+            // Anything from the local sink (typically output from the Autopilot controller) is only cached for later reuse
+            _messageRouter.AddFilterRule(new FilterRule(_messageRouter.InterfaceName, TalkerId.ElectronicChartDisplayAndInformationSystem, SentenceId.Any, 
+                new List<string>(), (source, destination, before) =>
+                {
+                    _cache.Add(before);
+                    return null;
+                }, true, false));
+
+            _messageRouter.StartDecode();
 
             _dataSets.Add(new NmeaValueDataSet("Speed over Ground", s =>
             {
@@ -94,7 +125,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Speed trough water", s =>
             {
-                if (s.TryGetLastSentence(WaterSpeedAndAngle.Id, out WaterSpeedAndAngle sentence))
+                if (s.TryGetLastSentence(WaterSpeedAndAngle.Id, out WaterSpeedAndAngle? sentence))
                 {
                     return sentence.Speed.ToUnit(SpeedUnit.Knot);
                 }
@@ -114,7 +145,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Heading", s =>
             {
-                if (s.TryGetLastSentence(HeadingTrue.Id, out HeadingTrue sentence))
+                if (s.TryGetLastSentence(HeadingTrue.Id, out HeadingTrue? sentence))
                 {
                     return sentence.Angle;
                 }
@@ -124,7 +155,7 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Depth below Surface", s =>
             {
-                if (s.TryGetLastSentence(DepthBelowSurface.Id, out DepthBelowSurface sentence))
+                if (s.TryGetLastSentence(DepthBelowSurface.Id, out DepthBelowSurface? sentence))
                 {
                     return sentence.Depth.ToUnit(LengthUnit.Meter);
                 }
@@ -134,17 +165,17 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Engine RPM", s =>
             {
-                if (s.TryGetLastDinSentence(SeaSmartEngineFast.HexId, out SeaSmartEngineFast sentence))
+                if (s.TryGetLastDinSentence(SeaSmartEngineFast.HexId, out SeaSmartEngineFast? sentence))
                 {
                     return sentence.RotationalSpeed.ToUnit(RotationalSpeedUnit.RevolutionPerMinute);
                 }
 
                 return null;
-            }));
+            }, "F0"));
 
             _dataSets.Add(new NmeaValueDataSet("Pitch", s =>
             {
-                if (s.TryGetTransducerData("PITCH", out TransducerDataSet set))
+                if (s.TryGetTransducerData("PITCH", out TransducerDataSet? set))
                 {
                     return Angle.FromDegrees(set.Value);
                 }
@@ -154,9 +185,33 @@ namespace Iot.Device.Ili934x.Samples
 
             _dataSets.Add(new NmeaValueDataSet("Roll", s =>
             {
-                if (s.TryGetTransducerData("ROLL", out TransducerDataSet set))
+                if (s.TryGetTransducerData("ROLL", out TransducerDataSet? set))
                 {
                     return Angle.FromDegrees(set.Value);
+                }
+
+                return null;
+            }));
+
+            _dataSets.Add(new NmeaValueDataSet("Distance to WP", s =>
+            {
+                if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination? rmb))
+                {
+                    return rmb.DistanceToWayPoint;
+                }
+
+                return null;
+            }));
+
+            _dataSets.Add(new NmeaValueDataSet("Est Time to WP", s =>
+            {
+                if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination? rmb))
+                {
+                    if (UnitMath.Abs(rmb.ApproachSpeed.GetValueOrDefault(Speed.Zero)) < Speed.FromKnots(0.1))
+                    {
+                        return Duration.FromHours(99);
+                    }
+                    return rmb.DistanceToWayPoint / rmb.ApproachSpeed;
                 }
 
                 return null;
@@ -167,6 +222,8 @@ namespace Iot.Device.Ili934x.Samples
             _rightMouseMenuBar = BitmapImage.CreateFromFile("images/MenuBarRightMouse.png");
             _defaultMenuBar = BitmapImage.CreateFromFile("images/MenuBar.png");
             _openMenu = BitmapImage.CreateFromFile("images/OpenMenu.png");
+            _zoomIn = BitmapImage.CreateFromFile("images/ZoomPlus.png");
+            _zoomOut = BitmapImage.CreateFromFile("images/ZoomMinus.png");
 
             _tcpClient.StartDecode();
         }
@@ -177,43 +234,19 @@ namespace Iot.Device.Ili934x.Samples
             // Console.WriteLine($"Received sentence: {nmeaSentence.ToString()}");
         }
 
-        private void OnTouched(object o, Point point)
+        private void MirrorModeOnTouched(Point point)
         {
-            Debug.WriteLine($"Touched screen at {point}");
-            _powerControl?.Beep(TimeSpan.FromMilliseconds(20));
-            // For the coordinates here, see the MenuBar.png file
-            if (_menuMode && point.Y < 100)
+            if (_overlayMenu)
             {
-                if (point.X > 222)
+                if (point.Y >= 100)
                 {
-                    _menuMode = false;
-                    _screenMode = ScreenMode.Mirror;
-                    Debug.WriteLine("Changed to mirror mode");
+                    _overlayMenu = false;
                 }
-                else if (point.Y < 50 && point.X > 100 && point.X < 160)
+                else if (point.X > 222)
                 {
-                    _screenMode = ScreenMode.Battery;
-                    Debug.WriteLine("Changed to battery status mode");
-                    _mouseButtonsToPress = MouseButton.None;
-                    _menuMode = false;
-                }
-                else if (point.Y < 50 && point.X >= 160 && point.X < 220)
-                {
+                    _overlayMenu = false;
                     _screenMode = ScreenMode.NmeaValue;
-                    Debug.WriteLine("Changed to NMEA display mode");
-                    _mouseButtonsToPress = MouseButton.None;
                     _forceUpdate = true;
-                    _menuMode = false;
-                }
-                else if (point.Y > 50 && point.X > 100 && point.X < 160)
-                {
-                    _scale /= 1.1f;
-                    Debug.WriteLine($"Changed scale to {_scale}");
-                }
-                else if (point.Y > 50 && point.X > 160 && point.X < 220)
-                {
-                    _scale *= 1.1f;
-                    Debug.WriteLine($"Changed scale to {_scale}");
                 }
                 else if (point.X < 100)
                 {
@@ -230,29 +263,96 @@ namespace Iot.Device.Ili934x.Samples
                         _mouseButtonsToPress = MouseButton.Left;
                     }
 
-                    Debug.WriteLine($"Mouse mode: {_mouseButtonsToPress}");
+                    Console.WriteLine($"Mouse mode: {_mouseButtonsToPress}");
+                }
+                else
+                {
+                    _overlayMenu = false;
+                    _menuItemSelected = null;
+                    _screenMode = ScreenMode.MainMenu;
+                    _forceUpdate = true;
                 }
             }
             else
             {
-                if (point.X > _screen.ScreenWidth - 30 && point.Y < 30)
+                if (OpenOverlayClicked(point))
                 {
-                    _menuMode = true;
+                    _overlayMenu = true;
                     return;
                 }
 
-                if (_screenMode == ScreenMode.Mirror)
+                if (point.Y < _zoomOut.Height && point.X < _zoomOut.Width)
                 {
-                    if (_mouseButtonsToPress != MouseButton.None)
-                    {
-                        var pt = ToAbsoluteScreenPosition(point);
-                        _clickSimulator.MoveTo(pt.X, pt.Y);
-                    }
+                    _scale = _scale / 1.5f;
                 }
-                else if (_screenMode == ScreenMode.NmeaValue)
+                else if (point.Y < _zoomOut.Height && point.X < 2 * _zoomOut.Width)
+                {
+                    _scale = _scale * 1.5f;
+                }
+                else if (_mouseButtonsToPress != MouseButton.None)
+                {
+                    var pt = ToAbsoluteScreenPosition(point);
+                    _clickSimulator.MoveTo(pt.X, pt.Y);
+                    _clickSimulator.Click(_mouseButtonsToPress);
+                }
+            }
+        }
+
+        private bool OpenOverlayClicked(Point point)
+        {
+            return point.X > _screen.ScreenWidth - 30 && point.Y < 30;
+        }
+
+        private void OnTouched(object o, Point point)
+        {
+            Console.WriteLine($"Touched screen at {point}");
+            _powerControl?.Beep(TimeSpan.FromMilliseconds(20));
+            _waitForClick.Set();
+            // For the coordinates here, see the MenuBar.png file
+            if (_screenMode == ScreenMode.Mirror)
+            {
+                MirrorModeOnTouched(point);
+                return;
+            }
+            if (_screenMode == ScreenMode.NmeaValue)
+            {
+                if (OpenOverlayClicked(point))
+                {
+                    _screenMode = ScreenMode.Mirror;
+                    return;
+                }
+                if (point.X > _screen.ScreenWidth / 2)
                 {
                     _selectedDataSet = (_selectedDataSet + 1) % _dataSets.Count;
                     _forceUpdate = true;
+                }
+                else if (point.X < _screen.ScreenWidth / 2)
+                {
+                    _selectedDataSet = (_selectedDataSet) > 0 ? _selectedDataSet - 1 : _dataSets.Count - 1;
+                    _forceUpdate = true;
+                }
+            }
+
+            if (_screenMode == ScreenMode.Battery)
+            {
+                if (OpenOverlayClicked(point))
+                {
+                    _screenMode = ScreenMode.Mirror;
+                    return;
+                }
+            }
+
+            if (_screenMode == ScreenMode.MainMenu)
+            {
+                foreach (var item in _menuItems)
+                {
+                    if (item.Rectangle.Contains(point))
+                    {
+                        _menuItemSelected = item;
+                        item.OnTouched();
+                        _menuItemSelected = null;
+                        return;
+                    }
                 }
             }
         }
@@ -315,18 +415,19 @@ namespace Iot.Device.Ili934x.Samples
         public void DecreaseBrightness()
         {
             _backLight = _backLight - ElectricPotential.FromMillivolts(200);
+            // Don't go down until the backlight switches off (won't be able to recover)
+            _backLight = UnitsNet.UnitMath.Clamp(_backLight, ElectricPotential.FromMillivolts(1800), ElectricPotential.FromMillivolts(3300));
             if (_powerControl != null)
             {
                 _powerControl.SetLcdVoltage(_backLight);
             }
         }
 
-        public void DisplayFeatures()
+        public void Run()
         {
             StartupDisplay();
 
             bool abort = false;
-            Point dragBegin = Point.Empty;
 
             var backBuffer = _screen.GetBackBufferCompatibleImage();
 
@@ -346,6 +447,9 @@ namespace Iot.Device.Ili934x.Samples
                 };
             }
 
+            TimeSpan minTimeBetweenFrames = TimeSpan.FromMilliseconds(100);
+            _menuItemSelected = null;
+            CreateMenuItems();
             while (!abort)
             {
                 Stopwatch sw = Stopwatch.StartNew();
@@ -355,26 +459,28 @@ namespace Iot.Device.Ili934x.Samples
                 {
                     case ScreenMode.Mirror:
                         DrawScreenContents(backBuffer, _capture, _scale, ref _left, ref _top);
+                        minTimeBetweenFrames = TimeSpan.FromMilliseconds(100);
                         break;
                     case ScreenMode.Battery:
                         backBuffer.Clear();
                         DrawPowerStatus(backBuffer);
+                        minTimeBetweenFrames = TimeSpan.FromSeconds(1);
                         break;
                     case ScreenMode.NmeaValue:
-                        if (!DrawNmeaValue(backBuffer, _menuMode || _forceUpdate))
-                        {
-                            Thread.Sleep(100);
-                            continue;
-                        }
-
+                        DrawNmeaValue(backBuffer, _forceUpdate);
+                        minTimeBetweenFrames = TimeSpan.FromMilliseconds(500);
                         _forceUpdate = false;
+                        break;
+                    case ScreenMode.MainMenu:
+                        DrawMenuEntries(backBuffer, _menuItemSelected);
+                        minTimeBetweenFrames = TimeSpan.FromMilliseconds(2000);
                         break;
                     default:
                         _screen.ClearScreen();
                         break;
                 }
 
-                if (_menuMode)
+                if (_overlayMenu)
                 {
                     BitmapImage bm = _defaultMenuBar;
                     if (_mouseButtonsToPress == MouseButton.Left)
@@ -388,24 +494,56 @@ namespace Iot.Device.Ili934x.Samples
 
                     backBuffer.GetDrawingApi().DrawImage(bm, 0, 0);
                 }
-                else
+                else if (_screenMode != ScreenMode.MainMenu)
                 {
                     // Draw the "open menu here" icon over the top right of the screen.
                     backBuffer.GetDrawingApi().DrawImage(_openMenu, new Rectangle(0, 0, _openMenu.Width, _openMenu.Height), new Rectangle(_screen.ScreenWidth - _openMenu.Width, 0, _openMenu.Width, _openMenu.Height));
                 }
 
-                _screen.DrawBitmap(backBuffer);
+                if (_commandLine.FlipScreen)
+                {
+                    var rotated = backBuffer.Rotate(180);
+                    _screen.DrawBitmap(rotated);
+                    rotated.Dispose();
+                }
+                else
+                {
+                    _screen.DrawBitmap(backBuffer);
+                }
+
                 double fps = 0;
                 if (_screen is Ili9341 ili)
                 {
                     fps = ili.Fps;
+                    Console.Write($"\rFPS: {fps:F1}     ");
                 }
-                Console.WriteLine($"\rFPS: {fps}");
-                // This typically happens if nothing needs to be done (the screen didn't change)
-                if (fps > 10)
+                _waitForClick.WaitOne(minTimeBetweenFrames);
+            }
+        }
+
+        private void CreateMenuItems()
+        {
+            _menuItems.Clear();
+            int itemHeight = 36;
+            _menuItems.Add(new MenuItem(() => _nightMode ? "Clear Night mode" : "Set Night Mode", new Rectangle(0, 0, _screen.ScreenWidth - 1, itemHeight), false, () => { _nightMode = !_nightMode; }));
+            _menuItems.Add(new MenuItem(() => "Increase Brightness", new Rectangle(0, itemHeight, _screen.ScreenWidth - 1, itemHeight), false, IncreaseBrightness));
+            _menuItems.Add(new MenuItem(() => "Decrease Brightness", new Rectangle(0, 2 * itemHeight, _screen.ScreenWidth - 1, itemHeight), false, DecreaseBrightness));
+            _menuItems.Add(new MenuItem(() => "Exit Menu", new Rectangle(0, _screen.ScreenHeight - itemHeight - 1, _screen.ScreenWidth - 1, itemHeight), false, () => { _screenMode = ScreenMode.Mirror; }));
+        }
+
+        private void DrawMenuEntries(BitmapImage backBuffer, MenuItem? selectedItem)
+        {
+            backBuffer.Clear();
+            foreach (var item in _menuItems)
+            {
+                string font = GetDefaultFontName();
+                backBuffer.GetDrawingApi().DrawRectangle(item.Rectangle, Color.FromArgb(67, 188, 228));
+                if (selectedItem == item)
                 {
-                    Thread.Sleep(100);
+                    backBuffer.GetDrawingApi().FillRectangle(item.Rectangle, Color.LightYellow);
                 }
+
+                backBuffer.GetDrawingApi().DrawText(item.Text(), font, item.Rectangle.Height - 6, Color.Blue, new Point(0, item.Rectangle.Y + 1));
             }
         }
 
@@ -460,27 +598,41 @@ namespace Iot.Device.Ili934x.Samples
                 top = pt.Y;
 
                 buffer.GetDrawingApi().DrawImage(resizedBitmap, -pt.X, -pt.Y);
+                buffer.GetDrawingApi().DrawImage(_zoomOut, 0, 0);
+                buffer.GetDrawingApi().DrawImage(_zoomIn, _zoomOut.Width, 0);
                 bmp.Dispose();
             }
         }
 
         private bool DrawNmeaValue(BitmapImage targetBuffer, bool force)
         {
+            const int leftOffset = 20;
             var data = _dataSets[_selectedDataSet];
             if (data.Update(_cache, 1E-2) || force)
             {
-                targetBuffer.Clear(Color.White);
+                if (_nightMode)
+                {
+                    targetBuffer.Clear(Color.Black);
+                }
+                else
+                {
+                    targetBuffer.Clear(Color.White);
+                }
+
                 using var g = targetBuffer.GetDrawingApi();
                 string font = GetDefaultFontName();
-                g.DrawText(data.Value, font, 110, Color.Blue, new Point(20, 30));
-                g.DrawText(data.Name, font, 20, Color.Blue, new Point(10, 5));
-                g.DrawText(data.Unit, font, 20, Color.Blue, new Point(_screen.ScreenWidth / 2, _screen.ScreenHeight - 33));
-
+                var size = g.MeasureText(data.Value, font, 110);
+                int actualSize = 110;
+                if (size.Width + leftOffset > _screen.ScreenWidth)
+                {
+                    float ratio = size.Width / (_screen.ScreenWidth - leftOffset);
+                    actualSize = (int)(actualSize / ratio);
+                }
+                g.DrawText(data.Value, font, actualSize, Color.Blue, new Point(20, 30));
+                g.DrawText(data.Name, font, 30, Color.Blue, new Point(10, 5));
+                g.DrawText(data.Unit, font, 30, Color.Blue, new Point(_screen.ScreenWidth / 2, _screen.ScreenHeight - 33));
+                // Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff}: {data.Name} {data.Value} {data.Unit}");
                 return true;
-            }
-            else
-            {
-                targetBuffer.Clear(Color.White);
             }
 
             return false;
@@ -488,7 +640,11 @@ namespace Iot.Device.Ili934x.Samples
 
         private void StartupDisplay()
         {
-            using var image = BitmapImage.CreateFromFile(@"images/Landscape.png");
+            var image = BitmapImage.CreateFromFile(@"images/Landscape.png");
+            if (_commandLine.FlipScreen)
+            {
+                image = image.Rotate(180);
+            }
             using var backBuffer = _screen.GetBackBufferCompatibleImage();
             for (int i = 1; i < 20; i++)
             {
@@ -510,12 +666,11 @@ namespace Iot.Device.Ili934x.Samples
                 Thread.Sleep(100);
             }
 
+            image.Dispose();
             if (Console.KeyAvailable)
             {
                 Console.ReadKey(true);
             }
-
-            Thread.Sleep(500);
         }
 
         private String GetDefaultFontName()
@@ -543,8 +698,14 @@ namespace Iot.Device.Ili934x.Samples
 
         public void Dispose()
         {
+            _messageRouter.Dispose();
+            _autopilotController.Dispose();
             _tcpClient.StopDecode();
             _tcpClient.Dispose();
+        }
+
+        private sealed record MenuItem(Func<string> Text, Rectangle Rectangle, bool Selected, Action OnTouched)
+        {
         }
     }
 }
