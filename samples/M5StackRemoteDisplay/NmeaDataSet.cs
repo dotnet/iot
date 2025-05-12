@@ -18,16 +18,25 @@ namespace Iot.Device.Ili934x.Samples
             Name = name;
         }
 
+        /// <summary>
+        /// The name of the data item
+        /// </summary>
         public string Name
         {
             get;
         }
 
+        /// <summary>
+        /// The current value of the data item
+        /// </summary>
         public abstract string Value
         {
             get;
         }
 
+        /// <summary>
+        /// The printable unit string of the data item
+        /// </summary>
         public abstract string Unit
         {
             get;

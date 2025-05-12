@@ -215,7 +215,7 @@ namespace Iot.Device.Nmea0183
         {
             bool passedWp = false;
             RecommendedMinimumNavToDestination? currentLeg = null;
-            if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination currentLeg1)
+            if (_cache.TryGetLastSentence(RecommendedMinimumNavToDestination.Id, out RecommendedMinimumNavToDestination? currentLeg1)
                 && currentLeg1.Valid)
             {
                 passedWp = currentLeg1.Arrived;
@@ -237,11 +237,11 @@ namespace Iot.Device.Nmea0183
 
             if (_activeDeviation == null || loops % 100 == 0)
             {
-                if (!_cache.TryGetLastSentence(HeadingAndDeclination.Id, out HeadingAndDeclination deviation) ||
+                if (!_cache.TryGetLastSentence(HeadingAndDeclination.Id, out HeadingAndDeclination? deviation) ||
                     !deviation.Declination.HasValue)
                 {
                     if (!_cache.TryGetLastSentence(RecommendedMinimumNavigationInformation.Id,
-                        out RecommendedMinimumNavigationInformation rmc) || !rmc.MagneticVariationInDegrees.HasValue)
+                        out RecommendedMinimumNavigationInformation? rmc) || !rmc.MagneticVariationInDegrees.HasValue)
                     {
                         if (loops % LogSkip == 0)
                         {
