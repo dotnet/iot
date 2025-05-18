@@ -226,6 +226,11 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
+        /// Provides access to the positioning provider for the AIS manager
+        /// </summary>
+        public PositionProvider PositionProvider => _positionProvider;
+
+        /// <summary>
         /// Gets the data of the own ship (including position and movement vectors) as a ship structure.
         /// </summary>
         /// <param name="ownShip">Receives the data about the own ship</param>

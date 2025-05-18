@@ -124,6 +124,7 @@ namespace Iot.Device.Nmea0183
             }
             else
             {
+                _internalParser.LastPacketTime = DateTime.UnixEpoch; // Long ago
                 _internalParser.OnNewSequence += ForwardDecoded;
             }
 
@@ -149,18 +150,22 @@ namespace Iot.Device.Nmea0183
 
         private bool DoForwardSequence(NmeaSentence sentence)
         {
-            if (sentence is RawSentence &&
-                (sentence.SentenceId == TimeDate.Id ||
-                 sentence.SentenceId == RecommendedMinimumNavigationInformation.Id ||
-                 sentence.SentenceId == BearingAndDistanceToWayPoint.Id ||
-                 sentence.SentenceId == GlobalPositioningSystemFixData.Id ||
-                 sentence.SentenceId == PositionFastUpdate.Id))
+            // If this is false, parse all messages with their original time stamps
+            if (DecodeInRealtime)
             {
-                // Do not forward these raw sentences, as these can only be used with a patched time.
-                return false;
-            }
+                if (sentence is RawSentence &&
+                    (sentence.SentenceId == TimeDate.Id ||
+                     sentence.SentenceId == RecommendedMinimumNavigationInformation.Id ||
+                     sentence.SentenceId == BearingAndDistanceToWayPoint.Id ||
+                     sentence.SentenceId == GlobalPositioningSystemFixData.Id ||
+                     sentence.SentenceId == PositionFastUpdate.Id))
+                {
+                    // Do not forward these raw sentences, as these can only be used with a patched time.
+                    return false;
+                }
 
-            sentence.DateTime = DateTime.UtcNow;
+                sentence.DateTime = DateTime.UtcNow;
+            }
 
             return true;
         }
