@@ -164,6 +164,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void FillCacheAndTest()
         {
             using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
+            _provider.Cache.MaxDataAge = TimeSpan.FromDays(10000);
             reader.OnNewSequence += (source, msg) =>
             {
                 _cache.Add(msg);
