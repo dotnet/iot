@@ -4,20 +4,14 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup Condition="$(Configuration)=='Release'">
-    <PackageReference Include="Iot.Device.Bindings" Version="3.1.0" />
-    <PackageReference Include="System.Device.Gpio" Version="3.1.0" />
-    <PackageReference Include="Iot.Device.Bindings.SkiaSharpAdapter" Version="3.1.0" />
-  </ItemGroup>
   
-  <PropertyGroup Condition="$(Configuration)!='Release'">
-    <!-- Defaults to false by base Directory.Builds.props. The name is a bit confusing, as it includes
+  <PropertyGroup>
+    <!-- Defaults to false by base Directory.Builds.props. The name is a bit confusing, as it
     does _not_ include the project references if it is set to true-->
     <PreferPackageReference>true</PreferPackageReference>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(Configuration)!='Release'">
+  <ItemGroup>
     <ProjectReference Include="..\..\src\devices\Common\Common.csproj" />
     <ProjectReference Include="..\..\src\devices\Board\Board.csproj" />
     <ProjectReference Include="..\..\src\devices\Nmea0183\Nmea0183.csproj" />
