@@ -52,6 +52,7 @@ namespace Iot.Device.Nmea0183
             knownSentences[RudderSensorAngle.Id] = (sentence, time) => new RudderSensorAngle(sentence, time);
             knownSentences[HeadingAndTrackControl.Id] = (sentence, time) => new HeadingAndTrackControl(sentence, time);
             knownSentences[HeadingAndTrackControlStatus.Id] = (sentence, time) => new HeadingAndTrackControlStatus(sentence, time);
+            knownSentences[EstimatedAccuracy.Id] = (sentence, time) => new EstimatedAccuracy(sentence, time);
             knownSentences[ProprietaryMessage.Id] = (sentence, time) =>
             {
                 var specificMessageId = sentence.Fields.FirstOrDefault();

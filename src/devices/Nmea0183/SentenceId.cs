@@ -17,6 +17,16 @@ namespace Iot.Device.Nmea0183
         public static SentenceId Any => new SentenceId("*");
 
         /// <summary>
+        /// Ais sentence from our own ship (or about or own ship)
+        /// </summary>
+        public static SentenceId Vdo => new SentenceId("VDO");
+
+        /// <summary>
+        /// Ais sentences from any other ship
+        /// </summary>
+        public static SentenceId Vdm => new SentenceId("VDM");
+
+        /// <summary>
         /// The sentence Id, typically a 3-letter code
         /// </summary>
         public string Id { get; init; }

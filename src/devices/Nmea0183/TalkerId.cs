@@ -308,5 +308,10 @@ namespace Iot.Device.Nmea0183
         /// Seatalk messages wrapped up as NMEA data should always be prefixed $STALK
         /// </summary>
         public static TalkerId Seatalk => new TalkerId('S', 'T');
+
+        /// <summary>
+        /// Garmin proprietary sentences
+        /// </summary>
+        public static TalkerId GarminProprietary => new TalkerId('P', 'G');
     }
 }
