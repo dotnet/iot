@@ -35,6 +35,57 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
         }
 
         /// <summary>
+        /// Draws a non-filled rectangle to the target
+        /// </summary>
+        /// <param name="graphics">The graphics object</param>
+        /// <param name="rectangle">The extent of the rectangle</param>
+        /// <param name="color">The color</param>
+        /// <param name="strokeWidth">Width of the border</param>
+        public static void DrawRectangle(this IGraphics graphics, Rectangle rectangle, Color color, int strokeWidth = 1)
+        {
+            var canvas = GetCanvas(graphics);
+            var paint = new SKPaint();
+            paint.Color = new SKColor((uint)color.ToArgb());
+            paint.StrokeWidth = strokeWidth;
+            paint.Style = SKPaintStyle.Stroke;
+            canvas.DrawRect(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, paint);
+        }
+
+        /// <summary>
+        /// Draws a filled rectangle to the target
+        /// </summary>
+        /// <param name="graphics">The graphics object</param>
+        /// <param name="rectangle">The extent of the rectangle</param>
+        /// <param name="fillColor">The color</param>
+        public static void FillRectangle(this IGraphics graphics, Rectangle rectangle, Color fillColor)
+        {
+            var canvas = GetCanvas(graphics);
+            var paint = new SKPaint();
+            paint.Color = new SKColor((uint)fillColor.ToArgb());
+            paint.Style = SKPaintStyle.Fill;
+            canvas.DrawRect(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, paint);
+        }
+
+        /// <summary>
+        /// Computes the size of the provided text without actually drawing it.
+        /// </summary>
+        /// <param name="graphics">The target object</param>
+        /// <param name="text">The text to render</param>
+        /// <param name="fontFamilyName">The font</param>
+        /// <param name="size">The height of the text</param>
+        /// <returns>The size of the string when rendered</returns>
+        public static SizeF MeasureText(this IGraphics graphics, string text, string fontFamilyName, int size)
+        {
+            var canvas = GetCanvas(graphics);
+            SKFont fnt = new SKFont(SKTypeface.FromFamilyName(fontFamilyName), size);
+            var paint = new SKPaint(fnt);
+            paint.TextAlign = SKTextAlign.Left;
+            paint.TextEncoding = SKTextEncoding.Utf16;
+            float width = paint.MeasureText(text);
+            return new SizeF(width, size);
+        }
+
+        /// <summary>
         /// Draws text to the bitmap
         /// </summary>
         public static void DrawText(this IGraphics graphics, string text, string fontFamilyName, int size, Color color, Point position)
@@ -72,6 +123,48 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
             var sourceBmp = (SkiaSharpBitmap)source;
             var targetCanvas = GetCanvas(graphics);
             targetCanvas.DrawBitmap(sourceBmp.WrappedBitmap, x, y, null);
+        }
+
+        /// <summary>
+        /// Rotates the specified bitmap by the given angle, returns a new bitmap
+        /// </summary>
+        /// <param name="source">The source image</param>
+        /// <param name="angle">The angle to rotate, in degrees</param>
+        /// <returns>A rotated bitmap</returns>
+        /// <exception cref="NotSupportedException">The input bitmap is not a SkiaSharpBitmap</exception>
+        public static BitmapImage Rotate(this BitmapImage source, double angle)
+        {
+            if (!(source is SkiaSharpBitmap img))
+            {
+                throw new NotSupportedException("Not a valid source image for this operation");
+            }
+
+            double radians = Math.PI * angle / 180;
+            float sine = (float)Math.Abs(Math.Sin(radians));
+            float cosine = (float)Math.Abs(Math.Cos(radians));
+            int originalWidth = source.Width;
+            int originalHeight = source.Height;
+            int rotatedWidth = (int)(cosine * originalWidth + sine * originalHeight);
+            int rotatedHeight = (int)(cosine * originalHeight + sine * originalWidth);
+
+            SKBitmap rotatedBitmap = new(rotatedWidth, rotatedHeight, img.WrappedBitmap.ColorType, img.WrappedBitmap.AlphaType);
+            using (SKCanvas canvas = new(rotatedBitmap))
+            {
+                canvas.Clear();
+                canvas.Translate(rotatedWidth / 2.0f, rotatedHeight / 2.0f);
+                canvas.RotateDegrees((float)angle);
+                canvas.Translate(-originalWidth / 2.0f, -originalHeight / 2.0f);
+                canvas.DrawBitmap(img.WrappedBitmap, new SKPoint());
+            }
+
+            PixelFormat pf = img.WrappedBitmap.ColorType switch
+            {
+                SKColorType.Bgra8888 => PixelFormat.Format32bppArgb,
+                SKColorType.Rgb888x => PixelFormat.Format32bppXrgb,
+                _ => PixelFormat.Format32bppArgb,
+            };
+
+            return new SkiaSharpBitmap(rotatedBitmap, pf);
         }
 
         /// <summary>

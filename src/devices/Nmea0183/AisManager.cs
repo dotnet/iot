@@ -226,6 +226,11 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
+        /// Provides access to the positioning provider for the AIS manager
+        /// </summary>
+        public PositionProvider PositionProvider => _positionProvider;
+
+        /// <summary>
         /// Gets the data of the own ship (including position and movement vectors) as a ship structure.
         /// </summary>
         /// <param name="ownShip">Receives the data about the own ship</param>
@@ -995,7 +1000,7 @@ namespace Iot.Device.Nmea0183
                     {
                         // Warn if the ship will be closer than the warning distance in less than the WarningTime
                         SendWarningMessage(new AisMessageId(AisWarningType.DangerousVessel, difference.To.Mmsi), difference.To.Mmsi,
-                            $"PROXIMITY WARN: CPA {cpa.Value.NauticalMiles:F2}; TCPA {tcpa.Value:mm\\:ss}",
+                            $"CPA {cpa.Value.NauticalMiles:F2}; TCPA {tcpa.Value:mm\\:ss}",
                             time, difference.To);
                     }
 

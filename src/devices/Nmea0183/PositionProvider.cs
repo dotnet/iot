@@ -49,6 +49,11 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
+        /// Provides access to the underlying sentence cache
+        /// </summary>
+        public SentenceCache Cache => _cache;
+
+        /// <summary>
         /// Get the current position from the latest message containing any of the relevant data parts. This does not extrapolate the position
         /// if the last received message is old
         /// </summary>

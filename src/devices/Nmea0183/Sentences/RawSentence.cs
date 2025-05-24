@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Iot.Device.Nmea0183.Ais;
 
 namespace Iot.Device.Nmea0183.Sentences
 {
@@ -30,6 +31,17 @@ namespace Iot.Device.Nmea0183.Sentences
         /// This is false for this message type
         /// </summary>
         public override bool ReplacesOlderInstance => false;
+
+        /// <summary>
+        /// Returns true if this is an AIS sentence (AIVDM or AIVDO)
+        /// </summary>
+        public bool IsAisSentence
+        {
+            get
+            {
+                return TalkerId == TalkerId.Ais && (SentenceId == AisParser.VdmId || SentenceId == AisParser.VdoId);
+            }
+        }
 
         internal string[] Fields => _fields;
 

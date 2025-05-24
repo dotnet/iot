@@ -26,6 +26,10 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         public AisManagerTest()
         {
             _manager = new AisManager("Test", true, 269110660u, "Cirrus");
+
+            // Our test data isn't _that_ old.
+            // We need to disable this test when replaying data with their original time stamps
+            _manager.PositionProvider.Cache.MaxDataAge = TimeSpan.FromDays(10000);
         }
 
         public void Dispose()
@@ -158,9 +162,9 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         }
 
         [Theory]
-        [InlineData(600, 1852, 20)] // Default settings
+        [InlineData(600, 1852, 18)] // Default settings
         [InlineData(600, 0, 0)] // Warning distance zero -> No warnings
-        [InlineData(10, 1852, 39)] // Very short warning timeout -> Many warnings
+        [InlineData(10, 1852, 34)] // Very short warning timeout -> Many warnings
         public void CheckSafetyPermanently(int warningRepeatSeconds, int warningDistance, int expectedWarningCount)
         {
             // This does a safety check all the time. Very expensive...
@@ -185,7 +189,8 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             reader.OnNewSequence += (source, msg) =>
             {
                 _manager.SendSentence(source, msg);
-                if (msg.SentenceId == new SentenceId("VDM"))
+                // Do the test when we find VDM sequences, but ignore anything until we have a valid time sync for the data
+                if (msg.SentenceId == new SentenceId("VDM") && msg.DateTime.Year > 1970)
                 {
                     // This is a big number that misses some dangerous encounters, but causes the test to end in reasonable time (10s instead of 22s)
                     if ((msgCount++ % 60) == 0)
@@ -212,7 +217,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             Assert.False(ship!.IsEstimate);
             Assert.NotNull(ship.RelativePosition);
             Assert.True(ship.RelativePosition!.From.Name == "Cirrus");
-            Assert.Equal(8260.2, ship.RelativePosition.Distance.Meters, 1);
+            Assert.Equal(8258.7, ship.RelativePosition.Distance.Meters, 1);
         }
 
         [Fact]

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.VisualBasic;
 
 namespace Iot.Device.Nmea0183
 {
@@ -22,6 +23,7 @@ namespace Iot.Device.Nmea0183
         private readonly IEnumerable<(string Name, Stream? Alternate)> _filesToRead;
         private DateTimeOffset? _referenceTimeInLog;
         private DateTimeOffset? _referenceTimeNow;
+        private DateTimeOffset _sentenceTimeLast = new DateTimeOffset(0, TimeSpan.Zero);
         private NmeaParser? _internalParser;
         private ManualResetEvent? _doneEvent;
 
@@ -98,10 +100,20 @@ namespace Iot.Device.Nmea0183
             set;
         }
 
+        /// <summary>
+        /// Loop until aborted. Only effective if set before calling <see cref="StartDecode"/>.
+        /// </summary>
+        public bool Loop
+        {
+            get;
+            set;
+        }
+
         /// <inheritdoc />
         public override void StartDecode()
         {
             var ms = new FileSetStream(_filesToRead);
+            ms.Loop = Loop;
             _doneEvent = new ManualResetEvent(false);
             _internalParser = new NmeaParser(InterfaceName, ms, null);
             _internalParser.SupportLogReading = true;
@@ -112,6 +124,7 @@ namespace Iot.Device.Nmea0183
             }
             else
             {
+                _internalParser.LastPacketTime = DateTime.UnixEpoch; // Long ago
                 _internalParser.OnNewSequence += ForwardDecoded;
             }
 
@@ -127,12 +140,46 @@ namespace Iot.Device.Nmea0183
 
         private void ForwardDecoded(NmeaSinkAndSource source, NmeaSentence sentence)
         {
+            if (!DoForwardSequence(sentence))
+            {
+                return;
+            }
+
             DispatchSentenceEvents(source, sentence);
+        }
+
+        private bool DoForwardSequence(NmeaSentence sentence)
+        {
+            // If this is false, parse all messages with their original time stamps
+            if (DecodeInRealtime)
+            {
+                if (sentence is RawSentence &&
+                    (sentence.SentenceId == TimeDate.Id ||
+                     sentence.SentenceId == RecommendedMinimumNavigationInformation.Id ||
+                     sentence.SentenceId == BearingAndDistanceToWayPoint.Id ||
+                     sentence.SentenceId == GlobalPositioningSystemFixData.Id ||
+                     sentence.SentenceId == PositionFastUpdate.Id))
+                {
+                    // Do not forward these raw sentences, as these can only be used with a patched time.
+                    return false;
+                }
+
+                sentence.DateTime = DateTime.UtcNow;
+            }
+
+            return true;
         }
 
         private void ForwardDecodedRealTime(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             var now = DateTimeOffset.UtcNow;
+            bool firstRound = false;
+
+            if (!DoForwardSequence(sentence))
+            {
+                return;
+            }
+
             if (_referenceTimeInLog == null)
             {
                 if (sentence.SentenceId != TimeDate.Id || sentence.Valid == false)
@@ -143,6 +190,15 @@ namespace Iot.Device.Nmea0183
 
                 _referenceTimeInLog = sentence.DateTime;
                 _referenceTimeNow = now;
+                firstRound = true;
+            }
+
+            if (sentence.SentenceId == TimeDate.Id && (_sentenceTimeLast - sentence.DateTime).Duration() > TimeSpan.FromSeconds(30) && !firstRound)
+            {
+                // Resync - input stream has restarted (otherwise, the waitTime below would become zero
+                // for every message now following, which floods the clients with messages)
+                _referenceTimeInLog = null;
+                return;
             }
 
             // var timeThatHasPassedNow = DateTimeOffset.UtcNow - _referenceTimeNow;
@@ -155,6 +211,11 @@ namespace Iot.Device.Nmea0183
             {
                 // Just block until the time is reached.
                 Thread.Sleep(waitTime.Value);
+            }
+
+            if (sentence.SentenceId == TimeDate.Id)
+            {
+                _sentenceTimeLast = sentence.DateTime;
             }
 
             sentence.DateTime = now;

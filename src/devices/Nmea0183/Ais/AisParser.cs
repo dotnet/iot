@@ -218,8 +218,7 @@ namespace Iot.Device.Nmea0183.Ais
 
         private bool IsValidAisSentence(RawSentence rs)
         {
-            return rs.Valid && rs.Fields.Length == 6 && (rs.SentenceId == VdoId || rs.SentenceId == VdmId) &&
-                   rs.TalkerId == TalkerId.Ais;
+            return rs.Valid && rs.Fields.Length == 6 && rs.IsAisSentence;
         }
 
         private Payload? DecodePayload(string encodedPayload, int numFragments, int fragmentNumber, int messageId, int numFillBits)
