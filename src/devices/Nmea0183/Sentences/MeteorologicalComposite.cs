@@ -172,7 +172,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                return $"Pressure: {BarometricPressure.GetValueOrDefault(Pressure.Zero).As(PressureUnit.Hectopascal)}, Air Temp: {AirTemperature.GetValueOrDefault(Temperature.Zero)}, " +
+                return $"Pressure: {BarometricPressure.GetValueOrDefault(Pressure.Zero).ToUnit(PressureUnit.Hectopascal)}, Air Temp: {AirTemperature.GetValueOrDefault(Temperature.Zero)}, " +
                        $"Water temp: {WaterTemperature.GetValueOrDefault(Temperature.Zero)}, Dew Point: {DewPoint.GetValueOrDefault(Temperature.Zero)}";
             }
 

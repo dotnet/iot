@@ -41,6 +41,16 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void CanDecodeAllMessageTypesInExample()
         {
+            List<SentenceId> uninterestingSentenceTypes = new List<SentenceId>()
+            {
+                new SentenceId("GSA"), // List of satellites in use (superseded by GSV)
+                new SentenceId("RMM"), // Garmin proprietary: Map datum (probably always "WGS 84")
+                new SentenceId("MTW"), // Water temperature. Could be implemented, but is usually superseded by MDA
+                new SentenceId("RMZ"), // Garmin proprietary: Altitude (included in GGA)
+                new SentenceId("VWR"), // Relative Wind Speed (use MWV instead)
+                new SentenceId("VWT"), // True wind speed (use MWV instead)
+            };
+
             using NmeaLogDataReader reader = new NmeaLogDataReader("Reader",
             new[]
             {
@@ -48,6 +58,7 @@ namespace Iot.Device.Nmea0183.Tests
                 TestDataHelper.GetResourceStream("Nmea-2023-10-22-13-39.txt")
             });
             DateTimeOffset latestPacketDate = default;
+            HashSet<SentenceId> unknownSentenceTypes = new HashSet<SentenceId>();
             reader.OnNewSequence += (source, msg) =>
             {
                 TalkerSentence ts = new TalkerSentence(msg);
@@ -55,12 +66,17 @@ namespace Iot.Device.Nmea0183.Tests
                 Assert.True(sentence != null, $"Unable to decode {msg}, type {msg.TalkerId}{msg.SentenceId}");
                 if (sentence is RawSentence rs)
                 {
-                    Assert.True(rs.IsAisSentence, $"Found sentence {rs} which is raw but not an AIS sentence. May need decoding.");
+                    if (!rs.IsAisSentence && !uninterestingSentenceTypes.Contains(rs.SentenceId))
+                    {
+                        unknownSentenceTypes.Add(rs.SentenceId);
+                    }
                 }
             };
 
             reader.StartDecode();
             reader.StopDecode();
+
+            Assert.Empty(unknownSentenceTypes);
         }
     }
 }
