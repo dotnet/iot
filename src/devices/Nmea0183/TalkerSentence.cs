@@ -31,6 +31,7 @@ namespace Iot.Device.Nmea0183
             knownSentences[HeadingMagnetic.Id] = (sentence, time) => new HeadingMagnetic(sentence, time);
             knownSentences[CrossTrackError.Id] = (sentence, time) => new CrossTrackError(sentence, time);
             knownSentences[DepthBelowSurface.Id] = (sentence, time) => new DepthBelowSurface(sentence, time);
+            knownSentences[DepthBelowTransducer.Id] = (sentence, time) => new DepthBelowTransducer(sentence, time);
             knownSentences[TransducerMeasurement.Id] = (sentence, time) => new TransducerMeasurement(sentence, time);
             knownSentences[GlobalPositioningSystemFixData.Id] = (sentence, time) => new GlobalPositioningSystemFixData(sentence, time);
             knownSentences[TrackMadeGood.Id] = (sentence, time) => new TrackMadeGood(sentence, time);
@@ -54,6 +55,7 @@ namespace Iot.Device.Nmea0183
             knownSentences[HeadingAndTrackControlStatus.Id] = (sentence, time) => new HeadingAndTrackControlStatus(sentence, time);
             knownSentences[EstimatedAccuracy.Id] = (sentence, time) => new EstimatedAccuracy(sentence, time);
             knownSentences[DepthOfWater.Id] = (sentence, time) => new DepthOfWater(sentence, time);
+            knownSentences[DistanceTraveledTroughWater.Id] = (sentence, time) => new DistanceTraveledTroughWater(sentence, time);
             knownSentences[ProprietaryMessage.Id] = (sentence, time) =>
             {
                 var specificMessageId = sentence.Fields.FirstOrDefault();

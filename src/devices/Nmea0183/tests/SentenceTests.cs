@@ -577,6 +577,8 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDDBS,150.2,f,45.78,M,25.0,F")]
         [InlineData("$YDDPT,45.28,0.50,")]
         [InlineData("$PGRME,3.0,M,3.0,M,4.2,M")]
+        [InlineData("$YDDBT,146.3,f,44.60,M,24.38,F")]
+        [InlineData("$YDVLW,6613.611,N,6613.567,N")]
         public void SentenceRoundTrip(string input)
         {
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
