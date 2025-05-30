@@ -13,7 +13,7 @@ namespace Iot.Device.Nmea0183
     public sealed class LoggingConfiguration
     {
         /// <summary>
-        /// Creates a new instance of <see cref="LoggingConfiguration"/> with an empty log target (basically disabling logging)
+        /// Creates a new instance of <see cref="LoggingConfiguration"/> with an empty log target
         /// </summary>
         public LoggingConfiguration()
         {
