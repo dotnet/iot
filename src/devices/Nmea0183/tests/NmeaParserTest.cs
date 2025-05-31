@@ -10,11 +10,19 @@ using Iot.Device.Nmea0183.Ais;
 using Iot.Device.Nmea0183.Sentences;
 using UnitsNet;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Iot.Device.Nmea0183.Tests
 {
     public class NmeaParserTest
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public NmeaParserTest(ITestOutputHelper outputHelper)
+        {
+            _outputHelper = outputHelper;
+        }
+
         [Fact]
         public void StreamReaderDecodes8BitDataCorrectly()
         {
@@ -69,6 +77,7 @@ namespace Iot.Device.Nmea0183.Tests
                     if (!rs.IsAisSentence && !uninterestingSentenceTypes.Contains(rs.SentenceId))
                     {
                         unknownSentenceTypes.Add(rs.SentenceId);
+                        _outputHelper.WriteLine($"Unidentified sentence: {ts.ToString()}");
                     }
                 }
             };

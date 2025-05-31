@@ -69,6 +69,10 @@ namespace Iot.Device.Nmea0183
                     {
                         return new SeaSmartEngineDetail(sentence, time);
                     }
+                    else if (msgid == SeaSmartFluidLevel.HexId)
+                    {
+                        return new SeaSmartFluidLevel(sentence, time);
+                    }
                 }
 
                 return null;
