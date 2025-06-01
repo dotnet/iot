@@ -25,6 +25,7 @@ namespace Nmea.Simulator
     internal class Simulator
     {
         private static readonly TimeSpan UpdateRate = TimeSpan.FromMilliseconds(500);
+        private readonly SimulatorArguments _arguments;
         private Thread? _simulatorThread;
         private bool _terminate;
         private SimulatorData _activeData;
@@ -33,11 +34,12 @@ namespace Nmea.Simulator
         private SeatalkToNmeaConverter? _seatalkInterface;
         private Random _random;
 
-        public Simulator()
+        public Simulator(SimulatorArguments arguments)
         {
             _activeData = new SimulatorData();
             ReplayFiles = new List<string>();
             _random = new Random();
+            _arguments = arguments;
         }
 
         private List<string> ReplayFiles
@@ -81,7 +83,7 @@ namespace Nmea.Simulator
                 LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory(LogLevel.Trace);
             }
 
-            var sim = new Simulator();
+            var sim = new Simulator(parsed.Value);
             if (!string.IsNullOrWhiteSpace(parsed.Value.ReplayFiles))
             {
                 var wildCards = parsed.Value.ReplayFiles;
@@ -90,12 +92,12 @@ namespace Nmea.Simulator
                 sim.ReplayFiles.AddRange(Directory.GetFiles(path, fi.Name));
             }
 
-            sim.StartServer(parsed.Value.SeatalkInterface);
+            sim.StartServer();
 
             return 0;
         }
 
-        private void StartServer(string seatalk)
+        private void StartServer()
         {
             _tcpServer = null;
             _udpServer = null;
@@ -115,7 +117,7 @@ namespace Nmea.Simulator
                     _simulatorThread.Start();
                 }
 
-                _tcpServer = new NmeaTcpServer("TcpServer");
+                _tcpServer = new NmeaTcpServer("TcpServer", IPAddress.Any, _arguments.TcpPort);
                 _tcpServer.StartDecode();
                 _tcpServer.OnNewSequence += OnNewSequenceFromServer;
 
@@ -156,15 +158,15 @@ namespace Nmea.Simulator
 
                 // Outgoing port is 10110, the incoming port is irrelevant (but we choose it differently here, so that a
                 // receiver can bind to 10110 on the same computer)
-                _udpServer = new NmeaUdpServer("UdpServer", 10110, 10110, broadcastAddress);
+                _udpServer = new NmeaUdpServer("UdpServer", _arguments.UdpPort, _arguments.UdpPort, broadcastAddress);
                 _udpServer.StartDecode();
                 _udpServer.OnNewSequence += OnNewSequenceFromServer;
 
                 // Also optionally directly connect to the Seatalk1 bus.
                 // For simplicity, this example is not using a MessageRouter.
-                if (!string.IsNullOrWhiteSpace(seatalk))
+                if (!string.IsNullOrWhiteSpace(_arguments.SeatalkInterface))
                 {
-                    _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", seatalk);
+                    _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", _arguments.SeatalkInterface);
                     _seatalkInterface.OnNewSequence += SeatalkNewSequence;
                     _seatalkInterface.SentencesToTranslate.Add(SentenceId.Any);
                     _seatalkInterface.StartDecode();
@@ -321,6 +323,7 @@ namespace Nmea.Simulator
         private void FilePlayback()
         {
             NmeaLogDataReader rd = new NmeaLogDataReader("LogDataReader", ReplayFiles);
+            rd.Loop = _arguments.Loop;
             rd.DecodeInRealtime = true;
             rd.OnNewSequence += (source, sentence) => SendSentence(sentence);
             rd.StartDecode();

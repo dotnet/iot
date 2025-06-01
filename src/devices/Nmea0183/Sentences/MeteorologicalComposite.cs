@@ -53,7 +53,7 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <summary>
-        /// Date and time message (ZDA). This should not normally need the last time as argument, because it defines it.
+        /// Constructor that decodes a message.
         /// </summary>
         public MeteorologicalComposite(TalkerId talkerId, IEnumerable<string> fields, DateTimeOffset time)
             : base(talkerId, Id, time)
@@ -172,7 +172,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                return $"Pressure: {BarometricPressure.GetValueOrDefault(Pressure.Zero).As(PressureUnit.Hectopascal)}, Air Temp: {AirTemperature.GetValueOrDefault(Temperature.Zero)}, " +
+                return $"Pressure: {BarometricPressure.GetValueOrDefault(Pressure.Zero).ToUnit(PressureUnit.Hectopascal)}, Air Temp: {AirTemperature.GetValueOrDefault(Temperature.Zero)}, " +
                        $"Water temp: {WaterTemperature.GetValueOrDefault(Temperature.Zero)}, Dew Point: {DewPoint.GetValueOrDefault(Temperature.Zero)}";
             }
 

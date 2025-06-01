@@ -534,6 +534,24 @@ namespace Iot.Device.Nmea0183.Tests
         }
 
         [Fact]
+        public void SeaSmartFluidLevelEncode()
+        {
+            var msg = new SeaSmartFluidLevel(new FluidData(FluidType.BlackWater, Ratio.FromPercent(20),
+                Volume.FromLiters(100), 7, false));
+            var text = msg.ToNmeaParameterList();
+            Assert.Equal("01F211,00000000,02,570014E8030000FF", text);
+
+            var sentence = TalkerSentence.FromSentenceString("$PCDIN,01F211,00000000,02,570014E8030000FF", out var error);
+            Assert.Equal(NmeaError.None, error);
+            DateTimeOffset time = DateTimeOffset.UtcNow;
+            var msg2 = (SeaSmartFluidLevel)sentence!.TryGetTypedValue(ref time)!;
+            var param1 = msg.ToNmeaParameterList();
+            var param2 = msg2.ToNmeaParameterList();
+            Assert.Equal(param1, param2);
+            Assert.Equal(SeaSmartFluidLevel.HexId, msg2.Identifier);
+        }
+
+        [Fact]
         public void StalkEncode()
         {
             var talk = new SeatalkNmeaMessage(new byte[]
@@ -574,6 +592,11 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42*73")]
         [InlineData("!AIVDM,1,1,,B,ENk`sR9`92ah97PR9h0W1T@1@@@=MTpS<7GFP00003vP000,2*4B")]
         [InlineData("$STALK,84,86,26,97,02,00,00,00,08*6F")]
+        [InlineData("$YDDBS,150.2,f,45.78,M,25.0,F*34")]
+        [InlineData("$YDDPT,45.28,0.50*63")]
+        [InlineData("$PGRME,3.0,M,3.0,M,4.2,M*28")]
+        [InlineData("$YDVLW,6613.611,N,6613.567,N*52")]
+        [InlineData("$PCDIN,01F211,00000000,02,00001026020000FF*20")]
         public void SentenceRoundTrip(string input)
         {
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
@@ -663,6 +686,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$STALK,9C,01,12,00")]
         [InlineData("$GPHTD,V,10.2,L,H,N,,,22.3,,,,2.0,M,V,V,V,12.2")]
         [InlineData("$GPHTC,V,10.2,L,H,N,,,22.3,,,,2.0,M")]
+        [InlineData("$PCDIN,01F211,00000000,02,00001026020000FF")]
         public void SentenceRoundTripIsUnaffectedByCulture(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here

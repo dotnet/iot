@@ -10,31 +10,31 @@ using UnitsNet;
 namespace Iot.Device.Nmea0183.Sentences
 {
     /// <summary>
-    /// XTE sentence: Cross track error (one of the most important messages used to control autopilot)
+    /// DBt sentence: Depth below transducer
     /// </summary>
-    public class CrossTrackError : NmeaSentence
+    public class DepthBelowTransducer : NmeaSentence
     {
         /// <summary>
         /// This sentence's id
         /// </summary>
-        public static SentenceId Id => new SentenceId("XTE");
+        public static SentenceId Id => new SentenceId("DBT");
         private static bool Matches(SentenceId sentence) => Id == sentence;
         private static bool Matches(TalkerSentence sentence) => Matches(sentence.Id);
 
         /// <summary>
-        /// Constructs a new MWV sentence
+        /// Constructs a new DBS sentence
         /// </summary>
-        public CrossTrackError(Length distance)
+        public DepthBelowTransducer(Length depth)
             : base(OwnTalkerId, Id, DateTimeOffset.UtcNow)
         {
-            Distance = distance;
+            Depth = depth;
             Valid = true;
         }
 
         /// <summary>
         /// Internal constructor
         /// </summary>
-        public CrossTrackError(TalkerSentence sentence, DateTimeOffset time)
+        public DepthBelowTransducer(TalkerSentence sentence, DateTimeOffset time)
             : this(sentence.TalkerId, Matches(sentence) ? sentence.Fields : throw new ArgumentException($"SentenceId does not match expected id '{Id}'"), time)
         {
         }
@@ -42,30 +42,25 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Constructor that decodes a message.
         /// </summary>
-        public CrossTrackError(TalkerId talkerId, IEnumerable<string> fields, DateTimeOffset time)
+        public DepthBelowTransducer(TalkerId talkerId, IEnumerable<string> fields, DateTimeOffset time)
             : base(talkerId, Id, time)
         {
             IEnumerator<string> field = fields.GetEnumerator();
 
-            string status1 = ReadString(field);
-            string status2 = ReadString(field);
-            double? distance = ReadValue(field);
-            string direction = ReadString(field);
-            string unit = ReadString(field);
+            // Same format as DBS
+            string feet = ReadString(field);
+            string feetUnit = ReadString(field);
+            double? meters = ReadValue(field);
+            string metersUnit = ReadString(field);
 
-            if (status1 == "A" && status2 == "A" && distance.HasValue && (direction == "L" || direction == "R") && unit == "N")
+            if (metersUnit == "M" && meters.HasValue)
             {
-                Distance = Length.FromNauticalMiles(distance.Value);
-                if (direction == "R")
-                {
-                    Distance = Distance * -1;
-                }
-
+                Depth = Length.FromMeters(meters.Value);
                 Valid = true;
             }
             else
             {
-                Distance = Length.Zero;
+                Depth = Length.Zero;
                 Valid = false;
             }
         }
@@ -76,11 +71,12 @@ namespace Iot.Device.Nmea0183.Sentences
         public override bool ReplacesOlderInstance => true;
 
         /// <summary>
-        /// Cross track distance. Positive if to the right of the track (meaning one shall steer left or to port)
+        /// Cross track distance, meters
         /// </summary>
-        public Length Distance
+        public Length Depth
         {
             get;
+            private set;
         }
 
         /// <summary>
@@ -90,14 +86,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                if (Distance.Value >= 0)
-                {
-                    return FormattableString.Invariant($"A,A,{Distance.NauticalMiles:F3},L,N,D");
-                }
-                else
-                {
-                    return FormattableString.Invariant($"A,A,{-Distance.NauticalMiles:F3},R,N,D");
-                }
+                return FormattableString.Invariant($"{Depth.Feet:F1},f,{Depth.Meters:F2},M,{Depth.Fathoms:F2},F");
             }
 
             return string.Empty;
@@ -108,17 +97,10 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                if (Distance.Value >= 0)
-                {
-                    return $"The route is {Distance.NauticalMiles:F3} nm to the left";
-                }
-                else
-                {
-                    return $"The route is {Math.Abs(Distance.NauticalMiles):F3} nm to the right";
-                }
+                return $"Depth below transducer: {Depth.Meters:F2}m";
             }
 
-            return "No valid direction to route";
+            return "No valid depth";
         }
     }
 }

@@ -7,12 +7,14 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using CommandLine;
 using Iot.Device.Arduino;
 using Iot.Device.Axp192;
 using Iot.Device.Common;
@@ -30,75 +32,43 @@ namespace Iot.Device.Ili934x.Samples
     {
         public static int Main(string[] args)
         {
-            bool isFt4222 = false;
-            bool isArduino = false;
-            IPAddress address = IPAddress.None;
             SkiaSharpAdapter.Register();
-            string nmeaSourceAddress = "localhost";
 
-            if (args.Length < 2)
+            var parser = new Parser(x =>
             {
-                Console.WriteLine("Are you using Ft4222? Type 'yes' and press ENTER if so, anything else will be treated as no.");
-                isFt4222 = Console.ReadLine() == "yes";
-                isArduino = true;
+                x.AutoHelp = true;
+                x.AutoVersion = true;
+                x.CaseInsensitiveEnumValues = true;
+                x.ParsingCulture = CultureInfo.InvariantCulture;
+                x.CaseSensitive = false;
+                x.HelpWriter = Console.Out;
+            });
 
-                if (!isFt4222)
-                {
-                    Console.WriteLine("Are you using an Arduino/Firmata? Type 'yes' and press ENTER if so.");
-                    isArduino = Console.ReadLine() == "yes";
-                }
-            }
-            else
+            var parsed = parser.ParseArguments<Arguments>(args);
+
+            if (parsed.Errors.Any())
             {
-                if (args[0] == "Ft4222")
-                {
-                    isFt4222 = true;
-                }
-                else if (args[0] == "INET" && args.Length >= 2)
-                {
-                    isArduino = true;
-                    IPAddress[] addr = Array.Empty<IPAddress>();
-                    try
-                    {
-                        addr = Dns.GetHostAddresses(args[1]);
-                    }
-                    catch (SocketException)
-                    {
-                        // Ignore, will be handled below
-                    }
-
-                    if (addr.Any())
-                    {
-                        address = addr.First();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Could not resolve host: {args[1]}");
-                        return 1;
-                    }
-                }
-
-                if (args.Any(x => x.Equals("--debug", StringComparison.OrdinalIgnoreCase)))
-                {
-                    Console.WriteLine("Waiting for debugger...");
-                    while (!Debugger.IsAttached)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
+                Console.WriteLine("Error in command line");
+                return 1;
             }
 
-            var idx = Array.IndexOf(args, "--nmeaserver");
-            if (idx >= 0 && args.Length > idx)
+            Arguments parsedArguments = parsed.Value;
+
+            if (parsedArguments.Debug)
             {
-                nmeaSourceAddress = args[idx + 1];
+                Console.WriteLine("Waiting for debugger...");
+                while (!Debugger.IsAttached)
+                {
+                    Thread.Sleep(100);
+                }
             }
+            
 
-            int pinDC = isFt4222 ? 1 : 23;
-            int pinReset = isFt4222 ? 0 : 24;
-            int pinLed = isFt4222 ? 2 : -1;
+            int pinDC = parsedArguments.IsFt4222 ? 1 : 23;
+            int pinReset = parsedArguments.IsFt4222 ? 0 : 24;
+            int pinLed = parsedArguments.IsFt4222 ? 2 : -1;
 
-            if (isArduino)
+            if (!parsedArguments.IsFt4222)
             {
                 // Pin mappings for the display in an M5Core2/M5Though
                 pinDC = 15;
@@ -114,13 +84,34 @@ namespace Iot.Device.Ili934x.Samples
             M5ToughPowerControl? powerControl = null;
             Chsc6440? touch = null;
 
-            if (isFt4222)
+            if (parsedArguments.IsFt4222)
             {
                 gpio = GetGpioControllerFromFt4222();
                 displaySPI = GetSpiFromFt4222();
             }
-            else if (isArduino)
+            else
             {
+                IPAddress[] addr = Array.Empty<IPAddress>();
+                try
+                {
+                    addr = Dns.GetHostAddresses(parsedArguments.M5Address);
+                }
+                catch (SocketException)
+                {
+                    // Ignore, will be handled below
+                }
+
+                IPAddress address;
+                if (addr.Any())
+                {
+                    address = addr.First();
+                }
+                else
+                {
+                    Console.WriteLine($"Could not resolve host: {parsedArguments.M5Address}");
+                    return 1;
+                }
+
                 if (!ArduinoBoard.TryConnectToNetworkedBoard(address, 27016, out board))
                 {
                     throw new IOException("Couldn't connect to board");
@@ -142,17 +133,13 @@ namespace Iot.Device.Ili934x.Samples
                 powerControl.EnableSpeaker = false; // With my current firmware, it's used instead of the status led. Noisy!
                 powerControl.Sleep(false);
             }
-            else
-            {
-                gpio = new GpioController();
-                displaySPI = GetSpiFromDefault();
-            }
 
             Ili9342 display = new Ili9342(displaySPI, pinDC, pinReset, backlightPin: pinLed, gpioController: gpio, spiBufferSize: spiBufferSize, shouldDispose: false);
 
             if (board != null)
             {
-                touch = new Chsc6440(board.CreateI2cDevice(new I2cConnectionSettings(0, Chsc6440.DefaultI2cAddress)), new Size(display.ScreenWidth, display.ScreenHeight), 39, board.CreateGpioController(), false);
+                touch = new Chsc6440(board.CreateI2cDevice(new I2cConnectionSettings(0, Chsc6440.DefaultI2cAddress)), 
+                    new Size(display.ScreenWidth, display.ScreenHeight), parsedArguments.FlipScreen, 39, board.CreateGpioController(), false);
                 touch.UpdateInterval = TimeSpan.FromMilliseconds(100);
                 touch.EnableEvents();
             }
@@ -163,14 +150,17 @@ namespace Iot.Device.Ili934x.Samples
             var size = screenCapture.ScreenSize();
             touchSimulator = VirtualPointingDevice.CreateAbsolute(size.Width, size.Height);
 
-            using RemoteControl ctrol = new RemoteControl(touch, display, powerControl, touchSimulator, screenCapture, nmeaSourceAddress);
-            ctrol.DisplayFeatures();
+            using RemoteControl ctrol = new RemoteControl(touch, display, powerControl, touchSimulator, screenCapture, parsedArguments);
+            ctrol.Run();
 
             display.ClearScreen(true);
             if (powerControl != null)
             {
                 powerControl.SetLcdVoltage(ElectricPotential.Zero);
-                powerControl.Sleep(true);
+                if (!parsedArguments.NoSleep)
+                {
+                    powerControl.Sleep(true);
+                }
             }
 
             touch?.Dispose();

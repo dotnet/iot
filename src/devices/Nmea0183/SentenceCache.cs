@@ -26,9 +26,9 @@ namespace Iot.Device.Nmea0183
         private readonly Dictionary<int, NmeaSentence> _dinData;
         private readonly Dictionary<SentenceId, NmeaSentence> _sentences;
         private readonly Dictionary<String, Dictionary<SentenceId, NmeaSentence>> _sentencesBySource;
-
         private readonly ILogger _logger;
 
+        private long _ticksLastCleanup;
         private Queue<RoutePart> _lastRouteSentences;
         private Dictionary<string, Waypoint> _wayPoints;
         private Queue<SatellitesInView> _lastSatelliteInfos;
@@ -62,6 +62,8 @@ namespace Iot.Device.Nmea0183
             StoreRawSentences = false;
             _logger = this.GetCurrentClassLogger();
             _source.OnNewSequence += OnNewSequence;
+            MaxDataAge = TimeSpan.FromSeconds(30);
+            _ticksLastCleanup = 0;
         }
 
         /// <summary>
@@ -69,6 +71,15 @@ namespace Iot.Device.Nmea0183
         /// Defaults to false.
         /// </summary>
         public bool StoreRawSentences
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Maximum age after which any message is discarded. Default 30 Seconds
+        /// </summary>
+        public TimeSpan MaxDataAge
         {
             get;
             set;
@@ -97,6 +108,7 @@ namespace Iot.Device.Nmea0183
         /// <returns>The last sentence of that type, or null.</returns>
         public NmeaSentence? GetLastSentence(SentenceId id)
         {
+            CleanOutdatedEntries();
             lock (_lock)
             {
                 if (_sentences.TryGetValue(id, out var sentence))
@@ -116,6 +128,7 @@ namespace Iot.Device.Nmea0183
         /// <returns>The last sentence of that type and source, null if not found</returns>
         public NmeaSentence? GetLastSentence(string? source, SentenceId id)
         {
+            CleanOutdatedEntries();
             if (source == null)
             {
                 return GetLastSentence(id);
@@ -143,10 +156,8 @@ namespace Iot.Device.Nmea0183
         /// <param name="sentence">Receives the sentence, if any was found</param>
         /// <returns>True on success, false if no such message was received</returns>
         public bool TryGetLastSentence<T>(SentenceId id,
-#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
-#endif
-            out T sentence)
+            out T? sentence)
             where T : NmeaSentence
         {
             var s = GetLastSentence(id);
@@ -156,7 +167,7 @@ namespace Iot.Device.Nmea0183
                 return true;
             }
 
-            sentence = null!;
+            sentence = null;
             return false;
         }
 
@@ -169,6 +180,7 @@ namespace Iot.Device.Nmea0183
         /// <returns>The last sentence of that type, or null if none was received within the given timespan.</returns>
         public NmeaSentence? GetLastSentence(SentenceId id, TimeSpan maxAge)
         {
+            CleanOutdatedEntries();
             lock (_lock)
             {
                 if (_sentences.TryGetValue(id, out var sentence))
@@ -289,16 +301,15 @@ namespace Iot.Device.Nmea0183
         /// <param name="sentence">Receives the sentence, if any was found</param>
         /// <returns>True on success, false if no such message was received</returns>
         public bool TryGetLastDinSentence<T>(int hexId,
-#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
-#endif
-            out T sentence)
+            out T? sentence)
             where T : NmeaSentence
         {
+            CleanOutdatedEntries();
             // The second condition should always be true, because this list only contains din messages
             if (!_dinData.TryGetValue(hexId, out var s) || s.SentenceId != ProprietaryMessage.Id)
             {
-                sentence = null!;
+                sentence = null;
                 return false;
             }
 
@@ -308,7 +319,7 @@ namespace Iot.Device.Nmea0183
                 return true;
             }
 
-            sentence = null!;
+            sentence = null;
             return false;
         }
 
@@ -319,11 +330,10 @@ namespace Iot.Device.Nmea0183
         /// <param name="data">Returns the value if it exists</param>
         /// <returns>True if a value with the given name was found, false otherwise</returns>
         public bool TryGetTransducerData(string name,
-#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
-#endif
-            out TransducerDataSet data)
+            out TransducerDataSet? data)
         {
+            CleanOutdatedEntries();
             lock (_lock)
             {
                 if (_xdrData.TryGetValue(name, out var data1))
@@ -333,7 +343,7 @@ namespace Iot.Device.Nmea0183
                 }
             }
 
-            data = null!;
+            data = null;
             return false;
         }
 
@@ -344,11 +354,10 @@ namespace Iot.Device.Nmea0183
         /// <param name="wp">The return data</param>
         /// <returns>True if found, false otherwise</returns>
         public bool TryGetWayPoint(string name,
-#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
-#endif
-            out Waypoint wp)
+            out Waypoint? wp)
         {
+            CleanOutdatedEntries();
             lock (_lock)
             {
                 if (_wayPoints.TryGetValue(name, out var innerResult))
@@ -357,7 +366,7 @@ namespace Iot.Device.Nmea0183
                     return true;
                 }
 
-                wp = null!;
+                wp = null;
                 return false;
             }
         }
@@ -370,6 +379,7 @@ namespace Iot.Device.Nmea0183
         /// <returns>True if a list was found, false if no RTE messages where received</returns>
         public bool QueryActiveRouteSentences(out List<RoutePart> routeParts)
         {
+            CleanOutdatedEntries();
             List<RoutePart> routeSentences;
             lock (_lock)
             {
@@ -389,11 +399,60 @@ namespace Iot.Device.Nmea0183
         /// <returns>True if the list was non-empty</returns>
         public bool QuerySatellitesInView(out List<SatellitesInView> sats)
         {
+            CleanOutdatedEntries();
             lock (_lock)
             {
                 sats = _lastSatelliteInfos.ToList();
                 sats.Reverse();
                 return sats.Count > 0;
+            }
+        }
+
+        private void CleanOutdatedEntries()
+        {
+            var now = Environment.TickCount64;
+            if (_ticksLastCleanup < Environment.TickCount64 - 5000)
+            {
+                _ticksLastCleanup = now;
+            }
+
+            lock (_lock)
+            {
+                // Convert to list, so this can be done in one round
+                foreach (var entry in _sentences.ToList())
+                {
+                    if (entry.Value.Age > MaxDataAge)
+                    {
+                        _sentences.Remove(entry.Key);
+                    }
+                }
+
+                if (_lastRouteSentences.All(x => x.Age > MaxDataAge))
+                {
+                    _lastRouteSentences.Clear();
+                }
+
+                if (_lastSatelliteInfos.All(x => x.Age > MaxDataAge))
+                {
+                    _lastSatelliteInfos.Clear();
+                }
+
+                foreach (var entry in _dinData.ToList())
+                {
+                    if (entry.Value.Age > MaxDataAge)
+                    {
+                        _dinData.Remove(entry.Key);
+                    }
+                }
+
+                foreach (var entry in _sentencesBySource.ToList())
+                {
+                    // If one source is completely dead, remove it
+                    if (entry.Value.All(x => x.Value.Age > MaxDataAge))
+                    {
+                        _sentencesBySource.Remove(entry.Key);
+                    }
+                }
             }
         }
     }

@@ -28,10 +28,9 @@ namespace Iot.Device.Nmea0183
         private TcpClient? _client;
         private NmeaParser? _parser;
         private Thread? _connectionThread;
-        private AutoResetEvent _serverControlEvent;
-        private ConcurrentQueue<Task> _serverTasks;
         private bool _terminated;
         private ILogger _logger;
+        private bool _connectionActive;
 
         /// <summary>
         /// Creates a server with the given source name bound to the given local IP and port.
@@ -45,8 +44,7 @@ namespace Iot.Device.Nmea0183
         {
             _destination = destination;
             _port = port;
-            _serverControlEvent = new AutoResetEvent(false);
-            _serverTasks = new ConcurrentQueue<Task>();
+            _connectionActive = false;
             RetryInterval = TimeSpan.FromSeconds(5);
             _logger = this.GetCurrentClassLogger();
         }
@@ -63,7 +61,7 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// Returns true if this client is connected
         /// </summary>
-        public bool Connected => _client != null && _client.Connected;
+        public bool Connected => _client != null && _client.Connected && _connectionActive;
 
         /// <summary>
         /// Starts connecting to the server. A failure to connect will not cause an exception. Retries will be handled
@@ -89,6 +87,7 @@ namespace Iot.Device.Nmea0183
                 try
                 {
                     var client = new TcpClient(_destination, _port);
+                    _connectionActive = true;
                     _logger.LogInformation($"{InterfaceName}: Connected to {_destination}:{_port}");
                     var parser = new NmeaParser($"{InterfaceName}: Connected to {_destination}:{_port}", client.GetStream(), client.GetStream());
                     parser.OnNewSequence += OnSentenceReceivedFromServer;
@@ -97,7 +96,7 @@ namespace Iot.Device.Nmea0183
                     _parser = parser;
                     parser.StartDecode();
 
-                    while (client.Connected && !_terminated)
+                    while (Connected && !_terminated)
                     {
                         Thread.Sleep(RetryInterval);
                     }
@@ -114,12 +113,18 @@ namespace Iot.Device.Nmea0183
                 {
                     // Retry
                     Thread.Sleep(RetryInterval);
+                    _connectionActive = false;
                 }
             }
         }
 
         private void ParserOnParserError(NmeaSinkAndSource source, string message, NmeaError errorCode)
         {
+            if (errorCode == NmeaError.PortClosed)
+            {
+                _connectionActive = false;
+            }
+
             FireOnParserError(message, errorCode);
         }
 

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -74,9 +75,10 @@ namespace Iot.Device.Nmea0183.Sentences
 
             string data = ReadString(field);
 
-            if (ReadFromHexString(data, 0, 2, false, out int tankNumber))
+            if (ReadFromHexString(data, 0, 2, false, out int combined))
             {
-                TankNumber = tankNumber;
+                TankNumber = combined & 0x0f;
+                Type = (FluidType)((combined >> 4) & 0x0f);
             }
 
             if (ReadFromHexString(data, 2, 4, false, out int level))
@@ -86,7 +88,14 @@ namespace Iot.Device.Nmea0183.Sentences
 
             if (ReadFromHexString(data, 6, 8, false, out int volume))
             {
-                TankVolume = Volume.FromCubicMeters(volume);
+                volume = BinaryPrimitives.ReadInt32BigEndian(new byte[]
+                {
+                    (byte)(volume & 0xff),
+                    (byte)(volume >> 8),
+                    (byte)(volume >> 16),
+                    (byte)(volume >> 24),
+                });
+                TankVolume = Volume.FromLiters(volume / 10.0d);
             }
 
             Valid = true;
