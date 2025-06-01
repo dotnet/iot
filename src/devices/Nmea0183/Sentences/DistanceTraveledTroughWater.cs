@@ -98,7 +98,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                return FormattableString.Invariant($"{TotalDistanceTraveled.NauticalMiles:F1},N,{DistanceTraveledSinceReset.NauticalMiles:F1},N");
+                return FormattableString.Invariant($"{TotalDistanceTraveled.NauticalMiles:F3},N,{DistanceTraveledSinceReset.NauticalMiles:F3},N");
             }
 
             return string.Empty;

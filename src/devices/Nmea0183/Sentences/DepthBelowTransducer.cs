@@ -86,7 +86,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                return FormattableString.Invariant($"{Depth.Feet:F1},f,{Depth.Meters:F2},M,{Depth.Fathoms:F1},F");
+                return FormattableString.Invariant($"{Depth.Feet:F1},f,{Depth.Meters:F2},M,{Depth.Fathoms:F2},F");
             }
 
             return string.Empty;

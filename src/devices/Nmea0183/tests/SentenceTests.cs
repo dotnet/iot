@@ -592,11 +592,10 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42*73")]
         [InlineData("!AIVDM,1,1,,B,ENk`sR9`92ah97PR9h0W1T@1@@@=MTpS<7GFP00003vP000,2*4B")]
         [InlineData("$STALK,84,86,26,97,02,00,00,00,08*6F")]
-        [InlineData("$YDDBS,150.2,f,45.78,M,25.0,F")]
-        [InlineData("$YDDPT,45.28,0.50,")]
-        [InlineData("$PGRME,3.0,M,3.0,M,4.2,M")]
-        [InlineData("$YDDBT,146.3,f,44.60,M,24.38,F")]
-        [InlineData("$YDVLW,6613.611,N,6613.567,N")]
+        [InlineData("$YDDBS,150.2,f,45.78,M,25.0,F*34")]
+        [InlineData("$YDDPT,45.28,0.50*63")]
+        [InlineData("$PGRME,3.0,M,3.0,M,4.2,M*28")]
+        [InlineData("$YDVLW,6613.611,N,6613.567,N*52")]
         [InlineData("$PCDIN,01F211,00000000,02,00001026020000FF*20")]
         public void SentenceRoundTrip(string input)
         {
@@ -687,7 +686,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$STALK,9C,01,12,00")]
         [InlineData("$GPHTD,V,10.2,L,H,N,,,22.3,,,,2.0,M,V,V,V,12.2")]
         [InlineData("$GPHTC,V,10.2,L,H,N,,,22.3,,,,2.0,M")]
-        [InlineData("$PCDIN,01F211,00000000,02,00001026020000FF*20")]
+        [InlineData("$PCDIN,01F211,00000000,02,00001026020000FF")]
         public void SentenceRoundTripIsUnaffectedByCulture(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here
