@@ -1,12 +1,12 @@
 # Device Bindings
 
-You will find a large variety of bindings in this nuget. You can [check the list on the repository](https://https://github.com/dotnet/iot/tree/main/src/devices).
+You will find a large variety of bindings in this nuget. You can [check the list on the repository](https://github.com/dotnet/iot/tree/main/src/devices).
 
 ## Getting started
 
 Once you've installed the nuget, you're ready to go! Make sure you have a proper device that support GPIO. See the System.Device.
 
-Each binding has [detailed example](https://https://github.com/dotnet/iot/tree/main/src/devices) in the main repository. Each directory will contain a detailed README with the specific usage of each binding. It will also in the `/samples` folder contains a detailed and commented example.
+Each binding has [detailed example](https://github.com/dotnet/iot/tree/main/src/devices) in the main repository. Each directory will contain a detailed README with the specific usage of each binding. It will also in the `/samples` folder contains a detailed and commented example.
 
 ## Hardware requirements
 
