@@ -36,7 +36,7 @@ namespace Iot.Device.Usb
         public RequestDataObject RequestDataObject => ReadRdo();
 
         /// <summary>Gets the requested voltage.</summary>
-        public ElectricPotentialDc RequestedVoltage => ReadRequestedVoltage();
+        public ElectricPotential RequestedVoltage => ReadRequestedVoltage();
 
         /// <summary>Gets or sets the NVM data.</summary>
         public byte[] NvmData { get => ReadNvm(); set => WriteNvm(value); }
@@ -258,11 +258,11 @@ namespace Iot.Device.Usb
 
         /// <summary>Reads the requested voltage.</summary>
         /// <returns>The requested voltage.</returns>
-        private ElectricPotentialDc ReadRequestedVoltage()
+        private ElectricPotential ReadRequestedVoltage()
         {
             _i2cDevice.WriteByte((byte)StUsb4500Register.MONITORING_CTRL_1);
             byte voltage = _i2cDevice.ReadByte();
-            return ElectricPotentialDc.FromVoltsDc(voltage / 10.0);
+            return ElectricPotential.FromVolts(voltage / 10.0);
         }
 
         /// <summary>Reads the NVM.</summary>
