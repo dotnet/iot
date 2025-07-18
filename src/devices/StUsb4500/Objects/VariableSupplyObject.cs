@@ -29,25 +29,25 @@ namespace Iot.Device.Usb
 
         /// <summary>Gets or sets the minimal voltage.</summary>
         /// <remarks>This is stored with the factor 20 as a 10-bit value (range 0 - 1023) => 0...51.15V.</remarks>
-        public ElectricPotentialDc MinimalVoltage
+        public ElectricPotential MinimalVoltage
         {
-            get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MinVoltageMask) >> 10) / 20.0);
+            get => ElectricPotential.FromVolts((ushort)((Value & MinVoltageMask) >> 10) / 20.0);
             set
             {
-                value.VoltsDc.CheckArgumentInRange(51.15);
-                Value = (Value & ~MinVoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 10 & MinVoltageMask);
+                value.Volts.CheckArgumentInRange(51.15);
+                Value = (Value & ~MinVoltageMask) | (Convert.ToUInt32(value.Volts * 20) << 10 & MinVoltageMask);
             }
         }
 
         /// <summary>Gets or sets the maximal voltage.</summary>
         /// <remarks>This is stored with the factor 20 as a 10-bit value (range 0 - 1023) => 0...51.15V.</remarks>
-        public ElectricPotentialDc MaximalVoltage
+        public ElectricPotential MaximalVoltage
         {
-            get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & MaxVoltageMask) >> 20) / 20.0);
+            get => ElectricPotential.FromVolts((ushort)((Value & MaxVoltageMask) >> 20) / 20.0);
             set
             {
-                value.VoltsDc.CheckArgumentInRange(51.15);
-                Value = (Value & ~MaxVoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 20 & MaxVoltageMask);
+                value.Volts.CheckArgumentInRange(51.15);
+                Value = (Value & ~MaxVoltageMask) | (Convert.ToUInt32(value.Volts * 20) << 20 & MaxVoltageMask);
             }
         }
 

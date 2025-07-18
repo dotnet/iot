@@ -110,9 +110,9 @@ void PrintRdo()
     Console.WriteLine($"Max. current: {rdo.MaximalCurrent:0.##}");
     Console.WriteLine($"USB communications capable: {rdo.UsbCommunicationsCapable}");
     Console.WriteLine($"Capability mismatch: {rdo.CapabilityMismatch}");
-    ElectricPotentialDc voltage = stUsb.RequestedVoltage;
+    ElectricPotential voltage = stUsb.RequestedVoltage;
     Console.WriteLine($"Requested voltage: {voltage:0.##}");
-    Console.WriteLine($"Available Power: {Power.FromWatts(voltage.VoltsDc * rdo.MaximalCurrent.Amperes):0.##}{Environment.NewLine}");
+    Console.WriteLine($"Available Power: {Power.FromWatts(voltage.Volts * rdo.MaximalCurrent.Amperes):0.##}{Environment.NewLine}");
 }
 
 void UpdateLocalPdo()
@@ -121,7 +121,7 @@ void UpdateLocalPdo()
     PowerDeliveryObject[] sinkPdos = stUsb.SinkPowerDeliveryObjects;
     if (sinkPdos.Length > 1 && sinkPdos[1] is FixedSupplyObject fixedSupplyObject1)
     {
-        fixedSupplyObject1.Voltage = ElectricPotentialDc.FromVoltsDc(12);
+        fixedSupplyObject1.Voltage = ElectricPotential.FromVolts(12);
         fixedSupplyObject1.OperationalCurrent = ElectricCurrent.FromAmperes(2.0);
     }
     else
@@ -129,7 +129,7 @@ void UpdateLocalPdo()
         List<PowerDeliveryObject> objects = sinkPdos.ToList();
         objects.Add(new FixedSupplyObject(sinkPdos.First().Value)
             {
-                Voltage = ElectricPotentialDc.FromVoltsDc(12),
+                Voltage = ElectricPotential.FromVolts(12),
                 OperationalCurrent = ElectricCurrent.FromAmperes(2.0)
             });
         sinkPdos = objects.ToArray();
@@ -137,7 +137,7 @@ void UpdateLocalPdo()
 
     if (sinkPdos.Length > 2 && sinkPdos[2] is FixedSupplyObject fixedSupplyObject2)
     {
-        fixedSupplyObject2.Voltage = ElectricPotentialDc.FromVoltsDc(20);
+        fixedSupplyObject2.Voltage = ElectricPotential.FromVolts(20);
         fixedSupplyObject2.OperationalCurrent = ElectricCurrent.FromAmperes(1.25);
     }
     else
@@ -145,7 +145,7 @@ void UpdateLocalPdo()
         List<PowerDeliveryObject> objects = sinkPdos.ToList();
         objects.Add(new FixedSupplyObject(sinkPdos.First().Value)
             {
-                Voltage = ElectricPotentialDc.FromVoltsDc(20),
+                Voltage = ElectricPotential.FromVolts(20),
                 OperationalCurrent = ElectricCurrent.FromAmperes(1.25)
             });
         sinkPdos = objects.ToArray();
