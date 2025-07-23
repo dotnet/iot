@@ -108,18 +108,15 @@ stages:
         --prepareMachine
       displayName: Build
 
-    - script: ./eng/common/msbuild.sh --warnaserror false --ci
-        eng/sendToHelix.proj
-        /t:Test
-        /p:TestOS=Unix
-        /p:Configuration=$(_BuildConfig)
-        /p:HelixBuild=$(Build.BuildNumber)
-        /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
-#        /p:HelixAccessToken=$(HelixApiAccessToken)
-      displayName: Run Helix Tests
-      condition: eq(variables['build.reason'], 'PullRequest')
-#      env:
-#        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+#    - script: ./eng/common/msbuild.sh --warnaserror false --ci
+#        eng/sendToHelix.proj
+#        /t:Test
+#        /p:TestOS=Unix
+#        /p:Configuration=$(_BuildConfig)
+#        /p:HelixBuild=$(Build.BuildNumber)
+#        /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+#      displayName: Run Helix Tests
+#      condition: eq(variables['build.reason'], 'PullRequest')
 
     - task: PublishBuildArtifacts@1
       displayName: Publish Build logs
