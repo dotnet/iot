@@ -746,7 +746,8 @@ namespace Iot.Device.Mcp23xxx
             int mask = 1;
             int pin = 0;
 
-            while (mask <= 0xF0)
+            // Iterate through all 8 bits of the interrupt pending value
+            while (mask <= 0x80)
             {
                 if ((interruptPending & mask) != 0)
                 {
