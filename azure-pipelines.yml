@@ -118,6 +118,7 @@ stages:
         /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
 #        /p:HelixAccessToken=$(HelixApiAccessToken)
       displayName: Run Helix Tests
+#      condition: eq(variables['build.reason'], 'PullRequest')  # Original condition
       condition: false  # Temporarily disabled - devices offline (issue #2406)
 #      env:
 #        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
