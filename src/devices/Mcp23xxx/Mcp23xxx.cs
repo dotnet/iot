@@ -746,7 +746,12 @@ namespace Iot.Device.Mcp23xxx
             int mask = 1;
             int pin = 0;
 
-            // Iterate through all 8 bits of the interrupt pending value
+            // Interrupt flag handling for MCP23008/MCP23017
+            // Refer to the datasheet: https://ww1.microchip.com/downloads/en/DeviceDoc/MCP23008-MCP23S08-Data-Sheet-20001919F.pdf
+            // On page 16(section 1.6.8 - Interrupt Flag INTF Register), each of the 8 bits in the INTF register
+            // corresponds to a pin. For the 16 - pin chip, a secondary register is used.
+            // This code iterates through the mask values(0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80)
+            // to check each pin's interrupt status. The loop terminates when the mask reaches 0x100.
             while (mask <= 0x80)
             {
                 if ((interruptPending & mask) != 0)
