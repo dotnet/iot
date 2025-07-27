@@ -28,13 +28,13 @@ namespace Iot.Device.Usb
 
         /// <summary>Gets or sets the voltage.</summary>
         /// <remarks>This is stored with the factor 20 as a 10-bit value (range 0 - 1023) => 0...51.15V.</remarks>
-        public ElectricPotentialDc Voltage
+        public ElectricPotential Voltage
         {
-            get => ElectricPotentialDc.FromVoltsDc((ushort)((Value & VoltageMask) >> 10) / 20.0);
+            get => ElectricPotential.FromVolts((ushort)((Value & VoltageMask) >> 10) / 20.0);
             set
             {
-                value.VoltsDc.CheckArgumentInRange(51.15);
-                Value = (Value & ~VoltageMask) | (Convert.ToUInt32(value.VoltsDc * 20) << 10 & VoltageMask);
+                value.Volts.CheckArgumentInRange(51.15);
+                Value = (Value & ~VoltageMask) | (Convert.ToUInt32(value.Volts * 20) << 10 & VoltageMask);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Iot.Device.Usb
         }
 
         /// <summary>Gets the power of this PDO.</summary>
-        public override Power Power => Power.FromWatts(Voltage.VoltsDc * OperationalCurrent.Amperes);
+        public override Power Power => Power.FromWatts(Voltage.Volts * OperationalCurrent.Amperes);
 
         /// <summary>Initializes a new instance of the <see cref="FixedSupplyObject"/> class.</summary>
         /// <param name="rawValue">

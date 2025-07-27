@@ -108,6 +108,7 @@ stages:
         --prepareMachine
       displayName: Build
 
+    # Disabled due to offline devices - see issue #2406
     - script: ./eng/common/msbuild.sh --warnaserror false --ci
         eng/sendToHelix.proj
         /t:Test
@@ -117,7 +118,8 @@ stages:
         /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
 #        /p:HelixAccessToken=$(HelixApiAccessToken)
       displayName: Run Helix Tests
-      condition: eq(variables['build.reason'], 'PullRequest')
+#      condition: eq(variables['build.reason'], 'PullRequest')  # Original condition
+      condition: false  # Temporarily disabled - devices offline (issue #2406)
 #      env:
 #        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
