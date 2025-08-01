@@ -168,7 +168,7 @@ namespace Iot.Device.Tca955x
             {
                 if (mode != PinMode.Input && mode != PinMode.Output && mode != PinMode.InputPullUp)
                 {
-                    throw new ArgumentException("The Mcp controller supports the following pin modes: Input, Output and InputPullUp.");
+                    throw new ArgumentException("The Tca955x controller supports the following pin modes: Input, Output and InputPullUp.");
                 }
 
                 byte polarityInversionRegister = GetRegisterIndex(pinNumber, Register.PolarityInversionPort);
@@ -434,7 +434,12 @@ namespace Iot.Device.Tca955x
 
             _interruptPins.Add(pinNumber, eventType);
             _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
-            _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
+
+            // Only register the callback if this is the first add callback
+            if (_interruptPins.Count == 1)
+            {
+                _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
+            }
 
             _eventHandlers[pinNumber] = callback;
         }
@@ -452,7 +457,12 @@ namespace Iot.Device.Tca955x
             {
                 _interruptPins.Remove(pinNumber);
                 _interruptLastInputValues.Remove(pinNumber);
-                _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
+
+                // Only remove interrup callback if there are no more interrup pins active
+                if (_interruptPins.Count == 0)
+                {
+                    _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
+                }
             }
         }
 

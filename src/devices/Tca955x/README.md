@@ -13,7 +13,7 @@ The family contains the TCA9554 (8-bit) and the TCA9555 (16-bit) device. Both de
 
 ## Interrupt support
 
-The `Tca955x` has one interrupt pin. The corresponding pins need to be connected to a master GPIO controller for this feature to work. You can use a GPIO controller around the MCP device to handle everything for you:
+The `Tca955x` has one interrupt pin. The corresponding pins need to be connected to a master GPIO controller for this feature to work. You can use a GPIO controller around the Tca955x device to handle everything for you:
 
 ```csharp
 // Gpio controller from parent device (eg. Raspberry Pi)
