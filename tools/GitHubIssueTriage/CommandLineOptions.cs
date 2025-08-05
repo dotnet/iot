@@ -27,5 +27,11 @@ namespace GitHubIssueTriage
 
         [Option('v', "verbose", Required = false, Default = false, HelpText = "Enable verbose output.")]
         public bool Verbose { get; set; }
+
+        [Option("openai-key", Required = false, HelpText = "OpenAI API key for LLM-based analysis. If not provided, uses keyword-based analysis.")]
+        public string? OpenAIKey { get; set; }
+
+        [Option("openai-model", Required = false, Default = "gpt-4o-mini", HelpText = "OpenAI model to use for analysis (default: gpt-4o-mini).")]
+        public string OpenAIModel { get; set; } = "gpt-4o-mini";
     }
 }

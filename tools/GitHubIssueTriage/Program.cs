@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
+using Microsoft.Extensions.AI;
 using Octokit;
 
 namespace GitHubIssueTriage
@@ -49,6 +50,29 @@ namespace GitHubIssueTriage
                     Credentials = new Credentials(options.GitHubToken)
                 };
 
+                // Initialize AI client if OpenAI key is provided
+                IChatClient? chatClient = null;
+                if (!string.IsNullOrWhiteSpace(options.OpenAIKey))
+                {
+                    try
+                    {
+                        chatClient = CreateOpenAIChatClient(options.OpenAIKey, options.OpenAIModel);
+                        if (options.Verbose)
+                        {
+                            Console.WriteLine($"LLM analysis enabled using model: {options.OpenAIModel}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"WARNING: Failed to initialize OpenAI client: {ex.Message}");
+                        Console.WriteLine("Falling back to keyword-based analysis...");
+                    }
+                }
+                else if (options.Verbose)
+                {
+                    Console.WriteLine("No OpenAI key provided, using keyword-based analysis");
+                }
+
                 if (options.Verbose)
                 {
                     Console.WriteLine($"Connecting to GitHub API...");
@@ -68,8 +92,8 @@ namespace GitHubIssueTriage
                 }
 
                 // Analyze the issue
-                var analyzer = new IssueTriageAnalyzer(options.Verbose);
-                var suggestion = analyzer.AnalyzeIssue(issue);
+                var analyzer = new IssueTriageAnalyzer(options.Verbose, chatClient);
+                var suggestion = await analyzer.AnalyzeIssueAsync(issue);
 
                 // Display suggestions
                 Console.WriteLine("\n=== TRIAGE SUGGESTIONS ===");
@@ -126,6 +150,14 @@ namespace GitHubIssueTriage
                 }
                 return 1;
             }
+        }
+
+        private static IChatClient? CreateOpenAIChatClient(string apiKey, string model)
+        {
+            // TODO: Implement OpenAI client creation once Microsoft.Extensions.AI APIs are stabilized
+            // For now, return null to fall back to keyword-based analysis
+            Console.WriteLine("LLM integration is not fully implemented yet. Using keyword-based analysis.");
+            return null;
         }
 
         private static async Task ApplyTriageSuggestionsAsync(

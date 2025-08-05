@@ -4,7 +4,8 @@ A .NET tool for analyzing and triaging GitHub issues in the dotnet/iot repositor
 
 ## Features
 
-- 🔍 **Smart Analysis**: Analyzes issue content using keyword detection and pattern matching
+- 🤖 **LLM-Powered Analysis**: Uses Microsoft.Extensions.AI for intelligent issue categorization (when configured)
+- 🔍 **Smart Fallback**: Falls back to keyword-based analysis when LLM is unavailable  
 - 🏷️ **Label Management**: Automatically removes "untriaged" and suggests appropriate categorization labels
 - 📝 **Triage Comments**: Generates helpful comments explaining next steps to issue authors
 - 🔄 **Dry-Run Mode**: Default safe mode shows suggestions without making changes
@@ -27,14 +28,30 @@ export GITHUB_TOKEN="ghp_your_token_here"
 ./triage.sh 456 apply
 ```
 
+### Using with LLM Analysis (Future)
+
+When the LLM integration is complete, you'll be able to use OpenAI for more intelligent analysis:
+
+```bash
+# With OpenAI API key for LLM analysis
+export OPENAI_API_KEY="your_openai_key"
+./triage.sh 123 --openai-key $OPENAI_API_KEY
+
+# Using different model
+./triage.sh 123 --openai-key $OPENAI_API_KEY --openai-model gpt-4
+```
+
 ### Using dotnet run directly
 
 ```bash
-# Dry-run analysis
+# Dry-run analysis with keyword-based approach
 dotnet run -- --token ghp_xxx --issue 123 --verbose
 
 # Apply changes
 dotnet run -- --token ghp_xxx --issue 456 --apply
+
+# Future: LLM-based analysis (when implemented)
+dotnet run -- --token ghp_xxx --issue 123 --openai-key sk-xxx --verbose
 ```
 
 ## Triage Logic
@@ -104,11 +121,30 @@ Action: Close issue
 Comment: [Triage] Thank you for your device binding suggestion! We don't track device binding requests as issues...
 ```
 
+## LLM Integration Status
+
+### Current Implementation
+The tool now includes framework support for LLM-based analysis using Microsoft.Extensions.AI:
+
+- ✅ **Architecture**: Core LLM integration structure in place
+- ✅ **Command-line options**: `--openai-key` and `--openai-model` parameters added
+- ✅ **Fallback mechanism**: Gracefully falls back to keyword analysis
+- ⏳ **API Integration**: LLM calls currently use placeholder (Microsoft.Extensions.AI API finalization pending)
+
+### Future Enhancements
+When the LLM integration is complete, it will provide:
+
+- 🎯 **Context-aware analysis**: Understanding issue intent beyond keyword matching
+- 📝 **Better categorization**: More nuanced classification of complex issues  
+- 💬 **Improved comments**: More helpful and personalized triage responses
+- 🔍 **Advanced detection**: Better identification of device requests vs. genuine feature requests
+
 ## Requirements
 
 - .NET 8.0 SDK
 - GitHub personal access token with repository access
 - Write permissions to target repository (for apply mode)
+- OpenAI API key (optional, for future LLM features)
 
 ## Building
 
