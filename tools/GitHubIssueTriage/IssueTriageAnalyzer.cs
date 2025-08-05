@@ -114,6 +114,12 @@ namespace GitHubIssueTriage
                 return;
             }
 
+            // Check for GPIO-specific issues
+            if (IsGpioRelated(content))
+            {
+                suggestion.LabelsToAdd.Add("area-System.Device.Gpio");
+            }
+
             // Check for bug indicators
             if (IsBugReport(content))
             {
@@ -136,6 +142,17 @@ namespace GitHubIssueTriage
                     "Please provide as much context as possible about what you're trying to achieve. " +
                     "You might also want to check our documentation and existing issues for similar questions.";
                 suggestion.Reasoning = "Question indicators detected";
+                return;
+            }
+
+            // Check for feature request indicators (not device-related)
+            if (IsFeatureRequest(content))
+            {
+                suggestion.LabelsToAdd.Add("api-suggestion");
+                suggestion.TriageComment = "[Triage] This appears to be a feature request. " +
+                    "Please provide a detailed description of the proposed changes, use cases, " +
+                    "and any relevant API design considerations.";
+                suggestion.Reasoning = "Feature request detected";
                 return;
             }
 
@@ -189,6 +206,28 @@ namespace GitHubIssueTriage
             return questionKeywords.Any(keyword => content.Contains(keyword));
         }
 
+        private bool IsGpioRelated(string content)
+        {
+            var gpioKeywords = new[]
+            {
+                "gpio", "pin", "digital", "analog", "pwm", "spi", "i2c", "uart", "serial",
+                "system.device.gpio", "raspberry pi", "arduino"
+            };
+
+            return gpioKeywords.Any(keyword => content.Contains(keyword));
+        }
+
+        private bool IsFeatureRequest(string content)
+        {
+            var featureKeywords = new[]
+            {
+                "feature request", "enhancement", "add support", "new feature",
+                "would be nice", "suggestion", "improve", "add method", "add property",
+                "api request", "could you add"
+            };
+
+            return featureKeywords.Any(keyword => content.Contains(keyword));
+        }
         private bool HasLabel(Octokit.Issue issue, string labelName)
         {
             return issue.Labels.Any(label => 
