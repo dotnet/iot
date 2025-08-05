@@ -1,0 +1,3 @@
+<Project>
+  <!-- Override parent Directory.Build.props to avoid Arcade SDK dependency -->
+</Project>
