@@ -36,6 +36,9 @@ namespace Iot.Device.SocketCan
         [DllImport("libc", EntryPoint = "ioctl", CallingConvention = CallingConvention.Cdecl)]
         private static extern int Ioctl3(int fd, uint request, ref InterfaceIndexQuery ifr);
 
+        [DllImport("libc", EntryPoint = "ioctl", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int Ioctl4(int fd, uint request, ref TimeVal tv);
+
         [DllImport("libc", EntryPoint = "bind", CallingConvention = CallingConvention.Cdecl)]
         private static extern int BindSocket(int fd, ref CanSocketAddress addr, uint addrlen);
 
@@ -147,6 +150,26 @@ namespace Iot.Device.SocketCan
             }
 
             return ifr.ifr_ifindex;
+        }
+
+        public static unsafe ulong GetLastTimeStamp(SafeHandle handle)
+        {
+            // From Linux 6.12.33+deb13-amd64 x86_64
+            const uint SIOCGSTAMP = 0x8906;
+
+            InterfaceIndexQuery tv = new TimeVal();
+            int ret = Ioctl4((int)handle.DangerousGetHandle(), SIOCGSTAMP, ref tv);
+            if (ret == -1)
+            {
+                throw new IOException("Could not get socketcan timestamp");
+            }
+            return (tv.tv_sec * 1000000 + tv.tv_usec);  // unix time in [us]
+        }
+
+        internal unsafe struct TimeVal
+        {
+            public uint tv_sec;   /* Seconds */
+            public uint tv_usec;  /* Microseconds */
         }
 
         internal unsafe struct InterfaceIndexQuery
