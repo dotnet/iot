@@ -79,7 +79,8 @@ void ReceiveAllExample()
             Span<byte> data = new Span<byte>(buffer, 0, frameLength);
             string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
             string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
-            Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
+            ulong ts = can.GetLastTimeStamp();  // Get the kernel timestamp of the frame
+            Console.WriteLine($"Ts: {ts} Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
         }
         else
         {
@@ -87,7 +88,8 @@ void ReceiveAllExample()
             Span<byte> data = new Span<byte>(buffer, 0, frameLength);
             string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
             string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
-            Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
+            ulong ts = can.GetLastTimeStamp();
+            Console.WriteLine($"Ts: {ts} Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
         }
     }
 }

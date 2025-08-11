@@ -157,19 +157,20 @@ namespace Iot.Device.SocketCan
             // From Linux 6.12.33+deb13-amd64 x86_64
             const uint SIOCGSTAMP = 0x8906;
 
-            InterfaceIndexQuery tv = new TimeVal();
+            TimeVal tv = new TimeVal();
             int ret = Ioctl4((int)handle.DangerousGetHandle(), SIOCGSTAMP, ref tv);
             if (ret == -1)
             {
                 throw new IOException("Could not get socketcan timestamp");
             }
-            return (tv.tv_sec * 1000000 + tv.tv_usec);  // unix time in [us]
+
+            return ((ulong)tv.tv_sec * 1000000 + (ulong)tv.tv_usec);  // unix time in [us]
         }
 
         internal unsafe struct TimeVal
         {
-            public uint tv_sec;   /* Seconds */
-            public uint tv_usec;  /* Microseconds */
+            public long tv_sec;   /* Seconds */
+            public long tv_usec;  /* Microseconds */
         }
 
         internal unsafe struct InterfaceIndexQuery
