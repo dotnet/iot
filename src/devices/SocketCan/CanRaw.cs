@@ -118,6 +118,15 @@ namespace Iot.Device.SocketCan
         }
 
         /// <summary>
+        /// Reads the timestamp of the last read frame from the kernel
+        /// </summary>
+        /// <returns>unix time of the last read frame in [us]</returns>
+        public ulong GetLastTimeStamp()
+        {
+            return Interop.GetLastTimeStamp(_handle);
+        }
+
+        /// <summary>
         /// Set filter on the bus to read only from specified recipient.
         /// </summary>
         /// <param name="id">Recipient identifier</param>
