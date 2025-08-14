@@ -1,7 +1,6 @@
 # .NET IoT — Repository Custom Instructions for GitHub Copilot
 
 > Place this file at `.github/copilot-instructions.md` in the **dotnet/iot** repository.
->
 > Purpose: steer Copilot to propose changes that match this repo’s structure, coding conventions, and contribution norms for **System.Device.Gpio** and **Iot.Device.Bindings**.
 
 ---
