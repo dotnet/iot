@@ -100,7 +100,7 @@ Use explicit, repo‑aware prompts. Examples:
 ## Where to look in this repo (for Copilot context)
 - **Patterns:** browse `src/devices` for existing sensor/display bindings; mirror their constructors, enums, and `Try*` APIs.
 - **Abstractions:** use `System.Device.Gpio`, `System.Device.I2c`, `System.Device.Spi`, `System.Device.Pwm` where possible.
-- **Docs:** check `Documentation/` for contribution guidance; keep wording and tone consistent.
+- **Docs:** check `Documentation/` for contribution guidelines; keep wording and tone consistent.
 
 ---
 
