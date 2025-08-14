@@ -88,12 +88,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
     }
 
     /// <inheritdoc/>
-    protected internal override int ConvertPinNumberToLogicalNumberingScheme(int lineOffset)
-    {
-        throw new NotSupportedException($"{nameof(LibGpiodV2Driver)} uses GPIO line numbering. For more information please refer to " +
-            $"https://docs.kernel.org/driver-api/gpio/using-gpio.html or consider using the gpioinfo cmd line tool provided by libgpiod to " +
-            $"find out more about present GPIO lines on the system");
-    }
+
 
     /// <inheritdoc/>
     /// <remarks>This only requests the line for it to be reserved and the consumer to be set.</remarks>

@@ -20,10 +20,7 @@ namespace Iot.Device.Board
         protected override int PinCount => 0;
 
         /// <inheritdoc />
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-        {
-            return 0;
-        }
+
 
         /// <summary>
         /// There are no pins on this board, so this always throws an exception

@@ -18,9 +18,5 @@ internal class RaspberryPiCm3Driver : RaspberryPi3LinuxDriver
     /// </summary>
     /// <param name="pinNumber">The board pin number to convert.</param>
     /// <returns>The pin number in the driver's logical numbering scheme.</returns>
-    protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-    {
-        // CM3 has no physical numbering scheme
-        return pinNumber;
-    }
+
 }
