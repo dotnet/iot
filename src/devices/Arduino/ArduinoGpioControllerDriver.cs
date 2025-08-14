@@ -45,10 +45,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Arduino does not distinguish between logical and physical numbers, so this always returns identity
         /// </summary>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-        {
-            return pinNumber;
-        }
+
 
         protected override void OpenPin(int pinNumber)
         {

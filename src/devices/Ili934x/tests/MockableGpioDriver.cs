@@ -28,12 +28,7 @@ public abstract class MockableGpioDriver : GpioDriver
         _event?.Invoke(this, new PinValueChangedEventArgs(eventTypes, forPin));
     }
 
-    public abstract int ConvertPinNumberToLogicalNumberingSchemeEx(int pinNumber);
 
-    protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-    {
-        return ConvertPinNumberToLogicalNumberingSchemeEx(pinNumber);
-    }
 
     public abstract void OpenPinEx(int pinNumber);
 

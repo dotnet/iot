@@ -36,10 +36,7 @@ namespace ArduinoCsCompiler
             }
         }
 
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-        {
-            return pinNumber;
-        }
+
 
         protected override void OpenPin(int pinNumber)
         {

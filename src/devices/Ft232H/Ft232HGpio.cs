@@ -41,7 +41,7 @@ namespace Iot.Device.Ft232H
         }
 
         /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
+
 
         /// <inheritdoc/>
         protected override void OpenPin(int pinNumber)
