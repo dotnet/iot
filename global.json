@@ -11,7 +11,7 @@
     }
   },
   "sdk": {
-    "version": "8.0.118",
+    "version": "8.0.300",
     "allowPrerelease": true,
     "rollForward": "major"
   },

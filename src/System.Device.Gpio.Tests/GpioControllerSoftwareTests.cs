@@ -95,26 +95,6 @@ public class GpioControllerSoftwareTests : IDisposable
         Assert.Equal(PinMode.Output, ctrl.GetPinMode(1));
     }
 
-    [Fact]
-    [Obsolete("Tests an obsolete feature")]
-    public void UsingBoardNumberingWorks()
-    {
-        // Our mock driver maps physical pin 2 to logical pin 1
-        _mockedGpioDriver.Setup(x => x.ConvertPinNumberToLogicalNumberingSchemeEx(2)).Returns(1);
-        _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
-        _mockedGpioDriver.Setup(x => x.SetPinModeEx(1, PinMode.Output));
-        _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
-        _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
-        _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
-        _mockedGpioDriver.Setup(x => x.ReadEx(1)).Returns(PinValue.High);
-        _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
-        var ctrl = new GpioController(PinNumberingScheme.Board, _mockedGpioDriver.Object);
-        ctrl.OpenPin(2, PinMode.Output);
-        ctrl.Write(2, PinValue.High);
-        Assert.Equal(PinValue.High, ctrl.Read(2));
-        ctrl.ClosePin(2);
-        ctrl.Dispose();
-    }
 
     [Fact]
     public void UsingLogicalNumberingDisposesTheRightPin()
@@ -130,21 +110,7 @@ public class GpioControllerSoftwareTests : IDisposable
         ctrl.Dispose();
     }
 
-    [Fact]
-    [Obsolete("Tests obsolete features")]
-    public void UsingBoardNumberingDisposesTheRightPin()
-    {
-        // Our mock driver maps physical pin 2 to logical pin 1
-        _mockedGpioDriver.Setup(x => x.ConvertPinNumberToLogicalNumberingSchemeEx(2)).Returns(1);
-        _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
-        _mockedGpioDriver.Setup(x => x.SetPinModeEx(1, PinMode.Output));
-        _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
-        _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
-        var ctrl = new GpioController(PinNumberingScheme.Board, _mockedGpioDriver.Object);
-        ctrl.OpenPin(2, PinMode.Output);
-        // No close on the pin here, we want to check that the Controller's Dispose works correctly
-        ctrl.Dispose();
-    }
+
 
     [Fact]
     public void CallbackOnEventWorks()
