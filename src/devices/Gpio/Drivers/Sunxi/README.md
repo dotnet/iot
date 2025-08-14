@@ -8,7 +8,7 @@
 
 ```C#
 // For Orange Pi Zero
-using GpioController gpio = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
+using GpioController gpio = new GpioController(new OrangePiZeroDriver());
 
 // Open the GPIO pin.
 gpio.OpenPin(7);
@@ -21,9 +21,9 @@ PinValue value = gpio.Read(7);
 ### Generic GPIO driver: `SunxiDriver`
 
 ```C#
-// Beacuse this is a generic driver, the pin scheme can only be Logical.
+// Because this is a generic driver, only logical pin numbering is supported.
 // The base addresses can be found in the corresponding SoC datasheet.
-using GpioController gpio = new GpioController(PinNumberingScheme.Logical, new SunxiDriver(cpuxPortBaseAddress: 0x01C20800, cpusPortBaseAddress: 0x01F02C00));
+using GpioController gpio = new GpioController(new SunxiDriver(cpuxPortBaseAddress: 0x01C20800, cpusPortBaseAddress: 0x01F02C00));
 
 // Convert pin number to logical scheme.
 int pinNumber = SunxiDriver.MapPinNumber(portController: 'A', port: 10);
@@ -59,27 +59,13 @@ gpio.Write(pinNumber, PinValue.High);
     public class OrangePiZeroDriver : Sun8iw7p1Driver { }
     ```
 
-2. Overriding the mapping method for converting a board pin number to the driver's logical numbering scheme.
+2. Override the PinCount property to specify the number of pins available on the board.
 
     ```C#
-    // Mapping from board pins to logic pins.
-    private static readonly int[] _pinNumberConverter = new int[27]
-    {
-        -1, -1, -1, MapPinNumber('A', 12), -1, MapPinNumber('A', 11), -1, MapPinNumber('A', 6), MapPinNumber('G', 6), -1,
-        MapPinNumber('G', 7), MapPinNumber('A', 1), MapPinNumber('A', 7), MapPinNumber('A', 0), -1, MapPinNumber('A', 3),
-        MapPinNumber('A', 19), -1, MapPinNumber('A', 18), MapPinNumber('A', 15), -1, MapPinNumber('A', 16), MapPinNumber('A', 2),
-        MapPinNumber('A', 14), MapPinNumber('A', 13), -1, MapPinNumber('A', 10)
-    };
-
     protected override int PinCount => 17;
-
-    protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-    {
-        int num = _pinNumberConverter[pinNumber];
-        return num != -1 ? num : 
-            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
-    }
     ```
+
+**Note:** Board-to-logical pin number conversion is no longer supported. All pin numbers must be specified using logical numbering (as defined by the SoC datasheet). Use the `MapPinNumber` helper method to convert from port controller and pin number to logical pin numbers.
 
 ## References
 
