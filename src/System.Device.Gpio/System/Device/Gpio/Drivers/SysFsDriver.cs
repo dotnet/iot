@@ -198,12 +198,7 @@ public class SysFsDriver : UnixDriver
     /// </summary>
     protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
-    /// <summary>
-    /// Converts a board pin number to the driver's logical numbering scheme.
-    /// </summary>
-    /// <param name="pinNumber">The board pin number to convert.</param>
-    /// <returns>The pin number in the driver's logical numbering scheme.</returns>
-    protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
+
 
     /// <summary>
     /// Opens a pin in order for it to be ready to use.

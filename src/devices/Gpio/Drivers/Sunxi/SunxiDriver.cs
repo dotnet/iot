@@ -48,7 +48,7 @@ namespace Iot.Device.Gpio.Drivers
         protected override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
         /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/> class.

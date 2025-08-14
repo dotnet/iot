@@ -7,7 +7,7 @@ This project contains a **full function(PULL-UP, PULL-DOWN)** generic GPIO drive
 ### Special GPIO driver: `OrangePi4Driver`
 
 ```C#
-using GpioController gpio = new GpioController(PinNumberingScheme.Board, new OrangePi4Driver());
+using GpioController gpio = new GpioController(new OrangePi4Driver());
 
 gpio.OpenPin(7);
 gpio.SetPinMode(7, PinMode.Output);
@@ -18,9 +18,9 @@ gpio.Write(7, PinValue.High);
 ### Generic GPIO driver: `RockchipDriver`
 
 ```C#
-// Beacuse this is a generic driver, the pin scheme can only be Logical.
+// Because this is a generic driver, only logical pin numbering is supported.
 // The base addresses can be found in the corresponding SoC datasheet.
-using GpioController gpio = new GpioController(PinNumberingScheme.Logical, new RockchipDriver(gpioRegisterAddresses: new uint[] { 0xFF72_0000, 0xFF73_0000, 0xFF78_0000, 0xFF78_8000, 0xFF79_0000 });
+using GpioController gpio = new GpioController(new RockchipDriver(gpioRegisterAddresses: new uint[] { 0xFF72_0000, 0xFF73_0000, 0xFF78_0000, 0xFF78_8000, 0xFF79_0000 });
 
 // Convert pin number to logical scheme.
 int pinNumber = RockchipDriver.MapPinNumber(gpioNumber: 4, port: 'C', portNumber: 6);

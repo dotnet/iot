@@ -26,12 +26,7 @@ public abstract class GpioDriver : IDisposable
     /// </summary>
     protected internal abstract int PinCount { get; }
 
-    /// <summary>
-    /// Converts a board pin number to the driver's logical numbering scheme.
-    /// </summary>
-    /// <param name="pinNumber">The board pin number to convert.</param>
-    /// <returns>The pin number in the driver's logical numbering scheme.</returns>
-    protected internal abstract int ConvertPinNumberToLogicalNumberingScheme(int pinNumber);
+
 
     /// <summary>
     /// Opens a pin in order for it to be ready to use.
