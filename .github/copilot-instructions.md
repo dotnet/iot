@@ -19,7 +19,7 @@
 - **Tests:** prefer **unit tests** for logic that can be isolated from hardware. For hardware-only functionality, ensure samples (and documentation) make manual verification straightforward.
 - **Docs:** device-specific docs/README typically live next to the device code; repo-wide docs live under `Documentation/`.
 
-> Copilot: when proposing commands or CI steps, use `dotnet build/test`, and do not bump target frameworks or change solution structure unless explicitly asked.
+> Copilot: when proposing commands or CI steps, use `dotnet build` and `dotnet test` as separate commands, or `dotnet build && dotnet test` for shell chaining. Do not bump target frameworks or change solution structure unless explicitly asked.
 
 ---
 
