@@ -59,7 +59,7 @@ When adding or updating a **device binding** under `src/devices/<DeviceName>`:
    - Guard against misuse (invalid pins, uninitialized device) with `ArgumentException`/`InvalidOperationException` and descriptive messages.
    - For transient hardware issues, either throw or return `false` in `Try*` patterns—**never** return bogus data silently.
 
-5. **Cross‑platform**
+5. **Cross-platform**
    - Use **System.Device** abstractions (controllers, drivers) instead of P/Invoke or OS-specific syscalls. If a feature is platform-only, guard it and fail gracefully elsewhere.
 
 6. **Samples & docs**
