@@ -111,5 +111,5 @@ Use explicit, repo‑aware prompts. Examples:
 ---
 
 ## One‑liner summary (what Copilot should optimize for)
-> **Write clear, disposable‑correct, hardware‑agnostic device code that matches existing patterns, surfaces failures honestly, and ships with samples and docs.**
+> **Write clear, disposable-correct, hardware-agnostic device code that matches existing patterns, surfaces failures honestly, and ships with samples and docs.**
 
