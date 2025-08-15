@@ -64,7 +64,7 @@ When adding or updating a **device binding** under `src/devices/<DeviceName>`:
 
 6. **Samples & docs**
    - Add a **sample** demonstrating typical usage (`samples/` and/or `src/devices/<DeviceName>/samples`). Keep samples small, readable, and disposable-friendly.
-   - Add or update a **README** for the device with wiring notes, required pull‑ups, expected ranges/units, and example code.
+   - Add or update a **README** for the device with wiring notes, required pull-ups, expected ranges/units, and example code.
 
 ---
 
