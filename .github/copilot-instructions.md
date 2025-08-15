@@ -92,7 +92,7 @@ When adding or updating a **device binding** under `src/devices/<DeviceName>`:
 Use explicit, repo‑aware prompts. Examples:
 
 - *“Create a new I2C temperature sensor binding under `src/devices/AcmeTemp` with a `TryReadTemperature(out Temperature t)` method and a sample app. Constructor should accept an `I2cDevice` and an optional address (default 0x48). Implement `IDisposable` and document units.”*
-- *“Refactor existing SPI display code to avoid per‑frame allocations. Suggest a pooled buffer approach using `Span<byte>` and show before/after microbenchmarks.”*
+- *“Refactor existing SPI display code to avoid per-frame allocations. Suggest a pooled buffer approach using `Span<byte>` and show before/after microbenchmarks.”*
 - *“Add XML docs and a README section for BMP280 explaining oversampling settings and expected units. Update the sample to dispose controllers correctly.”*
 
 ---
