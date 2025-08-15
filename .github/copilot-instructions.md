@@ -78,7 +78,7 @@ When adding or updating a **device binding** under `src/devices/<DeviceName>`:
 ---
 
 ## Review checklist for new/updated bindings (use this before finishing a PR)
-- [ ] Public API follows repo naming/style; members are XML‑documented with units (°C, Pa, %RH, lux, etc.).
+- [ ] Public API follows repo naming/style; members are XML-documented with units (°C, Pa, %RH, lux, etc.).
 - [ ] Constructor accepts caller‑provided transports and documents ownership.
 - [ ] Implements `IDisposable`; all hardware resources released.
 - [ ] Uses enums/consts for registers/addresses; no unexplained magic numbers.
