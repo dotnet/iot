@@ -168,7 +168,7 @@ namespace Iot.Device.Tca955x
             {
                 if (mode != PinMode.Input && mode != PinMode.Output && mode != PinMode.InputPullUp)
                 {
-                    throw new ArgumentException("The Mcp controller supports the following pin modes: Input, Output and InputPullUp.");
+                    throw new ArgumentException("The Tca955x controller supports the following pin modes: Input, Output and InputPullUp.");
                 }
 
                 byte polarityInversionRegister = GetRegisterIndex(pinNumber, Register.PolarityInversionPort);
@@ -432,9 +432,22 @@ namespace Iot.Device.Tca955x
                 throw new InvalidOperationException("No interrupt pin configured");
             }
 
-            _interruptPins.Add(pinNumber, eventType);
-            _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
-            _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
+            lock (_interruptHandlerLock)
+            {
+                _interruptPins.Add(pinNumber, eventType);
+                _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
+
+                // Register the interrupt callback only once, when the first input pin is added.
+                // The TCA955x family of I/O expanders shares a single INT (interrupt) output pin for all input ports in input mode.
+                // Any rising or falling edge on any input pin configured as input will trigger this shared interrupt.
+                // Therefore, we only need to register the interrupt handler once, regardless of how many input pins are monitored.
+                // This avoids redundant registrations and ensures efficient handling of input changes.
+                if (_interruptPins.Count == 1)
+                {
+                    _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
+                }
+
+            }
 
             _eventHandlers[pinNumber] = callback;
         }
@@ -448,11 +461,23 @@ namespace Iot.Device.Tca955x
                 throw new InvalidOperationException("No valid GPIO controller defined. And no callbacks registered either.");
             }
 
-            if (_eventHandlers.TryRemove(pinNumber, out _))
+            lock (_interruptHandlerLock)
             {
-                _interruptPins.Remove(pinNumber);
-                _interruptLastInputValues.Remove(pinNumber);
-                _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
+                if (_eventHandlers.TryRemove(pinNumber, out _))
+                {
+                    _interruptPins.Remove(pinNumber);
+                    _interruptLastInputValues.Remove(pinNumber);
+
+                    // Unregister the interrupt callback only when no more input pins are being monitored.
+                    // Since the TCA955x family uses a single shared interrupt pin for all input ports,
+                    // we only need the callback while at least one input pin is active.
+                    // Once all input pins have been removed, we can safely unregister the callback
+                    // to avoid unnecessary interrupt handling.
+                    if (_interruptPins.Count == 0)
+                    {
+                        _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
+                    }
+                }
             }
         }
 
