@@ -120,7 +120,7 @@ Let's assume your device is the first one, you'll be able to create a GPIO Contr
 ```csharp
 var ft232h = new Ft232HDevice(devices[0]);
 var gpio = ft232h.CreateGpioDriver();
-GpioController controller = new(PinNumberingScheme.Board, gpio);
+GpioController controller = new(gpio);
 ```
 
 > Important notes:
