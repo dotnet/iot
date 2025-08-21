@@ -456,8 +456,6 @@ namespace Iot.Device.Tca955x
             }
         }
 
-        /// <inheritdoc/>
-
         /// <summary>
         /// Waits for an event to occur on the given pin.
         /// </summary>

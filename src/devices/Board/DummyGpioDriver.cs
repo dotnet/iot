@@ -19,8 +19,6 @@ namespace Iot.Device.Board
         /// </summary>
         protected override int PinCount => 0;
 
-        /// <inheritdoc />
-
 
         /// <summary>
         /// There are no pins on this board, so this always throws an exception

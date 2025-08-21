@@ -42,9 +42,7 @@ namespace Iot.Device.Arduino
 
         protected override int PinCount { get; }
 
-        /// <summary>
-        /// Arduino does not distinguish between logical and physical numbers, so this always returns identity
-        /// </summary>
+
 
 
         protected override void OpenPin(int pinNumber)

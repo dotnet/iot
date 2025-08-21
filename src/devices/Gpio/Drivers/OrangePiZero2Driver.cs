@@ -23,7 +23,5 @@ namespace Iot.Device.Gpio.Drivers
 
         /// <inheritdoc/>
         protected override int PinCount => 17;
-
-        /// <inheritdoc/>
     }
 }

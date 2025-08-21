@@ -78,15 +78,7 @@ public class GpioController : IDisposable
         }
     }
 
-    /// <summary>
-    /// Gets the logical pin number in the controller's numbering scheme.
-    /// </summary>
-    /// <param name="pinNumber">The pin number</param>
-    /// <returns>The logical pin number in the controller's numbering scheme.</returns>
-    protected virtual int GetLogicalPinNumber(int pinNumber)
-    {
-        return pinNumber;
-    }
+
 
     /// <summary>
     /// Opens a pin in order for it to be ready to use.

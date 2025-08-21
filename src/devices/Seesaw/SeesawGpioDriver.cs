@@ -249,8 +249,6 @@ namespace Iot.Device.Seesaw
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => throw new NotImplementedException();
 
         /// <inheritdoc/>
-
-        /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => throw new NotImplementedException();
 
         /// <inheritdoc/>

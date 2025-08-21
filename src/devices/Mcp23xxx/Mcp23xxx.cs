@@ -857,9 +857,6 @@ namespace Iot.Device.Mcp23xxx
             }
         }
 
-        /// <inheritdoc/>
-
-
         /// <summary>
         /// Waits for an event to occur on the given pin.
         /// </summary>

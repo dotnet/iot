@@ -13,10 +13,6 @@ internal class RaspberryPiCm3Driver : RaspberryPi3LinuxDriver
     /// </summary>
     protected internal override int PinCount => 48;
 
-    /// <summary>
-    /// Converts a board pin number to the driver's logical numbering scheme.
-    /// </summary>
-    /// <param name="pinNumber">The board pin number to convert.</param>
-    /// <returns>The pin number in the driver's logical numbering scheme.</returns>
+
 
 }

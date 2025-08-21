@@ -40,8 +40,6 @@ namespace Iot.Device.Ft232H
             DeviceInformation.InitializeGpio();
         }
 
-        /// <inheritdoc/>
-
 
         /// <inheritdoc/>
         protected override void OpenPin(int pinNumber)
