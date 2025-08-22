@@ -7,6 +7,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.IO;
 using System.Threading;
+
 using Iot.Device.GrovePiDevice.Models;
 
 namespace Iot.Device.GrovePiDevice
@@ -16,7 +17,7 @@ namespace Iot.Device.GrovePiDevice
     /// </summary>
     public class GrovePi : IDisposable
     {
-        private const byte MaxRetries = 4;
+        private const byte MaxRetries = 10;
         private readonly bool _shouldDispose;
         private I2cDevice _i2cDevice;
 
@@ -100,7 +101,7 @@ namespace Iot.Device.GrovePiDevice
                     return;
                 }
                 catch (IOException ex)
-                 {
+                {
                     innerEx = ex;
                     tries++;
                     Thread.Sleep(10);
@@ -118,9 +119,10 @@ namespace Iot.Device.GrovePiDevice
         /// <returns></returns>
         public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
         {
+            const int dataNotAvailableCommand = 23;
             int numberBytesToRead = command switch
             {
-                GrovePiCommand.DigitalRead => 1,
+                GrovePiCommand.DigitalRead => 2,
                 GrovePiCommand.AnalogRead or GrovePiCommand.UltrasonicRead or GrovePiCommand.LetBarGet => 3,
                 GrovePiCommand.Version => 4,
                 GrovePiCommand.DhtTemp => 9,
@@ -143,7 +145,6 @@ namespace Iot.Device.GrovePiDevice
                 try
                 {
                     _i2cDevice.Read(outArray);
-                    return outArray;
                 }
                 catch (IOException ex)
                 {
@@ -151,7 +152,16 @@ namespace Iot.Device.GrovePiDevice
                     innerEx = ex;
                     tries++;
                     Thread.Sleep(10);
+                    continue;
                 }
+
+                if (outArray[0] != dataNotAvailableCommand && outArray[0] != 255)
+                {
+                    return outArray;
+                }
+
+                tries++;
+                Thread.Sleep(10);
             }
 
             throw new IOException($"{nameof(ReadCommand)}: Failed to write command {command}", innerEx);
@@ -165,27 +175,13 @@ namespace Iot.Device.GrovePiDevice
         public PinValue DigitalRead(GrovePort pin)
         {
             WriteCommand(GrovePiCommand.DigitalRead, pin, 0, 0);
-            byte tries = 0;
-            IOException? innerEx = null;
-            // When writing/reading to the I2C port, GrovePi doesn't respond on time in some cases
-            // So we wait a little bit before retrying
-            // In most cases, the I2C read/write can go thru without waiting
-            while (tries < MaxRetries)
+            var data = ReadCommand(GrovePiCommand.DigitalRead, pin);
+            if (data is null || data.Length < 2)
             {
-                try
-                {
-                    return (PinValue)_i2cDevice.ReadByte();
-                }
-                catch (IOException ex)
-                {
-                    // Give it another try
-                    innerEx = ex;
-                    tries++;
-                    Thread.Sleep(10);
-                }
+                return (PinValue)(-1);
             }
 
-            throw new IOException($"{nameof(DigitalRead)}: Failed to read byte with command {GrovePiCommand.DigitalRead}", innerEx);
+            return (PinValue)data[1];
         }
 
         /// <summary>
