@@ -123,9 +123,9 @@ namespace Iot.Device.SocketCan
         /// <param name="data">Data where output data should be written to</param>
         /// <param name="frameLength">Length of the data read</param>
         /// <param name="id">Recipient identifier</param>
-        /// <param name="timestamp">Unix time of the last read frame in [us]</param>
+        /// <param name="timestamp">UTC time when this frame was received with microsecond resolution</param>
         /// <returns></returns>
-        public bool TryReadFrame(Span<byte> data, out int frameLength, out CanId id, out ulong timestamp)
+        public bool TryReadFrame(Span<byte> data, out int frameLength, out CanId id, out DateTime timestamp)
         {
             bool ret = TryReadFrame(data, out frameLength, out id);
             timestamp = Interop.GetLastTimeStamp(_handle);
