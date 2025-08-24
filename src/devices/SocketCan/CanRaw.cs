@@ -118,12 +118,18 @@ namespace Iot.Device.SocketCan
         }
 
         /// <summary>
-        /// Reads the timestamp of the last read frame from the kernel
+        /// Reads frame from the bus with the timestamp when it was received.
         /// </summary>
-        /// <returns>unix time of the last read frame in [us]</returns>
-        public ulong GetLastTimeStamp()
+        /// <param name="data">Data where output data should be written to</param>
+        /// <param name="frameLength">Length of the data read</param>
+        /// <param name="id">Recipient identifier</param>
+        /// <param name="timestamp">Unix time of the last read frame in [us]</param>
+        /// <returns></returns>
+        public bool TryReadFrame(Span<byte> data, out int frameLength, out CanId id, out ulong timestamp)
         {
-            return Interop.GetLastTimeStamp(_handle);
+            bool ret = TryReadFrame(data, out frameLength, out id);
+            timestamp = Interop.GetLastTimeStamp(_handle);
+            return ret;
         }
 
         /// <summary>

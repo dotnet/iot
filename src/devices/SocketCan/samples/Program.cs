@@ -19,9 +19,9 @@ Dictionary<string, Action> samples = new()
     { "receive-on-specific-address", ReceiveOnAddressExample },
 };
 
-if (args.Length == 0 || !samples.ContainsKey(args[0]))
+if (args.Length < 2 || !samples.ContainsKey(args[0]))
 {
-    Console.WriteLine("Usage: SocketCan.Sample <sample-name>");
+    Console.WriteLine("Usage: SocketCan.Sample <sample-name> <can_if_name>");
     Console.WriteLine("Available samples:");
 
     foreach (var kv in samples)
@@ -38,7 +38,7 @@ void SendExample()
 {
     Console.WriteLine($"Sending to id = 0x{id.Value:X2}");
 
-    using CanRaw can = new CanRaw();
+    using CanRaw can = new CanRaw(args[1]);
     byte[][] buffers = new byte[][]
     {
         new byte[8] { 1, 2, 3, 40, 50, 60, 70, 80 },
@@ -69,17 +69,16 @@ void ReceiveAllExample()
 {
     Console.WriteLine("Listening for any id");
 
-    using CanRaw can = new();
+    using CanRaw can = new(args[1]);
     byte[] buffer = new byte[8];
 
     while (true)
     {
-        if (can.TryReadFrame(buffer, out int frameLength, out CanId id))
+        if (can.TryReadFrame(buffer, out int frameLength, out CanId id, out ulong ts))
         {
             Span<byte> data = new Span<byte>(buffer, 0, frameLength);
             string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
             string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
-            ulong ts = can.GetLastTimeStamp();  // Get the kernel timestamp of the frame
             Console.WriteLine($"Ts: {ts} Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
         }
         else
@@ -88,7 +87,6 @@ void ReceiveAllExample()
             Span<byte> data = new Span<byte>(buffer, 0, frameLength);
             string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
             string dataAsHex = string.Join(string.Empty, data.ToArray().Select((x) => x.ToString("X2")));
-            ulong ts = can.GetLastTimeStamp();
             Console.WriteLine($"Ts: {ts} Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
         }
     }
@@ -98,7 +96,7 @@ void ReceiveOnAddressExample()
 {
     Console.WriteLine($"Listening for id = 0x{id.Value:X2}");
 
-    using CanRaw can = new();
+    using CanRaw can = new(args[1]);
     byte[] buffer = new byte[8];
     can.Filter(id);
 
