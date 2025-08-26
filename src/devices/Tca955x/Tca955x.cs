@@ -447,9 +447,8 @@ namespace Iot.Device.Tca955x
                     _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
                 }
 
+                _eventHandlers[pinNumber] = callback;
             }
-
-            _eventHandlers[pinNumber] = callback;
         }
 
         /// <inheritdoc/>
