@@ -12,6 +12,8 @@ permissions:
 jobs:
   publish-nightly:
     runs-on: ubuntu-latest
+    # Only run on the main dotnet/iot repository, not on forks
+    if: github.repository == 'dotnet/iot'
     
     steps:
     - name: Checkout code
