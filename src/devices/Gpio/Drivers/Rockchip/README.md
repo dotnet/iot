@@ -47,7 +47,7 @@ PinValue value = gpio.Read(pinNumber);
     ```C#
     protected override uint[] GpioRegisterAddresses => new[] { 0xFF21_0000, 0xFF22_0000, 0xFF23_0000, 0xFF24_8000 };
     protected uint GeneralRegisterFiles => 0xFF10_0000;
-    protected uint ClockResetUnit => 0xFF44_0000;        
+    protected uint ClockResetUnit => 0xFF44_0000;
     ```
 
 3. Overriding `SetPinMode` method.
@@ -87,7 +87,7 @@ PinValue value = gpio.Read(pinNumber);
     protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
     {
         int num = _pinNumberConverter[pinNumber];
-        return num != -1 ? num : 
+        return num != -1 ? num :
             throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
     }
     ```

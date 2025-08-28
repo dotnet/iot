@@ -12,7 +12,4 @@ internal class RaspberryPiCm3Driver : RaspberryPi3LinuxDriver
     /// Raspberry CM3 has 48 GPIO pins.
     /// </summary>
     protected internal override int PinCount => 48;
-
-
-
 }

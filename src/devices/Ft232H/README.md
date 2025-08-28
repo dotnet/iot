@@ -172,7 +172,7 @@ As seen before in some specificities, they can have multiple channels:
   - Remaining pins can be used for traditional GPIO
   - Channel C and D can only be used for GPIO. All 8 pins can be set as input, output read and wrote.
   - The device will appear like this:
-  
+
   ```text
   Quad RS232-HS A
     Flags: HiSpeedMode

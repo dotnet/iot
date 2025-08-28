@@ -507,7 +507,7 @@ private int _pinToUse;
 public MyBinding(int pinToUse, GpioController controller = null, bool shouldDispose = true)
 {
   _shouldDispose = gpioController is null || shouldDispose;
-  _controller = gpioController ?? new GpioController();  
+  _controller = gpioController ?? new GpioController();
   _pinToUse = pinToUse;
   _controller.OpenPin(_pinToUse);
   // Initialize the rest of initialization

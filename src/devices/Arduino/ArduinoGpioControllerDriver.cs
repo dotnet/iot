@@ -42,9 +42,6 @@ namespace Iot.Device.Arduino
 
         protected override int PinCount { get; }
 
-
-
-
         protected override void OpenPin(int pinNumber)
         {
             if (pinNumber < 0 || pinNumber >= PinCount)

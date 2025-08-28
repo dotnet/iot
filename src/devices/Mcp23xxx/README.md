@@ -22,7 +22,7 @@ MCP23XXX devices contain different markings to distinguish features like interfa
 
 ### Mcp230xx I2C
 
-![I2C Interface](Mcp23S17_I2c_ReadSwitches_WriteLeds.png)  
+![I2C Interface](Mcp23S17_I2c_ReadSwitches_WriteLeds.png)
 
 ```csharp
 // 0x20 is the device address in this example.
