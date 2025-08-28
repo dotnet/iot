@@ -24,7 +24,7 @@ jobs:
         fetch-depth: 0 # Ensure we have full git history for versioning
     
     - name: Build and pack
-      run: ./build.sh -restore -build -pack
+      run: ./build.sh -restore -build -pack -ci /p:VersionSuffix=nightly.${{ github.run_number }}
       
     - name: Find package files
       id: find-packages
@@ -48,7 +48,7 @@ jobs:
         # Publish each package using environment variable for auth
         for package in ${{ steps.find-packages.outputs.packages }}; do
           echo "Publishing $package"
-          dotnet nuget push "$package" \
+          ./dotnet.sh nuget push "$package" \
             --source "https://nuget.pkg.github.com/dotnet/index.json" \
             --api-key "$GITHUB_TOKEN" \
             --skip-duplicate
