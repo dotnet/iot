@@ -54,7 +54,6 @@ public class GpioController : IDisposable
         _gpioPins = new ConcurrentDictionary<int, GpioPin>();
     }
 
-
     /// <summary>
     /// The number of pins provided by the controller.
     /// </summary>
@@ -77,8 +76,6 @@ public class GpioController : IDisposable
             return _gpioPins.Values;
         }
     }
-
-
 
     /// <summary>
     /// Opens a pin in order for it to be ready to use.
