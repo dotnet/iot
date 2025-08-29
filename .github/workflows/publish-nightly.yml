@@ -1,0 +1,62 @@
+name: Publish Nightly Packages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish-nightly:
+    runs-on: ubuntu-latest
+    # Only run on the main dotnet/iot repository, not on forks
+    if: github.repository == 'dotnet/iot'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Ensure we have full git history for versioning
+    
+    - name: Build and pack
+      run: ./build.sh -restore -build -pack -ci /p:VersionSuffix=nightly.${{ github.run_number }}
+      
+    - name: Find package files
+      id: find-packages
+      run: |
+        # Find all nupkg files in artifacts/packages
+        packages=$(find artifacts/packages -name "*.nupkg" -not -name "*.symbols.nupkg" | tr '\n' ' ')
+        echo "Found packages: $packages"
+        echo "packages=$packages" >> $GITHUB_OUTPUT
+        
+        # Count packages to verify we have the expected ones
+        package_count=$(echo $packages | wc -w)
+        echo "Package count: $package_count"
+        
+        if [ $package_count -eq 0 ]; then
+          echo "ERROR: No packages found!"
+          exit 1
+        fi
+    
+    - name: Publish packages to GitHub Packages
+      run: |
+        # Publish each package using environment variable for auth
+        for package in ${{ steps.find-packages.outputs.packages }}; do
+          echo "Publishing $package"
+          ./dotnet.sh nuget push "$package" \
+            --source "https://nuget.pkg.github.com/dotnet/index.json" \
+            --api-key "$GITHUB_TOKEN" \
+            --skip-duplicate
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload packages as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nightly-packages
+        path: artifacts/packages/**/*.nupkg
+        retention-days: 30
