@@ -10,39 +10,49 @@ using Xunit;
 
 namespace Iot.Device.Tca955x.Tests
 {
-    public class Tca9554Tests : IDisposable
+    public class Tca9554Tests
     {
         private readonly Mock<MockableI2cDevice> _device;
+        private readonly Mock<MockableI2cDevice> _deviceWithBadAddress;
         private readonly GpioController _controller;
         private readonly Mock<MockableGpioDriver> _driver;
 
         public Tca9554Tests()
         {
             _device = new Mock<MockableI2cDevice>(MockBehavior.Loose);
+            _deviceWithBadAddress = new Mock<MockableI2cDevice>(MockBehavior.Loose);
             _device.CallBase = true;
             _driver = new Mock<MockableGpioDriver>();
             _controller = new GpioController(_driver.Object);
-            _device.Setup(x => x.ConnectionSettings).Returns(new I2cConnectionSettings(0, Tca9554.DefaultI2cAdress));
-        }
-
-        public void Dispose()
-        {
-            _driver.VerifyAll();
-            _device.VerifyAll();
+            _device.Setup(x => x.ConnectionSettings).Returns(new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress));
+            _deviceWithBadAddress.Setup(x => x.ConnectionSettings).Returns(new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress + Tca9554.AddressRange + 1));
         }
 
         [Fact]
         public void CreateWithInterrupt()
         {
             var testee = new Tca9554(_device.Object, 10, _controller);
-            Assert.NotNull(testee);
+            _driver.VerifyAll();
+            _device.VerifyAll();
+
+        }
+
+        [Fact]
+        public void CreateWithBadAddress()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Tca9554(_deviceWithBadAddress.Object, -1));
+            _driver.VerifyAll();
+            _deviceWithBadAddress.VerifyAll();
+
         }
 
         [Fact]
         public void CreateWithoutInterrupt()
         {
             var testee = new Tca9554(_device.Object, -1);
-            Assert.NotNull(testee);
+            _driver.VerifyAll();
+            _device.VerifyAll();
+
         }
 
         [Fact]
@@ -67,6 +77,9 @@ namespace Iot.Device.Tca955x.Tests
             Assert.Equal(PinValue.High, value);
             pin0.Dispose();
             Assert.False(tcaController.IsPinOpen(0));
+            _driver.VerifyAll();
+            _device.VerifyAll();
+
         }
     }
 }

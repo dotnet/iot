@@ -33,9 +33,14 @@ namespace Iot.Device.Tca955x
         private ushort _gpioOutputCache;
 
         /// <summary>
-        /// Default Adress of the Tca955X Family.
+        /// Default Address of the Tca955X Family.
         /// </summary>
-        public const byte DefaultI2cAdress = 0x20;
+        public const byte DefaultI2cAddress = 0x20;
+
+        /// <summary>
+        /// Maximum number of addresses configurable via A0, A1, A2 pins.
+        /// </summary>
+        public const byte AddressRange = 7;
 
         /// <summary>
         /// Constructor for the Tca9555 I2C I/O Expander.
@@ -49,10 +54,10 @@ namespace Iot.Device.Tca955x
             _busDevice = device;
             _interrupt = interrupt;
 
-            if (_busDevice.ConnectionSettings.DeviceAddress < DefaultI2cAdress ||
-                _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAdress + 7)
+            if (_busDevice.ConnectionSettings.DeviceAddress < DefaultI2cAddress ||
+                _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAddress + AddressRange)
             {
-                new ArgumentOutOfRangeException(nameof(device), "Adress should be in Range 0x20 to 0x27");
+                throw new ArgumentOutOfRangeException(nameof(device), $"Address should be in Range {DefaultI2cAddress} to {DefaultI2cAddress + AddressRange} inclusive");
             }
 
             if (_interrupt != -1)
