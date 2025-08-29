@@ -9,23 +9,23 @@ namespace Iot.Device.Tca955x
     public enum Register
     {
         /// <summary>
-        /// Register Adress for the Inputs P0 - P7
+        /// Register Address for the Inputs P0 - P7
         /// Only Read Allowed on this Register
         /// </summary>
         InputPort = 0x00,
 
         /// <summary>
-        /// Register Adress for the Outputs P0 - P7
+        /// Register Address for the Outputs P0 - P7
         /// </summary>
         OutputPort = 0x01,
 
         /// <summary>
-        /// Register Adress for the Polarity Inversion P0 - P7
+        /// Register Address for the Polarity Inversion P0 - P7
         /// </summary>
         PolarityInversionPort = 0x02,
 
         /// <summary>
-        /// Register Adress for the Configuration P0 - P7
+        /// Register Address for the Configuration P0 - P7
         /// </summary>
         ConfigurationPort = 0x03,
     }
