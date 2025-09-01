@@ -31,6 +31,7 @@ public class GpioController : IDisposable
     /// </summary>
     private readonly ConcurrentDictionary<int, PinValue?> _openPins;
     private readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
+    private readonly bool _driverHasBlockAccess = false; // Cache the block access capability. Doing it this was trades one bool of memory for a little performance gain.
     private GpioDriver _driver;
 
     /// <summary>
@@ -50,6 +51,10 @@ public class GpioController : IDisposable
     public GpioController(GpioDriver driver)
     {
         _driver = driver;
+        if (_driver is IGpioDriverBlockAccess)
+        {
+            _driverHasBlockAccess = true;
+        }
 
 #pragma warning disable CS0612 // PinNumberingScheme is obsolete
         NumberingScheme = PinNumberingScheme.Logical;
@@ -464,9 +469,16 @@ public class GpioController : IDisposable
     /// <param name="pinValuePairs">The pin/value pairs to write.</param>
     public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
     {
-        for (int i = 0; i < pinValuePairs.Length; i++)
+        if (_driverHasBlockAccess)
         {
-            Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
+            ((IGpioDriverBlockAccess)_driver).Write(pinValuePairs);
+        }
+        else
+        {
+            for (int i = 0; i < pinValuePairs.Length; i++)
+            {
+                Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
+            }
         }
     }
 
@@ -476,10 +488,17 @@ public class GpioController : IDisposable
     /// <param name="pinValuePairs">The pin/value pairs to read.</param>
     public void Read(Span<PinValuePair> pinValuePairs)
     {
-        for (int i = 0; i < pinValuePairs.Length; i++)
+        if (_driverHasBlockAccess)
         {
-            int pin = pinValuePairs[i].PinNumber;
-            pinValuePairs[i] = new PinValuePair(pin, Read(pin));
+            ((IGpioDriverBlockAccess)_driver).Read(pinValuePairs);
+        }
+        else
+        {
+            for (int i = 0; i < pinValuePairs.Length; i++)
+            {
+                int pin = pinValuePairs[i].PinNumber;
+                pinValuePairs[i] = new PinValuePair(pin, Read(pin));
+            }
         }
     }
 
