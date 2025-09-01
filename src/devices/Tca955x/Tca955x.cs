@@ -14,7 +14,7 @@ namespace Iot.Device.Tca955x
     /// <summary>
     /// Base class for the Tca55x I2C I/O Expander
     /// </summary>
-    public abstract class Tca955x : GpioDriver
+    public abstract class Tca955x : GpioDriver, IDisposable
     {
         private readonly int _interrupt;
         private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
@@ -73,6 +73,9 @@ namespace Iot.Device.Tca955x
                 {
                     _controller.SetPinMode(interrupt, PinMode.Input);
                 }
+
+                // This should only be done once as there is only one interrupt for the entire ioexpander
+                _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
             }
         }
 
@@ -439,7 +442,6 @@ namespace Iot.Device.Tca955x
 
             _interruptPins.Add(pinNumber, eventType);
             _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
-            _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
 
             _eventHandlers[pinNumber] = callback;
         }
@@ -457,7 +459,6 @@ namespace Iot.Device.Tca955x
             {
                 _interruptPins.Remove(pinNumber);
                 _interruptLastInputValues.Remove(pinNumber);
-                _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
             }
         }
 
@@ -518,5 +519,24 @@ namespace Iot.Device.Tca955x
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode) =>
             (mode == PinMode.Input || mode == PinMode.Output || mode == PinMode.InputPullUp);
 
+        /// <inheritdoc/>
+        public new void Dispose()
+        {
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
+            else
+            {
+                // We don't own the interrupt controller, so we must unregister our interrupt handler
+                if (_controller != null && _interrupt != -1)
+                {
+                    _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
+                }
+            }
+
+            base.Dispose(true);
+        }
     }
 }
