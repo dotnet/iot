@@ -390,14 +390,18 @@ namespace Iot.Device.Tca955x
                         PinValue newValue = Read(interruptPin.Key);
                         PinValue lastValue = _interruptLastInputValues[interruptPin.Key];
 
-                        if ((interruptPin.Value.HasFlag(PinEventTypes.Rising) &&
-                            lastValue == PinValue.Low &&
-                            newValue == PinValue.High) ||
-                            (interruptPin.Value.HasFlag(PinEventTypes.Falling) &&
-                            lastValue == PinValue.High &&
-                            newValue == PinValue.Low))
+                        // We must calculate both edges, as the interrupt may have been triggered for
+                        // a pin that has not changed (isRisingEdge and isFallingEdge both false)
+                        bool isRisingEdge = lastValue == PinValue.Low && newValue == PinValue.High;
+                        bool isFallingEdge = lastValue == PinValue.High && newValue == PinValue.Low;
+
+                        if (interruptPin.Value.HasFlag(PinEventTypes.Rising) && isRisingEdge)
                         {
-                            CallHandlerOnPin(interruptPin.Key, interruptPin.Value);
+                            CallHandlerOnPin(interruptPin.Key, PinEventTypes.Rising);
+                        }
+                        else if (interruptPin.Value.HasFlag(PinEventTypes.Falling) && isFallingEdge)
+                        {
+                            CallHandlerOnPin(interruptPin.Key, PinEventTypes.Falling);
                         }
 
                         _interruptLastInputValues[interruptPin.Key] = newValue;
@@ -410,7 +414,7 @@ namespace Iot.Device.Tca955x
         /// Calls the event handler for the given pin, if any.
         /// </summary>
         /// <param name="pin">Pin to call the event handler on (if any exists)</param>
-        /// <param name="pinEvent">Non-zero if the value is currently high (therefore assuming the pin value was rising), otherwise zero</param>
+        /// <param name="pinEvent">What type of event led to calling this handler</param>
         private void CallHandlerOnPin(int pin, PinEventTypes pinEvent)
         {
             if (_eventHandlers.TryGetValue(pin, out var handler))
@@ -422,7 +426,7 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Calls an event handler if the given pin changes.
         /// </summary>
-        /// <param name="pinNumber">Pin number of the MCP23xxx</param>
+        /// <param name="pinNumber">Pin number to get callbacks for</param>
         /// <param name="eventType">Whether the handler should trigger on rising, falling or both edges</param>
         /// <param name="callback">The method to call when an interrupt is triggered</param>
         /// <exception cref="InvalidOperationException">There's no GPIO controller for the master interrupt configured, or no interrupt lines are configured for the
