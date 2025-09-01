@@ -436,6 +436,7 @@ namespace Iot.Device.Tca955x
         {
             if (_controller == null)
             {
+                // We could offer a polling solution here instead.
                 throw new InvalidOperationException("No GPIO controller available. Specify a GPIO controller and the relevant interrupt line numbers in the constructor");
             }
 
