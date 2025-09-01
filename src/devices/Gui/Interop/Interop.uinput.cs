@@ -150,10 +150,8 @@ namespace Iot.Device.Gui
 
         /// <summary>
         /// struct input_absinfo - used by EVIOCGABS/EVIOCSABS ioctls
-        ///
         /// Note that input core does not clamp reported values to the
         /// [minimum, maximum] limits, such task is left to userspace.
-        ///
         /// The default resolution for main axes (ABS_X, ABS_Y, ABS_Z)
         /// is reported in units per millimeter (units/mm), resolution
         /// for rotational axes (ABS_RX, ABS_RY, ABS_RZ) is reported

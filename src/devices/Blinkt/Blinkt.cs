@@ -11,9 +11,7 @@ namespace Iot.Device.Blinkt
     /// <summary>
     /// Driver for the Pimoroni Blinkt LED strip for Raspbery Pi
     /// https://shop.pimoroni.com/products/blinkt
-    ///
     /// This is a strip of 8 pixels that can be indendently controlled over GPIO.
-    ///
     /// Setting the color is a 2-step process:
     /// Set the color using Clear, SetPixel, or SetAll
     /// Call Show to update the physical pixels
@@ -34,7 +32,6 @@ namespace Iot.Device.Blinkt
 
         /// <summary>
         /// The sleep time in milliseconds between each bit written to the Blinkt.
-        ///
         /// The default value of 0 should be enough for most cases and works on the RPi 4 and 5,
         /// but you can increase this if you experience issues with the Blinkt on faster CPUs.
         /// </summary>
@@ -91,7 +88,6 @@ namespace Iot.Device.Blinkt
 
         /// <summary>
         /// Clears all the LEDs by turning them off.
-        ///
         /// After calling Clear, you must call Show to update the LEDs.
         /// </summary>
         public void Clear()

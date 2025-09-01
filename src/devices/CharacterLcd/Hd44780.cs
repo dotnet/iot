@@ -15,9 +15,7 @@ namespace Iot.Device.CharacterLcd
     /// The Hitatchi HD44780 was released in 1987 and set the standard for LCD controllers. Hitatchi does not make this chipset anymore, but
     /// most character LCD drivers are intended to be fully compatible with this chipset. Some examples: Sunplus SPLC780D, Sitronix ST7066U,
     /// Samsung KS0066U, Aiptek AIP31066, and many more.
-    ///
     /// Some compatible chips extend the HD44780 with addtional pins and features. They are still fully compatible. The ST7036 is one example.
-    ///
     /// This implementation was drawn from numerous datasheets and libraries such as Adafruit_Python_CharLCD.
     /// </remarks>
     public class Hd44780 : ICharacterLcd, IDisposable
@@ -331,36 +329,28 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <remarks>
         /// The custom characters also occupy character codes 8 - 15.
-        ///
         /// You can find help designing characters at https://www.quinapalus.com/hd44780udg.html.
-        ///
         /// The datasheet description for custom characters is very difficult to follow. Here is
         /// a rehash of the technical details that is hopefully easier:
-        ///
         /// Only 6 bits of addresses are available for character ram. That makes for 64 bytes of
         /// available character data. 8 bytes of data are used for each character, which is where
         /// the 8 total custom characters comes from (64/8).
-        ///
         /// Each byte corresponds to a character line. Characters are only 5 bits wide so only
         /// bits 0-4 are used for display. Whatever is in bits 5-7 is just ignored. Store bits
         /// there if it makes you happy, but it won't impact the display. '1' is on, '0' is off.
-        ///
         /// In the built-in characters the 8th byte is usually empty as this is where the underline
         /// cursor will be if enabled. You can put data there if you like, which gives you the full
         /// 5x8 character. The underline cursor just turns on the entire bottom row.
-        ///
         /// 5x10 mode is effectively useless as displays aren't available that utilize it. In 5x10
         /// mode *16* bytes of data are used for each character. That leaves room for only *4*
         /// custom characters. The first character is addressable from code 0, 1, 8, and 9. The
         /// second is 2, 3, 10, 11 and so on...
-        ///
         /// In this mode *11* bytes of data are actually used for the character data, which
         /// effectively gives you a 5x11 character, although typically the last line is blank to
         /// leave room for the underline cursor. Why the modes are referred to as 5x8 and 5x10 as
         /// opposed to 5x7 and 5x10 or 5x8 and 5x11 is a mystery. In an early pre-release data
         /// book 5x7 and 5x10 is used (Advance Copy #AP4 from July 1985). Perhaps it was a
         /// marketing change?
-        ///
         /// As only 11 bytes are used in 5x10 mode, but 16 bytes are reserved, the last 5 bytes
         /// are useless. The datasheet helpfully suggests that you can store your own data there.
         /// The same would be true for bits 5-7 of lines that matter for both 5x8 and 5x10.

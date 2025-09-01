@@ -21,7 +21,6 @@ namespace Iot.Device.Display
     /// |  3  4  5  |
     /// | /   |   \ |
     ///  ----11----- .6
-    ///
     /// Sources:
     /// Derived from /src/devices/Display/FontHelper.cs
     /// </remarks>

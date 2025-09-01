@@ -10,7 +10,6 @@ namespace Iot.Device.Nmea0183.Ais
     /// <remarks>
     /// Any system that uses AIS-Sart, MOB or Epirb type is only activated in case of an emergency. When receiving any message from such
     /// a transmitter an alert should be generated and the nearest MRCC should be contacted immediately. Somebody might be in imminent danger!
-    ///
     /// Some of these types are rarely or only in very limited areas used.
     /// </remarks>
     public enum MmsiType

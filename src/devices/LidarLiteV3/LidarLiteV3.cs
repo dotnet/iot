@@ -252,7 +252,6 @@ namespace Iot.Device.DistanceSensor
         /// Get or set the maximum aquisition count limits the number of times
         /// the device will integrate acquistions to find a correlation
         /// record peak.
-        ///
         /// Roughly correlates to: acq rate = 1/count and max
         /// range = count^(1/4)
         /// </summary>
@@ -272,7 +271,6 @@ namespace Iot.Device.DistanceSensor
 
         /// <summary>
         /// Get or set the threshold of peak value that bypasses the internal algorithm.
-        ///
         /// Recommended non-default values are 32 for higher sensitivity
         /// but higher erronenous measurement and 96 for reduced
         /// sensitivity and fewer erroneous measurements.

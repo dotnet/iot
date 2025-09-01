@@ -141,7 +141,6 @@ namespace Iot.Device.Tm16xx
         /// Displays segments starting at first segment with byte array containing raw data for each segment including the dot.
         /// <remarks>
         /// Segment representation:
-        ///
         /// bit 0 = a       _a_
         /// bit 1 = b      |   |
         /// bit 2 = c      f   b
@@ -150,7 +149,6 @@ namespace Iot.Device.Tm16xx
         /// bit 5 = f      e   c
         /// bit 6 = g      |_d_|  .dp
         /// bit 7 = dp
-        ///
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f.
         /// </remarks>
         /// </summary>
@@ -178,7 +176,6 @@ namespace Iot.Device.Tm16xx
         /// </summary>
         /// <remarks>
         /// Segment representation:
-        ///
         /// bit 0 = a       _a_
         /// bit 1 = b      |   |
         /// bit 2 = c      f   b
@@ -187,7 +184,6 @@ namespace Iot.Device.Tm16xx
         /// bit 5 = f      e   c
         /// bit 6 = g      |_d_|  .dp
         /// bit 7 = dp
-        ///
         /// Representation of the number 0 so lighting segments a, b, c, d, e and F is then 0x3f.
         /// </remarks>
         /// <param name="characterPosition">The character position from 0 to 3.</param>

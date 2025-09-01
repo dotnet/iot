@@ -95,10 +95,8 @@ namespace Iot.Device.Ili934x
         /// <param name="color">The color to be converted.</param>
         /// <returns>
         /// This method returns the low byte and the high byte of the 16bit value representing RGB565 or BGR565 value
-        ///
         /// byte    11111111 00000000
         /// bit     76543210 76543210
-        ///
         /// For ColorSequence.RGB (inversed!, the LSB is the top byte)
         ///         GGGBBBBB RRRRRGGG
         ///         43210543 21043210

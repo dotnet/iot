@@ -23,7 +23,6 @@ namespace Display
 
     /// <summary>Default pin scheme for the 5641AS 4-digit 7-segment display</summary>
     /// <remarks>
-    ///
     ///      AAA
     ///     F   B
     ///     F   B
@@ -31,14 +30,12 @@ namespace Display
     ///     E   C
     ///     E   C
     ///      DDD   DP
-    ///
     ///       12 11 10  9  8  7
     ///  |~~~~ |  |  |  |  |  | ~~~~|
     ///  |                          |
     ///  |                          |
     ///  |~~~~ |  |  |  |  |  | ~~~~|
     ///        1  2  3  4  5  6
-    ///
     ///  Segments
     ///  A = 11
     ///  B = 7
@@ -48,14 +45,11 @@ namespace Display
     ///  F = 10
     ///  G = 5
     ///  DP = 3
-    ///
     ///  Digits
     ///  Dig1 = 12
     ///  Dig2 = 9
     ///  Dig3 = 8
     ///  Dig4 = 6
-    ///
-    ///
     /// </remarks>
     public class LedSegmentDisplay5641ASPinScheme
     {

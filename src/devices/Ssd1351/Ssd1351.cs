@@ -70,14 +70,11 @@ namespace Iot.Device.Ssd1351
         /// <param name="color">The color to be converted.</param>
         /// <returns>
         /// This method returns the low byte and the high byte of the 16bit value representing RGB565 or BGR565 value
-        ///
         /// byte    11111111 00000000
         /// bit     76543210 76543210
-        ///
         /// For ColorSequence.RGB
         ///         RRRRRGGG GGGBBBBB
         ///         43210543 21043210
-        ///
         /// For ColorSequence.BGR
         ///         BBBBBGGG GGGRRRRR
         ///         43210543 21043210
