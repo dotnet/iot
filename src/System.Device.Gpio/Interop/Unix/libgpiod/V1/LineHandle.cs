@@ -31,10 +31,6 @@ internal sealed class LineHandle : IDisposable
 
             return _handle;
         }
-        set
-        {
-            _handle = value;
-        }
     }
 
     /// <summary>
