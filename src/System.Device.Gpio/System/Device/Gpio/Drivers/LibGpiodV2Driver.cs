@@ -89,7 +89,6 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
 
-
     /// <inheritdoc/>
     /// <remarks>This only requests the line for it to be reserved and the consumer to be set.</remarks>
     protected internal override void OpenPin(int lineOffset)

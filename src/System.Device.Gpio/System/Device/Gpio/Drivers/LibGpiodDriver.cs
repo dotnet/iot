@@ -201,8 +201,6 @@ public class LibGpiodDriver : UnixDriver
         return _pinNumberToEventHandler.ContainsKey(pinNumber);
     }
 
-
-
     /// <inheritdoc/>
     protected internal override PinMode GetPinMode(int pinNumber)
     {

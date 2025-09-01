@@ -108,7 +108,6 @@ namespace Iot.Device.Common
             public double[] C4x = new double[21];
         }
 
-
         /**
          * The struct containing information about a single geodesic.  This must be
          * initialized by geod_lineinit(), geod_directline(), geod_gendirectline(),
@@ -176,7 +175,6 @@ namespace Iot.Device.Common
             }
         }
 
-
         private const uint CAP_NONE = 0U;
         private const uint CAP_C1 = 1U << 0;
         private const uint CAP_C1p = 1U << 1;
@@ -185,7 +183,6 @@ namespace Iot.Device.Common
         private const uint CAP_C4 = 1U << 4;
         private const uint CAP_ALL = 0x1FU;
         private const uint OUT_ALL = 0x7F80U;
-
 
         private static double fmod(double x, double y)
         {
@@ -439,7 +436,6 @@ namespace Iot.Device.Common
 
             return ang;
         }
-
 
         public static void geod_init(out geod_geodesic g, double a, double f)
         {

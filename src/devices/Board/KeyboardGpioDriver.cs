@@ -69,7 +69,6 @@ namespace Iot.Device.Board
 
         /// <inheritdoc />
 
-
         /// <inheritdoc />
         protected override void OpenPin(int pinNumber)
         {

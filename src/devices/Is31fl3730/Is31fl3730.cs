@@ -154,7 +154,6 @@ namespace Iot.Device.Display
             - https://shop.pimoroni.com/products/microdot-phat
             - https://shop.pimoroni.com/products/led-dot-matrix-breakout
 
-
             Both of these products present pairs of 5x7 LED matrices.
 
             *matrix 2*

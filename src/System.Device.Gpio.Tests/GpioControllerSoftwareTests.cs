@@ -95,7 +95,6 @@ public class GpioControllerSoftwareTests : IDisposable
         Assert.Equal(PinMode.Output, ctrl.GetPinMode(1));
     }
 
-
     [Fact]
     public void UsingLogicalNumberingDisposesTheRightPin()
     {
@@ -109,8 +108,6 @@ public class GpioControllerSoftwareTests : IDisposable
         // No close on the pin here, we want to check that the Controller's Dispose works correctly
         ctrl.Dispose();
     }
-
-
 
     [Fact]
     public void CallbackOnEventWorks()

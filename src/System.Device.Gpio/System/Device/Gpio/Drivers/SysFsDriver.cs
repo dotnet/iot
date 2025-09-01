@@ -198,8 +198,6 @@ public class SysFsDriver : UnixDriver
     /// </summary>
     protected internal override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
 
-
-
     /// <summary>
     /// Opens a pin in order for it to be ready to use.
     /// This retains the pin direction, but if it is output, the value will always be low after open.

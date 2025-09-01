@@ -26,8 +26,6 @@ public abstract class GpioDriver : IDisposable
     /// </summary>
     protected internal abstract int PinCount { get; }
 
-
-
     /// <summary>
     /// Opens a pin in order for it to be ready to use.
     /// The driver attempts to open the pin without changing its mode or value.
