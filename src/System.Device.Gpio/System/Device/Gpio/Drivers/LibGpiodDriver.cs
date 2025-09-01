@@ -238,11 +238,13 @@ public class LibGpiodDriver : UnixDriver
                 return;
             }
 
-            LineHandle pinHandle = new LineHandle(LibgpiodV1.gpiod_chip_get_line(_chip, pinNumber));
-            if (pinHandle == null)
+            IntPtr rawHandle = LibgpiodV1.gpiod_chip_get_line(_chip, pinNumber);
+            if (rawHandle == IntPtr.Zero)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
             }
+
+            LineHandle pinHandle = new LineHandle(rawHandle);
 
             int mode = LibgpiodV1.gpiod_line_direction(pinHandle.Handle);
             if (mode == 1)
