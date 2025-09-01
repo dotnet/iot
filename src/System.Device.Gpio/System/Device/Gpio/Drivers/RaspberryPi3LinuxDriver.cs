@@ -65,8 +65,6 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
         }
     }
 
-
-
     /// <summary>
     /// Adds a handler for a pin value changed event.
     /// </summary>
