@@ -10,13 +10,13 @@ using Xunit;
 
 namespace Iot.Device.Tca955x.Tests
 {
-    public class Tca9554Tests
+    public class Tca9555Tests
     {
         private readonly Mock<MockableI2cDevice> _device;
         private readonly GpioController _controller;
         private readonly Mock<MockableGpioDriver> _driver;
 
-        public Tca9554Tests()
+        public Tca9555Tests()
         {
             _device = new Mock<MockableI2cDevice>(MockBehavior.Loose);
             _device.CallBase = true;
@@ -28,7 +28,7 @@ namespace Iot.Device.Tca955x.Tests
         [Fact]
         public void CreateWithInterrupt()
         {
-            var testee = new Tca9554(_device.Object, 10, _controller);
+            var testee = new Tca9555(_device.Object, 10, _controller);
             Assert.NotNull(testee);
         }
 
@@ -51,16 +51,16 @@ namespace Iot.Device.Tca955x.Tests
                 b[0] = 1;
             });
 
-            var testee = new Tca9554(_device.Object, -1);
+            var testee = new Tca9555(_device.Object, -1);
             var tcaController = new GpioController(testee);
-            Assert.Equal(8, tcaController.PinCount);
-            GpioPin pin0 = tcaController.OpenPin(0);
-            Assert.NotNull(pin0);
-            Assert.True(tcaController.IsPinOpen(0));
-            var value = pin0.Read();
+            Assert.Equal(16, tcaController.PinCount);
+            GpioPin pin8 = tcaController.OpenPin(8);
+            Assert.NotNull(pin8);
+            Assert.True(tcaController.IsPinOpen(8));
+            var value = pin8.Read();
             Assert.Equal(PinValue.High, value);
-            pin0.Dispose();
-            Assert.False(tcaController.IsPinOpen(0));
+            pin8.Dispose();
+            Assert.False(tcaController.IsPinOpen(8));
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Iot.Device.Tca955x.Tests
             GpioPin pin0 = tcaController.OpenPin(0);
             Assert.NotNull(pin0);
             Assert.True(tcaController.IsPinOpen(0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => tcaController.Read(new Span<PinValuePair>(new PinValuePair[] { new(9, PinValue.Low) })));
+            Assert.Throws<ArgumentOutOfRangeException>(() => tcaController.Read(new Span<PinValuePair>(new PinValuePair[] { new(16, PinValue.Low) })));
         }
     }
 }
