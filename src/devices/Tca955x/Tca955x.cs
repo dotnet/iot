@@ -129,21 +129,6 @@ namespace Iot.Device.Tca955x
         /// </summary>
         public void WriteByte(byte register, byte value) => InternalWriteByte(register, value);
 
-        /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
-        {
-            if (_shouldDispose)
-            {
-                _controller?.Dispose();
-                _controller = null;
-            }
-
-            _pinValues.Clear();
-            _busDevice?.Dispose();
-            _busDevice = null!;
-            base.Dispose(disposing);
-        }
-
         /// <summary>
         /// Returns the value of the interrupt pin if configured
         /// </summary>
@@ -574,6 +559,27 @@ namespace Iot.Device.Tca955x
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode) =>
             (mode == PinMode.Input || mode == PinMode.Output || mode == PinMode.InputPullUp);
 
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null;
+            }
+            else
+            {
+                // We don't own the interrupt controller, so we must unregister our interrupt handler
+                if (_controller != null && _interrupt != -1)
+                {
+                    _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
+                }
+            }
+
+            _busDevice?.Dispose();
+
+            base.Dispose(true);
+        }
     }
 
 }
