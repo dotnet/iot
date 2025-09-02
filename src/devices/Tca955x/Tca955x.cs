@@ -425,22 +425,35 @@ namespace Iot.Device.Tca955x
             {
                 if (_interruptPins.Count > 0)
                 {
-                    foreach (var interruptPin in _interruptPins)
+                    Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[_interruptPins.Count];
+                    int i = 0;
+                    foreach (var kvp in _interruptPins)
                     {
-                        PinValue newValue = Read(interruptPin.Key);
-                        PinValue lastValue = _interruptLastInputValues[interruptPin.Key];
+                        pinValuePairs[i++] = new PinValuePair(kvp.Key, default);
+                    }
 
-                        if ((interruptPin.Value.HasFlag(PinEventTypes.Rising) &&
-                            lastValue == PinValue.Low &&
-                            newValue == PinValue.High) ||
-                            (interruptPin.Value.HasFlag(PinEventTypes.Falling) &&
-                            lastValue == PinValue.High &&
-                            newValue == PinValue.Low))
+                    Read(pinValuePairs);
+
+                    for (i = 0; i < pinValuePairs.Length; i++)
+                    {
+                        int pin = pinValuePairs[i].PinNumber;
+                        PinValue newValue = pinValuePairs[i].PinValue;
+                        PinValue lastValue = _interruptLastInputValues[pin];
+                        var eventTypes = _interruptPins[pin];
+
+                        bool isRisingEdge = lastValue == PinValue.Low && newValue == PinValue.High;
+                        bool isFallingEdge = lastValue == PinValue.High && newValue == PinValue.Low;
+
+                        if (eventTypes.HasFlag(PinEventTypes.Rising) && isRisingEdge)
                         {
-                            CallHandlerOnPin(interruptPin.Key, interruptPin.Value);
+                            CallHandlerOnPin(pin, PinEventTypes.Rising);
+                        }
+                        else if (eventTypes.HasFlag(PinEventTypes.Falling) && isFallingEdge)
+                        {
+                            CallHandlerOnPin(pin, PinEventTypes.Falling);
                         }
 
-                        _interruptLastInputValues[interruptPin.Key] = newValue;
+                        _interruptLastInputValues[pin] = newValue;
                     }
                 }
             }
