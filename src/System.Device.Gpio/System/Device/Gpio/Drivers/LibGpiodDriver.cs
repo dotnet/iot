@@ -239,10 +239,6 @@ public class LibGpiodDriver : UnixDriver
             }
 
             LineHandle pinHandle = new LineHandle(LibgpiodV1.gpiod_chip_get_line(_chip, pinNumber));
-            if (pinHandle == null)
-            {
-                throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
-            }
 
             int mode = LibgpiodV1.gpiod_line_direction(pinHandle.Handle);
             if (mode == 1)

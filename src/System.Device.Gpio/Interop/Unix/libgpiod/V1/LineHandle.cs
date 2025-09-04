@@ -14,6 +14,11 @@ internal sealed class LineHandle : IDisposable
     private IntPtr _handle;
     public LineHandle(IntPtr handle)
     {
+        if (handle == IntPtr.Zero)
+        {
+            throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
+        }
+
         _handle = handle;
         PinMode = PinMode.Input;
     }
@@ -31,10 +36,6 @@ internal sealed class LineHandle : IDisposable
 
             return _handle;
         }
-        set
-        {
-            _handle = value;
-        }
     }
 
     /// <summary>
@@ -46,13 +47,11 @@ internal sealed class LineHandle : IDisposable
         Interop.LibgpiodV1.gpiod_line_release(_handle);
     }
 
-    public bool IsInvalid => _handle == IntPtr.Zero || _handle == Interop.LibgpiodV1.InvalidHandleValue;
-
     public void Dispose()
     {
         if (_handle != IntPtr.Zero)
         {
-            Interop.LibgpiodV1.gpiod_line_release(_handle);
+            ReleaseLock();
             _handle = IntPtr.Zero;
         }
     }
