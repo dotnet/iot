@@ -51,6 +51,11 @@ namespace Iot.Device.Tca955x
         public const byte DefaultI2cAddress = 0x20;
 
         /// <summary>
+        /// Maximum number of addresses configurable via A0, A1, A2 pins.
+        /// </summary>
+        public const byte AddressRange = 7;
+        
+        /// <summary>
         /// Represents the number of bits in a byte.
         /// </summary>
         public const int BitsPerByte = 8;
@@ -68,9 +73,9 @@ namespace Iot.Device.Tca955x
             _interrupt = interrupt;
 
             if (_busDevice.ConnectionSettings.DeviceAddress < DefaultI2cAddress ||
-                _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAddress + 7)
+                _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAddress + AddressRange)
             {
-                new ArgumentOutOfRangeException(nameof(device), "Address should be in Range 0x20 to 0x27");
+                throw new ArgumentOutOfRangeException(nameof(device), $"Address should be in Range {DefaultI2cAddress} to {DefaultI2cAddress + AddressRange} inclusive");
             }
 
             if (_interrupt != -1)
@@ -86,6 +91,9 @@ namespace Iot.Device.Tca955x
                 {
                     _controller.SetPinMode(interrupt, PinMode.Input);
                 }
+
+                // This should only be done once as there is only one interrupt for the entire ioexpander
+                _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
             }
         }
 
@@ -522,7 +530,7 @@ namespace Iot.Device.Tca955x
         /// Calls the event handler for the given pin, if any.
         /// </summary>
         /// <param name="pin">Pin to call the event handler on (if any exists)</param>
-        /// <param name="pinEvent">Non-zero if the value is currently high (therefore assuming the pin value was rising), otherwise zero</param>
+        /// <param name="pinEvent">What type of event led to calling this handler</param>
         private void CallHandlerOnPin(int pin, PinEventTypes pinEvent)
         {
             if (_eventHandlers.TryGetValue(pin, out var handler))
@@ -534,7 +542,7 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Calls an event handler if the given pin changes.
         /// </summary>
-        /// <param name="pinNumber">Pin number of the MCP23xxx</param>
+        /// <param name="pinNumber">Pin number to get callbacks for</param>
         /// <param name="eventType">Whether the handler should trigger on rising, falling or both edges</param>
         /// <param name="callback">The method to call when an interrupt is triggered</param>
         /// <exception cref="InvalidOperationException">There's no GPIO controller for the master interrupt configured, or no interrupt lines are configured for the
@@ -544,6 +552,7 @@ namespace Iot.Device.Tca955x
         {
             if (_controller == null)
             {
+                // We could offer a polling solution here instead.
                 throw new InvalidOperationException("No GPIO controller available. Specify a GPIO controller and the relevant interrupt line numbers in the constructor");
             }
 
@@ -554,7 +563,6 @@ namespace Iot.Device.Tca955x
 
             _interruptPins.Add(pinNumber, eventType);
             _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
-            _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
 
             _eventHandlers[pinNumber] = callback;
         }
@@ -572,7 +580,6 @@ namespace Iot.Device.Tca955x
             {
                 _interruptPins.Remove(pinNumber);
                 _interruptLastInputValues.Remove(pinNumber);
-                _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
             }
         }
 
