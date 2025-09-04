@@ -31,13 +31,15 @@ namespace Iot.Device.Tca955x
 
         private object _interruptHandlerLock = new object();
 
-        // This task processes the i2c reading of the io expander in the background to
-        // avoid blocking the interrupt handler too long. While it is running, further
+        // This task processes the i2c reading of the io expander in a background task to
+        // avoid blocking the interrupt handler for too long. While it is running, further
         // incoming events for the Interrupt pin are ignored but if there are any, then we
         // will read the device a second time just in case we missed the most current state.
         // This is the best we can do given the limitations of the i2c bus speed and the fact that
         // the device can clear and reassert the INT pin regardless of whether we have read
-        // the expander state over i2c.
+        // the expander state over i2c. Bear in mind that the interrupt processing routine
+        // also synchronously calls out to any user event handlers that have been registered
+        // and they could take an arbitrary amount of time to complete.
         private Task? _interruptProcessingTask = null;
         // Set to true if an interrupt occurred while we were already processing one.
         // If so, we need to do another read when we finish the current one.
@@ -54,7 +56,7 @@ namespace Iot.Device.Tca955x
         /// Maximum number of addresses configurable via A0, A1, A2 pins.
         /// </summary>
         public const byte AddressRange = 7;
-        
+
         /// <summary>
         /// Represents the number of bits in a byte.
         /// </summary>
@@ -87,12 +89,15 @@ namespace Iot.Device.Tca955x
                     _controller.OpenPin(_interrupt);
                 }
 
-                if (_controller.GetPinMode(_interrupt) != PinMode.Input)
+                var currentIntPinMode = _controller.GetPinMode(_interrupt);
+                // The INT pin is open drain active low so we need to ensure it is configured as an input,
+                // but it could be configured with pullup or use an external pullup.
+                if (currentIntPinMode != PinMode.Input && currentIntPinMode != PinMode.InputPullUp)
                 {
                     _controller.SetPinMode(interrupt, PinMode.Input);
                 }
 
-                // This should only be done once as there is only one interrupt for the entire ioexpander
+                // This is only be done once as there is only one INT pin interrupt for the entire ioexpander
                 _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
             }
         }
@@ -141,28 +146,14 @@ namespace Iot.Device.Tca955x
         }
 
         /// <summary>
-        /// Read a byte from the given register.
+        /// Read a byte from the given register. Use with caution as it does not synchronize with interrupts
         /// </summary>
         public byte ReadByte(byte register) => InternalReadByte(register);
 
         /// <summary>
-        /// Write a byte to the given register.
+        /// Write a byte to the given register. Use with caution as it does not synchronize with interrupts
         /// </summary>
         public void WriteByte(byte register, byte value) => InternalWriteByte(register, value);
-
-        /// <summary>
-        /// Returns the value of the interrupt pin if configured
-        /// </summary>
-        /// <returns>Value of interrupt pin</returns>
-        protected PinValue ReadInterrupt()
-        {
-            if (_interrupt == -1 || _controller is null)
-            {
-                throw new ArgumentException("No interrupt pin configured.", nameof(_interrupt));
-            }
-
-            return _controller.Read(_interrupt);
-        }
 
         private byte SetBit(byte data, int bitNumber) => (byte)(data | (1 << bitNumber));
 
@@ -434,11 +425,12 @@ namespace Iot.Device.Tca955x
             // fired reentrantly and we are already processing an interrupt.
             // OR we are reading/writing or configuring a pin.
             // In this case record the interrupt, and return.
-            // We may miss an interrupt while busy but because we have to slowly read the
-            // i2c and detect a change in the returned input register data, Not to mention run the
+            // We may miss an interrupt while busy, but because we have to slowly read the
+            // i2c and detect a change in the returned input register data, not to mention run the
             // event handlers that the consumer of the library has signed up, we are likely
             // to miss edges while we are doing that anyway. Dropping interrupts in this
-            // case is the best we can do and prevents flooding the consumer with queued events.
+            // case is the best we can do and prevents flooding the consumer with events
+            // that could queue up in the INT gpio pin driver.
             lock (_interruptHandlerLock)
             {
                 if (_interruptProcessingTask == null)
@@ -448,18 +440,6 @@ namespace Iot.Device.Tca955x
                 else
                 {
                     _interruptPending = true;
-                }
-            }
-        }
-
-        private void DoPendingInterruptProcessing()
-        {
-            lock (_interruptHandlerLock)
-            {
-                if (_interruptPending && _interruptProcessingTask == null)
-                {
-                    _interruptPending = false;
-                    _interruptProcessingTask = ProcessInterruptInTask();
                 }
             }
         }
@@ -518,11 +498,19 @@ namespace Iot.Device.Tca955x
 
             processingTask.ContinueWith(t =>
             {
-                _interruptProcessingTask = null;
-                DoPendingInterruptProcessing();
+                lock (_interruptHandlerLock)
+                {
+                    _interruptProcessingTask = null;
+                    if (_interruptPending)
+                    {
+                        _interruptPending = false;
+                        _interruptProcessingTask = ProcessInterruptInTask();
+                    }
+                }
             });
 
             processingTask.Start();
+
             return processingTask;
         }
 
@@ -550,6 +538,7 @@ namespace Iot.Device.Tca955x
         /// <remarks>Only one event handler can be registered per pin. Calling this again with a different handler for the same pin replaces the handler</remarks>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventType, PinChangeEventHandler callback)
         {
+            ValidatePin(pinNumber);
             if (_controller == null)
             {
                 // We could offer a polling solution here instead.
@@ -561,25 +550,31 @@ namespace Iot.Device.Tca955x
                 throw new InvalidOperationException("No interrupt pin configured");
             }
 
-            _interruptPins.Add(pinNumber, eventType);
-            _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
-
-            _eventHandlers[pinNumber] = callback;
+            lock (_interruptHandlerLock)
+            {
+                if (_interruptPins.ContainsKey(pinNumber))
+                {
+                    throw new InvalidOperationException($"A callback is already registered for pin {pinNumber}");
+                }
+                else
+                {
+                    _interruptPins.Add(pinNumber, eventType);
+                    _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
+                    _eventHandlers[pinNumber] = callback;
+                }
+            }
         }
 
         /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            if (_controller == null)
+            lock (_interruptHandlerLock)
             {
-                // If we had any callbacks registered, this would have thrown up earlier.
-                throw new InvalidOperationException("No valid GPIO controller defined. And no callbacks registered either.");
-            }
-
-            if (_eventHandlers.TryRemove(pinNumber, out _))
-            {
-                _interruptPins.Remove(pinNumber);
-                _interruptLastInputValues.Remove(pinNumber);
+                if (_eventHandlers.TryRemove(pinNumber, out _))
+                {
+                    _interruptPins.Remove(pinNumber);
+                    _interruptLastInputValues.Remove(pinNumber);
+                }
             }
         }
 
@@ -593,8 +588,7 @@ namespace Iot.Device.Tca955x
         /// <param name="eventTypes">The event to wait for (rising, falling or either)</param>
         /// <param name="cancellationToken">A timeout token</param>
         /// <returns>The wait result</returns>
-        /// <remarks>This method should only be used on pins that are not otherwise used in event handling, as it clears any
-        /// existing event handlers for the same pin.</remarks>
+        /// <remarks>This method can only be used on pins that are not otherwise used in event handling.</remarks>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes,
             CancellationToken cancellationToken)
         {
@@ -638,7 +632,7 @@ namespace Iot.Device.Tca955x
 
         /// <inheritdoc/>
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode) =>
-            (mode == PinMode.Input || mode == PinMode.Output || mode == PinMode.InputPullUp);
+            (mode == PinMode.Input || mode == PinMode.Output);
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
