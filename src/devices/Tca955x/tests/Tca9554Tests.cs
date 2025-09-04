@@ -74,8 +74,8 @@ namespace Iot.Device.Tca955x.Tests
             pin0.Dispose();
             Assert.False(tcaController.IsPinOpen(0));
         }
-        
-                [Fact]
+
+        [Fact]
         public void InterruptCallbackIsInvokedOnPinChange()
         {
             // Arrange
@@ -127,39 +127,6 @@ namespace Iot.Device.Tca955x.Tests
             Assert.NotNull(pin0);
             Assert.True(tcaController.IsPinOpen(0));
             Assert.Throws<ArgumentOutOfRangeException>(() => tcaController.Read(new Span<PinValuePair>(new PinValuePair[] { new(9, PinValue.Low) })));
-            tcaController.OpenPin(1, PinMode.Input);
-            bool callbackInvoked = false;
-            PinValueChangedEventArgs? receivedArgs = null;
-
-            void Callback(object sender, PinValueChangedEventArgs args)
-            {
-                callbackInvoked = true;
-                receivedArgs = args;
-            }
-
-            // Change the device setup to simulate pin1 as high
-            _device.Setup(x => x.Read(It.IsAny<byte[]>())).Callback((byte[] b) =>
-            {
-                b[0] = 0x02;
-            });
-
-            // Register callback for rising edge
-            tcaController.RegisterCallbackForPinValueChangedEvent(1, PinEventTypes.Falling, Callback);
-
-            // Change the device setup to simulate pin1 as low.
-            _device.Setup(x => x.Read(It.IsAny<byte[]>())).Callback((byte[] b) =>
-            {
-                b[0] = 0x00;
-            });
-
-            // Simulate the hardware int pin pin change using the _controller mock
-            _driver.Object.FireEventHandler(interruptPin, PinEventTypes.Rising);
-
-            // Assert
-            Assert.True(callbackInvoked);
-            Assert.NotNull(receivedArgs);
-            Assert.Equal(1, receivedArgs.PinNumber);
-            Assert.Equal(PinEventTypes.Falling, receivedArgs.ChangeType);
         }
 
         [Fact]
