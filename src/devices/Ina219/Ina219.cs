@@ -14,7 +14,6 @@ namespace Iot.Device.Adc
 {
     /// <summary>
     /// INA219 Bidirectional Current/Power monitor.
-    ///
     /// The INA219 is a high-side current shunt and power monitor with an I2C interface.
     /// The INA219 monitors both shunt drop and supply voltage, with programmable conversion
     /// times and filtering. A programmable calibration value, combined with an internal multiplier,

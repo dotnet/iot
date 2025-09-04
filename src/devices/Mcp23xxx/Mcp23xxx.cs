@@ -857,9 +857,6 @@ namespace Iot.Device.Mcp23xxx
             }
         }
 
-        /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
-
         /// <summary>
         /// Waits for an event to occur on the given pin.
         /// </summary>

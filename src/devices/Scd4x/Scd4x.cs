@@ -161,11 +161,9 @@ namespace Iot.Device.Scd4x
         /// <para>
         /// Instructs the sensor to start performing periodic measurements.
         /// </para>
-        ///
         /// <para>
         /// Every period, the length of which is available in <see cref="MeasurementPeriod"/>, the measurement can then be read via <see cref="ReadPeriodicMeasurement"/>.
         /// </para>
-        ///
         /// <para>
         /// Periodic measurement can be stopped with <see cref="StopPeriodicMeasurements"/>.
         /// </para>

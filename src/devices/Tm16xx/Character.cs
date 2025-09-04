@@ -6,7 +6,6 @@ using System;
 namespace Iot.Device.Tm16xx
 {
     /// <summary>
-    ///
     /// bit 0 = a       _a_
     /// bit 1 = b      |   |
     /// bit 2 = c      f   b
@@ -15,7 +14,6 @@ namespace Iot.Device.Tm16xx
     /// bit 5 = f      e   c
     /// bit 6 = g      |_d_|  .dp
     /// bit 7 = dp
-    ///
     /// </summary>
     [Flags]
     public enum Character : byte

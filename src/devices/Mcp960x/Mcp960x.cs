@@ -92,15 +92,12 @@ namespace Iot.Device.Mcp960x
         /// <param name="Alert1Status">Returns Alert 1 status bit.</param>
         /// <remarks>
         /// burstComplete: Once Burst mode is enabled, this bit is normally set after the first burst is complete. User can clear it and poll the bit periodically until the next burst of temperature conversions is complete
-        ///
         /// thUpdate: This bit is normally set. User can clear it and poll the bit until the next temperature conversion is complete.
-        ///
         /// shortCircuit:
         ///   MCP9601/L01/RL01 only:
         ///     1 = Thermocouple Shorted to VDD or VSS
         ///     0 = Normal operation
         ///   The VSENSE pin must be connected to the Thermocouple.
-        ///
         /// openCircuitOrInputRange:
         ///   MCP960X/L0X/RL0X:
         ///      1 = The ADC input Voltage (EMF) or the temperature data from the TH register exceeds the measurement range for the selected thermocouple type
@@ -108,7 +105,6 @@ namespace Iot.Device.Mcp960x
         ///      If this bit is set, then the MCP960X/L0X/RL0X input voltage (EMF) to Degree Celsius conversion may be bypassed.
         ///   MCP9601/L01/RL01:
         ///      Indicates whether the Thermocouple is disconnected from the inputs.The VSENSE pin must be connected to the Thermocouple.
-        ///
         ///   AlertXYZStatus:
         ///     Alert XYZ status bit
         ///       1 = TX &gt;  Temperature ALERT&lt;Y&gt;
@@ -206,10 +202,8 @@ namespace Iot.Device.Mcp960x
         ///    Temp = (UpperByte x 16 + LowerByte/16)
         /// Temperature &lt;  0°C
         ///    Temp = (UpperByte x 16 + LowerByte/16) – 4096
-        ///
         /// In case of reading register TH, TDELTA the UpperByte Bit 7 is used as sign bit -> valueBitPattern = 0x7F.
         /// In case of reading register TC the UpperByte Bit 7-4 is used as sign bit -> valueBitPattern = 0x0F.
-        ///
         /// So Bit 7 of UpperByte can always be used to determin the sign of the value.
         /// </remarks>
         private Temperature CalcTemperaturFromRegisterData(Span<byte> data, byte valueBitPattern)

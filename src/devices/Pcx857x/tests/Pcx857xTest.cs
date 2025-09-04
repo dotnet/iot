@@ -201,9 +201,6 @@ namespace Iot.Device.Pcx857x.Tests
 
             protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => true;
 
-            protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) =>
-                throw new NotImplementedException();
-
             protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes,
                 CancellationToken cancellationToken) => throw new NotImplementedException();
 

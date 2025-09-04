@@ -97,14 +97,11 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <remarks>
         /// The "F" option from the HD44780 datasheet.
-        ///
         /// The displays that supported 5x10 are extremely rare.
-        ///
         /// On NXP/Philips chips this is the "M" option that
         /// controls the number of display lines. When set the
         /// driver is set to 2 line x 16 characters. Otherwise
         /// the driver is set to 1 line by 32 characters.
-        ///
         /// For Sitronix, this is referred to as "DH" and sets
         /// double height mode.
         /// </remarks>
@@ -115,7 +112,6 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <remarks>
         /// The "N" option from the datasheet.
-        ///
         /// When set to one line, shifting the display right pulls
         /// address 0x4F to the 1st display position. When set to two
         /// lines, shifting right pulls 0x27 for the first line and

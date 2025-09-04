@@ -73,5 +73,4 @@ namespace System.Device.Gpio
     }
 }
 
-
 #endif
