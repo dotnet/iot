@@ -18,7 +18,7 @@ The `Tca955x` has one interrupt pin. The corresponding pins need to be connected
 ```csharp
 // Gpio controller from parent device (eg. Raspberry Pi)
 _gpioController = new GpioController();
-_i2c = I2cDevice.Create(new I2cConnectionSettings(1, Tca955x.DefaultI2cAdress));
+_i2c = I2cDevice.Create(new I2cConnectionSettings(1, Tca955x.DefaultI2cAddress));
 // The "Interrupt" line of the TCA9554 is connected to GPIO input 11 of the Raspi
 _device = new Tca9554(_i2c, 11, _gpioController, false);
 GpioController theDeviceController = new GpioController(_device);

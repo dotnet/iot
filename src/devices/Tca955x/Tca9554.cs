@@ -17,7 +17,7 @@ namespace Iot.Device.Tca955x
         /// <param name="device">The I2C device used for communication</param>
         /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
         /// <param name="gpioController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
+        /// <param name="shouldDispose">True to dispose the <paramref name="gpioController"/> when this object is disposed</param>
         public Tca9554(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
             : base(device, interrupt, gpioController, shouldDispose)
         {

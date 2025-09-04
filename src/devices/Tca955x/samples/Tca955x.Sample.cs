@@ -31,7 +31,7 @@ tca9554.WriteByte(Register.OutputPort, 0xF0);
 // Create an GPIO Controller where the Interrupt Pin connected is.
 GpioController controller = new GpioController();
 
-I2cConnectionSettings i2cConnectionSettings_tca9555 = new(1, Tca955x.DefaultI2cAdress);
+I2cConnectionSettings i2cConnectionSettings_tca9555 = new(1, Tca955x.DefaultI2cAddress);
 I2cDevice i2cDevice_tca9555 = I2cDevice.Create(i2cConnectionSettings_tca9555);
 var tca9555 = new Tca9555(i2cDevice_tca9555, 4);
 // Create an GPIO Controller which represent the TCA9554
