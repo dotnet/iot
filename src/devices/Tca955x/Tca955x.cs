@@ -8,6 +8,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Iot.Device.Tca955x
 {
@@ -20,7 +21,7 @@ namespace Iot.Device.Tca955x
         private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
         private readonly ConcurrentDictionary<int, PinChangeEventHandler> _eventHandlers = new ConcurrentDictionary<int, PinChangeEventHandler>();
         private readonly Dictionary<int, PinEventTypes> _interruptPins = new Dictionary<int, PinEventTypes>();
-        private readonly Dictionary<int, PinValue> _interruptLastInputValues = new Dictionary<int, PinValue>();
+        private Dictionary<int, PinValue> _interruptLastInputValues = new Dictionary<int, PinValue>();
 
         private GpioController? _controller;
 
@@ -29,6 +30,18 @@ namespace Iot.Device.Tca955x
         private I2cDevice _busDevice;
 
         private object _interruptHandlerLock = new object();
+
+        // This task processes the i2c reading of the io expander in the background to
+        // avoid blocking the interrupt handler too long. While it is running, further
+        // incoming events for the Interrupt pin are ignored but if there are any, then we
+        // will read the device a second time just in case we missed the most current state.
+        // This is the best we can do given the limitations of the i2c bus speed and the fact that
+        // the device can clear and reassert the INT pin regardless of whether we have read
+        // the expander state over i2c.
+        private Task? _interruptProcessingTask = null;
+        // Set to true if an interrupt occurred while we were already processing one.
+        // If so, we need to do another read when we finish the current one.
+        private bool _interruptPending = false;
 
         private ushort _gpioOutputCache;
 
@@ -221,6 +234,7 @@ namespace Iot.Device.Tca955x
         /// <returns>High or low pin value.</returns>
         protected override PinValue Read(int pinNumber)
         {
+            PinValue pinValue;
             lock (_interruptHandlerLock)
             {
                 ValidatePin(pinNumber);
@@ -229,8 +243,10 @@ namespace Iot.Device.Tca955x
                     new PinValuePair(pinNumber, default)
                 };
                 Read(pinValuePairs);
-                return _pinValues[pinNumber];
+                pinValue = _pinValues[pinNumber];
             }
+
+            return pinValue;
         }
 
         /// <inheritdoc/>
@@ -406,25 +422,69 @@ namespace Iot.Device.Tca955x
 
         private void InterruptHandler(object sender, PinValueChangedEventArgs e)
         {
+            // If the handler task is already running (not null), it means interrupts are being
+            // fired reentrantly and we are already processing an interrupt.
+            // OR we are reading/writing or configuring a pin.
+            // In this case record the interrupt, and return.
+            // We may miss an interrupt while busy but because we have to slowly read the
+            // i2c and detect a change in the returned input register data, Not to mention run the
+            // event handlers that the consumer of the library has signed up, we are likely
+            // to miss edges while we are doing that anyway. Dropping interrupts in this
+            // case is the best we can do and prevents flooding the consumer with queued events.
             lock (_interruptHandlerLock)
             {
-                if (_interruptPins.Count > 0)
+                if (_interruptProcessingTask == null)
                 {
-                    Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[_interruptPins.Count];
+                    _interruptProcessingTask = ProcessInterruptInTask();
+                }
+                else
+                {
+                    _interruptPending = true;
+                }
+            }
+        }
+
+        private void DoPendingInterruptProcessing()
+        {
+            lock (_interruptHandlerLock)
+            {
+                if (_interruptPending && _interruptProcessingTask == null)
+                {
+                    _interruptPending = false;
+                    _interruptProcessingTask = ProcessInterruptInTask();
+                }
+            }
+        }
+
+        private Task ProcessInterruptInTask()
+        {
+            Task processingTask = new Task(() =>
+            {
+                Dictionary<int, PinEventTypes> interruptPinsSnapshot;
+                Dictionary<int, PinValue> interruptLastInputValuesSnapshot;
+                lock (_interruptHandlerLock)
+                {
+                    interruptPinsSnapshot = new Dictionary<int, PinEventTypes>(_interruptPins);
+                    interruptLastInputValuesSnapshot = new Dictionary<int, PinValue>(_interruptLastInputValues);
+                }
+
+                if (interruptPinsSnapshot.Count > 0)
+                {
+                    Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[interruptPinsSnapshot.Count];
                     int i = 0;
-                    foreach (var kvp in _interruptPins)
+                    foreach (var kvp in interruptPinsSnapshot)
                     {
                         pinValuePairs[i++] = new PinValuePair(kvp.Key, default);
                     }
 
                     Read(pinValuePairs);
 
-                    for (i = 0; i < pinValuePairs.Length; i++)
+                    foreach (var pvp in pinValuePairs)
                     {
-                        int pin = pinValuePairs[i].PinNumber;
-                        PinValue newValue = pinValuePairs[i].PinValue;
-                        PinValue lastValue = _interruptLastInputValues[pin];
-                        var eventTypes = _interruptPins[pin];
+                        int pin = pvp.PinNumber;
+                        PinValue newValue = pvp.PinValue;
+                        PinValue lastValue = interruptLastInputValuesSnapshot[pin];
+                        var eventTypes = interruptPinsSnapshot[pin];
 
                         bool isRisingEdge = lastValue == PinValue.Low && newValue == PinValue.High;
                         bool isFallingEdge = lastValue == PinValue.High && newValue == PinValue.Low;
@@ -438,10 +498,24 @@ namespace Iot.Device.Tca955x
                             CallHandlerOnPin(pin, PinEventTypes.Falling);
                         }
 
-                        _interruptLastInputValues[pin] = newValue;
+                        interruptLastInputValuesSnapshot[pin] = newValue;
+                    }
+
+                    lock (_interruptHandlerLock)
+                    {
+                        _interruptLastInputValues = interruptLastInputValuesSnapshot;
                     }
                 }
-            }
+            });
+
+            processingTask.ContinueWith(t =>
+            {
+                _interruptProcessingTask = null;
+                DoPendingInterruptProcessing();
+            });
+
+            processingTask.Start();
+            return processingTask;
         }
 
         /// <summary>
