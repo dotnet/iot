@@ -107,7 +107,7 @@ To create a device using an external chipset like FT4222 to offer GPIO and I2C s
 
 ```csharp
 var ftdiI2C = new Ft4222I2c(new I2cConnectionSettings(0, Ccs811Sensor.I2cFirstAddress));
-var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+var gpioController = new GpioController(new Ft4222Gpio());
 ccs811 = new Ccs811Sensor(ftdiI2C, gpioController, 3, 2, -1, false);
 ```
 

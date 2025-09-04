@@ -103,11 +103,11 @@ for you:
 
 ```csharp
 // Gpio controller from parent device (eg. Raspberry Pi)
-_gpioController = new GpioController(PinNumberingScheme.Logical);
+_gpioController = new GpioController();
 _i2c = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
 // The "InterruptA" line of the Mcp23017 is connected to GPIO input 11 of the Raspi
 _device = new Mcp23017(_i2c, -1, 11, -1, _gpioController, false);
-GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
+GpioController theDeviceController = new GpioController(_device);
 theDeviceController.OpenPin(1, PinMode.Input);
 theDeviceController.RegisterCallbackForPinValueChangedEvent(1, PinEventTypes.Rising, Callback);
 ```
