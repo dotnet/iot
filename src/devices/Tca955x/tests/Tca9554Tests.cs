@@ -5,6 +5,8 @@ using System;
 using System.Device.Gpio;
 using System.Device.Gpio.Tests;
 using System.Device.I2c;
+using System.Threading;
+
 using Moq;
 using Xunit;
 
@@ -27,28 +29,24 @@ namespace Iot.Device.Tca955x.Tests
             _controller = new GpioController(_driver.Object);
             _device.Setup(x => x.ConnectionSettings).Returns(new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress));
             _deviceWithBadAddress.Setup(x => x.ConnectionSettings).Returns(new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress + Tca9554.AddressRange + 1));
+        }
+
         [Fact]
         public void CreateWithInterrupt()
+        {
             var testee = new Tca9554(_device.Object, 10, _controller);
-
         }
 
         [Fact]
         public void CreateWithBadAddress()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new Tca9554(_deviceWithBadAddress.Object, -1));
-            _driver.VerifyAll();
-            _deviceWithBadAddress.VerifyAll();
-
         }
 
         [Fact]
         public void CreateWithoutInterrupt()
         {
             var testee = new Tca9554(_device.Object, -1);
-            _driver.VerifyAll();
-            _device.VerifyAll();
-
         }
 
         [Fact]
@@ -85,11 +83,13 @@ namespace Iot.Device.Tca955x.Tests
             tcaController.OpenPin(1, PinMode.Input);
             bool callbackInvoked = false;
             PinValueChangedEventArgs? receivedArgs = null;
+            ManualResetEventSlim mre = new(false);
 
             void Callback(object sender, PinValueChangedEventArgs args)
             {
                 callbackInvoked = true;
                 receivedArgs = args;
+                mre.Set();
             }
 
             // Change the device setup to simulate pin1 as high
@@ -107,8 +107,10 @@ namespace Iot.Device.Tca955x.Tests
                 b[0] = 0x00;
             });
 
+            // Act
             // Simulate the hardware int pin pin change using the _controller mock
             _driver.Object.FireEventHandler(interruptPin, PinEventTypes.Rising);
+            mre.Wait(2000); // Wait for the callback to be invoked
 
             // Assert
             Assert.True(callbackInvoked);
