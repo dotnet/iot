@@ -22,13 +22,13 @@ namespace SunxiGpioDriver.GpioSpeed
             switch (key)
             {
                 case "1":
-                    controller = new GpioController(PinNumberingScheme.Logical, new SysFsDriver());
+                    controller = new GpioController(new SysFsDriver());
                     break;
                 case "2":
-                    controller = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver());
+                    controller = new GpioController(new LibGpiodDriver());
                     break;
                 case "3":
-                    controller = new GpioController(PinNumberingScheme.Logical, new OrangePiZeroDriver());
+                    controller = new GpioController(new OrangePiZeroDriver());
                     break;
                 default:
                     Console.WriteLine("Exit");

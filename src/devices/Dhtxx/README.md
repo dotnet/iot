@@ -132,7 +132,7 @@ See this [issue 1145](https://github.com/dotnet/iot/issues/1145). We're actively
 
 ```csharp
 GpioDriver driver = new RaspberryPi3Driver();
-var controller = new GpioController(PinNumberingScheme.Logical, driver);
+var controller = new GpioController(driver);
 // This uses pin 4 in the logical schema so pin 7 in the physical schema
 var dht = new Dht11(4, gpioController: controller);
 ```

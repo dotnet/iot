@@ -124,7 +124,7 @@ The example below shows how to blink a led on GPIO2 and then read the value. It'
 
 ```csharp
     const int Gpio2 = 2;
-    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+    var gpioController = new GpioController(new Ft4222Gpio());
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio2);

@@ -35,7 +35,7 @@ You can use as well any GpioController like the MCP23017 in the following exampl
 var settings = new System.Device.I2c.I2cConnectionSettings(1, 0x20);
 var i2cDevice = System.Device.I2c.I2cDevice.Create(settings);
 var mcp23017 = new Iot.Device.Mcp23xxx.Mcp23017(i2cDevice);
-GpioController gpio = new GpioController(PinNumberingScheme.Logical, mcp23017);
+GpioController gpio = new GpioController(mcp23017);
 IEnumerable<int> outputs = new int[] { 26, 19, 13, 6 };
 IEnumerable<int> inputs = new int[] { 21, 20, 16, 12 };
 KeyMatrix mk = new KeyMatrix(outputs, inputs, TimeSpan.FromMilliseconds(20), gpio, true);
