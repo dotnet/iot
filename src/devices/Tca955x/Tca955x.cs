@@ -634,6 +634,14 @@ namespace Iot.Device.Tca955x
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            _controller?.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
+            _interruptPending = false;
+
+            // Make a copy of the task refernce to avoid a race condition
+            // between checking it for null and then waiting on it.
+            var localinterruptProcessingTask = _interruptProcessingTask;
+            localinterruptProcessingTask?.Wait();
+
             if (_shouldDispose)
             {
                 _controller?.Dispose();
