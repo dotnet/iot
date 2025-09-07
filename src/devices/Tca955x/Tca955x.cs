@@ -424,7 +424,7 @@ namespace Iot.Device.Tca955x
             // If the handler task is already running (not null), it means interrupts are being
             // fired reentrantly and we are already processing an interrupt.
             // OR we are reading/writing or configuring a pin.
-            // In this case record the interrupt, and return.
+            // In this case record the missed interrupt, and return.
             // We may miss an interrupt while busy, but because we have to slowly read the
             // i2c and detect a change in the returned input register data, not to mention run the
             // event handlers that the consumer of the library has signed up, we are likely
@@ -446,16 +446,13 @@ namespace Iot.Device.Tca955x
 
         private Task ProcessInterruptInTask()
         {
+            // Take a snapshot of the current interrupt pin configuration and last known input values
+            // so we can safely process them outside the lock in a background task.
+            var interruptPinsSnapshot = new Dictionary<int, PinEventTypes>(_interruptPins);
+            var interruptLastInputValuesSnapshot = new Dictionary<int, PinValue>(_interruptLastInputValues);
+
             Task processingTask = new Task(() =>
             {
-                Dictionary<int, PinEventTypes> interruptPinsSnapshot;
-                Dictionary<int, PinValue> interruptLastInputValuesSnapshot;
-                lock (_interruptHandlerLock)
-                {
-                    interruptPinsSnapshot = new Dictionary<int, PinEventTypes>(_interruptPins);
-                    interruptLastInputValuesSnapshot = new Dictionary<int, PinValue>(_interruptLastInputValues);
-                }
-
                 if (interruptPinsSnapshot.Count > 0)
                 {
                     Span<PinValuePair> pinValuePairs = stackalloc PinValuePair[interruptPinsSnapshot.Count];
