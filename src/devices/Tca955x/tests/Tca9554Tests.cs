@@ -132,7 +132,7 @@ namespace Iot.Device.Tca955x.Tests
         }
 
         [Fact]
-        public void CanNotConstructIfNoInterruptConfigured()
+        public void CanNotConstructIfInterruptConfiguredIncorrectly()
         {
             Assert.Throws<ArgumentException>(() =>
             {
