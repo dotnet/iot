@@ -260,7 +260,7 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Reads the value of a set of pins
         /// </summary>
-        public override void Read(Span<PinValuePair> pinValuePairs)
+        protected override void Read(Span<PinValuePair> pinValuePairs)
         {
             lock (_interruptHandlerLock)
             {
@@ -323,7 +323,7 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Writes values to a set of pins
         /// </summary>
-        public override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+        protected override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             bool lowChanged = false;
             bool highChanged = false;
