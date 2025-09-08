@@ -66,8 +66,8 @@ namespace Iot.Device.Tca955x
         /// Constructor for the Tca9555 I2C I/O Expander.
         /// </summary>
         /// <param name="device">The I2C device used for communication.</param>
-        /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
-        /// <param name="gpioController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
+        /// <param name="interrupt">The input pin number that is connected to the interrupt.Must be set together with the <paramref name="gpioController"/></param>
+        /// <param name="gpioController">The controller for the interrupt pin. Must be set together with the <paramref name="interrupt"/></param>
         /// <param name="shouldDispose">True to dispose the <paramref name="gpioController"/> when this object is disposed</param>
         protected Tca955x(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
         {
@@ -78,6 +78,12 @@ namespace Iot.Device.Tca955x
                 _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAddress + AddressRange)
             {
                 throw new ArgumentOutOfRangeException(nameof(device), $"Address should be in Range {DefaultI2cAddress} to {DefaultI2cAddress + AddressRange} inclusive");
+            }
+
+            if ((_interrupt != -1 && gpioController is null) ||
+                (_interrupt == -1 && (gpioController is not null)))
+            {
+                throw new ArgumentException("gpioController and interrupt must be set together.");
             }
 
             if (_interrupt != -1)
