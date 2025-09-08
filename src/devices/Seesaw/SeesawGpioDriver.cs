@@ -177,18 +177,6 @@ namespace Iot.Device.Seesaw
         protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         /// <summary>
-        /// Read the given pins with the given pin numbers.
-        /// </summary>
-        /// <param name="pinValuePairs">The pin/value pairs to read.</param>
-        public void Read(Span<PinValuePair> pinValuePairs)
-        {
-            for (int i = 0; i < pinValuePairs.Length; i++)
-            {
-                pinValuePairs[i] = new PinValuePair(pinValuePairs[i].PinNumber, Read(pinValuePairs[i].PinNumber));
-            }
-        }
-
-        /// <summary>
         /// Sets the mode to a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -228,18 +216,6 @@ namespace Iot.Device.Seesaw
 
             _seesawDevice.WriteGpioDigital((byte)pinNumber, (value == PinValue.High));
             _pinValues[pinNumber] = value;
-        }
-
-        /// <summary>
-        /// Write the given pins with the given values.
-        /// </summary>
-        /// <param name="pinValuePairs">The pin/value pairs to write.</param>
-        public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
-        {
-            for (int i = 0; i < pinValuePairs.Length; i++)
-            {
-                Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
-            }
         }
 
         /// <inheritdoc/>
