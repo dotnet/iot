@@ -15,7 +15,7 @@ namespace Iot.Device.Tca955x
     /// <summary>
     /// Base class for the Tca55x I2C I/O Expander
     /// </summary>
-    public abstract class Tca955x : GpioDriver, IGpioDriverBlockAccess
+    public abstract class Tca955x : GpioDriver
     {
         private readonly int _interrupt;
         private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
@@ -254,7 +254,7 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Reads the value of a set of pins
         /// </summary>
-        public void Read(Span<PinValuePair> pinValuePairs)
+        public override void Read(Span<PinValuePair> pinValuePairs)
         {
             lock (_interruptHandlerLock)
             {
@@ -317,7 +317,7 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Writes values to a set of pins
         /// </summary>
-        public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+        public override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             bool lowChanged = false;
             bool highChanged = false;
