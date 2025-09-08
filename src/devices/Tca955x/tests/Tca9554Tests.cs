@@ -132,19 +132,16 @@ namespace Iot.Device.Tca955x.Tests
         }
 
         [Fact]
-        public void RegisterCallbackThrowsIfNoInterruptConfigured()
+        public void CanNotConstructIfNoInterruptConfigured()
         {
-            var testee = new Tca9554(_device.Object, -1, _controller);
-            var tcaController = new GpioController(testee);
-            tcaController.OpenPin(1, PinMode.Input);
-            void Callback(object sender, PinValueChangedEventArgs args)
+            Assert.Throws<ArgumentException>(() =>
             {
-                // No-op
-            }
+                var testee = new Tca9554(_device.Object, -1, _controller);
+            });
 
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
-                tcaController.RegisterCallbackForPinValueChangedEvent(1, PinEventTypes.Rising, Callback);
+                var testee = new Tca9554(_device.Object, 2);
             });
         }
 
