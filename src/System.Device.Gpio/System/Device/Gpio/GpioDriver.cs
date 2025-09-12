@@ -92,6 +92,23 @@ public abstract class GpioDriver : IDisposable
     protected internal abstract PinValue Read(int pinNumber);
 
     /// <summary>
+    /// Read the given pins with the given pin numbers.
+    /// </summary>
+    /// <remarks>
+    /// The default implementation calls <see cref="Read(int)"/> for each pin in the array.
+    /// where possible, drivers should override this method to provide a more efficient implementation.
+    /// </remarks>
+    /// <param name="pinValuePairs">The pin/value pairs to read.</param>
+    protected internal virtual void Read(Span<PinValuePair> pinValuePairs)
+    {
+        for (int i = 0; i < pinValuePairs.Length; i++)
+        {
+            int pin = pinValuePairs[i].PinNumber;
+            pinValuePairs[i] = new PinValuePair(pin, Read(pin));
+        }
+    }
+
+    /// <summary>
     /// Toggle the current value of a pin.
     /// </summary>
     /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
@@ -103,6 +120,22 @@ public abstract class GpioDriver : IDisposable
     /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
     /// <param name="value">The value to be written to the pin.</param>
     protected internal abstract void Write(int pinNumber, PinValue value);
+
+    /// <summary>
+    /// Write the given pins with the given values.
+    /// </summary>
+    /// <remarks>
+    /// The default implementation calls <see cref="Write(int, PinValue)"/> for each pin in the array.
+    /// where possible, drivers should override this method to provide a more efficient implementation.
+    /// </remarks>
+    /// <param name="pinValuePairs">The pin/value pairs to write.</param>
+    protected internal virtual void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+    {
+        for (int i = 0; i < pinValuePairs.Length; i++)
+        {
+            Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
+        }
+    }
 
     /// <summary>
     /// Blocks execution until an event of type eventType is received or a cancellation is requested.

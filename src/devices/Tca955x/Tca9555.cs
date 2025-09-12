@@ -15,10 +15,10 @@ namespace Iot.Device.Tca955x
         /// <summary>
         /// Constructor for the Tca9555 I2C I/O Expander.
         /// </summary>
-        /// <param name="device">The I2C Device the device is connected to. Expect an I2C Adress between 0x20 and 0x27</param>
+        /// <param name="device">The I2C Device the device is connected to. Expect an I2C Address between 0x20 and 0x27</param>
         /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
         /// <param name="gpioController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
+        /// <param name="shouldDispose">True to dispose the <paramref name="gpioController"/> when this object is disposed</param>
         public Tca9555(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
             : base(device, interrupt, gpioController, shouldDispose)
         {
@@ -92,7 +92,7 @@ namespace Iot.Device.Tca955x
         /// Read a byte from the given Register.
         /// </summary>
         /// <param name="register">The given Register.</param>
-        /// <returns>The readed byte from the Register.</returns>
+        /// <returns>The byte read from the Register.</returns>
         public byte ReadByte(Tca9555Register register) => InternalReadByte((byte)register);
     }
 }
