@@ -19,8 +19,9 @@ namespace Iot.Device.Tca955x
         /// <param name="interrupt">The input pin number that is connected to the interrupt.</param>
         /// <param name="gpioController">The controller for the reset and interrupt pins. If not specified, the default controller will be used.</param>
         /// <param name="shouldDispose">True to dispose the <paramref name="gpioController"/> when this object is disposed</param>
-        public Tca9555(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
-            : base(device, interrupt, gpioController, shouldDispose)
+        /// <param name="skipAddressCheck">True to skip checking the I2C address is in the valid range for the device. Only set this to true if you are using a compatible device with a different addresss scheme.</param>
+        public Tca9555(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true, bool skipAddressCheck = false)
+            : base(device, interrupt, gpioController, shouldDispose, skipAddressCheck)
         {
         }
 
