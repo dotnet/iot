@@ -20,8 +20,8 @@ namespace Iot.Device.Tca955x
         private readonly int _interrupt;
         private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
         private readonly ConcurrentDictionary<int, PinChangeEventHandler> _eventHandlers = new ConcurrentDictionary<int, PinChangeEventHandler>();
-        private readonly Dictionary<int, PinEventTypes> _interruptPins = new Dictionary<int, PinEventTypes>();
-        private Dictionary<int, PinValue> _interruptLastInputValues = new Dictionary<int, PinValue>();
+        private readonly Dictionary<int, PinEventTypes> _interruptPinsSubscribedEvents = new Dictionary<int, PinEventTypes>();
+        private readonly ConcurrentDictionary<int, PinValue> _interruptLastInputValues = new ConcurrentDictionary<int, PinValue>();
 
         private GpioController? _controller;
 
@@ -90,6 +90,14 @@ namespace Iot.Device.Tca955x
 
             if (_interrupt != -1)
             {
+                // Initialise the interrupt handling state because ints may start coming from the INT pin
+                // on the expander as soon as we register the interrupt handler.
+                for (int i = 0; i < PinCount; i++)
+                {
+                    _interruptPinsSubscribedEvents.Add(i, PinEventTypes.None);
+                    _interruptLastInputValues.TryAdd(i, PinValue.Low);
+                }
+
                 _shouldDispose = shouldDispose || gpioController is null;
                 _controller = gpioController ?? new GpioController();
                 if (!_controller.IsPinOpen(_interrupt))
@@ -456,7 +464,7 @@ namespace Iot.Device.Tca955x
         {
             // Take a snapshot of the current interrupt pin configuration and last known input values
             // so we can safely process them outside the lock in a background task.
-            var interruptPinsSnapshot = new Dictionary<int, PinEventTypes>(_interruptPins);
+            var interruptPinsSnapshot = new Dictionary<int, PinEventTypes>(_interruptPinsSubscribedEvents);
             var interruptLastInputValuesSnapshot = new Dictionary<int, PinValue>(_interruptLastInputValues);
 
             Task processingTask = new Task(() =>
@@ -494,9 +502,9 @@ namespace Iot.Device.Tca955x
                         interruptLastInputValuesSnapshot[pin] = newValue;
                     }
 
-                    lock (_interruptHandlerLock)
+                    foreach (var pin in interruptLastInputValuesSnapshot.Keys)
                     {
-                        _interruptLastInputValues = interruptLastInputValuesSnapshot;
+                        _interruptLastInputValues.TryUpdate(pin, interruptLastInputValuesSnapshot[pin], !interruptLastInputValuesSnapshot[pin]);
                     }
                 }
             });
@@ -557,15 +565,12 @@ namespace Iot.Device.Tca955x
 
             lock (_interruptHandlerLock)
             {
-                if (_interruptPins.ContainsKey(pinNumber))
+                _interruptPinsSubscribedEvents[pinNumber] = eventType;
+                var currentValue = Read(pinNumber);
+                _interruptLastInputValues.TryUpdate(pinNumber, currentValue, !currentValue);
+                if (!_eventHandlers.TryAdd(pinNumber, callback))
                 {
-                    throw new InvalidOperationException($"A callback is already registered for pin {pinNumber}");
-                }
-                else
-                {
-                    _interruptPins.Add(pinNumber, eventType);
-                    _interruptLastInputValues.Add(pinNumber, Read(pinNumber));
-                    _eventHandlers[pinNumber] = callback;
+                    throw new InvalidOperationException($"An event handler is already registered for pin {pinNumber}");
                 }
             }
         }
@@ -575,11 +580,8 @@ namespace Iot.Device.Tca955x
         {
             lock (_interruptHandlerLock)
             {
-                if (_eventHandlers.TryRemove(pinNumber, out _))
-                {
-                    _interruptPins.Remove(pinNumber);
-                    _interruptLastInputValues.Remove(pinNumber);
-                }
+                _eventHandlers.TryRemove(pinNumber, out _);
+                _interruptPinsSubscribedEvents[pinNumber] = PinEventTypes.None;
             }
         }
 
