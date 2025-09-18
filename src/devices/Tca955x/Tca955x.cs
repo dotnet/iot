@@ -69,13 +69,15 @@ namespace Iot.Device.Tca955x
         /// <param name="interrupt">The input pin number that is connected to the interrupt.Must be set together with the <paramref name="gpioController"/></param>
         /// <param name="gpioController">The controller for the interrupt pin. Must be set together with the <paramref name="interrupt"/></param>
         /// <param name="shouldDispose">True to dispose the <paramref name="gpioController"/> when this object is disposed</param>
-        protected Tca955x(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
+        /// <param name="skipAddressCheck">True to skip checking the I2C address is in the valid range for the device. Only set this to true if you are using a compatible device with a different addresss scheme.</param>
+        protected Tca955x(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true, bool skipAddressCheck = false)
         {
             _busDevice = device;
             _interrupt = interrupt;
 
-            if (_busDevice.ConnectionSettings.DeviceAddress < DefaultI2cAddress ||
-                _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAddress + AddressRange)
+            if (!skipAddressCheck &&
+                (_busDevice.ConnectionSettings.DeviceAddress < DefaultI2cAddress ||
+                _busDevice.ConnectionSettings.DeviceAddress > DefaultI2cAddress + AddressRange))
             {
                 throw new ArgumentOutOfRangeException(nameof(device), $"Address should be in Range {DefaultI2cAddress} to {DefaultI2cAddress + AddressRange} inclusive");
             }
