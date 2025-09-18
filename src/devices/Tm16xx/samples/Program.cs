@@ -16,7 +16,7 @@ namespace Samples
             // Create an instance of TM1637, using Gpio 23 for clock and 24 for IO.
             using (Tm1637 tm1637 = new Tm1637(23, 24))
             {
-                // When creating the instance without GpioController provided, a new instance of GpioController is created using PinNumberingScheme.Logical from default constructor. The instance of GpioController is disposed with the instance of Tm16xx.
+                // When creating the instance without GpioController provided, a new instance of GpioController is created using the default constructor. The instance of GpioController is disposed with the instance of Tm16xx.
                 // Provides an instance of GpioController when constructing Tm16xx instance when specified factory of GpioController is required or for reusing. The instance of GpioContoller provided is not disposed with the instance of Tm16xx.
                 // Some board need a delay for self initializing.
                 Thread.Sleep(100);
