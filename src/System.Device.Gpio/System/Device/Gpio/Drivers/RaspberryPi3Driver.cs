@@ -177,12 +177,6 @@ public class RaspberryPi3Driver : GpioDriver
     protected internal override void ClosePin(int pinNumber) => InternalDriver.ClosePin(pinNumber);
 
     /// <inheritdoc/>
-    protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-    {
-        return InternalDriver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
-    }
-
-    /// <inheritdoc/>
     protected internal override PinMode GetPinMode(int pinNumber) => InternalDriver.GetPinMode(pinNumber);
 
     /// <inheritdoc/>

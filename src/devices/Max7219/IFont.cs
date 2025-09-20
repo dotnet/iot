@@ -11,7 +11,6 @@ namespace Iot.Device.Max7219
     /// <remarks>
     /// Each character consists of a list of bytes where a single byte represents a column of the display.
     /// </remarks>
-    ///
     /// <example>
     /// This example shows how the 'A' char could by encoded:
     /// <code>
@@ -26,7 +25,6 @@ namespace Iot.Device.Max7219
     ///     0b0000000
     /// };
     /// </code>
-    ///
     /// </example>
     public interface IFont
     {

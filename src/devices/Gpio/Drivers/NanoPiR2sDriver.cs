@@ -21,13 +21,5 @@ namespace Iot.Device.Gpio.Drivers
 
         /// <inheritdoc/>
         protected override int PinCount => 5;
-
-        /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-        {
-            int num = _pinNumberConverter[pinNumber];
-
-            return num != -1 ? num : throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
-        }
     }
 }

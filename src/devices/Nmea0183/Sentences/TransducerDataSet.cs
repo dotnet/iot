@@ -86,7 +86,6 @@ namespace Iot.Device.Nmea0183.Sentences
         /// - LIVEWELL
         /// - OIL
         /// - BATVOLT, BATCURR
-        ///
         /// The above values may be followed by a #y, where y is the instance number (i.e. the tank number)
         /// </summary>
         public string DataName { get; set; }

@@ -120,7 +120,7 @@ Let's assume your device is the first one, you'll be able to create a GPIO Contr
 ```csharp
 var ft232h = new Ft232HDevice(devices[0]);
 var gpio = ft232h.CreateGpioDriver();
-GpioController controller = new(PinNumberingScheme.Board, gpio);
+GpioController controller = new(gpio);
 ```
 
 > Important notes:
@@ -172,7 +172,7 @@ As seen before in some specificities, they can have multiple channels:
   - Remaining pins can be used for traditional GPIO
   - Channel C and D can only be used for GPIO. All 8 pins can be set as input, output read and wrote.
   - The device will appear like this:
-  
+
   ```text
   Quad RS232-HS A
     Flags: HiSpeedMode

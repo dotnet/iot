@@ -9,9 +9,7 @@ namespace Iot.Device.Bmxx80.FilteringMode
     /// <remarks>
     /// This filter effectively reduces the bandwidth of the temperature and pressure output signals
     /// and increases the resolution of the pressure and temperature output data to 20 bits.
-    ///
     /// The higher the coefficient, the slower the sensors responds to external inputs.
-    ///
     /// See the data sheet with recommended settings for different scenarios.
     /// </remarks>
     public enum Bmx280FilteringMode : byte
