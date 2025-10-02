@@ -2,12 +2,12 @@
   <!-- Packaging related properties -->
   <PropertyGroup>
     <MajorVersion>4</MajorVersion>
-    <MinorVersion>0</MinorVersion>
-    <PatchVersion>1</PatchVersion>
+    <MinorVersion>2</MinorVersion>
+    <PatchVersion>0</PatchVersion>
     <Description>This package provides a set of Device Bindings ("Device drivers") that use System.Device.Gpio package to communicate with sensors and microcontrollers.</Description>
     <PackageTags>.NET GPIO Pins SPI I2C PWM RPi IoT Device Bindings</PackageTags>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <PackageValidationBaselineVersion>3.1.0</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>4.0.1</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <Import Project="../../Directory.Build.props" />

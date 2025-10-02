@@ -8,7 +8,7 @@
 
 ```C#
 // For Orange Pi Zero
-using GpioController gpio = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
+using GpioController gpio = new GpioController(new OrangePiZeroDriver());
 
 // Open the GPIO pin.
 gpio.OpenPin(7);
@@ -23,7 +23,7 @@ PinValue value = gpio.Read(7);
 ```C#
 // Beacuse this is a generic driver, the pin scheme can only be Logical.
 // The base addresses can be found in the corresponding SoC datasheet.
-using GpioController gpio = new GpioController(PinNumberingScheme.Logical, new SunxiDriver(cpuxPortBaseAddress: 0x01C20800, cpusPortBaseAddress: 0x01F02C00));
+using GpioController gpio = new GpioController(new SunxiDriver(cpuxPortBaseAddress: 0x01C20800, cpusPortBaseAddress: 0x01F02C00));
 
 // Convert pin number to logical scheme.
 int pinNumber = SunxiDriver.MapPinNumber(portController: 'A', port: 10);

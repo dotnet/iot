@@ -1,12 +1,46 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
+<!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
-    <DiagnosticId>PKV006</DiagnosticId>
-    <Target>.NETStandard,Version=v2.0</Target>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Usb.BatteryObject.get_MaximalVoltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>PKV006</DiagnosticId>
-    <Target>net6.0</Target>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Usb.BatteryObject.get_MinimalVoltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Usb.FixedSupplyObject.get_Voltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Usb.StUsb4500.get_RequestedVoltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Usb.VariableSupplyObject.get_MaximalVoltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Usb.VariableSupplyObject.get_MinimalVoltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
 </Suppressions>

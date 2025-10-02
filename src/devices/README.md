@@ -504,10 +504,10 @@ private GpioController _controller;
 private bool _shouldDispose;
 private int _pinToUse;
 
-public MyBinding(int pinToUse, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+public MyBinding(int pinToUse, GpioController controller = null, bool shouldDispose = true)
 {
   _shouldDispose = gpioController is null || shouldDispose;
-  _controller = gpioController ?? new GpioController(pinNumberingScheme);  
+  _controller = gpioController ?? new GpioController();  
   _pinToUse = pinToUse;
   _controller.OpenPin(_pinToUse);
   // Initialize the rest of initialization

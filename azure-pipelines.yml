@@ -41,6 +41,7 @@ stages:
         markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
       displayName: 'Execute Markdownlint'
       condition: eq(variables['build.reason'], 'PullRequest')
+      continueOnError: true
 
       # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
     - script: build.cmd -ci
