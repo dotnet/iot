@@ -391,6 +391,20 @@ namespace Iot.Device.Nmea0183.Tests
         }
 
         [Fact]
+        public void VhwEncode()
+        {
+            string text = "10.0,T,15.0,M,9.9,N,18.4,K,A";
+
+            WaterSpeedAndAngle water = new WaterSpeedAndAngle(Angle.FromDegrees(10), Angle.FromDegrees(15),
+                Speed.FromMetersPerSecond(5.1));
+
+            Assert.True(water.Valid);
+            Assert.True(water.HeadingMagnetic.HasValue);
+            Assert.True(water.HeadingTrue.HasValue);
+            Assert.Equal(text, water.ToNmeaParameterList());
+        }
+
+        [Fact]
         public void ZdaDecode()
         {
             _lastPacketTime = DateTimeOffset.UtcNow;

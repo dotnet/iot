@@ -90,7 +90,11 @@ namespace Iot.Device.Nmea0183
             _textWriter = new StreamWriter(_logFile);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// "Sends" the message to the logger, that means logs it (as input from the given source)
+        /// </summary>
+        /// <param name="source">Source from where the message originated</param>
+        /// <param name="sentence">The message</param>
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             lock (_lock)
@@ -102,9 +106,7 @@ namespace Iot.Device.Nmea0183
                     // But log all AIS messages, they come as raw only
                     if ((_lastSentence.SentenceId != sentence.SentenceId && _lastSentence.TalkerId != sentence.TalkerId) || !(sentence is RawSentence) || sentence.TalkerId == TalkerId.Ais)
                     {
-                        string msg = FormattableString.Invariant(
-                            $"{DateTime.UtcNow:s}|{source.InterfaceName}|${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaParameterList()}|{sentence.ToReadableContent()}");
-                        _textWriter.WriteLine(msg);
+                        LogMessage("<<<" + source.InterfaceName, sentence);
                     }
 
                     if ((_logFile.Length > Configuration.MaxFileSize) && (Configuration.MaxFileSize != 0))
@@ -114,6 +116,29 @@ namespace Iot.Device.Nmea0183
 
                     _lastSentence = sentence;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Writes the message to the log. Note: Caller must own the lock.
+        /// </summary>
+        private void LogMessage(string sourceName, NmeaSentence sentence)
+        {
+            string msg = FormattableString.Invariant(
+                $"{DateTime.UtcNow:s}|{sourceName}|${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaParameterList()}|{sentence.ToReadableContent()}");
+            _textWriter?.WriteLine(msg);
+        }
+
+        /// <summary>
+        /// Logs the given message as outgoing on that sink
+        /// </summary>
+        /// <param name="destination">Interface where the message is being sent to</param>
+        /// <param name="message">The message</param>
+        public void LogSendMessage(NmeaSinkAndSource destination, NmeaSentence message)
+        {
+            lock (_lock)
+            {
+                LogMessage(">>>" + destination.InterfaceName, message);
             }
         }
 
