@@ -85,7 +85,7 @@ namespace Iot.Device.Nmea0183
         /// <param name="file">The recorded nmea file (from a logged session)</param>
         public void CreateCorrectionTable(string file)
         {
-            CreateCorrectionTable(new[] { file }, DateTimeOffset.MinValue, DateTimeOffset.MaxValue);
+            CreateCorrectionTable(new[] { file }, DateTimeOffset.MinValue, DateTimeOffset.MaxValue, Angle.FromDegrees(30));
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Iot.Device.Nmea0183
         /// <param name="stream">The recorded nmea stream (from a logged session)</param>
         public void CreateCorrectionTable(Stream stream)
         {
-            CreateCorrectionTable(new[] { stream }, DateTimeOffset.MinValue, DateTimeOffset.MaxValue);
+            CreateCorrectionTable(new[] { stream }, DateTimeOffset.MinValue, DateTimeOffset.MaxValue, Angle.FromDegrees(30));
         }
 
         /// <summary>
@@ -107,7 +107,9 @@ namespace Iot.Device.Nmea0183
         /// <param name="fileSet">The recorded nmea files (from a logged session)</param>
         /// <param name="beginCalibration">The start time of the calibration loops</param>
         /// <param name="endCalibration">The end time of the calibration loops</param>
-        public void CreateCorrectionTable(string[] fileSet, DateTimeOffset beginCalibration, DateTimeOffset endCalibration)
+        /// <param name="maxValidDeviation">The maximum expected deviation. Throws an warning when exceeded at some point</param>
+        /// <returns>A list of observed warnings</returns>
+        public List<string> CreateCorrectionTable(string[] fileSet, DateTimeOffset beginCalibration, DateTimeOffset endCalibration, Angle maxValidDeviation)
         {
             Stream[] streams = new Stream[fileSet.Length];
             for (int i = 0; i < fileSet.Length; i++)
@@ -115,12 +117,14 @@ namespace Iot.Device.Nmea0183
                 streams[i] = new FileStream(fileSet[i], FileMode.Open);
             }
 
-            CreateCorrectionTable(streams, beginCalibration, endCalibration);
+            var result = CreateCorrectionTable(streams, beginCalibration, endCalibration, maxValidDeviation);
 
             foreach (var s in streams)
             {
                 s.Dispose();
             }
+
+            return result;
         }
 
         /// <summary>
@@ -131,8 +135,9 @@ namespace Iot.Device.Nmea0183
         /// <param name="fileSet">The recorded nmea files (from a logged session)</param>
         /// <param name="beginCalibration">The start time of the calibration loops</param>
         /// <param name="endCalibration">The end time of the calibration loops</param>
+        /// <param name="maxValidDeviation">The maximum expected deviation. Throws an warning when exceeded at some point</param>
         /// <returns>A list of observed warnings</returns>
-        public List<string> CreateCorrectionTable(Stream[] fileSet, DateTimeOffset beginCalibration, DateTimeOffset endCalibration)
+        public List<string> CreateCorrectionTable(Stream[] fileSet, DateTimeOffset beginCalibration, DateTimeOffset endCalibration, Angle maxValidDeviation)
         {
             _interestingSentences.Clear();
             _magneticVariation = Angle.Zero;
@@ -278,7 +283,7 @@ namespace Iot.Device.Nmea0183
                 }
                 else
                 {
-                    if (Math.Abs(pt.Deviation + averageOffset) > 30)
+                    if (Math.Abs(pt.Deviation + averageOffset) > maxValidDeviation.Degrees)
                     {
                         warnings.Add($"Your magnetic compass shows deviations of {pt.Deviation + averageOffset} degrees. Use a better installation location or buy a new one.");
                     }

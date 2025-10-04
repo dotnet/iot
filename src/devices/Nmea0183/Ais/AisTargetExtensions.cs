@@ -113,7 +113,7 @@ namespace Iot.Device.Nmea0183.Ais
 
                     // The other is not a ship - Assume static position (but make sure a lost target doesn't become a
                     // dangerous target - we warn about lost targets separately)
-                    if (distance < parameters.WarningDistance && state != AisSafetyState.Lost)
+                    if (distance < WarningDistanceOf(parameters, other) && state != AisSafetyState.Lost)
                     {
                         state = AisSafetyState.Dangerous;
                     }
@@ -178,10 +178,23 @@ namespace Iot.Device.Nmea0183.Ais
                         };
 
                         var timeToClosest = pos.TimeToClosestPointOfApproach(now);
-                        if (pos.ClosestPointOfApproach < parameters.WarningDistance &&
-                            timeToClosest > -TimeSpan.FromMinutes(1) && timeToClosest < parameters.WarningTime)
+                        if (pos.ClosestPointOfApproach < WarningDistanceOf(parameters, pos.To) &&
+                            timeToClosest > -TimeSpan.FromMinutes(1) && timeToClosest < WarningTimeOf(parameters, pos.To))
                         {
-                            pos.SafetyState = AisSafetyState.Dangerous;
+                            if (otherAsMovingTarget is SarAircraft)
+                            {
+                                // Let's assume we can't collide with a helicopter.
+                                pos.SafetyState = AisSafetyState.Ignored;
+                            }
+                            else if (!parameters.IgnoreVesselsSlowerThan.HasValue || otherAsMovingTarget.SpeedOverGround >
+                                parameters.IgnoreVesselsSlowerThan.Value)
+                            {
+                                pos.SafetyState = AisSafetyState.Dangerous;
+                            }
+                            else
+                            {
+                                pos.SafetyState = AisSafetyState.Ignored;
+                            }
                         }
 
                         retList.Add(pos);

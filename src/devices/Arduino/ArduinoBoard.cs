@@ -209,9 +209,7 @@ namespace Iot.Device.Arduino
         /// <param name="board">Returns the board if successful</param>
         /// <returns>True on success, false otherwise</returns>
         public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port, bool useAutoReconnect,
-#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
-#endif
             out ArduinoBoard? board)
         {
             try

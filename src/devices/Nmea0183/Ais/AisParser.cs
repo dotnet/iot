@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Nmea0183.Ais
 {
@@ -31,6 +33,7 @@ namespace Iot.Device.Nmea0183.Ais
         private readonly AisMessageFactory _messageFactory;
         private readonly PayloadEncoder _payloadEncoder;
         private readonly IDictionary<int, List<string>> _fragments = new Dictionary<int, List<string>>();
+        private readonly ILogger _logger;
         private int _nextFragmentedMessageId;
 
         public AisParser()
@@ -51,6 +54,7 @@ namespace Iot.Device.Nmea0183.Ais
             _payloadEncoder = payloadEncoder;
             _nextFragmentedMessageId = 1;
             GeneratedSentencesId = VdoId;
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -123,7 +127,20 @@ namespace Iot.Device.Nmea0183.Ais
 
             var payload = DecodePayload(encodedPayload, Convert.ToInt32(sentenceParts[1]), Convert.ToInt32(sentenceParts[2]),
                 messageNumber, Convert.ToInt32(sentenceParts[6]));
-            return payload == null ? null : _messageFactory.Create(payload, ThrowOnUnknownMessage);
+
+            if (payload == null)
+            {
+                _logger.LogWarning($"Unable to decode AIS message {sentence}");
+                return null;
+            }
+
+            var createdMessage = _messageFactory.Create(payload, ThrowOnUnknownMessage);
+            if (createdMessage == null)
+            {
+                _logger.LogWarning($"Message {sentence} could technically be parsed, but the message type {payload.MessageType} is unknown");
+            }
+
+            return createdMessage;
         }
 
         public AisMessage? Parse(NmeaSentence sentence)

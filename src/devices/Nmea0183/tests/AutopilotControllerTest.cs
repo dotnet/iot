@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
 using Moq;
@@ -117,6 +118,7 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void CalculationLoopWithExternalInputRmbOnly()
         {
+            _autopilot.SentenceCache.MaxDataAge = Timeout.InfiniteTimeSpan;
             string[] inputSequences =
             {
                 // Messages in a typical scenario, where an external GPS sends just an RMB, but no waypoints
@@ -133,16 +135,17 @@ namespace Iot.Device.Nmea0183.Tests
             string[] expectedOutput =
             {
                 // This becomes the origin, so cross track error is 0
-                "$GPRMB,A,0.000,R,R4,R5,4728.81500,N,00929.99990,E,0.735,201.6,-1.5,V,D",
+                "$GPRMB,A,0.000,R,Origin,R5,4728.81500,N,00929.99990,E,0.735,201.6,-1.5,V,D",
                 "$GPXTE,A,A,0.000,R,N,D",
                 "$GPVTG,38.5,T,36.6,M,1.6,N,3.0,K,A",
                 "$GPBWC,183758.833,4728.81500,N,00929.99990,E,201.6,T,199.7,M,0.735,N,R5,D",
-                "$GPBOD,201.6,T,199.7,M,R5,R4",
+                "$GPBOD,201.6,T,199.7,M,R5,Origin",
                 "$GPWPL,4729.49810,N,00930.39910,E,Origin",
                 "$GPWPL,4728.81500,N,00929.99990,E,R5",
                 "$GPRTE,1,1,c,Goto,Origin,R5"
             };
 
+            bool outputReceived = false;
             DateTimeOffset now = new DateTimeOffset(2020, 05, 31, 18, 37, 58, 833, TimeSpan.Zero);
             _output.Setup(x => x.SendSentences(It.IsNotNull<IEnumerable<NmeaSentence>>())).Callback<IEnumerable<NmeaSentence>>(
                 outputSentence =>
@@ -157,10 +160,98 @@ namespace Iot.Device.Nmea0183.Tests
                         Assert.Equal(expectedOutput[index], txt);
                         index++;
                     }
+
+                    outputReceived = true;
                 });
 
             ParseSequencesAndAddToCache(inputSequences);
             _autopilot.CalculateNewStatus(0, now);
+            Assert.True(outputReceived);
+        }
+
+        [Fact]
+        public void CalculationLoopWithExternalInputRmbOnlyReconstructLastWp()
+        {
+            _autopilot.SentenceCache.MaxDataAge = Timeout.InfiniteTimeSpan; // because the data is in the past
+            string[] inputSequences =
+            {
+                // Messages in a typical scenario, where an external GPS sends just an RMB, but no waypoints
+                "$GPBOD,244.8,T,242.9,M,R4,",
+                "$GPRMB,A,0.50,L,,R4,4728.8150,N,00929.9999,E,0.737,201.6,-1.7,V,D",
+                "$GPRMC,115615.000,A,4729.49810,N,00930.39910,E,1.600,38.500,240520,1.900,E,D",
+                "$HCHDG,30.9,,,1.9,E",
+                "$GPXTE,A,A,0.500,L,N,D",
+                "$GPVTG,38.5,T,36.6,M,1.6,N,3.0,K,A"
+            };
+
+            string[] inputSequences2 =
+            {
+                // Message set after switching legs
+                "$GPBOD,244.8,T,242.9,M,R5,",
+                "$GPRMB,A,0.50,L,Origin,R5,4728.8250,N,00930.0000,E,0.737,201.6,-1.7,V,D",
+                "$GPRMC,115615.000,A,4730.49810,N,00930.39910,E,1.600,38.500,240520,1.900,E,D",
+                "$HCHDG,30.9,,,1.9,E",
+                "$GPXTE,A,A,0.400,L,N,D",
+                "$GPVTG,38.5,T,36.6,M,1.6,N,3.0,K,A"
+            };
+
+            // Similar to input, except with added accuracy and some additional messages
+            // (even though quite a bit of the information is redundant across messages)
+            string[] expectedOutput =
+            {
+                // This becomes the origin, so cross track error is 0
+                "$GPRMB,A,0.000,R,Origin,R4,4728.81500,N,00929.99990,E,0.735,201.6,-1.5,V,D",
+                "$GPXTE,A,A,0.000,R,N,D",
+                "$GPVTG,38.5,T,36.6,M,1.6,N,3.0,K,A",
+                "$GPBWC,183758.833,4728.81500,N,00929.99990,E,201.6,T,199.7,M,0.735,N,R4,D",
+                "$GPBOD,201.6,T,199.7,M,R4,Origin",
+                "$GPWPL,4729.49810,N,00930.39910,E,Origin",
+                "$GPWPL,4728.81500,N,00929.99990,E,R4",
+                "$GPRTE,1,1,c,Goto,Origin,R4"
+            };
+
+            string[] expectedOutput2 =
+            {
+                // This becomes the origin, so cross track error is 0
+                "$GPRMB,A,0.259,L,R4,R5,4728.82500,N,00930.00000,E,1.696,189.2,-1.4,V,D",
+                "$GPXTE,A,A,0.259,L,N,D",
+                "$GPVTG,38.5,T,36.6,M,1.6,N,3.0,K,A",
+                "$GPBWC,183759.833,4728.82500,N,00930.00000,E,189.2,T,187.3,M,1.696,N,R5,D",
+                "$GPBOD,0.4,T,358.5,M,R5,R4",
+                "$GPWPL,4729.49810,N,00930.39910,E,R4",
+                "$GPWPL,4728.81500,N,00929.99990,E,R5",
+                "$GPRTE,1,1,c,Goto,R4,R5"
+            };
+
+            var expectedHere = expectedOutput;
+            DateTimeOffset now = new DateTimeOffset(2020, 05, 31, 18, 37, 58, 833, TimeSpan.Zero);
+            _output.Setup(x => x.SendSentences(It.IsNotNull<IEnumerable<NmeaSentence>>())).Callback<IEnumerable<NmeaSentence>>(
+                outputSentence =>
+                {
+                    // Check that the messages that should be sent are equal to what's defined above
+                    Assert.True(outputSentence.Any());
+                    int index = 0;
+                    foreach (var msg in outputSentence)
+                    {
+                        string txt = msg.ToNmeaParameterList();
+                        txt = $"${TalkerId.GlobalPositioningSystem}{msg.SentenceId},{txt}";
+                        Assert.Equal(expectedHere[index], txt);
+                        index++;
+                    }
+                });
+
+            ParseSequencesAndAddToCache(inputSequences);
+            _autopilot.CalculateNewStatus(0, now);
+            Assert.Equal(AutopilotErrorState.DirectGoto, _autopilot.OperationState);
+            Assert.Equal("Origin", _autopilot.PreviousWaypoint?.WaypointName);
+            Assert.Equal("R4", _autopilot.NextWaypoint?.WaypointName);
+
+            expectedHere = expectedOutput2;
+            ParseSequencesAndAddToCache(inputSequences2);
+            _autopilot.CalculateNewStatus(1, now + TimeSpan.FromSeconds(1));
+            Assert.Equal(AutopilotErrorState.DirectGoto, _autopilot.OperationState);
+            Assert.Equal("R4", _autopilot.PreviousWaypoint?.WaypointName);
+            Assert.Equal("R5", _autopilot.NextWaypoint?.WaypointName);
         }
 
         private void ParseSequencesAndAddToCache(IEnumerable<string> inputSequences)

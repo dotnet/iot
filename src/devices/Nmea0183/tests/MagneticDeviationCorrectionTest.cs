@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
+using Shouldly;
 using UnitsNet;
 using Xunit;
 
@@ -39,7 +40,8 @@ namespace Iot.Device.Nmea0183.Tests
                         TestDataHelper.GetResourceStream("Nmea-2023-10-22-13-39.txt")
                     },
                     DateTimeOffset.Parse("2023-10-22T13:40:00", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
-                    DateTimeOffset.Parse("2023-10-22T13:50:00", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal));
+                    DateTimeOffset.Parse("2023-10-22T13:50:00", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    Angle.FromDegrees(30));
 
                 dev.Save("Calibration_Cirrus_test.xml", "Cirrus", "HBY5127", "269110660");
 
@@ -47,6 +49,27 @@ namespace Iot.Device.Nmea0183.Tests
                 var actual = new MagneticDeviationCorrection("Calibration_Cirrus_test.xml");
                 Assert.Equal(expected, actual);
                 File.Delete("Calibration_Cirrus_test.xml");
+            }
+        }
+
+        [Fact]
+        public void CreateDeviationTable2025()
+        {
+            using (new SetCultureForTest("de-DE"))
+            {
+                MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
+                var result = dev.CreateCorrectionTable(new Stream[]
+                    {
+                        TestDataHelper.GetResourceStream("Nmea-2025-07-24-06-40.txt"),
+                        TestDataHelper.GetResourceStream("Nmea-2025-07-24-06-50.txt"),
+                    },
+                    DateTimeOffset.Parse("2025-07-24T06:43", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    DateTimeOffset.Parse("2025-07-24T06:55", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    Angle.FromDegrees(90));
+
+                result.ShouldBeEmpty();
+
+                dev.Save("Calibration_Cirrus_2025.xml", "Cirrus", "HBY5127", "269110660");
             }
         }
 
