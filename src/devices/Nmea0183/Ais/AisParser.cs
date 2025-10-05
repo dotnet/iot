@@ -26,8 +26,6 @@ namespace Iot.Device.Nmea0183.Ais
         private const int MaxPayloadLength = 60; // Characters
 
         public bool ThrowOnUnknownMessage { get; }
-        public static SentenceId VdoId = new SentenceId("VDO");
-        public static SentenceId VdmId = new SentenceId("VDM");
 
         private readonly PayloadDecoder _payloadDecoder;
         private readonly AisMessageFactory _messageFactory;
@@ -53,12 +51,12 @@ namespace Iot.Device.Nmea0183.Ais
             _messageFactory = messageFactory;
             _payloadEncoder = payloadEncoder;
             _nextFragmentedMessageId = 1;
-            GeneratedSentencesId = VdoId;
+            GeneratedSentencesId = SentenceId.Vdo;
             _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
-        /// Which <see cref="SentenceId"/> generated AIS messages should get. Meaningful values are <see cref="VdmId"/> or <see cref="VdoId"/>.
+        /// Which <see cref="SentenceId"/> generated AIS messages should get. Meaningful values are <see cref="SentenceId.Vdm"/> or <see cref="SentenceId.Vdo"/>.
         /// Default is "VDO"
         /// </summary>
         public SentenceId GeneratedSentencesId
