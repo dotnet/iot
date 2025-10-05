@@ -214,7 +214,7 @@ namespace Iot.Device.Nmea0183
         public TrackEstimationParameters TrackEstimationParameters { get; private set; }
 
         /// <summary>
-        /// Which <see cref="SentenceId"/> generated AIS messages should get. Meaningful values are <see cref="AisParser.VdmId"/> or <see cref="AisParser.VdoId"/>.
+        /// Which <see cref="SentenceId"/> generated AIS messages should get. Meaningful values are <see cref="SentenceId.Vdm"/> or <see cref="SentenceId.Vdo"/>.
         /// Default is "VDO"
         /// </summary>
         public SentenceId GeneratedSentencesId
