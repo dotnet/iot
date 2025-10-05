@@ -107,7 +107,7 @@ namespace Iot.Device.Nmea0183
         /// <param name="ownMmsi">The MMSI of the own ship</param>
         /// <param name="ownShipName">The name of the own ship</param>
         public AisManager(string interfaceName, uint ownMmsi, string ownShipName)
-        : this(interfaceName, false, ownMmsi, ownShipName)
+            : this(interfaceName, false, ownMmsi, ownShipName)
         {
         }
 

@@ -195,7 +195,8 @@ namespace Iot.Device.Arduino
         /// <param name="period">The idle time. Any events within this period will be ignored</param>
         public void SetDebouncingPeriod(int pinNumber, TimeSpan period)
         {
-            int us = (int)period.TotalMicroseconds;
+            ArgumentOutOfRangeException.ThrowIfNegative(period.TotalSeconds, nameof(period));
+            uint us = (uint)period.TotalMicroseconds;
             FirmataCommandSequence sequence = new();
             sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
             sequence.WriteByte(3);

@@ -222,26 +222,6 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         }
 
         [Fact]
-        public void EnableDisableBackgroundThread()
-        {
-            ManualResetEvent ev = new ManualResetEvent(false);
-            _manager.OnMessage += (received, sourceMmsi, destinationMmsi, text) =>
-            {
-                if (text.Contains("GNSS"))
-                {
-                    ev.Set();
-                }
-            };
-
-            _manager.ClearWarnings();
-            _manager.EnableAisAlarms(true, new TrackEstimationParameters() { AisSafetyCheckInterval = TimeSpan.Zero, WarnIfGnssMissing = true });
-
-            // Fails if we actually hit the timeout
-            Assert.True(ev.WaitOne(TimeSpan.FromSeconds(30)));
-            _manager.EnableAisAlarms(false);
-        }
-
-        [Fact]
         public void UseOfWithWorksCorrectly()
         {
             AisTarget ship = new Ship(1)

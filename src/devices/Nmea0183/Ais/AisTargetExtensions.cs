@@ -205,6 +205,38 @@ namespace Iot.Device.Nmea0183.Ais
             return retList;
         }
 
+        private static Length WarningDistanceOf(TrackEstimationParameters parameters, AisTarget target)
+        {
+            if (target is Ship ship)
+            {
+                if (ship.Length < Length.FromMeters(50))
+                {
+                    return parameters.WarningDistanceSmallVessels;
+                }
+
+                return parameters.WarningDistanceLargeVessels;
+            }
+
+            // Beacons and other non-ship targets are usually small.
+            return parameters.WarningDistanceSmallVessels;
+        }
+
+        private static TimeSpan WarningTimeOf(TrackEstimationParameters parameters, AisTarget target)
+        {
+            if (target is Ship ship)
+            {
+                if (ship.Length < Length.FromMeters(50))
+                {
+                    return parameters.WarningTimeSmallVessels;
+                }
+
+                return parameters.WarningTimeLargeVessels;
+            }
+
+            // Beacons and other non-ship targets are usually small.
+            return parameters.WarningTimeSmallVessels;
+        }
+
         /// <summary>
         /// Estimates where a ship will be after some time.
         /// </summary>

@@ -600,7 +600,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$IIDBK,29.2,f,8.90,M,4.9,F*0B")] // Unknown sentence (for now)
         [InlineData("$GPGLL,4729.49680,N,00930.39770,E,115611.000,A,D*54")]
         [InlineData("$GPRTE,1,1,c,Route 008,R1,R2,R3,R4,R5*39")]
-        [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,*64")]
+        [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,A*25")]
         [InlineData("$ENRPM,S,1,3200,100,A*7B")]
         [InlineData("$ECMDA,30.12,I,1.020,B,18.5,C,,C,38.7,,4.2,C,,T,,M,,N,,M*37")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42*73")]
@@ -691,7 +691,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$GPGLL,4729.49680,N,00930.39770,E,115611.000,A,D")]
         [InlineData("$IIXDR,C,18.20,C,ENV_WATER_T,C,28.69,C,ENV_OUTAIR_T,P,101400,P,ENV_ATMOS_P")]
         [InlineData("$GPRMB,A,2.341,L,R3,R4,4728.92180,N,00930.33590,E,0.009,192.9,2.5,V,D")]
-        [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,")]
+        [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,A")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M")]
         [InlineData("$APHTC,V,10.0,L,R,N,12.3,13.4,2.0,1.0,15.1,0.5,16.2,T")]
