@@ -70,6 +70,10 @@ namespace Iot.Device.Nmea0183.Tests
                 result.ShouldBeEmpty();
 
                 dev.Save("Calibration_Cirrus_2025.xml", "Cirrus", "HBY5127", "269110660");
+
+                var expected = new MagneticDeviationCorrection(TestDataHelper.GetResourceStream("Calibration_Cirrus_2025.xml"));
+                Assert.Equal(expected.Identification, dev.Identification);
+                Assert.Equal(expected, dev);
             }
         }
 
