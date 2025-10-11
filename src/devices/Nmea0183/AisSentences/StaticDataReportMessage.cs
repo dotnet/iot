@@ -35,6 +35,12 @@ namespace Iot.Device.Nmea0183.AisSentences
 
         public override AisTransceiverClass TransceiverType => AisTransceiverClass.B;
 
+        public override void Encode(Payload payload)
+        {
+            base.Encode(payload);
+            payload.WriteUInt(PartNumber, 2);
+        }
+
         public static AisMessage Create(Payload payload)
         {
             var message = new StaticDataReportMessage(payload);

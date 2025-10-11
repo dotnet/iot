@@ -33,6 +33,7 @@ namespace Iot.Device.Nmea0183.Ais
         private readonly IDictionary<int, List<string>> _fragments = new Dictionary<int, List<string>>();
         private readonly ILogger _logger;
         private int _nextFragmentedMessageId;
+        private char _generatedReceiverChannel;
 
         public AisParser()
             : this(false)
@@ -52,6 +53,7 @@ namespace Iot.Device.Nmea0183.Ais
             _payloadEncoder = payloadEncoder;
             _nextFragmentedMessageId = 1;
             GeneratedSentencesId = SentenceId.Vdo;
+            _generatedReceiverChannel = 'A';
             _logger = this.GetCurrentClassLogger();
         }
 
@@ -63,6 +65,27 @@ namespace Iot.Device.Nmea0183.Ais
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// The receiver channel we're simulating on outgoing messages.
+        /// For most applications, this doesn't matter, as it will be filled by the transponder firmware.
+        /// </summary>
+        public char GeneratedReceiverChannel
+        {
+            get
+            {
+                return _generatedReceiverChannel;
+            }
+            set
+            {
+                if (value != 'A' && value != 'B')
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "The receiver channel must be specified as 'A' or 'B'");
+                }
+
+                _generatedReceiverChannel = value;
+            }
         }
 
         /// <summary>
@@ -208,7 +231,7 @@ namespace Iot.Device.Nmea0183.Ais
                 parts.Add(numBlocks.ToString(CultureInfo.InvariantCulture));
                 parts.Add(blockNumber.ToString(CultureInfo.InvariantCulture));
                 parts.Add(fragmentId); // may be empty, see above
-                parts.Add("A"); // Doesn't really matter (determined by the transceiver), but must be "A" or "B"
+                parts.Add(_generatedReceiverChannel.ToString());
                 int thisMessageLength = Math.Min(fullData.Length, MaxPayloadLength);
                 string thisMessagePayLoad = fullData.Substring(0, thisMessageLength);
                 fullData = fullData.Remove(0, thisMessageLength);

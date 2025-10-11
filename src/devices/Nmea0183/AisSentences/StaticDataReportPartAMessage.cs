@@ -22,5 +22,11 @@ namespace Iot.Device.Nmea0183.AisSentences
         {
             ShipName = payload.ReadString(40, 120);
         }
+
+        public override void Encode(Payload payload)
+        {
+            base.Encode(payload);
+            payload.WriteString(ShipName, 120, false);
+        }
     }
 }
