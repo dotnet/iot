@@ -39,7 +39,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             get
             {
-                return TalkerId == TalkerId.Ais && (SentenceId == AisParser.VdmId || SentenceId == AisParser.VdoId);
+                return TalkerId == TalkerId.Ais && (SentenceId == SentenceId.Vdm || SentenceId == SentenceId.Vdo);
             }
         }
 

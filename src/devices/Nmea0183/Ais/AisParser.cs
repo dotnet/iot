@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Nmea0183.Ais
 {
@@ -24,14 +26,14 @@ namespace Iot.Device.Nmea0183.Ais
         private const int MaxPayloadLength = 60; // Characters
 
         public bool ThrowOnUnknownMessage { get; }
-        public static SentenceId VdoId = new SentenceId("VDO");
-        public static SentenceId VdmId = new SentenceId("VDM");
 
         private readonly PayloadDecoder _payloadDecoder;
         private readonly AisMessageFactory _messageFactory;
         private readonly PayloadEncoder _payloadEncoder;
         private readonly IDictionary<int, List<string>> _fragments = new Dictionary<int, List<string>>();
+        private readonly ILogger _logger;
         private int _nextFragmentedMessageId;
+        private char _generatedReceiverChannel;
 
         public AisParser()
             : this(false)
@@ -50,17 +52,40 @@ namespace Iot.Device.Nmea0183.Ais
             _messageFactory = messageFactory;
             _payloadEncoder = payloadEncoder;
             _nextFragmentedMessageId = 1;
-            GeneratedSentencesId = VdoId;
+            GeneratedSentencesId = SentenceId.Vdo;
+            _generatedReceiverChannel = 'A';
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
-        /// Which <see cref="SentenceId"/> generated AIS messages should get. Meaningful values are <see cref="VdmId"/> or <see cref="VdoId"/>.
+        /// Which <see cref="SentenceId"/> generated AIS messages should get. Meaningful values are <see cref="SentenceId.Vdm"/> or <see cref="SentenceId.Vdo"/>.
         /// Default is "VDO"
         /// </summary>
         public SentenceId GeneratedSentencesId
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// The receiver channel we're simulating on outgoing messages.
+        /// For most applications, this doesn't matter, as it will be filled by the transponder firmware.
+        /// </summary>
+        public char GeneratedReceiverChannel
+        {
+            get
+            {
+                return _generatedReceiverChannel;
+            }
+            set
+            {
+                if (value != 'A' && value != 'B')
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "The receiver channel must be specified as 'A' or 'B'");
+                }
+
+                _generatedReceiverChannel = value;
+            }
         }
 
         /// <summary>
@@ -123,7 +148,20 @@ namespace Iot.Device.Nmea0183.Ais
 
             var payload = DecodePayload(encodedPayload, Convert.ToInt32(sentenceParts[1]), Convert.ToInt32(sentenceParts[2]),
                 messageNumber, Convert.ToInt32(sentenceParts[6]));
-            return payload == null ? null : _messageFactory.Create(payload, ThrowOnUnknownMessage);
+
+            if (payload == null)
+            {
+                _logger.LogWarning($"Unable to decode AIS message {sentence}");
+                return null;
+            }
+
+            var createdMessage = _messageFactory.Create(payload, ThrowOnUnknownMessage);
+            if (createdMessage == null)
+            {
+                _logger.LogWarning($"Message {sentence} could technically be parsed, but the message type {payload.MessageType} is unknown");
+            }
+
+            return createdMessage;
         }
 
         public AisMessage? Parse(NmeaSentence sentence)
@@ -193,7 +231,7 @@ namespace Iot.Device.Nmea0183.Ais
                 parts.Add(numBlocks.ToString(CultureInfo.InvariantCulture));
                 parts.Add(blockNumber.ToString(CultureInfo.InvariantCulture));
                 parts.Add(fragmentId); // may be empty, see above
-                parts.Add("A"); // Doesn't really matter (determined by the transceiver), but must be "A" or "B"
+                parts.Add(_generatedReceiverChannel.ToString());
                 int thisMessageLength = Math.Min(fullData.Length, MaxPayloadLength);
                 string thisMessagePayLoad = fullData.Substring(0, thisMessageLength);
                 fullData = fullData.Remove(0, thisMessageLength);

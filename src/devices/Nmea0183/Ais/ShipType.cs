@@ -101,7 +101,7 @@ namespace Iot.Device.Nmea0183.Ais
         MilitaryOps = 35,
 
         /// <summary>
-        /// This is a sailing vessel. Used for both sailing yachts as well as large sailboats. Vessels equipped with a class A transceiver should use
+        /// This is a sailing vessel. Used for both sailing yachts and large sailboats. Vessels equipped with a class A transceiver should use
         /// <see cref="NavigationStatus.UnderWaySailing"/> when they're actually underway using their sails. Some sailing yachts also use <see cref="PleasureCraft"/>
         /// as ship type instead.
         /// </summary>
@@ -194,7 +194,8 @@ namespace Iot.Device.Nmea0183.Ais
         PortTender = 53,
 
         /// <summary>
-        /// An anti-pollution vessel. Used to collect garbage from the sea or to collect spilled oil.
+        /// An anti-pollution vessel. Used to collect garbage from the sea or to collect spilled oil. Also seen on government vessels
+        /// supervising MARPOL compliance.
         /// </summary>
         AntiPollutionEquipment = 54,
 

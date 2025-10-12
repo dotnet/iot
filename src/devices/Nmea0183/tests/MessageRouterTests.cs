@@ -56,7 +56,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void AddSimpleOutgoingFilter()
         {
             // This rule sends all messages from the local client to all (other) sinks
-            FilterRule f = new FilterRule(MessageRouter.LocalMessageSource, TalkerId.Any, SentenceId.Any, new[] { "1", "2" }, false);
+            FilterRule f = new FilterRule(MessageRouter.LocalMessageSource, TalkerId.Any, SentenceId.Any, new[] { "1", "2" }, false, false);
             _router.AddFilterRule(f);
 
             var sentence = TypedTestSentence();
@@ -71,7 +71,7 @@ namespace Iot.Device.Nmea0183.Tests
         {
             // Configuring false for the last parameter here on the local outgoing rule is probably not useful, because
             // the local sender will typically provide typed messages.
-            FilterRule f = new FilterRule(MessageRouter.LocalMessageSource, TalkerId.Any, SentenceId.Any, new[] { "1", "2" }, true);
+            FilterRule f = new FilterRule(MessageRouter.LocalMessageSource, TalkerId.Any, SentenceId.Any, new[] { "1", "2" }, true, false);
             _router.AddFilterRule(f);
             _router.SendSentence(_router, TypedTestSentence());
         }
@@ -81,8 +81,8 @@ namespace Iot.Device.Nmea0183.Tests
         {
             // These two rules define that messages with a YDGGA header (Navigation data from the NMEA2000 Gateway) shall be
             // discarded and GPGGA messages used instead. These (in my test case) contain elevation as well.
-            FilterRule f1 = new FilterRule("*", new TalkerId('Y', 'D'), new SentenceId("GGA"), new List<string>(), false);
-            FilterRule f2 = new FilterRule("*", new TalkerId('G', 'P'), new SentenceId("GGA"), new[] { "1", "2" }, false);
+            FilterRule f1 = new FilterRule("*", new TalkerId('Y', 'D'), new SentenceId("GGA"), new List<string>(), false, false);
+            FilterRule f2 = new FilterRule("*", new TalkerId('G', 'P'), new SentenceId("GGA"), new[] { "1", "2" }, false, false);
 
             _router.AddFilterRule(f1);
             _router.AddFilterRule(f2);
@@ -106,7 +106,7 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void DecodableMessageIsOnlyForwardedOnce()
         {
-            FilterRule f1 = new FilterRule("*", new TalkerId('G', 'P'), new SentenceId("GGA"), new[] { "1" }, true);
+            FilterRule f1 = new FilterRule("*", new TalkerId('G', 'P'), new SentenceId("GGA"), new[] { "1" }, true, false);
 
             _router.AddFilterRule(f1);
 
@@ -126,7 +126,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("1")]
         public void MessageLoopingDoesNotCauseStackOverflow(string target)
         {
-            FilterRule f1 = new FilterRule("*", new TalkerId('G', 'P'), new SentenceId("GGA"), new[] { target }, true);
+            FilterRule f1 = new FilterRule("*", new TalkerId('G', 'P'), new SentenceId("GGA"), new[] { target }, true, false);
 
             _router.AddFilterRule(f1);
 

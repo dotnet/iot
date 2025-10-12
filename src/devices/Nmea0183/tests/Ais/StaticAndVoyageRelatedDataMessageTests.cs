@@ -210,10 +210,11 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         [Fact]
         public void Should_parse_message_libais_32()
         {
-            const string sentence1 = "!AIVDM,2,1,1,A,55>u@H02;lGc<Ha;L0084i<7GR22222222222216:PE885AU0A4l13H13kBC,0*3D";
-            const string sentence2 = "!AIVDM,2,2,1,A,R@hC`4QD;`0,2*06";
+            const string sentence1a = "!AIVDM,2,1,1,A,55>u@H02;lGc<Ha;L0084i<7GR22222222222216:PE885AU0A4l13H13kBC,0*3D";
+            const string sentence1b = "!AIVDM,2,1,1,A,55>u@H02;lGc<Ha;L0084i<7GP00000000000016:PE885AU0A4l13H13kBC,0*3F";
+            const string sentence2 = "!AIVDM,2,2,1,A,R@hC`4QD;P0,2*36";
 
-            Parser.Parse(sentence1).ShouldBeNull();
+            Parser.Parse(sentence1a).ShouldBeNull();
             var message = Parser.Parse(sentence2) as StaticAndVoyageRelatedDataMessage;
 
             message.ShouldNotBeNull();
@@ -238,6 +239,15 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             message.Destination.ShouldBe("SPDM DOMINICAN REP.");
             message.DataTerminalReady.ShouldBeTrue();
             message.Spare.ShouldBe(0u);
+
+            // This message is equivalent to sentence1a (it seems to be undefined whether the ship name is to be filled with 0's or blanks)
+            Parser.Parse(sentence1b).ShouldBeNull();
+            var message2 = Parser.Parse(sentence2) as StaticAndVoyageRelatedDataMessage;
+
+            Parser.GeneratedSentencesId = SentenceId.Vdm; // To regenerate the exact same message
+            var msg = Parser.ToSentences(message2!);
+            msg[0].ToNmeaMessage().ShouldBe(sentence1b);
+            msg[1].ToNmeaMessage().ShouldBe(sentence2);
         }
 
         [Fact]

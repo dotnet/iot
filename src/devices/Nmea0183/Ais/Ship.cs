@@ -25,12 +25,13 @@ namespace Iot.Device.Nmea0183.Ais
         }
 
         /// <summary>
-        /// The call sign. A sequence of up to 7 letters or numbers, without blanks. Empty if unknown
+        /// The call sign. A sequence of up to 7 letters or numbers, without blanks. This can technically be empty, but all vessels with an AIS transceiver should
+        /// have a callsign.
         /// </summary>
         public string CallSign { get; set; }
 
         /// <summary>
-        /// The ship type
+        /// The ship type.
         /// </summary>
         public ShipType ShipType { get; set; }
 
@@ -72,27 +73,33 @@ namespace Iot.Device.Nmea0183.Ais
         public Length Beam => DimensionToPort + DimensionToStarboard;
 
         /// <summary>
-        /// Estimated time of arrival at the destination. Ships without a designated destinations or with recurring destinations often use a dummy value, such as January 1st, midnight
+        /// Estimated time of arrival at the destination. Ships without a designated destinations or with
+        /// recurring destinations often use a dummy value, such as January 1st, midnight.
+        /// Only available for class A transceivers.
         /// </summary>
         public DateTimeOffset? EstimatedTimeOfArrival { get; set; }
 
         /// <summary>
         /// A text for the destination, often abbreviated.
+        /// Only available for class A transceivers.
         /// </summary>
         public string Destination { get; set; }
 
         /// <summary>
         /// The current draught of the vessel. For large cargo vessels, this may be very variable.
+        /// Only available for class A transceivers.
         /// </summary>
         public Length? Draught { get; set; }
 
         /// <summary>
-        /// The IMO number of the ship
+        /// The IMO number of the ship.
+        /// Only available for class A transceivers.
         /// </summary>
         public uint ImoNumber { get; set; }
 
         /// <summary>
-        /// Navigation status, see there
+        /// Navigation status, see there.
+        /// Only available for class A transceivers.
         /// </summary>
         public NavigationStatus NavigationStatus { get; set; }
 

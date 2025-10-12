@@ -23,7 +23,7 @@ namespace Iot.Device.Nmea0183.Sentences
         private static bool Matches(TalkerSentence sentence) => Matches(sentence.Id);
 
         /// <summary>
-        /// Constructs a new MWV sentence
+        /// Constructs a new VHW sentence
         /// </summary>
         public WaterSpeedAndAngle(Angle? headingTrue, Angle? headingMagnetic, Speed speed)
             : base(OwnTalkerId, Id, DateTimeOffset.UtcNow)
@@ -122,11 +122,11 @@ namespace Iot.Device.Nmea0183.Sentences
             if (Valid)
             {
                 // It seems that angles should always be written 0..360.
-                string normalizedT = HeadingTrue.HasValue ? HeadingTrue.Value.Normalize(true).ToString("F1", CultureInfo.InvariantCulture) : string.Empty;
-                string normalizedM = HeadingMagnetic.HasValue ? HeadingMagnetic.Value.Normalize(true).ToString("F1", CultureInfo.InvariantCulture) : string.Empty;
+                string normalizedT = HeadingTrue.HasValue ? HeadingTrue.Value.Normalize(true).Degrees.ToString("F1", CultureInfo.InvariantCulture) : string.Empty;
+                string normalizedM = HeadingMagnetic.HasValue ? HeadingMagnetic.Value.Normalize(true).Degrees.ToString("F1", CultureInfo.InvariantCulture) : string.Empty;
 
-                // This ends with a comma. What extra parameter is expected there is unclear
-                return FormattableString.Invariant($"{normalizedT},T,{normalizedM},M,{Speed.Knots:F1},N,{Speed.KilometersPerHour:F1},K,");
+                // The extra "A" at the end means "valid", but it's optional
+                return FormattableString.Invariant($"{normalizedT},T,{normalizedM},M,{Speed.Knots:F1},N,{Speed.KilometersPerHour:F1},K,A");
             }
 
             return string.Empty;
