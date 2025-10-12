@@ -320,18 +320,10 @@ public abstract class GpioControllerTestBase
     [Fact]
     public void AddCallbackRemoveAllCallbackTest()
     {
-        using GpioDriver testDriver = GetTestDriver();
-        // Skipping the test for now when using the SysFsDriver or the RaspberryPi3Driver given that this test is flaky for those drivers.
-        // Issue tracking this problem is https://github.com/dotnet/iot/issues/629
-        if (testDriver is SysFsDriver || testDriver is RaspberryPi3Driver)
-        {
-            return;
-        }
-
         RetryHelper.Execute(() =>
         {
             int risingEventOccurredCount = 0, fallingEventOccurredCount = 0;
-            using (GpioController controller = new GpioController(testDriver))
+            using (GpioController controller = new GpioController(GetTestDriver()))
             {
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
