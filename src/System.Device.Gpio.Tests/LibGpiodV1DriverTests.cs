@@ -19,10 +19,11 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     public LibGpiodV1DriverTests(ITestOutputHelper testOutputHelper)
         : base(testOutputHelper)
     {
-        while (!Debugger.IsAttached)
+        int i = 100;
+        while (!Debugger.IsAttached && i-- > 0)
         {
             Thread.Sleep(1000);
-            testOutputHelper.WriteLine("Waiting for debugger...");
+            testOutputHelper.WriteLine($"Process {Process.GetCurrentProcess().Id} is waiting for debugger...");
         }
     }
 
