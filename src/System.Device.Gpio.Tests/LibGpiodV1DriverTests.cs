@@ -19,6 +19,11 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     public LibGpiodV1DriverTests(ITestOutputHelper testOutputHelper)
         : base(testOutputHelper)
     {
+        while (!Debugger.IsAttached)
+        {
+            Thread.Sleep(1000);
+            testOutputHelper.WriteLine("Waiting for debugger...");
+        }
     }
 
     protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0);
