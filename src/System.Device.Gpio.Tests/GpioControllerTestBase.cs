@@ -454,6 +454,7 @@ public abstract class GpioControllerTestBase
         using (GpioController controller = new GpioController(GetTestDriver()))
         {
             CancellationTokenSource tokenSource = new CancellationTokenSource();
+            tokenSource.CancelAfter(TimeSpan.FromSeconds(20));
             controller.OpenPin(InputPin, PinMode.Input);
             controller.OpenPin(OutputPin, PinMode.Output);
             controller.Write(OutputPin, PinValue.Low);
@@ -479,6 +480,7 @@ public abstract class GpioControllerTestBase
             using (GpioController controller = new GpioController(GetTestDriver()))
             {
                 CancellationTokenSource tokenSource = new CancellationTokenSource();
+                tokenSource.CancelAfter(TimeSpan.FromSeconds(30));
                 controller.OpenPin(InputPin, PinMode.Input);
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.Write(OutputPin, PinValue.Low);
