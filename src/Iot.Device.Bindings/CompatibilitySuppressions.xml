@@ -3,6 +3,41 @@
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Tca955x.Tca955x.DefaultI2cAdress</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Tca955x.Tca9554.#ctor(System.Device.I2c.I2cDevice,System.Int32,System.Device.Gpio.GpioController,System.Boolean)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Tca955x.Tca9555.#ctor(System.Device.I2c.I2cDevice,System.Int32,System.Device.Gpio.GpioController,System.Boolean)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Tca955x.Tca955x.#ctor(System.Device.I2c.I2cDevice,System.Int32,System.Device.Gpio.GpioController,System.Boolean)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Tca955x.Tca955x.ReadInterrupt</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Usb.BatteryObject.get_MaximalVoltage</Target>
     <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
@@ -39,6 +74,27 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Usb.VariableSupplyObject.get_MinimalVoltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0011</DiagnosticId>
+    <Target>F:Iot.Device.Tca955x.Tca9555Register.ConfigurationPort1</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0019</DiagnosticId>
+    <Target>M:Iot.Device.Pcx857x.Pcx857x.Read(System.Span{System.Device.Gpio.PinValuePair})</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0019</DiagnosticId>
+    <Target>M:Iot.Device.Pcx857x.Pcx857x.Write(System.ReadOnlySpan{System.Device.Gpio.PinValuePair})</Target>
     <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
