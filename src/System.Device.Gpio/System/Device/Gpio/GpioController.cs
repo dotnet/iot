@@ -37,58 +37,21 @@ public class GpioController : IDisposable
     /// Initializes a new instance of the <see cref="GpioController"/> class that will use the logical pin numbering scheme as default.
     /// </summary>
     public GpioController()
-#pragma warning disable CS0612 // PinNumberingScheme is obsolete
-        : this(PinNumberingScheme.Logical)
-#pragma warning restore CS0612
+        : this(GetBestDriverForBoard())
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme and driver.
+    /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified driver.
     /// </summary>
     /// <param name="driver">The driver that manages all of the pin operations for the controller.</param>
     public GpioController(GpioDriver driver)
     {
         _driver = driver;
 
-#pragma warning disable CS0612 // PinNumberingScheme is obsolete
-        NumberingScheme = PinNumberingScheme.Logical;
-#pragma warning restore CS0612
-
         _openPins = new ConcurrentDictionary<int, PinValue?>();
         _gpioPins = new ConcurrentDictionary<int, GpioPin>();
     }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme and driver.
-    /// </summary>
-    /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-    /// <param name="driver">The driver that manages all of the pin operations for the controller.</param>
-    [Obsolete]
-    public GpioController(PinNumberingScheme numberingScheme, GpioDriver driver)
-    {
-        _driver = driver;
-        NumberingScheme = numberingScheme;
-        _openPins = new ConcurrentDictionary<int, PinValue?>();
-        _gpioPins = new ConcurrentDictionary<int, GpioPin>();
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme.
-    /// The controller will default to use the driver that best applies given the platform the program is executing on.
-    /// </summary>
-    /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-    [Obsolete]
-    public GpioController(PinNumberingScheme numberingScheme)
-        : this(numberingScheme, GetBestDriverForBoard())
-    {
-    }
-
-    /// <summary>
-    /// The numbering scheme used to represent pins provided by the controller.
-    /// </summary>
-    [Obsolete]
-    public PinNumberingScheme NumberingScheme { get; }
 
     /// <summary>
     /// The number of pins provided by the controller.
@@ -120,9 +83,7 @@ public class GpioController : IDisposable
     /// <returns>The logical pin number in the controller's numbering scheme.</returns>
     protected virtual int GetLogicalPinNumber(int pinNumber)
     {
-#pragma warning disable CS0612 // PinNumberingScheme is obsolete
-        return (NumberingScheme == PinNumberingScheme.Logical) ? pinNumber : _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
-#pragma warning restore CS0612
+        return pinNumber;
     }
 
     /// <summary>
