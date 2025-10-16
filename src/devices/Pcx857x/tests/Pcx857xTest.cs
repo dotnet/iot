@@ -163,7 +163,7 @@ namespace Iot.Device.Pcx857x.Tests
 
             protected override void Toggle(int pinNumber) => Write(pinNumber, !Read(pinNumber));
 
-            public void Read(Span<PinValuePair> pinValues)
+            protected override void Read(Span<PinValuePair> pinValues)
             {
                 for (int i = 0; i < pinValues.Length; i++)
                 {
@@ -182,7 +182,7 @@ namespace Iot.Device.Pcx857x.Tests
                 _pinValues[pinNumber] = value;
             }
 
-            public void Write(ReadOnlySpan<PinValuePair> pinValues)
+            protected override void Write(ReadOnlySpan<PinValuePair> pinValues)
             {
                 foreach ((int pin, PinValue value) in pinValues)
                 {
