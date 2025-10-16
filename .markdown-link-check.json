@@ -3,6 +3,7 @@
         { "pattern": "^http[s]?://(?!(github.com|([a-zA-Z]*).microsoft.com|aka.ms|dotnetfoundation.org|www.nuget.org))" },
         { "pattern": "../.vscode/launch.json" },
         { "pattern": "../.vscode/tasks.json" },
-        { "pattern": "http://url/image" }
+        { "pattern": "http://url/image" },
+        { "pattern": "../../azure-pipelines-pr.yml" }
     ] 
 }
