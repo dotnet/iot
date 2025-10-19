@@ -434,7 +434,7 @@ namespace Iot.Device.Nmea0183
         /// <param name="sentence">The new sentence</param>
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
-            _cache?.Add(sentence);
+            _cache?.Add(source, sentence);
 
             DoCleanup(sentence.DateTime);
 
