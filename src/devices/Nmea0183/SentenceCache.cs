@@ -18,6 +18,7 @@ namespace Iot.Device.Nmea0183
     /// Caches the last sentence(s) of each type for later retrieval.
     /// This is a helper class for <see cref="AutopilotController"/> and <see cref="PositionProvider"/>. Use <see cref="PositionProvider"/> to query the position from
     /// the most appropriate messages.
+    /// It internally keeps two kinds of lists: The last sentence of each type and the last sentence of each type _by source_.
     /// </summary>
     public sealed class SentenceCache : IDisposable
     {
@@ -319,15 +320,6 @@ namespace Iot.Device.Nmea0183
         {
             _source.OnNewSequence -= OnNewSequence;
             _sentences.Clear();
-        }
-
-        /// <summary>
-        /// Adds the given sentence to the cache - if manual filling is preferred
-        /// </summary>
-        /// <param name="sentence">Sentence to add</param>
-        public void Add(NmeaSentence sentence)
-        {
-            OnNewSequence(null, sentence);
         }
 
         /// <summary>
