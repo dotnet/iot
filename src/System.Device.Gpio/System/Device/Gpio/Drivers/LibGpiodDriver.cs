@@ -9,7 +9,7 @@ using System.Device.Gpio.Libgpiod.V1;
 using System.Diagnostics;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
-
+using System.Globalization;
 using LibgpiodV1 = Interop.LibgpiodV1;
 
 namespace System.Device.Gpio.Drivers;
@@ -114,7 +114,6 @@ public class LibGpiodDriver : UnixDriver
     {
         List<GpioChipInfo> result = new List<GpioChipInfo>();
         var iterator = new SafeChipIteratorHandle(LibgpiodV1.gpiod_chip_iter_new());
-        int index = 0;
         while (true)
         {
             SafeChipHandle chip = new SafeChipHandle(LibgpiodV1.gpiod_chip_iter_next_noclose(iterator));
@@ -129,8 +128,26 @@ public class LibGpiodDriver : UnixDriver
             if (!result.Any(x => x.Label == label && x.NumLines == numLines))
             {
                 // The iterator may find duplicates, but we skip them here
-                result.Add(new GpioChipInfo(index, name, label, numLines));
-                index++;
+                // Need to find the number at the end of the name (e.g. 15 in gpiochip15)
+                int id = 0;
+                int numberOfDigitsAtEnd = 0;
+                for (var i = name.Length - 1; i >= 0; i--)
+                {
+                    if (!char.IsDigit(name[i]))
+                    {
+                        break;
+                    }
+
+                    numberOfDigitsAtEnd++;
+                }
+
+                string theNumber = name[^numberOfDigitsAtEnd..];
+                if (!Int32.TryParse(theNumber, CultureInfo.InvariantCulture, out id))
+                {
+                    id = 0;
+                }
+
+                result.Add(new GpioChipInfo(id, name, label, numLines));
             }
 
             chip.Dispose();
