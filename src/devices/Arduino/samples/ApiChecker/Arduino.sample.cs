@@ -110,6 +110,7 @@ namespace Arduino.Samples
         private static void ConnectWithStream(Stream stream)
         {
             ArduinoBoard board = new ArduinoBoard(stream);
+            stream.ReadTimeout = 60000;
             try
             {
                 Console.WriteLine(

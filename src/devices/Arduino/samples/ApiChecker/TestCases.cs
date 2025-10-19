@@ -493,6 +493,22 @@ namespace Iot.Device.Arduino.Sample
 
         private void TestAnalogIn()
         {
+            _board.SetAnalogPinSamplingInterval(TimeSpan.FromMilliseconds(20));
+            TimeSpan diditwork = TimeSpan.Zero;
+            try
+            {
+                diditwork = _board.QueryAnalogPinSamplingInterval();
+            }
+            catch (IOException)
+            {
+                diditwork = TimeSpan.Zero;
+            }
+
+            if (diditwork != TimeSpan.FromMilliseconds(20))
+            {
+                Console.WriteLine("We are not able to query the sampling interval. Ensure the board runs ConfigurableFirmata 3.4 or newer");
+            }
+
             // Use Pin 6
             int gpio = _ledPin;
             int analogPin = GetAnalogPin(_board, _analogInputChannel);
@@ -503,7 +519,7 @@ namespace Iot.Device.Arduino.Sample
             gpioController.OpenPin(gpio);
             gpioController.SetPinMode(gpio, PinMode.Output);
 
-            Console.WriteLine("Blinking GPIO6, based on analog input.");
+            Console.WriteLine($"Blinking GPIO{analogPin}, based on analog input on A{_analogInputChannel}.");
             while (!Console.KeyAvailable)
             {
                 ElectricPotential voltage = pin.ReadVoltage();

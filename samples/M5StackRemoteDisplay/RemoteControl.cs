@@ -107,7 +107,7 @@ namespace Iot.Device.Ili934x.Samples
             _messageRouter.AddFilterRule(new FilterRule(_messageRouter.InterfaceName, TalkerId.ElectronicChartDisplayAndInformationSystem, SentenceId.Any, 
                 new List<string>(), (source, destination, before) =>
                 {
-                    _cache.Add(before);
+                    _cache.Add(source, before);
                     return null;
                 }, true, false));
 
