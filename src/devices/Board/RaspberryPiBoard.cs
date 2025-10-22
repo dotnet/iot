@@ -13,6 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Iot.Device.Gpio;
 using UnitsNet;
 
 namespace Iot.Device.Board
@@ -924,6 +925,12 @@ namespace Iot.Device.Board
 
             ret.Properties["PinCount"] = PinCount.ToString(CultureInfo.InvariantCulture);
             return ret;
+        }
+
+        public static VirtualGpioController CreatePhysicalPinMapping(GpioController defaultController)
+        {
+            var map = 1;
+            var pinMapping = new VirtualGpioController();
         }
     }
 }
