@@ -19,6 +19,7 @@ using Iot.Device.Multiplexing;
 // UsingGroveRgbDisplay();
 // UsingHd44780OverI2C();
 // UsingHd44780OverI2CAndArduino();
+// UsingAip31068Lcd();
 UsingShiftRegister();
 
 void UsingGpioPins()
@@ -85,6 +86,11 @@ void UsingHd44780OverI2CAndArduino()
     LargeValueSample.LargeValueDemo(hd44780);
     LcdConsoleSamples.WriteTest(hd44780);
     ExtendedSample.Test(hd44780);
+}
+
+void UsingAip31068Lcd()
+{
+    Aip31068Sample.Run();
 }
 
 void UsingShiftRegister()

@@ -44,6 +44,18 @@ using LcdRgb lcd = new LcdRgb(new Size(16, 2), i2cLcdDevice, i2cRgbDevice);
 }
 ```
 
+AIP31068 based LCDs expose the same HD44780 compatible instruction set but require an extended
+initialization sequence. The <code>Aip31068Lcd</code> binding performs the necessary configuration and allows
+adjusting the display contrast:
+
+```csharp
+var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: 0x3E));
+using Aip31068Lcd lcd = new(i2cDevice);
+lcd.Clear();
+lcd.Write("Hello from AIP31068!");
+lcd.Contrast = 36; // optional: tune the contrast (0-63)
+```
+
 PCF8574T/PCF8574AT Sample
 The I2C backpack based on the PCF8574T/AT IC uses specific pin mapping, to consume this device binding on this backpack use like so
 
