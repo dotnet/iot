@@ -20,9 +20,15 @@ namespace Iot.Device.Gpio
     public class VirtualGpioControllerWithDefault : VirtualGpioController
     {
         private readonly GpioController _defaultController;
-        private readonly Dictionary<int, int> _fromVirtualToRealMapping;
+        private readonly Func<int, int> _fromVirtualToRealMapping;
 
-        public VirtualGpioControllerWithDefault(GpioController defaultController, Dictionary<int, int> fromVirtualToRealMapping)
+        /// <summary>
+        /// Create a controller that by default uses the given controller to open a pin, using the given mapping.
+        /// Note that you can still use <see cref="VirtualGpioController.Add(int, GpioPin)"/> to manually add pins from another controller.
+        /// </summary>
+        /// <param name="defaultController">The default controller</param>
+        /// <param name="fromVirtualToRealMapping">A mapping function from virtual to logical. This should return -1 for unknown pins.</param>
+        public VirtualGpioControllerWithDefault(GpioController defaultController, Func<int, int> fromVirtualToRealMapping)
         {
             _defaultController = defaultController ?? throw new ArgumentNullException(nameof(defaultController));
             _fromVirtualToRealMapping = fromVirtualToRealMapping ?? throw new ArgumentNullException(nameof(fromVirtualToRealMapping));
@@ -50,12 +56,7 @@ namespace Iot.Device.Gpio
 
         public int MapToRealPin(int virtualPin)
         {
-            if (_fromVirtualToRealMapping.TryGetValue(virtualPin, out int realPin))
-            {
-                return realPin;
-            }
-
-            return -1;
+            return _fromVirtualToRealMapping(virtualPin);
         }
     }
 }
