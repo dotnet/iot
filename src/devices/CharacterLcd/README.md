@@ -45,7 +45,7 @@ using LcdRgb lcd = new LcdRgb(new Size(16, 2), i2cLcdDevice, i2cRgbDevice);
 ```
 
 AIP31068 based LCDs expose the same HD44780 compatible instruction set but require an extended
-initialization sequence. The <code>Aip31068Lcd</code> binding performs the necessary configuration and allows
+initialization sequence. The `Aip31068Lcd` binding performs the necessary configuration and allows
 adjusting the display contrast:
 
 ```csharp
