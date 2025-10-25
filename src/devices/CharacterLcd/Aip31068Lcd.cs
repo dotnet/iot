@@ -121,6 +121,19 @@ namespace Iot.Device.CharacterLcd
             }
         }
 
+        /// <summary>
+        /// Performs the extended-instruction initialization sequence required by AIP31068L-compatible controllers.
+        /// </summary>
+        /// <remarks>
+        /// Sequence (extended mode): enter extended instruction set; program bias/oscillator; set contrast low nibble
+        /// (0x70 | C[3:0]) and high bits with Ion/Bon (0x50 | Ion | Bon | C[5:4]); enable follower (Fon, Rab[2:0]);
+        /// wait for VLCD to stabilize; return to basic instruction set.
+        /// References (AIP31068L Product Specification):
+        /// - Table 3. Instruction Table (p.18/28)
+        /// - Section 4.5 "INITIALIZING BY INSTRUCTION" (p.20/28)
+        /// - Section 5.2 "BIAS VOLTAGE DIVIDE CIRCUIT" (p.23/28)
+        /// Datasheet: https://www.orientdisplay.com/wp-content/uploads/2022/08/AIP31068L.pdf
+        /// </remarks>
         private void InitializeController()
         {
             EnterExtendedInstructionSet();
@@ -143,6 +156,15 @@ namespace Iot.Device.CharacterLcd
             ExitExtendedInstructionSet();
         }
 
+        /// <summary>
+        /// Writes the electronic volume (contrast) low and high bits while in the extended instruction set.
+        /// </summary>
+        /// <remarks>
+        /// Issues 0x70 | C[3:0] (low nibble) then 0x50 | Ion | Bon | C[5:4] (high bits and power/icon controls).
+        /// References (AIP31068L Product Specification): Table 3. Instruction Table (p.18/28) and
+        /// Section 4.5 "INITIALIZING BY INSTRUCTION" (p.20/28).
+        /// Datasheet: https://www.orientdisplay.com/wp-content/uploads/2022/08/AIP31068L.pdf
+        /// </remarks>
         private void SendContrastCommands()
         {
             SendCommandAndWait((byte)(ContrastSetCommand | (_contrast & 0x0F)));
