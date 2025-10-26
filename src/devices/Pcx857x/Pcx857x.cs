@@ -274,9 +274,6 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode) => (mode == PinMode.Output || mode == PinMode.Input);
 
-        /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
-
         // For now eventing APIs are not supported.
 
         /// <inheritdoc/>

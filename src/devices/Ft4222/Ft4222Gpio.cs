@@ -116,9 +116,6 @@ namespace Iot.Device.Ft4222
         }
 
         /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
-
-        /// <inheritdoc/>
         protected override PinMode GetPinMode(int pinNumber) => _gpioDirections[pinNumber] == GpioPinMode.Input ? PinMode.Input : PinMode.Output;
 
         /// <inheritdoc/>
