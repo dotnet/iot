@@ -219,10 +219,6 @@ public class LibGpiodDriver : UnixDriver
     }
 
     /// <inheritdoc/>
-    protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) =>
-        throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.ConvertPinNumberingSchemaError);
-
-    /// <inheritdoc/>
     protected internal override PinMode GetPinMode(int pinNumber)
     {
         lock (_pinNumberLock)

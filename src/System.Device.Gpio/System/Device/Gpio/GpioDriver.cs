@@ -31,7 +31,11 @@ public abstract class GpioDriver : IDisposable
     /// </summary>
     /// <param name="pinNumber">The board pin number to convert.</param>
     /// <returns>The pin number in the driver's logical numbering scheme.</returns>
-    protected internal abstract int ConvertPinNumberToLogicalNumberingScheme(int pinNumber);
+    [Obsolete("Pin mapping should be implemented using VirtualGpioDriver.")]
+    protected internal virtual int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
+    {
+        return pinNumber;
+    }
 
     /// <summary>
     /// Opens a pin in order for it to be ready to use.

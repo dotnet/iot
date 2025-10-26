@@ -29,6 +29,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">The board pin number to convert.</param>
         /// <returns>The pin number in the driver's logical numbering scheme.</returns>
+        [Obsolete("Clean up. (PinCount matches neither the left nor the right side of this assignment) and then remove.")]
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             return pinNumber switch

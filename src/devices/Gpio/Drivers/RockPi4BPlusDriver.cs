@@ -17,6 +17,7 @@ namespace Iot.Device.Gpio.Drivers
         protected override int PinCount => 40;
 
         /// <inheritdoc/>
+        [Obsolete("Clean up. (PinCount matches neither the left nor the right side of this assignment) and then remove.")]
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             return pinNumber switch
