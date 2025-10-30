@@ -60,8 +60,9 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                 WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle.Handle, ref timeout);
                 if (waitResult == WaitEventResult.Error)
                 {
-                    // Can't use ExceptionHelper.GetLastErrorMessage() here because we need to check 
-                    // for EINTR before throwing
+                    // Can't use ExceptionHelper.GetLastErrorMessage() here because we need the error code 
+                    // for the EINTR check. GetLastErrorMessage() would call GetLastWin32Error() internally, 
+                    // and we can't call GetLastWin32Error() twice as subsequent calls might return different values.
                     var errorCode = Marshal.GetLastWin32Error();
                     if (errorCode == ERROR_CODE_EINTR)
                     {
