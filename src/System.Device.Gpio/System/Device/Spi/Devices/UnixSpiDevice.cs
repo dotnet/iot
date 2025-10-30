@@ -64,10 +64,7 @@ internal class UnixSpiDevice : SpiDevice
             _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
             if (_deviceFileDescriptor < 0)
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-                throw new IOException($"Error {error}. Can not open SPI device file '{deviceFileName}'.");
+                throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()}. Can not open SPI device file '{deviceFileName}'.");
             }
 
             UnixSpiMode mode = SpiSettingsToUnixSpiMode();
@@ -91,10 +88,7 @@ internal class UnixSpiDevice : SpiDevice
                 result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
                 if (result == -1)
                 {
-                    int errorCode = Marshal.GetLastWin32Error();
-                    string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-                    string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-                    throw new IOException($"Error {error}. Can not set SPI mode to {_settings.Mode}.");
+                    throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()}. Can not set SPI mode to {_settings.Mode}.");
                 }
 
                 _isInverted = true;
@@ -106,10 +100,7 @@ internal class UnixSpiDevice : SpiDevice
             result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_BITS_PER_WORD, nativePtr);
             if (result == -1)
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-                throw new IOException($"Error {error}. Can not set SPI data bit length to {_settings.DataBitLength}.");
+                throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()}. Can not set SPI data bit length to {_settings.DataBitLength}.");
             }
 
             int clockFrequency = _settings.ClockFrequency;
@@ -118,10 +109,7 @@ internal class UnixSpiDevice : SpiDevice
             result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MAX_SPEED_HZ, nativePtr);
             if (result == -1)
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-                throw new IOException($"Error {error}. Can not set SPI clock frequency to {_settings.ClockFrequency}.");
+                throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()}. Can not set SPI clock frequency to {_settings.ClockFrequency}.");
             }
         }
     }
@@ -303,10 +291,7 @@ internal class UnixSpiDevice : SpiDevice
         int result = Interop.ioctl(_deviceFileDescriptor, SPI_IOC_MESSAGE_1, new IntPtr(&tr));
         if (result < 1)
         {
-            int errorCode = Marshal.GetLastWin32Error();
-            string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-            string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-            throw new IOException($"Error {error} performing SPI data transfer.");
+            throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()} performing SPI data transfer.");
         }
     }
 
