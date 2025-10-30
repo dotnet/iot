@@ -24,7 +24,10 @@ internal class UnixI2cBus : I2cBus
 
             if (busFileDescriptor < 0)
             {
-                throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not open I2C device file '{deviceFileName}'.");
+                int errorCode = Marshal.GetLastWin32Error();
+                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+                throw new IOException($"Error {error}. Can not open I2C device file '{deviceFileName}'.");
             }
 
             I2cFunctionalityFlags functionalityFlags;
@@ -194,7 +197,10 @@ internal class UnixI2cBus : I2cBus
         int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&msgset));
         if (result < 0)
         {
-            throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+            int errorCode = Marshal.GetLastWin32Error();
+            string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+            string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+            throw new IOException($"Error {error} performing I2C data transfer.");
         }
     }
 
