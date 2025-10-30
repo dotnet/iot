@@ -617,20 +617,25 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             if (fileDescriptor == -1)
             {
                 win32Error = Marshal.GetLastWin32Error();
+                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
 
                 // if the failure is NOT because /dev/gpiomem doesn't exist then throw an exception at this point.
                 // if it were anything else then it is probably best not to try and use /dev/mem on the basis that
                 // it would be better to solve the issue rather than use a method that requires root privileges
                 if (win32Error != ENOENT)
                 {
-                    throw new IOException($"Error {win32Error} initializing the Gpio driver.");
+                    string error = string.IsNullOrWhiteSpace(errorMessage) ? win32Error.ToString() : $"{win32Error} ({errorMessage})";
+                    throw new IOException($"Error {error} initializing the Gpio driver.");
                 }
 
                 // if /dev/gpiomem doesn't seem to be available then let's try /dev/mem
                 fileDescriptor = Interop.open(MemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
                 if (fileDescriptor == -1)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                    int errorCode = Marshal.GetLastWin32Error();
+                    string errMsg = Marshal.GetLastPInvokeErrorMessage();
+                    string error = string.IsNullOrWhiteSpace(errMsg) ? errorCode.ToString() : $"{errorCode} ({errMsg})";
+                    throw new IOException($"Error {error} initializing the Gpio driver.");
                 }
                 else // success so set the offset into memory of the gpio registers
                 {
@@ -668,7 +673,10 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
             if (mapPointer.ToInt64() == -1)
             {
-                throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                int errorCode = Marshal.GetLastWin32Error();
+                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+                throw new IOException($"Error {error} initializing the Gpio driver.");
             }
 
             Interop.close(fileDescriptor);

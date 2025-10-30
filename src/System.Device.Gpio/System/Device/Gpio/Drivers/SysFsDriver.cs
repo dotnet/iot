@@ -591,7 +591,9 @@ public class SysFsDriver : UnixDriver
                     continue;
                 }
 
-                throw new IOException($"Error while waiting for pin interrupts. (ErrorCode={errorCode})");
+                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+                throw new IOException($"Error while waiting for pin interrupts. (ErrorCode={error})");
             }
 
             if (waitResult > 0)

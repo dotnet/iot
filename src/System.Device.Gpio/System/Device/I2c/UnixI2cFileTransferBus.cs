@@ -18,7 +18,10 @@ internal class UnixI2cFileTransferBus : UnixI2cBus
         int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, deviceAddress);
         if (result < 0)
         {
-            throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+            int errorCode = Marshal.GetLastWin32Error();
+            string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+            string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+            throw new IOException($"Error {error} performing I2C data transfer.");
         }
 
         if (writeBuffer != null)
@@ -26,7 +29,10 @@ internal class UnixI2cFileTransferBus : UnixI2cBus
             result = Interop.write(BusFileDescriptor, new IntPtr(writeBuffer), writeBufferLength);
             if (result < 0)
             {
-                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                int errorCode = Marshal.GetLastWin32Error();
+                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+                throw new IOException($"Error {error} performing I2C data transfer.");
             }
         }
 
@@ -35,7 +41,10 @@ internal class UnixI2cFileTransferBus : UnixI2cBus
             result = Interop.read(BusFileDescriptor, new IntPtr(readBuffer), readBufferLength);
             if (result < 0)
             {
-                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                int errorCode = Marshal.GetLastWin32Error();
+                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+                throw new IOException($"Error {error} performing I2C data transfer.");
             }
         }
     }
