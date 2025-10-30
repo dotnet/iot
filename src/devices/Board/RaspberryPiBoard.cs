@@ -930,6 +930,7 @@ namespace Iot.Device.Board
         /// <summary>
         /// Creates a derived GPIO controller that uses physical pin mapping for the Raspberry Pi.
         /// </summary>
+        /// <returns>A virtual gpio controller that uses physical pin mapping for this device</returns>
         public VirtualGpioController CreatePhysicalPinMapping()
         {
             Initialize();

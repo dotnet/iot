@@ -29,4 +29,18 @@
     <Right>lib/net8.0/System.Device.Gpio.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Gpio.GpioController.GetLogicalPinNumber(System.Int32)</Target>
+    <Left>lib/net8.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net8.0/System.Device.Gpio.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Gpio.GpioDriver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)</Target>
+    <Left>lib/net8.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net8.0/System.Device.Gpio.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
 </Suppressions>

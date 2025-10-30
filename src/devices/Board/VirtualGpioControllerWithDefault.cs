@@ -8,8 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 namespace Iot.Device.Gpio
 {
     /// <summary>
@@ -54,6 +52,11 @@ namespace Iot.Device.Gpio
             }
         }
 
+        /// <summary>
+        /// Returns the real pin associated with this virtual pin
+        /// </summary>
+        /// <param name="virtualPin">The virtual pin to query</param>
+        /// <returns>A real pin number or -1 if the provided virtual pin number was unknown</returns>
         public int MapToRealPin(int virtualPin)
         {
             return _fromVirtualToRealMapping(virtualPin);
