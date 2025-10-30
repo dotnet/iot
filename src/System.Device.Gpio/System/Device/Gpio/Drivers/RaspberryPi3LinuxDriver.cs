@@ -616,6 +616,8 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
             if (fileDescriptor == -1)
             {
+                // Can't use ExceptionHelper.GetLastErrorMessage() here because we need to check 
+                // for ENOENT before throwing
                 win32Error = Marshal.GetLastWin32Error();
                 string errorMessage = Marshal.GetLastPInvokeErrorMessage();
 

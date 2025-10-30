@@ -591,7 +591,8 @@ public class SysFsDriver : UnixDriver
                     continue;
                 }
 
-                // Get error message immediately after checking for EINTR
+                // Can't use ExceptionHelper.GetLastErrorMessage() here because we already called 
+                // GetLastWin32Error() above for the EINTR check
                 string errorMessage = Marshal.GetLastPInvokeErrorMessage();
                 string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
                 throw new IOException($"Error while waiting for pin interrupts. (ErrorCode={error})");
