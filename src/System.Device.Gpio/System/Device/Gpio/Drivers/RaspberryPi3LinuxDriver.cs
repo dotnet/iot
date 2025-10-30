@@ -632,10 +632,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 fileDescriptor = Interop.open(MemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
                 if (fileDescriptor == -1)
                 {
-                    int errorCode = Marshal.GetLastWin32Error();
-                    string errMsg = Marshal.GetLastPInvokeErrorMessage();
-                    string error = string.IsNullOrWhiteSpace(errMsg) ? errorCode.ToString() : $"{errorCode} ({errMsg})";
-                    throw new IOException($"Error {error} initializing the Gpio driver.");
+                    throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()} initializing the Gpio driver.");
                 }
                 else // success so set the offset into memory of the gpio registers
                 {
@@ -673,10 +670,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
             if (mapPointer.ToInt64() == -1)
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-                throw new IOException($"Error {error} initializing the Gpio driver.");
+                throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()} initializing the Gpio driver.");
             }
 
             Interop.close(fileDescriptor);

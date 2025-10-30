@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -24,10 +25,7 @@ internal class UnixI2cBus : I2cBus
 
             if (busFileDescriptor < 0)
             {
-                int errorCode = Marshal.GetLastWin32Error();
-                string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-                string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-                throw new IOException($"Error {error}. Can not open I2C device file '{deviceFileName}'.");
+                throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()}. Can not open I2C device file '{deviceFileName}'.");
             }
 
             I2cFunctionalityFlags functionalityFlags;
@@ -197,10 +195,7 @@ internal class UnixI2cBus : I2cBus
         int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&msgset));
         if (result < 0)
         {
-            int errorCode = Marshal.GetLastWin32Error();
-            string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-            string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
-            throw new IOException($"Error {error} performing I2C data transfer.");
+            throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()} performing I2C data transfer.");
         }
     }
 
