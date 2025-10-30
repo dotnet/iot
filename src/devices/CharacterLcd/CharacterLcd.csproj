@@ -8,6 +8,7 @@
     <Compile Include="Hd44780.cs" />
     <Compile Include="ICharacterLcd.cs" />
     <Compile Include="CharacterLcdExtensions.cs" />
+    <Compile Include="Aip31068Lcd.cs" />
     <Compile Include="Lcd1602.cs" />
     <Compile Include="Lcd2004.cs" />
     <Compile Include="LcdConsole.cs" />
