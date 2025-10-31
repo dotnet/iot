@@ -77,16 +77,6 @@ public class GpioController : IDisposable
     }
 
     /// <summary>
-    /// Gets the logical pin number in the controller's numbering scheme.
-    /// </summary>
-    /// <param name="pinNumber">The pin number</param>
-    /// <returns>The logical pin number in the controller's numbering scheme.</returns>
-    protected virtual int GetLogicalPinNumber(int pinNumber)
-    {
-        return pinNumber;
-    }
-
-    /// <summary>
     /// Opens a pin in order for it to be ready to use.
     /// The driver attempts to open the pin without changing its mode or value.
     /// </summary>
@@ -110,8 +100,7 @@ public class GpioController : IDisposable
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
     protected virtual void OpenPinCore(int pinNumber)
     {
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        _driver.OpenPin(logicalPinNumber);
+        _driver.OpenPin(pinNumber);
     }
 
     /// <summary>
@@ -165,8 +154,7 @@ public class GpioController : IDisposable
     /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
     protected virtual void ClosePinCore(int pinNumber)
     {
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        _driver.ClosePin(logicalPinNumber);
+        _driver.ClosePin(pinNumber);
         _gpioPins.TryRemove(pinNumber, out _);
     }
 
@@ -182,7 +170,6 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not set a mode to pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
         if (!IsPinModeSupported(pinNumber, mode))
         {
             throw new InvalidOperationException($"Pin {pinNumber} does not support mode {mode}.");
@@ -190,11 +177,11 @@ public class GpioController : IDisposable
 
         if (_openPins.TryGetValue(pinNumber, out var desired) && desired.HasValue)
         {
-            _driver.SetPinMode(logicalPinNumber, mode, desired.Value);
+            _driver.SetPinMode(pinNumber, mode, desired.Value);
         }
         else
         {
-            _driver.SetPinMode(logicalPinNumber, mode);
+            _driver.SetPinMode(pinNumber, mode);
         }
     }
 
@@ -210,8 +197,7 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not get the mode of pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        return _driver.GetPinMode(logicalPinNumber);
+        return _driver.GetPinMode(pinNumber);
     }
 
     /// <summary>
@@ -242,8 +228,7 @@ public class GpioController : IDisposable
     public virtual bool IsPinModeSupported(int pinNumber, PinMode mode)
     {
         CheckDriverValid();
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        return _driver.IsPinModeSupported(logicalPinNumber, mode);
+        return _driver.IsPinModeSupported(pinNumber, mode);
     }
 
     /// <summary>
@@ -258,8 +243,7 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not read from pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        return _driver.Read(logicalPinNumber);
+        return _driver.Read(pinNumber);
     }
 
     /// <summary>
@@ -288,16 +272,14 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not write to pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-
         _openPins[pinNumber] = value;
 
-        if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
+        if (_driver.GetPinMode(pinNumber) != PinMode.Output)
         {
             return;
         }
 
-        _driver.Write(logicalPinNumber, value);
+        _driver.Write(pinNumber, value);
     }
 
     /// <summary>
@@ -327,8 +309,7 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not wait for events from pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        return _driver.WaitForEvent(logicalPinNumber, eventTypes, cancellationToken);
+        return _driver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
     }
 
     /// <summary>
@@ -358,8 +339,7 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not wait for events from pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        return _driver.WaitForEventAsync(logicalPinNumber, eventTypes, token);
+        return _driver.WaitForEventAsync(pinNumber, eventTypes, token);
     }
 
     /// <summary>
@@ -375,8 +355,7 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not add callback for pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
+        _driver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
     }
 
     /// <summary>
@@ -391,8 +370,7 @@ public class GpioController : IDisposable
             throw new InvalidOperationException($"Can not remove callback for pin {pinNumber} because it is not open.");
         }
 
-        int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-        _driver.RemoveCallbackForPinValueChangedEvent(logicalPinNumber, callback);
+        _driver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
     }
 
     /// <summary>
