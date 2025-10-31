@@ -44,8 +44,8 @@ namespace Iot.Device.Nmea0183.Tests
             var sentence1 = new RoutePart("RT", 1, 1, new List<string>() { "A", "B" });
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
 
-            _cache.Add(new Waypoint(new GeographicPosition(), "A"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "B"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "A"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "B"));
 
             Assert.Equal(AutopilotErrorState.RoutePresent, _provider.TryGetCurrentRoute(out var route));
             Assert.Equal(2, route.Count);
@@ -84,10 +84,10 @@ namespace Iot.Device.Nmea0183.Tests
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
 
-            _cache.Add(new Waypoint(new GeographicPosition(), "A"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "B"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "C"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "D"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "A"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "B"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "C"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "D"));
 
             _provider.TryGetCurrentRoute(out var route);
             Assert.Equal(4, route.Count);
@@ -108,10 +108,10 @@ namespace Iot.Device.Nmea0183.Tests
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
 
-            _cache.Add(new Waypoint(new GeographicPosition(), "A"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "B"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "C"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "D"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "A"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "B"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "C"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "D"));
 
             _provider.TryGetCurrentRoute(out var route);
             Assert.Equal(2, route.Count);
@@ -127,10 +127,10 @@ namespace Iot.Device.Nmea0183.Tests
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1);
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
 
-            _cache.Add(new Waypoint(new GeographicPosition(), "A"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "B"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "A"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "B"));
             // Not all waypoints for new route
-            _cache.Add(new Waypoint(new GeographicPosition(), "D"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "D"));
 
             // This will skip the iteration
             Assert.Equal(AutopilotErrorState.WaypointsWithoutPosition, _provider.TryGetCurrentRoute(out _));
@@ -149,10 +149,10 @@ namespace Iot.Device.Nmea0183.Tests
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence1b);
             _sink.Raise(x => x.OnNewSequence += null, _dummySource.Object, sentence2);
 
-            _cache.Add(new Waypoint(new GeographicPosition(), "A"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "B"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "C"));
-            _cache.Add(new Waypoint(new GeographicPosition(), "D"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "A"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "B"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "C"));
+            _cache.Add(_dummySource.Object, new Waypoint(new GeographicPosition(), "D"));
 
             // Only part 1 of the new route was transmitted - use the old one until we have all messages for the new route.
             _provider.TryGetCurrentRoute(out var route);
@@ -167,7 +167,7 @@ namespace Iot.Device.Nmea0183.Tests
             _provider.Cache.MaxDataAge = TimeSpan.FromDays(10000);
             reader.OnNewSequence += (source, msg) =>
             {
-                _cache.Add(msg);
+                _cache.Add(_dummySource.Object, msg);
             };
             reader.StartDecode();
             reader.StopDecode();

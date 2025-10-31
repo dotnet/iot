@@ -32,6 +32,11 @@ namespace Iot.Device.Nmea0183.Ais
         /// <summary>
         /// The other target is so far away or the relative speed is so low, that (T)CPA calculations wouldn't be meaningful.
         /// </summary>
-        FarAway
+        FarAway,
+
+        /// <summary>
+        /// The ship's safety state is ignored (e.g. because it's moored)
+        /// </summary>
+        Ignored
     }
 }

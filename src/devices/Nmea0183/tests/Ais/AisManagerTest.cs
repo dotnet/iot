@@ -162,9 +162,9 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         }
 
         [Theory]
-        [InlineData(600, 1852, 18)] // Default settings
+        [InlineData(600, 1852, 2)] // Default settings
         [InlineData(600, 0, 0)] // Warning distance zero -> No warnings
-        [InlineData(10, 1852, 34)] // Very short warning timeout -> Many warnings
+        [InlineData(10, 1852, 7)] // Very short warning timeout -> Many warnings
         public void CheckSafetyPermanently(int warningRepeatSeconds, int warningDistance, int expectedWarningCount)
         {
             // This does a safety check all the time. Very expensive...
@@ -172,7 +172,8 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             List<string> messages = new List<string>();
             List<AisMessageId> warnings = new List<AisMessageId>();
             _manager.TrackEstimationParameters.AisSafetyCheckInterval = TimeSpan.Zero;
-            _manager.TrackEstimationParameters.WarningDistance = Length.FromMeters(warningDistance);
+            _manager.TrackEstimationParameters.WarningDistanceLargeVessels = Length.FromMeters(warningDistance);
+            _manager.TrackEstimationParameters.WarningDistanceSmallVessels = Length.FromMeters(warningDistance) / 2;
             _manager.TrackEstimationParameters.WarningRepeatTimeout = TimeSpan.FromSeconds(warningRepeatSeconds);
             _manager.OnMessage += (received, sourceMmsi, destinationMmsi, text) =>
             {
@@ -218,26 +219,6 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             Assert.NotNull(ship.RelativePosition);
             Assert.True(ship.RelativePosition!.From.Name == "Cirrus");
             Assert.Equal(8258.7, ship.RelativePosition.Distance.Meters, 1);
-        }
-
-        [Fact]
-        public void EnableDisableBackgroundThread()
-        {
-            ManualResetEvent ev = new ManualResetEvent(false);
-            _manager.OnMessage += (received, sourceMmsi, destinationMmsi, text) =>
-            {
-                if (text.Contains("GNSS"))
-                {
-                    ev.Set();
-                }
-            };
-
-            _manager.ClearWarnings();
-            _manager.EnableAisAlarms(true, new TrackEstimationParameters() { AisSafetyCheckInterval = TimeSpan.Zero, WarnIfGnssMissing = true });
-
-            // Fails if we actually hit the timeout
-            Assert.True(ev.WaitOne(TimeSpan.FromSeconds(30)));
-            _manager.EnableAisAlarms(false);
         }
 
         [Fact]

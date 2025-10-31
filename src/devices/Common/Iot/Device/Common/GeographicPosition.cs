@@ -52,9 +52,25 @@ namespace Iot.Device.Common
         /// <param name="latitude">Latitude of position, in degrees. Valid values are -90 - +90</param>
         /// <param name="longitude">Longitude of position, in degrees. Valid values are -180 to +180 or 0 to 360, depending on application</param>
         /// <param name="ellipsoidalHeight">Height over the WGS84 ellipsoid.</param>
-        /// <remarks>No exception is thrown on denormalized or out-of-range positions.</remarks>
+        /// <exception cref="ArgumentOutOfRangeException">The position is invalid (latitude or longitude are out of range)</exception>
         public GeographicPosition(double latitude, double longitude, double ellipsoidalHeight)
         {
+            if (Double.IsNaN(latitude) || Double.IsInfinity(latitude) || Math.Abs(latitude) > 90.1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(latitude), latitude, "Latitude must be a valid number and between -90 and +90");
+            }
+
+            if (Double.IsNaN(longitude) || Double.IsInfinity(longitude))
+            {
+                throw new ArgumentOutOfRangeException(nameof(longitude), longitude, "Longitude must be a valid number");
+            }
+
+            if (Double.IsNaN(ellipsoidalHeight) || Double.IsInfinity(ellipsoidalHeight))
+            {
+                throw new ArgumentOutOfRangeException(nameof(ellipsoidalHeight), ellipsoidalHeight,
+                    "Height must be a valid number");
+            }
+
             _latitude = latitude;
             _longitude = longitude;
             _height = ellipsoidalHeight;

@@ -42,6 +42,8 @@ namespace Iot.Device.Nmea0183
         protected NmeaSinkAndSource(string interfaceName)
         {
             InterfaceName = interfaceName;
+            LogReceive = true;
+            LogSend = false;
         }
 
         /// <summary>
@@ -50,6 +52,24 @@ namespace Iot.Device.Nmea0183
         public string InterfaceName
         {
             get;
+        }
+
+        /// <summary>
+        /// True (the default) to log any input from this interface.
+        /// </summary>
+        public bool LogReceive
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// True to log any sends on this interface. The default is false.
+        /// </summary>
+        public bool LogSend
+        {
+            get;
+            set;
         }
 
         /// <summary>
