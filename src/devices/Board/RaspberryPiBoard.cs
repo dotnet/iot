@@ -988,7 +988,7 @@ namespace Iot.Device.Board
         /// <remarks>If the provided <paramref name="defaultController"/> is not for a Raspberry Pi, the behavior might be undefined.</remarks>
         public static VirtualGpioController CreatePhysicalPinMapping(GpioController defaultController)
         {
-            return new VirtualGpioControllerWithDefault(defaultController, ConvertPinNumberFromPhysicalToLogical);
+            return new MappingGpioController(defaultController, ConvertPinNumberFromPhysicalToLogical);
         }
     }
 }

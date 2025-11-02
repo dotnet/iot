@@ -95,7 +95,7 @@ namespace Iot.Device.Gpio
 
         /// <summary>
         /// This operation is not supported, as the virtual controller doesn't know what to do here.
-        /// Use <see cref="VirtualGpioControllerWithDefault"/> for an alternative approach if you need to dynamically assign pins.
+        /// Use <see cref="MappingGpioController"/> for an alternative approach if you need to dynamically assign pins.
         /// </summary>
         /// <param name="pinNumber">The number of the pin</param>
         /// <exception cref="InvalidOperationException">Always. This operation is not supported</exception>

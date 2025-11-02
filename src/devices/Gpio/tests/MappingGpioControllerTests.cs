@@ -14,12 +14,12 @@ using Xunit;
 
 namespace Iot.Device.Gpio.Tests
 {
-    public sealed class VirtualGpioControllerWithDefaultTests : IDisposable
+    public sealed class MappingGpioControllerTests : IDisposable
     {
         public Mock<MockableGpioDriver> _driverMock;
         public GpioController _gpioController;
 
-        public VirtualGpioControllerWithDefaultTests()
+        public MappingGpioControllerTests()
         {
             _driverMock = new Mock<MockableGpioDriver>(MockBehavior.Default);
             _driverMock.CallBase = true;
