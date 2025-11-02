@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ namespace Iot.Device.Nmea0183
     /// Caches the last sentence(s) of each type for later retrieval.
     /// This is a helper class for <see cref="AutopilotController"/> and <see cref="PositionProvider"/>. Use <see cref="PositionProvider"/> to query the position from
     /// the most appropriate messages.
+    /// It internally keeps two kinds of lists: The last sentence of each type and the last sentence of each type _by source_.
     /// </summary>
     public sealed class SentenceCache : IDisposable
     {
@@ -28,11 +30,11 @@ namespace Iot.Device.Nmea0183
         private readonly Dictionary<String, Dictionary<SentenceId, NmeaSentence>> _sentencesBySource;
         private readonly ILogger _logger;
 
-        private long _ticksLastCleanup;
         private Queue<RoutePart> _lastRouteSentences;
         private Dictionary<string, Waypoint> _wayPoints;
         private Queue<SatellitesInView> _lastSatelliteInfos;
         private Dictionary<string, TransducerDataSet> _xdrData;
+        private TalkerId _magneticDeviationProvider = TalkerId.Any;
 
         private SentenceId[] _groupSentences = new SentenceId[]
         {
@@ -63,7 +65,6 @@ namespace Iot.Device.Nmea0183
             _logger = this.GetCurrentClassLogger();
             _source.OnNewSequence += OnNewSequence;
             MaxDataAge = TimeSpan.FromSeconds(30);
-            _ticksLastCleanup = 0;
         }
 
         /// <summary>
@@ -86,6 +87,15 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
+        /// The magnetic variation at the current location. Positive when easterly, negative when westerly.
+        /// </summary>
+        public Angle? MagneticVariation
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Clears the cache
         /// </summary>
         public void Clear()
@@ -97,6 +107,8 @@ namespace Iot.Device.Nmea0183
                 _wayPoints.Clear();
                 _lastSatelliteInfos.Clear();
                 _sentencesBySource.Clear();
+                MagneticVariation = null;
+                _magneticDeviationProvider = TalkerId.Any;
             }
         }
 
@@ -195,6 +207,21 @@ namespace Iot.Device.Nmea0183
             }
         }
 
+        /// <summary>
+        /// Let's the cache remember this waypoint.
+        /// The method can be called multiple times to update a waypoint (e.g. new position with same name)
+        /// </summary>
+        /// <param name="wpt">The waypoint. Must have a valid name.</param>
+        public void AddWayPoint(Waypoint wpt)
+        {
+            ArgumentNullException.ThrowIfNull(wpt);
+            ArgumentException.ThrowIfNullOrWhiteSpace(wpt.Name);
+            lock (_lock)
+            {
+                _wayPoints[wpt.Name] = wpt;
+            }
+        }
+
         private void OnNewSequence(NmeaSinkAndSource? source, NmeaSentence sentence)
         {
             // Cache only valid sentences
@@ -238,7 +265,8 @@ namespace Iot.Device.Nmea0183
                         _sentencesBySource[sourceName] = d;
                     }
                 }
-                else if (sentence.SentenceId == RoutePart.Id && (sentence is RoutePart rte))
+
+                if (sentence.SentenceId == RoutePart.Id && (sentence is RoutePart rte))
                 {
                     _lastRouteSentences.Enqueue(rte);
                     while (_lastRouteSentences.Count > 100)
@@ -272,6 +300,16 @@ namespace Iot.Device.Nmea0183
                 {
                     _dinData[din.Identifier] = din;
                 }
+                else if (sentence.SentenceId == RecommendedMinimumNavigationInformation.Id && (sentence is RecommendedMinimumNavigationInformation rmc))
+                {
+                    // Once we received one such value, always use that provider. Otherwise we might get confused
+                    // by different sources with varying variance models.
+                    if (rmc.MagneticVariationInDegrees.HasValue && (_magneticDeviationProvider == rmc.TalkerId || _magneticDeviationProvider == TalkerId.Any))
+                    {
+                        MagneticVariation = rmc.MagneticVariationInDegrees.Value;
+                        _magneticDeviationProvider = sentence.TalkerId;
+                    }
+                }
             }
         }
 
@@ -285,12 +323,40 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Adds the given sentence to the cache - if manual filling is preferred
+        /// Adds the given sentence explicitly to the cache
         /// </summary>
-        /// <param name="sentence">Sentence to add</param>
-        public void Add(NmeaSentence sentence)
+        /// <param name="source">The source of the sentence</param>
+        /// <param name="sentence">The sentence</param>
+        public void Add(NmeaSinkAndSource source, NmeaSentence sentence)
         {
-            OnNewSequence(null, sentence);
+            OnNewSequence(source, sentence);
+        }
+
+        /// <summary>
+        /// Adds a sentence to the cache, but only to the list of sentences from this particular source,
+        /// so the message will not override the effect of a <see cref="GetLastSentence(Iot.Device.Nmea0183.SentenceId)"/> call.
+        /// </summary>
+        /// <param name="source">The source. Must be non-null</param>
+        /// <param name="sentence">The sentence. Must be non-null</param>
+        public void AddFromSource(NmeaSinkAndSource source, NmeaSentence sentence)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(sentence);
+            string sourceName = source.InterfaceName;
+            lock (_lock)
+            {
+                // We already own the lock to do that a bit more complex update.
+                if (_sentencesBySource.TryGetValue(sourceName, out var dict))
+                {
+                    dict[sentence.SentenceId] = sentence;
+                }
+                else
+                {
+                    var d = new Dictionary<SentenceId, NmeaSentence>();
+                    d[sentence.SentenceId] = sentence;
+                    _sentencesBySource[sourceName] = d;
+                }
+            }
         }
 
         /// <summary>
@@ -410,10 +476,9 @@ namespace Iot.Device.Nmea0183
 
         private void CleanOutdatedEntries()
         {
-            var now = Environment.TickCount64;
-            if (_ticksLastCleanup < Environment.TickCount64 - 5000)
+            if (MaxDataAge == Timeout.InfiniteTimeSpan)
             {
-                _ticksLastCleanup = now;
+                return;
             }
 
             lock (_lock)
@@ -424,6 +489,7 @@ namespace Iot.Device.Nmea0183
                     if (entry.Value.Age > MaxDataAge)
                     {
                         _sentences.Remove(entry.Key);
+                        _logger.LogInformation($"Discarding outdated entries of type {entry.Key}");
                     }
                 }
 

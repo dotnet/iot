@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -185,6 +186,24 @@ namespace Iot.Device.Arduino
             sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             SendCommand(sequence);
             _frequencyReportingPin = -1;
+        }
+
+        /// <summary>
+        /// Sets a debouncing period for the input pin. Useful if the sensor's signal is a bit "dirty".
+        /// </summary>
+        /// <param name="pinNumber">The pin to observe</param>
+        /// <param name="period">The idle time. Any events within this period will be ignored</param>
+        public void SetDebouncingPeriod(int pinNumber, TimeSpan period)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(period.TotalSeconds, nameof(period));
+            uint us = (uint)period.TotalMicroseconds;
+            FirmataCommandSequence sequence = new();
+            sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
+            sequence.WriteByte(3);
+            sequence.WriteByte((byte)pinNumber);
+            sequence.SendUInt32(us);
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(sequence);
         }
 
         /// <inheritdoc />

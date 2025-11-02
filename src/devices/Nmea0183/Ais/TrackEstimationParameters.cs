@@ -42,14 +42,24 @@ namespace Iot.Device.Nmea0183.Ais
         public TimeSpan AisSafetyCheckInterval { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        /// Minimum CPA distance to issue a warning. Default: 1 nm.
+        /// Minimum CPA distance to issue a warning when the target vessel is over 50m in length. Default: 1 nm.
         /// </summary>
-        public Length WarningDistance { get; set; } = Length.FromNauticalMiles(1);
+        public Length WarningDistanceLargeVessels { get; set; } = Length.FromNauticalMiles(1);
 
         /// <summary>
-        /// Minimum TCPA to issue a warning (when <see cref="WarningDistance"/> is also reached). Default: 10 minutes
+        /// Minimum TCPA to issue a warning (when <see cref="WarningDistanceLargeVessels"/> is also reached). Default: 10 minutes
         /// </summary>
-        public TimeSpan WarningTime { get; set; } = TimeSpan.FromMinutes(10);
+        public TimeSpan WarningTimeLargeVessels { get; set; } = TimeSpan.FromMinutes(10);
+
+        /// <summary>
+        /// Minimum CPA distance for target vessels shorter than 50m
+        /// </summary>
+        public Length WarningDistanceSmallVessels { get; set; } = Length.FromMeters(200);
+
+        /// <summary>
+        /// Minimum safe passage distance for target vessels shorter than 50m
+        /// </summary>
+        public TimeSpan WarningTimeSmallVessels { get; set; } = TimeSpan.FromMinutes(5);
 
         /// <summary>
         /// Maximum age of the position record for a given ship to consider it valid.
@@ -92,5 +102,15 @@ namespace Iot.Device.Nmea0183.Ais
         /// is controlled via <see cref="TargetLostTimeout"/>. Default: 25 minutes
         /// </summary>
         public TimeSpan CleanupLatency { get; set; } = TimeSpan.FromMinutes(25);
+
+        /// <summary>
+        /// Speed limit to assume a vessel is moored. Set to null to disable. Default: 0.2 Knots
+        /// </summary>
+        public Speed? IgnoreVesselsSlowerThan { get; set; } = Speed.FromKnots(0.2);
+
+        /// <summary>
+        /// Disables all warnings about vessels. Useful e.g. when approaching a busy port.
+        /// </summary>
+        public bool SuppressAllVesselWarnings { get; set; }
     }
 }
