@@ -1508,7 +1508,7 @@ namespace Iot.Device.Arduino
             SendCommand(seq);
         }
 
-        public TimeSpan QueryAnalogInputSamplingInterval()
+        public TimeSpan GetAnalogInputSamplingInterval()
         {
             FirmataCommandSequence seq = new();
             seq.WriteByte((byte)FirmataSysexCommand.SAMPLING_INTERVAL_QUERY);

@@ -864,7 +864,7 @@ namespace Iot.Device.Arduino
         /// Configures the sampling interval for analog input pins (when an event callback is enabled)
         /// </summary>
         /// <param name="timeSpan">Timespan between updates. Default ~20ms</param>
-        public void SetAnalogPinSamplingInterval(TimeSpan timeSpan)
+        public void SetAnalogInputSamplingInterval(TimeSpan timeSpan)
         {
             Initialize();
 
@@ -874,11 +874,11 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Query the current analog input sampling interval.
         /// </summary>
-        /// <returns></returns>
-        public TimeSpan QueryAnalogPinSamplingInterval()
+        /// <returns>The timespan between analog reads, if any are configured</returns>
+        public TimeSpan GetAnalogInputSamplingInterval()
         {
             Initialize();
-            return Firmata.QueryAnalogInputSamplingInterval();
+            return Firmata.GetAnalogInputSamplingInterval();
         }
 
         /// <summary>
