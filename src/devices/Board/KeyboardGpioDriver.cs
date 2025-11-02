@@ -68,12 +68,6 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-        {
-            return pinNumber;
-        }
-
-        /// <inheritdoc />
         protected override void OpenPin(int pinNumber)
         {
         }
