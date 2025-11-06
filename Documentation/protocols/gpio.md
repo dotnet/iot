@@ -13,9 +13,9 @@ const int chipNumber = 0;
 // 'using' will dispose the controller when it falls out of scope, which will un-claim lines
 
 // alternatively be more explicit: 'new GpioController(chipNumber, new LibGpiodDriver())'
-using var gpioController = new GpioController(chipNumber);
+using var controller = new GpioController(chipNumber);
 
-gpioController.OpenPin(ledGpio);
+controller.OpenPin(ledGpio);
 
 for (int i = 0; i < 5; i++)
 {
