@@ -16,7 +16,7 @@ internal sealed class LineHandle : IDisposable
     {
         if (handle == IntPtr.Zero)
         {
-            throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
+            throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, ExceptionHelper.GetLastErrorMessage());
         }
 
         _handle = handle;
