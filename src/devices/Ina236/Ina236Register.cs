@@ -1,11 +1,12 @@
-﻿namespace Iot.Device.Adc;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#pragma warning disable CS1591
+namespace Iot.Device.Adc;
 
 /// <summary>
 /// The Ina236 Register map. Note that all registers are 16 bit wide.
 /// </summary>
-public enum Ina236Register
+internal enum Ina236Register
 {
     Configuration = 0,
     ShuntVoltage = 1,
