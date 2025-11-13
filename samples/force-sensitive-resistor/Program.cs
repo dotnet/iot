@@ -7,7 +7,7 @@ using Iot.Device.Adc;
 using force_sensitive_resistor;
 
 Console.WriteLine("Hello Fsr408 capacitor Sample!");
-// Use this sample when using ADC for reading          
+// Use this sample when using ADC for reading
 StartReadingWithADC();
 
 // Use this sample if using capacitor for reading
@@ -16,7 +16,7 @@ StartReadingWithADC();
 void StartReadingWithADC()
 {
     FsrWithAdcSample fsrWithAdc = new();
-    
+
     while (true)
     {
         int value = fsrWithAdc.Read(0);

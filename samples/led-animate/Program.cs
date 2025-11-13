@@ -23,8 +23,8 @@ using AnimateLeds leds = new(segment);
 
 CancellationTokenSource cts = new();
 CancellationToken token = cts.Token;
-Console.CancelKeyPress += (s, e) => 
-{ 
+Console.CancelKeyPress += (s, e) =>
+{
     e.Cancel = true;
     cts.Cancel();
     int delay = leds.LitTime + 10;
@@ -32,7 +32,7 @@ Console.CancelKeyPress += (s, e) =>
     leds.LitTime = 10;
     Thread.Sleep(delay);
 };
-            
+
 Console.WriteLine($"Animate! {segment.Length} pins are initialized.");
 
 while (!token.IsCancellationRequested)

@@ -62,7 +62,7 @@ namespace Iot.Device.Ili934x.Samples
                     Thread.Sleep(100);
                 }
             }
-            
+
 
             int pinDC = parsedArguments.IsFt4222 ? 1 : 23;
             int pinReset = parsedArguments.IsFt4222 ? 0 : 24;
@@ -138,7 +138,7 @@ namespace Iot.Device.Ili934x.Samples
 
             if (board != null)
             {
-                touch = new Chsc6440(board.CreateI2cDevice(new I2cConnectionSettings(0, Chsc6440.DefaultI2cAddress)), 
+                touch = new Chsc6440(board.CreateI2cDevice(new I2cConnectionSettings(0, Chsc6440.DefaultI2cAddress)),
                     new Size(display.ScreenWidth, display.ScreenHeight), parsedArguments.FlipScreen, 39, board.CreateGpioController(), false);
                 touch.UpdateInterval = TimeSpan.FromMilliseconds(100);
                 touch.EnableEvents();

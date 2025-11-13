@@ -22,7 +22,7 @@ namespace force_sensitive_resistor
 
         public double CalculateVoltage(int readValue)
         {
-            // This sample used Mcp3008 ADC which analog voltage read output ranges from 0 to 1023 (10 bit) 
+            // This sample used Mcp3008 ADC which analog voltage read output ranges from 0 to 1023 (10 bit)
             // mapping it to corresponding milli voltage, update output range if you use different ADC
             return _voltageSupplied * readValue / 1023;
         }
@@ -47,7 +47,7 @@ namespace force_sensitive_resistor
             if (resistance > 0)
             {
                 double force;
-                double fsrConductance = 1_000_000 / resistance; 
+                double fsrConductance = 1_000_000 / resistance;
 
                 // Use the two FSR guide graphs to approximate the force
                 if (fsrConductance <= 1000)

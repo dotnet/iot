@@ -19,7 +19,7 @@ public class Volume : IDisposable
         volume.Init();
         return volume;
     }
-    
+
     private Mcp3008 _mcp3008;
     private int _lastValue = 0;
 
@@ -77,9 +77,9 @@ public class Volume : IDisposable
         {
             factor = 1 / factor;
         }
-        
+
         newValue = (int)(sleep / factor);
-  
+
         if (newValue >=10 && newValue <=1000)
         {
             return (true,newValue);

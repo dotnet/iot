@@ -20,7 +20,7 @@ namespace DNSensorAzureIoTHub
         private const string DeviceID = "<replace-with-your-device-id>";
         private const string IotBrokerAddress = "<replace-with-your-iot-hub-name>.azure-devices.net";
 
-        // LED constraints 
+        // LED constraints
         private const int Pin = 18;
         private const int LightTime = 1000;
         private const int DimTime = 2000;
@@ -35,7 +35,7 @@ namespace DNSensorAzureIoTHub
             // set up for LED and pin
             using GpioController led = new();
             led.OpenPin(Pin, PinMode.Output);
-    
+
             // setup for BMP280
             I2cConnectionSettings i2cSettings = new(BusId, Bmp280.DefaultI2cAddress);
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);

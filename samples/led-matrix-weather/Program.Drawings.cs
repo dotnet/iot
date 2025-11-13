@@ -173,7 +173,7 @@ namespace LedMatrixWeather
 
             float dropSpeed = 2 + 0.5f * (float)Math.Sin(2 * pi * uv.X * 77f);
             float dropNoise = 11 * uv.X + (float)Math.Sin(2 * pi * uv.X * 100f);
-            float rain = smoothstep(0f, 0.05f, 
+            float rain = smoothstep(0f, 0.05f,
                 (float)Math.Sin(2 * pi * (dropNoise + dropSpeed * uv.Y)) - 0.9f);
 
             return mix(
