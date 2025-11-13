@@ -164,9 +164,9 @@ docker run --rm -v /sys:/sys --privileged myiotapp
 
 **Cons:**
 
-- ❌ Requires privileged mode (security risk)
-- ❌ Slower than /dev/gpiomem
-- ❌ Mounts entire /sys filesystem
+- Requires privileged mode (security risk)
+- Slower than /dev/gpiomem
+- Mounts entire /sys filesystem
 
 **Use only if other methods fail.**
 
@@ -531,14 +531,14 @@ docker pull --platform linux/arm64 mcr.microsoft.com/dotnet/runtime:8.0
 
 ## Best Practices
 
-1. ✅ **Use multi-stage builds** - Smaller images, faster deployment
-2. ✅ **Run as non-root user** - Improved security
-3. ✅ **Use specific tags** - Don't rely on `latest` in production
-4. ✅ **Minimize layers** - Combine RUN commands
-5. ✅ **Use .dockerignore** - Faster builds, smaller context
-6. ✅ **Health checks** - Monitor container health
-7. ✅ **Resource limits** - Prevent resource exhaustion
-8. ✅ **Logging** - Send logs to stdout/stderr
+1. **Use multi-stage builds** - Smaller images, faster deployment
+2. **Run as non-root user** - Improved security
+3. **Use specific tags** - Don't rely on `latest` in production
+4. **Minimize layers** - Combine RUN commands
+5. **Use .dockerignore** - Faster builds, smaller context
+6. **Health checks** - Monitor container health
+7. **Resource limits** - Prevent resource exhaustion
+8. **Logging** - Send logs to stdout/stderr
 
 ## Advanced: Health Checks
 

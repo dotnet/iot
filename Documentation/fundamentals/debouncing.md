@@ -471,7 +471,7 @@ public class DebouncedRotaryEncoder
 
 ## Common Mistakes to Avoid
 
-❌ **No debouncing at all**
+**No debouncing at all**
 
 ```csharp
 // BAD: Will trigger multiple times per press
@@ -479,14 +479,14 @@ controller.RegisterCallbackForPinValueChangedEvent(pin,
     PinEventTypes.Falling, (s, e) => HandlePress());
 ```
 
-❌ **Debounce time too short**
+**Debounce time too short**
 
 ```csharp
 // BAD: 5ms may be too short for mechanical buttons
 const int debounceMs = 5; // Still getting bounces!
 ```
 
-❌ **Blocking delays in callback**
+**Blocking delays in callback**
 
 ```csharp
 // BAD: Blocks callback thread
@@ -498,7 +498,7 @@ controller.RegisterCallbackForPinValueChangedEvent(pin,
     });
 ```
 
-❌ **Ignoring edge types**
+**Ignoring edge types**
 
 ```csharp
 // BAD: Might need both Rising and Falling

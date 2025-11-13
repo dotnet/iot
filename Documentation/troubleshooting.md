@@ -706,11 +706,11 @@ Add cooling if > 70°C.
 
 ### Before Asking for Help
 
-1. ✅ Read error message carefully
-2. ✅ Check this troubleshooting guide
-3. ✅ Verify hardware with multimeter
-4. ✅ Test with known-good example code
-5. ✅ Search GitHub issues: [dotnet/iot issues](https://github.com/dotnet/iot/issues)
+1. Read error message carefully
+2. Check this troubleshooting guide
+3. Verify hardware with multimeter
+4. Test with known-good example code
+5. Search GitHub issues: [dotnet/iot issues](https://github.com/dotnet/iot/issues)
 
 ### When Asking for Help
 
@@ -733,14 +733,14 @@ Include:
 
 ## Preventive Measures
 
-1. ✅ **Double-check wiring** before powering on
-2. ✅ **Use adequate power supply** (5V/3A minimum)
-3. ✅ **Measure voltages** with multimeter when in doubt
-4. ✅ **Dispose resources properly** - Use `using` statements
-5. ✅ **Add error handling** - Catch exceptions, log errors
-6. ✅ **Start simple** - Test hardware with basic code first
-7. ✅ **Keep backups** - SD card images of working systems
-8. ✅ **Use version control** - Git for your code
+1. **Double-check wiring** before powering on
+2. **Use adequate power supply** (5V/3A minimum)
+3. **Measure voltages** with multimeter when in doubt
+4. **Dispose resources properly** - Use `using` statements
+5. **Add error handling** - Catch exceptions, log errors
+6. **Start simple** - Test hardware with basic code first
+7. **Keep backups** - SD card images of working systems
+8. **Use version control** - Git for your code
 
 ## See Also
 

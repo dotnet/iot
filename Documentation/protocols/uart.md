@@ -76,10 +76,10 @@ GND ─────────────────── GND
 
 ### Voltage Levels
 
-⚠️ **Critical:** Raspberry Pi GPIO uses **3.3V logic**
+**Critical:** Raspberry Pi GPIO uses **3.3V logic**
 
-- ✅ Safe: 3.3V devices (most modern sensors/modules)
-- ❌ Dangerous: 5V devices (will damage Raspberry Pi!)
+- Safe: 3.3V devices (most modern sensors/modules)
+- Dangerous: 5V devices (will damage Raspberry Pi!)
 
 **For 5V devices (RS232):**
 
@@ -498,14 +498,14 @@ cat /dev/serial0
 
 ## Best Practices
 
-1. ✅ **Always use try-catch** for timeout exceptions
-2. ✅ **Set appropriate timeouts** (1-5 seconds typical)
-3. ✅ **Close ports when done** - Use `using` statements
-4. ✅ **Flush buffers** before reading to avoid stale data
-5. ✅ **Add delays** after commands (devices need processing time)
-6. ✅ **Verify baud rate** matches device datasheet exactly
-7. ✅ **Use level shifters** for 5V devices
-8. ✅ **Keep cables short** (< 15m for RS232, < 1200m for RS485)
+1. **Always use try-catch** for timeout exceptions
+2. **Set appropriate timeouts** (1-5 seconds typical)
+3. **Close ports when done** - Use `using` statements
+4. **Flush buffers** before reading to avoid stale data
+5. **Add delays** after commands (devices need processing time)
+6. **Verify baud rate** matches device datasheet exactly
+7. **Use level shifters** for 5V devices
+8. **Keep cables short** (< 15m for RS232, < 1200m for RS485)
 
 ## Advanced: Event-Driven Reading
 

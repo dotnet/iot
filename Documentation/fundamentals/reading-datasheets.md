@@ -307,9 +307,9 @@ Must be read once at startup and used for all conversions
 
 If a register isn't documented:
 
-- ❌ Don't write to it (may damage device)
-- ❌ Don't rely on its value
-- ✅ Stick to documented registers only
+- Don't write to it (may damage device)
+- Don't rely on its value
+- Stick to documented registers only
 
 ## Practical Example: Reading a BME280 Datasheet
 
@@ -396,13 +396,13 @@ gpioinfo
 
 ## Tips for Success
 
-1. ✅ **Read the entire datasheet** - Don't skip sections
-2. ✅ **Verify electrical compatibility** - Check voltage levels first
-3. ✅ **Start with simple tests** - Read device ID register first
-4. ✅ **Compare with existing code** - Check device bindings in [src/devices](../../src/devices)
-5. ✅ **Use diagnostic tools** - Verify hardware before debugging code
-6. ✅ **Check errata documents** - Manufacturers publish bug fixes and workarounds
-7. ✅ **Join communities** - Forums and GitHub issues often have solutions
+1. **Read the entire datasheet** - Don't skip sections
+2. **Verify electrical compatibility** - Check voltage levels first
+3. **Start with simple tests** - Read device ID register first
+4. **Compare with existing code** - Check device bindings in [src/devices](../../src/devices)
+5. **Use diagnostic tools** - Verify hardware before debugging code
+6. **Check errata documents** - Manufacturers publish bug fixes and workarounds
+7. **Join communities** - Forums and GitHub issues often have solutions
 
 ## Common Datasheet Sections
 

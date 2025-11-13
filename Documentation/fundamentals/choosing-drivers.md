@@ -10,11 +10,11 @@ Uses the modern `libgpiod` library to access GPIO through the character device i
 
 **Use LibGpiodDriver when:**
 
-- ✅ Using modern Linux kernels (4.8+)
-- ✅ Running on Raspberry Pi OS (Bullseye, Bookworm or later)
-- ✅ Security and proper resource management matter
-- ✅ Multiple processes may access GPIO simultaneously
-- ✅ You want the best-maintained and most future-proof solution
+- Using modern Linux kernels (4.8+)
+- Running on Raspberry Pi OS (Bullseye, Bookworm or later)
+- Security and proper resource management matter
+- Multiple processes may access GPIO simultaneously
+- You want the best-maintained and most future-proof solution
 
 ### 2. SysFsDriver (Legacy)
 
@@ -22,9 +22,9 @@ Uses the older `/sys/class/gpio` interface (deprecated in Linux kernel).
 
 **Use SysFsDriver when:**
 
-- ⚠️ Stuck on very old Linux kernels (pre-4.8)
-- ⚠️ Legacy system compatibility required
-- ❌ **Not recommended for new projects**
+- Stuck on very old Linux kernels (pre-4.8)
+- Legacy system compatibility required
+- **Not recommended for new projects**
 
 ### 3. Windows10Driver
 
@@ -36,7 +36,7 @@ For Windows 10 IoT Core (now discontinued).
 
 | Feature | LibGpiodDriver | SysFsDriver |
 |---------|----------------|-------------|
-| **Status** | ✅ Active, Recommended | ⚠️ Deprecated |
+| **Status** | Active, Recommended | Deprecated |
 | **Kernel Version** | 4.8+ | All |
 | **Performance** | Better | Good |
 | **Security** | Excellent | Limited |
@@ -95,8 +95,8 @@ libgpiod library has multiple versions with breaking changes. .NET IoT supports 
 
 | Library Version | Driver Version | Status |
 |----------------|----------------|--------|
-| libgpiod 1.1 - 1.6 | V1 | ✅ Supported |
-| libgpiod 2.0+ | V2 | ✅ Supported |
+| libgpiod 1.1 - 1.6 | V1 | Supported |
+| libgpiod 2.0+ | V2 | Supported |
 
 ### Auto-detection
 
@@ -342,10 +342,10 @@ The Linux kernel is **deprecating** the sysfs GPIO interface (`/sys/class/gpio`)
 
 **Action Items:**
 
-1. ✅ Use LibGpiodDriver for all new projects
-2. ✅ Migrate existing SysFsDriver projects to LibGpiodDriver
-3. ✅ Keep libgpiod library updated
-4. ✅ Test on target hardware early in development
+1. Use LibGpiodDriver for all new projects
+2. Migrate existing SysFsDriver projects to LibGpiodDriver
+3. Keep libgpiod library updated
+4. Test on target hardware early in development
 
 ## Summary: What Should I Use?
 

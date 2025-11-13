@@ -139,4 +139,4 @@ Be aware of different pin numbering schemes:
 - Use a multimeter to verify voltages and connections
 - Power off the device before changing wiring
 
-Happy building! 🎉
+Happy building!

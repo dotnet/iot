@@ -289,34 +289,34 @@ pwm.Stop();
 
 ### Choose I2C when:
 
-- ✅ Connecting multiple sensors
-- ✅ Using pre-made sensor modules
-- ✅ Space/pin count is limited
-- ✅ Low to medium speed is acceptable
-- ❌ NOT for: High-speed displays, long distances
+- Connecting multiple sensors
+- Using pre-made sensor modules
+- Space/pin count is limited
+- Low to medium speed is acceptable
+- NOT for: High-speed displays, long distances
 
 ### Choose SPI when:
 
-- ✅ High-speed data transfer needed
-- ✅ Large displays (TFT, e-paper)
-- ✅ SD cards or flash memory
-- ✅ Full-duplex communication needed
-- ❌ NOT for: Limited pins, multiple sensors
+- High-speed data transfer needed
+- Large displays (TFT, e-paper)
+- SD cards or flash memory
+- Full-duplex communication needed
+- NOT for: Limited pins, multiple sensors
 
 ### Choose UART when:
 
-- ✅ Point-to-point communication
-- ✅ GPS, Bluetooth, GSM modules
-- ✅ Long-distance RS485 networks
-- ✅ Streaming data (logging, telemetry)
-- ❌ NOT for: Multiple devices on one bus
+- Point-to-point communication
+- GPS, Bluetooth, GSM modules
+- Long-distance RS485 networks
+- Streaming data (logging, telemetry)
+- NOT for: Multiple devices on one bus
 
 ### Choose GPIO when:
 
-- ✅ Simple on/off control
-- ✅ Button input
-- ✅ One device per pin acceptable
-- ❌ NOT for: Complex data, multiple devices
+- Simple on/off control
+- Button input
+- One device per pin acceptable
+- NOT for: Complex data, multiple devices
 
 ## Mixing Protocols
 

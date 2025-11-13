@@ -504,14 +504,14 @@ Develop in containers (see [Containers Guide](deployment/containers.md)).
 
 ## Best Practices
 
-1. ✅ **Use `using` statements** for automatic disposal
-2. ✅ **Handle exceptions** gracefully (hardware can fail)
-3. ✅ **Log important events** for debugging
-4. ✅ **Validate hardware configuration** at startup
-5. ✅ **Make pin numbers configurable** (don't hardcode)
-6. ✅ **Add README** with wiring instructions
-7. ✅ **Version control** your code (Git)
-8. ✅ **Test incrementally** (one device at a time)
+1. **Use `using` statements** for automatic disposal
+2. **Handle exceptions** gracefully (hardware can fail)
+3. **Log important events** for debugging
+4. **Validate hardware configuration** at startup
+5. **Make pin numbers configurable** (don't hardcode)
+6. **Add README** with wiring instructions
+7. **Version control** your code (Git)
+8. **Test incrementally** (one device at a time)
 
 ## Example: Complete Project Template
 
