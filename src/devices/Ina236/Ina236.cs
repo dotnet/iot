@@ -24,6 +24,13 @@ namespace Iot.Device.Adc
     [Interface("INA236 Bidirectional Current/Power monitor")]
     public class Ina236 : IDisposable
     {
+        /// <summary>
+        /// The default I2C Address for this device.
+        /// According to the datasheet, the device comes in two variants, A and B.
+        /// Type A has addresses 0x80 to 0x83, depending on whether the ADDR pin is connected to GND, VS, SDA or SCL.
+        /// Type B has addresses 0x90 to 0x94, depending on the ADDR pin.
+        /// </summary>
+        public const int DefaultI2cAddress = 0x80;
         private I2cDevice _i2cDevice;
         private ElectricResistance _shuntResistance;
         private ElectricCurrent _currentLsb;
