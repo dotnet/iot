@@ -2,11 +2,9 @@
 
 Welcome to the .NET IoT documentation! This guide will help you get started with building IoT applications using .NET on single-board computers like Raspberry Pi.
 
-## 🚀 New to .NET IoT? Start Here!
+## New to .NET IoT? Start Here!
 
 **[Getting Started Guide](getting-started.md)** - Blink an LED in 5 minutes and learn the basics
-
-## 📚 Essential Knowledge for Newcomers
 
 ### Learn the Fundamentals
 
@@ -46,7 +44,7 @@ Step-by-step guides for enabling and using hardware interfaces:
 - **[Troubleshooting Guide](troubleshooting.md)** - Solutions to common problems
 - **[Device Conventions](Devices-conventions.md)** - Guidelines for device bindings
 
-## 📦 Repository Layout
+## Repository Layout
 
 This repository contains two main components:
 
@@ -70,12 +68,12 @@ When contributing, please read:
 - [Device Conventions](./Devices-conventions.md)
 - [Contributing a Binding](../src/devices/README.md#contributing-a-binding)
 
-## 🔧 System.Device.* APIs and Tools
+## System.Device.* APIs and Tools
 
 - **[Device Bindings](https://github.com/dotnet/iot/tree/main/src/devices)** - 130+ pre-built drivers for sensors, displays, and peripherals
 - **[DevicesApiTester CLI](https://github.com/dotnet/iot/tree/main/tools/DevicesApiTester)** - Command-line tool for testing GPIO, I2C, SPI, and connected hardware
 
-## 🎓 Learning Resources
+## Learning Resources
 
 ### External Tutorials and References
 
@@ -102,7 +100,7 @@ When contributing, please read:
 - [.NET Design Reviews: GPIO (10/19/2018)](https://youtu.be/wtkPtOpI3CA)
 - [.NET Design Reviews: GPIO (11/2/2018)](https://youtu.be/UZc3sbJ0-PI)
 - [Mono WinForms GPIO Demo (Toradex + Torizon)](https://www.youtube.com/watch?v=1d3g2VDZyXE)
-## 🖥️ Supported Hardware Platforms
+## Supported Hardware Platforms
 
 .NET IoT has been verified to work on the following development boards:
 
@@ -135,7 +133,7 @@ When contributing, please read:
 
 > **Note:** While .NET IoT works on these boards, testing has been most extensive on Raspberry Pi. Other boards may require additional configuration.
 
-## 🛠️ Maker Resources
+## Maker Resources
 
 ### Prototyping Tutorials
 
