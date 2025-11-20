@@ -655,7 +655,7 @@ namespace Iot.Device.Common
             /* tan(alp0) = cos(sig2)*tan(alp2) */
             salp2 = l.salp0;
             calp2 = l.calp0 * csig2; /* No need to normalize */
-            
+
 /* tan(omg2) = sin(alp0) * tan(sig2) */
             somg2 = l.salp0 * ssig2;
             comg2 = csig2; /* No need to normalize */

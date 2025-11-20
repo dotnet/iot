@@ -44,7 +44,7 @@ public class AnimateLeds : IDisposable
         {
             _segment.Write(output, PinValue.High);
         }
-        
+
         if (DisplayShouldCancel(token, LitTime)) return;
 
         // dim time
@@ -52,7 +52,7 @@ public class AnimateLeds : IDisposable
         {
             _segment.Write(output, PinValue.Low);
         }
-        
+
         if (DisplayShouldCancel(token, DimTime)) return;
         }
 

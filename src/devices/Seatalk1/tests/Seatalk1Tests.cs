@@ -19,11 +19,11 @@ namespace Iot.Device.Tests.Seatalk1
         [Fact]
         public void DecodeSomeSentences()
         {
-            string data = @"9c 01 12 00 
-84 06 12 00 00 00 00 00 08 
-86 01 02 fd 
-84 06 12 00 00 00 00 00 08 
-9c 01 12 00 
+            string data = @"9c 01 12 00
+84 06 12 00 00 00 00 00 08
+86 01 02 fd
+84 06 12 00 00 00 00 00 08
+9c 01 12 00
 84 06 12 00 00 00 00 00 08";
             MemoryStream ms = GetStreamFromInputString(data);
 
@@ -63,11 +63,11 @@ namespace Iot.Device.Tests.Seatalk1
         public void SkipSomeGarbage()
         {
             // The second row is garbled (for this test, at least 18 bytes must be in the input after the garbage)
-            string data = @"9c 01 12 00 
-0A 02 12 00 00 FF DD 00 08 
-86 01 02 fd 
-84 06 12 00 00 00 00 00 08 
-9c 01 12 00 
+            string data = @"9c 01 12 00
+0A 02 12 00 00 FF DD 00 08
+86 01 02 fd
+84 06 12 00 00 00 00 00 08
+9c 01 12 00
 84 06 12 00 00 00 00 00 08";
             MemoryStream ms = GetStreamFromInputString(data);
 
