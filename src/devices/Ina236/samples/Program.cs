@@ -9,8 +9,8 @@ using Iot.Device.Adc;
 using Iot.Device.Arduino;
 using UnitsNet;
 
-using ArduinoBoard board = new ArduinoBoard("COM4", 115200);
-using Ina236 device = new(board.CreateI2cDevice(new I2cConnectionSettings(0, 0x80)), ElectricResistance.FromMilliohms(8),
+using ArduinoBoard board = new ArduinoBoard("COM5", 115200);
+using Ina236 device = new(board.CreateI2cDevice(new I2cConnectionSettings(0, 0x40)), ElectricResistance.FromMilliohms(8),
     ElectricCurrent.FromAmperes(10.0));
 
 while (!Console.KeyAvailable)

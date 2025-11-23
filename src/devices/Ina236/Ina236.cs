@@ -27,10 +27,10 @@ namespace Iot.Device.Adc
         /// <summary>
         /// The default I2C Address for this device.
         /// According to the datasheet, the device comes in two variants, A and B.
-        /// Type A has addresses 0x80 to 0x83, depending on whether the ADDR pin is connected to GND, VS, SDA or SCL.
-        /// Type B has addresses 0x90 to 0x94, depending on the ADDR pin.
+        /// Type A has addresses 0x40 to 0x43, depending on whether the ADDR pin is connected to GND, VS, SDA or SCL.
+        /// Type B has addresses 0x44 to 0x47, depending on the ADDR pin.
         /// </summary>
-        public const int DefaultI2cAddress = 0x80;
+        public const int DefaultI2cAddress = 0x40;
         private I2cDevice _i2cDevice;
         private ElectricResistance _shuntResistance;
         private ElectricCurrent _currentLsb;
@@ -77,16 +77,21 @@ namespace Iot.Device.Adc
             }
 
             // See datasheet. Use twice the value to allow later rounding
-            var currentLsbMinimum = current / Pow(2.0, 15) * 2;
+            ElectricCurrent currentLsbMinimum = current / Pow(2.0, 15) * 2;
             double exactCalibrationValue = 0.00512 / (currentLsbMinimum.Amperes * shuntResistance.Ohms);
-            int valueToSet = (int)(exactCalibrationValue * 1E6); // the value must be set in uA
+            int valueToSet = (int)exactCalibrationValue;
             if (valueToSet > 0xFFFF)
             {
                 throw new InvalidOperationException("Invalid combination of settings - the calibration value is out of spec");
             }
 
             // Reverse calculation, to get the exact lsb
-            double exactLsbMinimum = valueToSet / 0.00512 / shuntResistance.Ohms;
+            // Solve this for x:
+            // calibrationValue = 0.00512 / (x * resistance) // * (x * resistance)
+            // calibrationValue * (x * resistance) = 0.00512 // / resistance
+            // calibrationValue * x = 0.00512 / resistance // / calibrationvalue
+            // x = 0.00512 / resistance / calibrationValue
+            double exactLsbMinimum = 0.00512 / shuntResistance.Ohms / valueToSet;
 
             _currentLsb = ElectricCurrent.FromAmperes(exactLsbMinimum);
 
