@@ -100,6 +100,8 @@ namespace ArduinoCsCompiler
 
         internal CompilerCommandHandler CommandHandler => _commandHandler;
 
+        public ILogger Logger => _logger;
+
         private static bool HasStaticFields(Type cls)
         {
             foreach (var fld in cls.GetFields())
@@ -3087,7 +3089,11 @@ namespace ArduinoCsCompiler
             }
 
             var decl = _activeExecutionSet.GetMethod(method);
-            _logger.LogInformation($"Starting execution on {decl}...");
+            if (!decl.Name.Contains("..cctor"))
+            {
+                _logger.LogInformation($"Starting execution on {decl}...");
+            }
+
             if (method.GetParameters().Length != arguments.Length)
             {
                 throw new ArgumentException($"The number of arguments for the method {method.MemberInfoSignature()} does not match. {arguments.Length} arguments were provided");

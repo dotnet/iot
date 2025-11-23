@@ -28,19 +28,19 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void AllocateSimpleClass()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(SimpleClass1.SimpleTest1, true);
+            ExecuteComplexProgramSuccess<Func<int>>(SimpleClass1.SimpleTest1, nameof(AllocateSimpleClass), true);
         }
 
         [Fact]
         public void SimpleGcStatistics()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(SimpleClass1.SimpleGcStatistics, false);
+            ExecuteComplexProgramSuccess<Func<int>>(SimpleClass1.SimpleGcStatistics, nameof(SimpleGcStatistics), false);
         }
 
         [Fact]
         public void SimpleGcFunctions()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(SimpleClass1.GcFunctions, true);
+            ExecuteComplexProgramSuccess<Func<int>>(SimpleClass1.GcFunctions, nameof(SimpleGcFunctions), true);
         }
 
         internal class SimpleClass1

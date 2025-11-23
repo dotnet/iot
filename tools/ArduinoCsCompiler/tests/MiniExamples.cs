@@ -51,7 +51,7 @@ namespace Iot.Device.Arduino.Tests
                 MaxMemoryUsage = 350 * 1024,
             };
 
-            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.Run, false, s);
+            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.Run, nameof(DisplayHelloWorld), false, s);
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace Iot.Device.Arduino.Tests
                 ForceFlashWrite = true,
             };
 
-            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.FileSystemTest, false, s);
+            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.FileSystemTest, nameof(FileSystemCheck), false, s);
         }
 
         public class UseI2cDisplay
