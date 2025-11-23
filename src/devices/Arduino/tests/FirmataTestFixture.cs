@@ -11,6 +11,8 @@ using System.Text;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
@@ -27,6 +29,8 @@ namespace Iot.Device.Arduino.Tests
                 var loggerFactory = LoggerFactory.Create(builder =>
                 {
                     builder.AddProvider(new DebuggerOutputLoggerProvider())
+                        .SetMinimumLevel(LogLevel.Debug);
+                    builder.AddProvider(new SimpleConsoleLoggerFactory())
                         .SetMinimumLevel(LogLevel.Debug);
                 });
 

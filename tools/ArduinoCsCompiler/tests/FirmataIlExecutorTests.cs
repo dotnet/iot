@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using ArduinoCsCompiler;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Sdk;
 
@@ -73,6 +74,7 @@ namespace Iot.Device.Arduino.Tests
             object[] data = new object[0];
             MethodState state = MethodState.Stopped;
 
+            Stopwatch sw = Stopwatch.StartNew();
             // for (int i = 0; i < 10; i++)
             {
                 // This assertion fails on a timeout
@@ -83,6 +85,8 @@ namespace Iot.Device.Arduino.Tests
                 // The task has terminated (do this after the above, otherwise the test will not show an exception)
                 Assert.Equal(MethodState.Stopped, remoteMethod.State);
             }
+
+            Compiler.Logger.LogInformation($"Executing {testClass.Name}.{methodName} took {sw.ElapsedMilliseconds}ms (not including upload)");
 
             // The only result is from the end of the method
             Assert.Equal(MethodState.Stopped, state);

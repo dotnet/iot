@@ -75,7 +75,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void RunBlinkWithGpioController()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(SimpleLedBinding.RunBlink, false, 6, 1000);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(SimpleLedBinding.RunBlink, nameof(RunBlinkWithGpioController), false, 6, 1000);
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void GetDataFromStaticByteField()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticByteField.GetFirstByte, true, 0, 0);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticByteField.GetFirstByte, nameof(GetDataFromStaticByteField), true, 0, 0);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void CpuIsLittleEndian()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(IsLittleEndianTest, true);
+            ExecuteComplexProgramSuccess<Func<int>>(IsLittleEndianTest, nameof(CpuIsLittleEndian), true);
         }
 
         private static int IsLittleEndianTest()
@@ -197,19 +197,19 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void ClassWith64BitFieldTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassWith64BitField.ClassMain, true);
+            ExecuteComplexProgramSuccess<Func<int>>(ClassWith64BitField.ClassMain, nameof(ClassWith64BitFieldTest), true);
         }
 
         [Fact]
         public void MethodCallOnValueTypeTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(MethodCallOnValueType, true);
+            ExecuteComplexProgramSuccess<Func<int>>(MethodCallOnValueType, nameof(MethodCallOnValueTypeTest), true);
         }
 
         [Fact]
         public void MethodCallOnGenericClass()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(MethodCallOnGenericTest, true);
+            ExecuteComplexProgramSuccess<Func<int>>(MethodCallOnGenericTest, nameof(MethodCallOnGenericClass), true);
         }
 
         public class ClassWith64BitField
@@ -266,7 +266,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void GetDataFromClassWithStaticField2()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticField2.GetFirstByte, true, 0, 0);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticField2.GetFirstByte, nameof(GetDataFromClassWithStaticField2), true, 0, 0);
         }
 
         public class ClassWithStaticField2
@@ -297,61 +297,61 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void GetDataFromStaticIntField()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticIntField.GetFirst, true, 7, 0);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticIntField.GetFirst, nameof(GetDataFromStaticIntField), true, 7, 7);
         }
 
         [Fact]
         public void SimpleDelegateTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test1, true);
+            ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test1, nameof(SimpleDelegateTest), true);
         }
 
         [Fact]
         public void NonStaticDelegateTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test2, true);
+            ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test2, nameof(NonStaticDelegateTest), true);
         }
 
         [Fact]
         public void EventHandlerTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test3, true);
+            ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test3, nameof(EventHandlerTest), true);
         }
 
         [Fact]
         public void OverridingObjectEqualsWorksTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassThatOverridesObjectEquals.Test1, true);
+            ExecuteComplexProgramSuccess<Func<int>>(ClassThatOverridesObjectEquals.Test1, nameof(OverridingObjectEqualsWorksTest), true);
         }
 
         [Fact]
         public void OverridingObjectEqualsInderivedClassWorksTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test2, true);
+            ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test2, nameof(OverridingObjectEqualsInderivedClassWorksTest), true);
         }
 
         [Fact]
         public void EqualityDoesNotReturnTrueIfTypeIsNotSame()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test3, true);
+            ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test3, nameof(EqualityDoesNotReturnTrueIfTypeIsNotSame), true);
         }
 
         [Fact]
         public void HashSetTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.TestHashSet, true);
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.TestHashSet, nameof(HashSetTest), true);
         }
 
         [Fact]
         public void DictionaryTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.DictionaryTest, true);
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.DictionaryTest, nameof(DictionaryTest), true);
         }
 
         [Fact]
         public void ReflectionTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.ReflectionTest, true);
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.ReflectionTest, nameof(ReflectionTest), true);
         }
 
         [Fact]
@@ -366,7 +366,7 @@ namespace Iot.Device.Arduino.Tests
                 MaxMemoryUsage = 100_000,
             };
 
-            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.CreateInstanceTest, true, s);
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.CreateInstanceTest, nameof(CreateInstanceTest), true, s);
         }
 
         public class ClassThatOverridesObjectEquals : IEquatable<ClassThatOverridesObjectEquals>

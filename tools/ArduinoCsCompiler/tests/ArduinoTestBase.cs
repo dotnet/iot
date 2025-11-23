@@ -3,9 +3,12 @@
 
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using ArduinoCsCompiler;
 using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -63,13 +66,13 @@ namespace Iot.Device.Arduino.Tests
             GC.SuppressFinalize(this);
         }
 
-        protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, params object[] args)
+        protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, string name, bool executeLocally, params object[] args)
             where T : Delegate
         {
-            ExecuteComplexProgramSuccess<T>(mainEntryPoint, executeLocally, CompilerSettings, args);
+            ExecuteComplexProgramSuccess<T>(mainEntryPoint, name, executeLocally, CompilerSettings, args);
         }
 
-        protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, CompilerSettings settings, params object[] args)
+        protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, string name, bool executeLocally, CompilerSettings settings, params object[] args)
             where T : Delegate
         {
             // Execute function locally, if possible (to compare behavior)
@@ -82,12 +85,12 @@ namespace Iot.Device.Arduino.Tests
 
             var exec = _compiler.PrepareAndRunExecutionSet(mainEntryPoint, settings);
 
-            // long memoryUsage = exec.EstimateRequiredMemory();
-            // Assert.True(memoryUsage < settings.MaxMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
+            Stopwatch sw = Stopwatch.StartNew();
             var task = exec.MainEntryPoint;
             task.InvokeAsync(args);
 
             task.WaitForResult();
+            Compiler.Logger.LogInformation($"Executing {name} took {sw.ElapsedMilliseconds}ms (not including upload)");
 
             Assert.True(task.GetMethodResults(exec, out var returnCodes, out var state));
             Assert.NotEmpty(returnCodes);
