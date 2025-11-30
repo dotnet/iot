@@ -126,6 +126,136 @@ namespace Iot.Device.Adc
         }
 
         /// <summary>
+        /// How many samples should be combined into one result.
+        /// A high value returns less often a new reading, but is more stable.
+        /// <remarks>
+        /// Valid values are: 1, 4, 16, 64, 128, 256, 512 and 1024. Other values will be rounded accordingly.
+        /// </remarks>
+        /// </summary>
+        [Property]
+        public uint AverageOverNoSamples
+        {
+            get
+            {
+                int reg = (ReadRegisterUnsigned(Ina236Register.Configuration) >> 9) & 0x7;
+                return reg switch
+                {
+                    0b000 => 1,
+                    0b001 => 4,
+                    0b010 => 16,
+                    0b011 => 64,
+                    0b100 => 128,
+                    0b101 => 256,
+                    0b110 => 512,
+                    0b111 => 1024,
+                    _ => throw new InvalidOperationException("This is not possible")
+                };
+            }
+            set
+            {
+                int valueToSet = value switch
+                {
+                    <= 1 => 0b000,
+                    <= 4 => 0b001,
+                    <= 16 => 0b010,
+                    <= 64 => 0b011,
+                    <= 128 => 0b100,
+                    <= 256 => 0b101,
+                    <= 512 => 0b110,
+                    >= 513 => 0b111,
+                };
+
+                int reg = ReadRegisterUnsigned(Ina236Register.Configuration) & 0xF1FF;
+                reg = reg | (valueToSet << 9);
+                WriteRegister(Ina236Register.Configuration, (ushort)reg);
+            }
+        }
+
+        /// <summary>
+        /// Conversion time for a single bus value, in microseconds
+        /// </summary>
+        /// <remarks>Valid values are: 140, 204, 332, 588, 1100 (default), 2116, 4156 and 8244us. Other values will be rounded</remarks>
+        public int BusConversionTime
+        {
+            get
+            {
+                int reg = (ReadRegisterUnsigned(Ina236Register.Configuration) >> 6) & 0x7;
+                return ConversionPeriodFromValue(reg);
+            }
+
+            set
+            {
+                int valueToSet = ValueFromConversionPeriod(value);
+                int reg = ReadRegisterUnsigned(Ina236Register.Configuration) & 0xFE3F;
+                reg = reg | (valueToSet << 6);
+                WriteRegister(Ina236Register.Configuration, (ushort)reg);
+            }
+        }
+
+        /// <summary>
+        /// Conversion time for a single shunt value, in microseconds
+        /// </summary>
+        /// <remarks>Valid values are: 140, 204, 332, 588, 1100 (default), 2116, 4156 and 8244us. Other values will be rounded</remarks>
+        public int ShuntConversionTime
+        {
+            get
+            {
+                int reg = (ReadRegisterUnsigned(Ina236Register.Configuration) >> 3) & 0x7;
+                return ConversionPeriodFromValue(reg);
+            }
+
+            set
+            {
+                int valueToSet = ValueFromConversionPeriod(value);
+                int reg = ReadRegisterUnsigned(Ina236Register.Configuration) & 0xFFC7;
+                reg = reg | (valueToSet << 3);
+                WriteRegister(Ina236Register.Configuration, (ushort)reg);
+            }
+        }
+
+        /// <summary>
+        /// Converts the given conversion period in us into the binary equivalent
+        /// </summary>
+        /// <param name="period">Period in microseconds</param>
+        /// <returns>An integer value to be set to the register (with appropriate shift, used for VBUSCT and VSHCT
+        /// in the configuration register)</returns>
+        private int ValueFromConversionPeriod(int period)
+        {
+            return period switch
+            {
+                <= 140 => 0b000,
+                <= 204 => 0b001,
+                <= 332 => 0b010,
+                <= 588 => 0b011,
+                <= 1100 => 0b100,
+                <= 2116 => 0b101,
+                <= 4156 => 0b110,
+                >= 4157 => 0b111
+            };
+        }
+
+        /// <summary>
+        /// Inverse of the above
+        /// </summary>
+        /// <param name="period">The time period</param>
+        /// <returns>The bit value for the conversion register</returns>
+        private int ConversionPeriodFromValue(int period)
+        {
+            return period switch
+            {
+                0b000 => 140,
+                0b001 => 204,
+                0b010 => 332,
+                0b011 => 588,
+                0b100 => 1100,
+                0b101 => 2116,
+                0b110 => 4156,
+                0b111 => 8244,
+                _ => throw new InvalidOperationException("This cannot really happen")
+            };
+        }
+
+        /// <summary>
         /// Dispose instance
         /// </summary>
         public void Dispose()
