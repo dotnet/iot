@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using UnitsNet;
 
 namespace System.Device.I2c;
 
@@ -20,6 +22,7 @@ namespace System.Device.I2c;
 public abstract class I2cSimulatedDeviceBase : I2cDevice
 {
     private bool _disposed;
+    private Dictionary<byte, RegisterBase> _registerMap;
 
     /// <summary>
     /// Default constructor
@@ -28,8 +31,14 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
     public I2cSimulatedDeviceBase(I2cConnectionSettings settings)
     {
         ConnectionSettings = settings;
+        _registerMap = new Dictionary<byte, RegisterBase>();
         _disposed = false;
     }
+
+    /// <summary>
+    /// The registermap of this device.
+    /// </summary>
+    protected Dictionary<byte, RegisterBase> RegisterMap => _registerMap;
 
     /// <summary>
     /// The active connection settings
@@ -122,5 +131,102 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
         self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
         self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
         return self;
+    }
+
+    /// <summary>
+    /// Base class for generic register access
+    /// </summary>
+    public abstract record class RegisterBase : IComparable
+    {
+        /// <summary>
+        /// Writes the register, regardless of its actual type
+        /// </summary>
+        /// <param name="value">The value to write</param>
+        public abstract void WriteRegister(int value);
+
+        /// <summary>
+        /// Reads the register value regardless of its actual type
+        /// </summary>
+        /// <returns>The register value, sign-extended to int</returns>
+        public abstract int ReadRegister();
+
+        /// <inheritdoc />
+        public abstract int CompareTo(object? obj);
+    }
+
+    /// <summary>
+    /// Represents a register value
+    /// </summary>
+    /// <typeparam name="T">Size of the register, usually byte or int</typeparam>
+    public record class Register<T> : RegisterBase
+        where T : struct, IEquatable<T>, INumber<T>, IComparable
+    {
+        private T _value;
+
+        /// <summary>
+        /// Event that is raised when the register is written
+        /// </summary>
+        public event Action<T>? ValueChanged;
+
+        /// <summary>
+        /// Create a new register
+        /// </summary>
+        public Register()
+            : this(default(T))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new register
+        /// </summary>
+        /// <param name="initialValue">The initial (power-on-reset) value of the register</param>
+        public Register(T initialValue)
+        {
+            _value = initialValue;
+        }
+
+        /// <summary>
+        /// The current value of the register
+        /// </summary>
+        public T Value
+        {
+            get
+            {
+                return _value;
+            }
+            set
+            {
+                _value = value;
+                ValueChanged?.Invoke(_value);
+            }
+        }
+
+        /// <inheritdoc />
+        public override void WriteRegister(int value)
+        {
+            Value = T.CreateChecked(value);
+        }
+
+        /// <inheritdoc />
+        public override int ReadRegister()
+        {
+            return int.CreateChecked(Value);
+        }
+
+        /// <inheritdoc />
+        public override int CompareTo(object? obj)
+        {
+            if (obj == null)
+            {
+                return 1;
+            }
+
+            if (obj is Register<T> t1)
+            {
+                return _value.CompareTo(t1._value);
+            }
+
+            throw new ArgumentException("These types can't be compared");
+        }
     }
 }
