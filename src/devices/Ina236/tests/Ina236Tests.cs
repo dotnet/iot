@@ -42,8 +42,23 @@ namespace Iot.Device.Adc.Tests
             Assert.Equal(1280, calibrationValue);
         }
 
+        [Fact]
+        public void ReadValues()
+        {
+            // Calibration has been set up, so we should get the values mentioned in the data sheet
+            ElectricPotential voltage = _ina236.ReadBusVoltage();
+            Assert.Equal(12.0, voltage.Volts);
+
+            ElectricCurrent current = _ina236.ReadCurrent();
+            Assert.Equal(6.0, current.Amperes);
+
+            Power p = _ina236.ReadPower();
+            Assert.Equal(72.0m, p.Watts);
+        }
+
         public void Dispose()
         {
+            _ina236.Dispose();
         }
     }
 }
