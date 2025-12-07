@@ -326,9 +326,6 @@ namespace Iot.Device.Adc
             // set a value in the buffer representing the register that we want to read and send it to the INA219
             _i2cDevice.WriteRead(new ReadOnlySpan<byte>(ref registerNumber), buffer);
 
-            // read the register back from the INA219.
-            _i2cDevice.Read(buffer);
-
             // massage the big endian value read from the INA219 unto a ushort.
             return BinaryPrimitives.ReadUInt16BigEndian(buffer);
         }
@@ -345,9 +342,6 @@ namespace Iot.Device.Adc
             byte registerNumber = (byte)register;
             // set a value in the buffer representing the register that we want to read and send it to the INA219
             _i2cDevice.WriteRead(new ReadOnlySpan<byte>(ref registerNumber), buffer);
-
-            // read the register back from the INA219.
-            _i2cDevice.Read(buffer);
 
             // massage the big endian value read from the INA219 unto a ushort.
             return BinaryPrimitives.ReadInt16BigEndian(buffer);
