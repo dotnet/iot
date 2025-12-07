@@ -17,10 +17,13 @@ namespace Iot.Device.Adc.Tests
     public sealed class Ina236Tests : IDisposable
     {
         private Ina236 _ina236;
+        private SimulatedIna236 _simulatedIna236;
 
         public Ina236Tests()
         {
-            _ina236 = new Ina236(new SimulatedIna236(new I2cConnectionSettings(1, 0x40)), ElectricResistance.FromMilliohms(8), ElectricCurrent.FromAmperes(10));
+            _simulatedIna236 = new SimulatedIna236(new I2cConnectionSettings(1, 0x40));
+            // Use the setting that corresponds to the example values in the data sheet
+            _ina236 = new Ina236(_simulatedIna236, ElectricResistance.FromMilliohms(8), ElectricCurrent.FromAmperes(16.384 / 2.0));
         }
 
         [Fact]
@@ -30,6 +33,13 @@ namespace Iot.Device.Adc.Tests
             Assert.Equal(1u, _ina236.AverageOverNoSamples);
             Assert.Equal(1100, _ina236.BusConversionTime);
             Assert.Equal(1100, _ina236.ShuntConversionTime);
+        }
+
+        [Fact]
+        public void CheckSetupComplete()
+        {
+            int calibrationValue = _simulatedIna236.RegisterMap[5].ReadRegister();
+            Assert.Equal(1280, calibrationValue);
         }
 
         public void Dispose()

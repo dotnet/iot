@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnitsNet;
@@ -23,6 +24,7 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
 {
     private bool _disposed;
     private Dictionary<byte, RegisterBase> _registerMap;
+    private byte _currentRegister;
 
     /// <summary>
     /// Default constructor
@@ -33,17 +35,36 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
         ConnectionSettings = settings;
         _registerMap = new Dictionary<byte, RegisterBase>();
         _disposed = false;
+        _currentRegister = 0;
     }
 
     /// <summary>
     /// The registermap of this device.
+    /// This should only be accessed from a derived class, except for test purposes.
     /// </summary>
-    protected Dictionary<byte, RegisterBase> RegisterMap => _registerMap;
+    public Dictionary<byte, RegisterBase> RegisterMap => _registerMap;
 
     /// <summary>
     /// The active connection settings
     /// </summary>
     public override I2cConnectionSettings ConnectionSettings { get; }
+
+    /// <summary>
+    /// The active register.
+    /// Can be set to mimic some non-standard behavior of setting a register (or if reading increases
+    /// the register pointer, which is the case on some chips)
+    /// </summary>
+    protected byte CurrentRegister
+    {
+        get
+        {
+            return _currentRegister;
+        }
+        set
+        {
+            _currentRegister = value;
+        }
+    }
 
     /// <summary>
     /// Reads a byte from the bus
@@ -68,7 +89,7 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
     }
 
     /// <summary>
-    /// This method should implement the read operation from the device.
+    /// This method implements the read operation from the device.
     /// </summary>
     /// <param name="inputBuffer">Buffer with input data to the device, buffer[0] is usually the command byte</param>
     /// <param name="outputBuffer">The return data from the device</param>
@@ -83,6 +104,7 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
         if (WriteRead([], buffer2) == buffer.Length)
         {
             buffer2.CopyTo(buffer);
+            return;
         }
 
         throw new IOException($"Unable to read {buffer.Length} bytes from the device");
@@ -142,16 +164,22 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
         /// Writes the register, regardless of its actual type
         /// </summary>
         /// <param name="value">The value to write</param>
-        public abstract void WriteRegister(int value);
+        protected abstract void WriteRegister(int value);
 
         /// <summary>
         /// Reads the register value regardless of its actual type
         /// </summary>
         /// <returns>The register value, sign-extended to int</returns>
-        public abstract int ReadRegister();
+        protected abstract int ReadRegister();
 
         /// <inheritdoc />
         public abstract int CompareTo(object? obj);
+
+        /// <summary>
+        /// Gets the value as stored in the register
+        /// </summary>
+        /// <returns></returns>
+        public abstract int GetValue();
     }
 
     /// <summary>
@@ -161,12 +189,18 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
     public record class Register<T> : RegisterBase
         where T : struct, IEquatable<T>, INumber<T>, IComparable
     {
-        private T _value;
-
         /// <summary>
         /// Event that is raised when the register is written
         /// </summary>
-        public event Action<T>? ValueChanged;
+        private readonly Func<T, T>? _registerUpdateHandler;
+
+        /// <summary>
+        /// Event that is raised to read the register. Gets the internal value of the register
+        /// and returns the value the client should see (e.g a random measurement value)
+        /// </summary>
+        private readonly Func<T, T>? _registerReadHandler;
+
+        private T _value;
 
         /// <summary>
         /// Create a new register
@@ -186,29 +220,76 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
         }
 
         /// <summary>
+        /// Creates a new register with handlers
+        /// </summary>
+        /// <param name="initialValue">The initial value of the register at power-up</param>
+        /// <param name="updateHandler">A handler for a register write. Can be null.</param>
+        /// <param name="readHandler">A handler for a register read. Can be null.</param>
+        public Register(T initialValue, Func<T, T>? updateHandler, Func<T, T>? readHandler)
+        {
+            _value = initialValue;
+            _registerUpdateHandler = updateHandler;
+            _registerReadHandler = readHandler;
+        }
+
+        /// <summary>
         /// The current value of the register
         /// </summary>
         public T Value
         {
             get
             {
+                if (_registerReadHandler != null)
+                {
+                    return _registerReadHandler(_value);
+                }
+
                 return _value;
             }
             set
             {
+                if (_registerUpdateHandler != null)
+                {
+                    _value = _registerUpdateHandler(value);
+                    return;
+                }
+
                 _value = value;
-                ValueChanged?.Invoke(_value);
             }
         }
 
         /// <inheritdoc />
-        public override void WriteRegister(int value)
+        protected override void WriteRegister(int value)
         {
+            if (Marshal.SizeOf<T>() == 2 && BitConverter.IsLittleEndian)
+            {
+                // The bus runs in big-endian mode
+                int r = (value & 0xFF) << 8 | value >> 8;
+                value = r;
+            }
+
             Value = T.CreateChecked(value);
         }
 
         /// <inheritdoc />
-        public override int ReadRegister()
+        protected override int ReadRegister()
+        {
+            int ret = int.CreateChecked(Value);
+            if (Marshal.SizeOf<T>() == 2 && BitConverter.IsLittleEndian)
+            {
+                // The bus runs in big-endian mode
+                int r = (ret & 0xFF) << 8 | ret >> 8;
+                ret = r;
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// The value, for external access
+        /// </summary>
+        /// <returns>The value, sign-extended to int</returns>
+        public override int GetValue()
         {
             return int.CreateChecked(Value);
         }
