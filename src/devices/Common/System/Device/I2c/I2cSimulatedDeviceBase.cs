@@ -164,22 +164,16 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
         /// Writes the register, regardless of its actual type
         /// </summary>
         /// <param name="value">The value to write</param>
-        protected abstract void WriteRegister(int value);
+        public abstract void WriteRegister(int value);
 
         /// <summary>
         /// Reads the register value regardless of its actual type
         /// </summary>
         /// <returns>The register value, sign-extended to int</returns>
-        protected abstract int ReadRegister();
+        public abstract int ReadRegister();
 
         /// <inheritdoc />
         public abstract int CompareTo(object? obj);
-
-        /// <summary>
-        /// Gets the value as stored in the register
-        /// </summary>
-        /// <returns></returns>
-        public abstract int GetValue();
     }
 
     /// <summary>
@@ -259,37 +253,13 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
         }
 
         /// <inheritdoc />
-        protected override void WriteRegister(int value)
+        public override void WriteRegister(int value)
         {
-            if (Marshal.SizeOf<T>() == 2 && BitConverter.IsLittleEndian)
-            {
-                // The bus runs in big-endian mode
-                int r = (value & 0xFF) << 8 | value >> 8;
-                value = r;
-            }
-
             Value = T.CreateChecked(value);
         }
 
         /// <inheritdoc />
-        protected override int ReadRegister()
-        {
-            int ret = int.CreateChecked(Value);
-            if (Marshal.SizeOf<T>() == 2 && BitConverter.IsLittleEndian)
-            {
-                // The bus runs in big-endian mode
-                int r = (ret & 0xFF) << 8 | ret >> 8;
-                ret = r;
-            }
-
-            return ret;
-        }
-
-        /// <summary>
-        /// The value, for external access
-        /// </summary>
-        /// <returns>The value, sign-extended to int</returns>
-        public override int GetValue()
+        public override int ReadRegister()
         {
             return int.CreateChecked(Value);
         }

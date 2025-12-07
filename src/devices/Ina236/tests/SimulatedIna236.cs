@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.Linq;
@@ -16,10 +17,10 @@ namespace Ina236.Tests
             : base(settings)
         {
             RegisterMap.Add(0, new Register<ushort>(0x4127, ConfigurationRegisterHandler, null)); // 0x4127 is the power-on default of the configuration register
-            RegisterMap.Add(1, new Register<ushort>());
-            RegisterMap.Add(2, new Register<ushort>());
-            RegisterMap.Add(3, new Register<ushort>());
-            RegisterMap.Add(4, new Register<ushort>());
+            RegisterMap.Add(1, new Register<ushort>(19200)); // Default values for example from data sheet
+            RegisterMap.Add(2, new Register<ushort>(7500));
+            RegisterMap.Add(3, new Register<ushort>(4500));
+            RegisterMap.Add(4, new Register<ushort>(12000));
             RegisterMap.Add(5, new Register<ushort>());
             RegisterMap.Add(6, new Register<ushort>());
             RegisterMap.Add(7, new Register<ushort>());
@@ -52,7 +53,7 @@ namespace Ina236.Tests
                 CurrentRegister = inputBuffer[0];
                 if (inputBuffer.Length >= 3 && RegisterMap.TryGetValue(CurrentRegister, out var register))
                 {
-                    ushort reg = BitConverter.ToUInt16(inputBuffer, 1);
+                    ushort reg = BinaryPrimitives.ReadUInt16BigEndian(inputBuffer.AsSpan().Slice(1));
                     register.WriteRegister(reg);
                 }
             }
@@ -61,8 +62,7 @@ namespace Ina236.Tests
             if (outputBuffer.Length >= 2 && RegisterMap.TryGetValue(CurrentRegister, out var register2))
             {
                 ushort ret = (ushort)register2.ReadRegister();
-                byte[] buf = BitConverter.GetBytes(ret);
-                buf.CopyTo(outputBuffer, 0);
+                BinaryPrimitives.WriteUInt16BigEndian(outputBuffer, ret);
             }
 
             return outputBuffer.Length;
