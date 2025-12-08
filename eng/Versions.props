@@ -4,7 +4,7 @@
     <!-- Disabling the check for End of live TFMs since we still target netcoreapp 2.1 -->
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <MicrosoftDotNetGenAPIPackageVersion>9.0.0-beta.25562.4</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>9.0.0-beta.25577.5</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
     <SystemDrawingCommonPackageVersion>8.0.8</SystemDrawingCommonPackageVersion>
     <SystemIOPortsPackageVersion>8.0.0</SystemIOPortsPackageVersion>
