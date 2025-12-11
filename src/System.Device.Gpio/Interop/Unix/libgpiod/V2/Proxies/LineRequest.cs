@@ -263,7 +263,8 @@ internal class LineRequest : LibGpiodProxyBase
             {
                 var requestEvent = new epoll_event
                 {
-                    events = PollEvents.EPOLLIN | PollEvents.EPOLLPRI, data = new epoll_data { fd = requestFileDescriptor }
+                    events = PollEvents.EPOLLIN | PollEvents.EPOLLPRI,
+                    data = new epoll_data { fd = requestFileDescriptor }
                 };
 
                 int ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, requestFileDescriptor, ref requestEvent);
@@ -290,7 +291,8 @@ internal class LineRequest : LibGpiodProxyBase
                 {
                     var signalEvent = new epoll_event
                     {
-                        events = PollEvents.EPOLLIN | PollEvents.EPOLLERR, data = new epoll_data { fd = signalPipeReadSide }
+                        events = PollEvents.EPOLLIN | PollEvents.EPOLLERR,
+                        data = new epoll_data { fd = signalPipeReadSide }
                     };
 
                     ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, signalPipeReadSide, ref signalEvent);

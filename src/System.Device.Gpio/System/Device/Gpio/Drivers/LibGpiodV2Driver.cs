@@ -186,18 +186,18 @@ public sealed class LibGpiodV2Driver : UnixDriver
         switch (direction)
         {
             case GpiodLineDirection.Input:
-            {
-                var bias = lineInfo.GetBias();
-                return bias switch
                 {
-                    GpiodLineBias.AsIs => PinMode.Input,
-                    GpiodLineBias.Unknown => PinMode.Input,
-                    GpiodLineBias.Disabled => PinMode.Input,
-                    GpiodLineBias.PullUp => PinMode.InputPullUp,
-                    GpiodLineBias.PullDown => PinMode.InputPullDown,
-                    _ => throw new GpiodException($"Bias '{bias}' out of range")
-                };
-            }
+                    var bias = lineInfo.GetBias();
+                    return bias switch
+                    {
+                        GpiodLineBias.AsIs => PinMode.Input,
+                        GpiodLineBias.Unknown => PinMode.Input,
+                        GpiodLineBias.Disabled => PinMode.Input,
+                        GpiodLineBias.PullUp => PinMode.InputPullUp,
+                        GpiodLineBias.PullDown => PinMode.InputPullDown,
+                        _ => throw new GpiodException($"Bias '{bias}' out of range")
+                    };
+                }
 
             case GpiodLineDirection.Output:
                 return PinMode.Output;

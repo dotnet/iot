@@ -55,7 +55,7 @@ public abstract class UnixDriver : GpioDriver
         throw new PlatformNotSupportedException("No unix driver appears to be runnable");
     }
 
-    private static bool TryCreate(Func<UnixDriver> creationAction, [NotNullWhen(true)]out UnixDriver? driver)
+    private static bool TryCreate(Func<UnixDriver> creationAction, [NotNullWhen(true)] out UnixDriver? driver)
     {
         try
         {
