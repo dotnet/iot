@@ -182,9 +182,9 @@ stages:
       displayName: Download build artifacts
 
     - task: UseDotNet@2
-      displayName: 'Use .NET SDK 9.0.3xx'
+      displayName: 'Use .NET SDK 9.x'
       inputs:
-        version: 9.0.3xx
+        version: 9.x
 
     # Install the code signing tool
     - task: DotNetCoreCLI@2
