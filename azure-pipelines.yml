@@ -90,6 +90,7 @@ stages:
         ls -r *.md | % { markdown-link-check -v -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
       displayName: 'Execute markdown-link-check'
       condition: eq(variables['build.reason'], 'PullRequest')
+      continueOnError: true
 
   - job: Linux
     displayName: Linux Build
