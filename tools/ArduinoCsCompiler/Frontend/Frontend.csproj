@@ -20,8 +20,8 @@
     <ToolCommandName>dotnet-acs</ToolCommandName>
     <PackageOutputPath>..\..\..\artifacts\packages\$(Configuration)\Shipping</PackageOutputPath>
     <MajorVersion>1</MajorVersion>
-    <MinorVersion>0</MinorVersion>
-    <PatchVersion>2</PatchVersion>
+    <MinorVersion>1</MinorVersion>
+    <PatchVersion>0</PatchVersion>
     <!-- Stay in beta mode -->
     <SuppressFinalPackageVersion>true</SuppressFinalPackageVersion>
   </PropertyGroup>
