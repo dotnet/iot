@@ -46,7 +46,7 @@ stages:
         npm install -g markdownlint-cli
         markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
       displayName: 'Execute Markdownlint'
-      condition: and(eq(variables['build.reason'], 'PullRequest'), eq('${{ parameters.runMarkdownChecks }}', 'true'))
+      condition: and(eq(variables['build.reason'], 'PullRequest'), ${{ parameters.runMarkdownChecks }})
       continueOnError: true
 
       # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
@@ -88,7 +88,7 @@ stages:
     displayName: Markdown Link Check
     pool:
       vmImage: windows-latest
-    condition: eq('${{ parameters.runMarkdownChecks }}', 'true')
+    condition: ${{ parameters.runMarkdownChecks }}
 
     # Use Version 3.10.3 of markdown-link-check, as 3.11.0 is broken (completely ignores the json file)
     steps:
