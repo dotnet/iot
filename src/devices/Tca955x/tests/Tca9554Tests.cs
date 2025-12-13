@@ -8,33 +8,32 @@ using System.Device.I2c;
 using System.Threading;
 
 using Moq;
+using Tca955x.Tests;
 using Xunit;
 
 namespace Iot.Device.Tca955x.Tests
 {
     public class Tca9554Tests
     {
-        private readonly Mock<MockableI2cDevice> _device;
-        private readonly Mock<MockableI2cDevice> _deviceWithBadAddress;
+        private readonly Tca955xSimulatedDevice _device;
+        private readonly Mock<I2cSimulatedDeviceBase> _deviceWithBadAddress;
         private readonly GpioController _controller;
         private readonly Mock<MockableGpioDriver> _driver;
 
         public Tca9554Tests()
         {
-            _device = new Mock<MockableI2cDevice>(MockBehavior.Loose);
-            _deviceWithBadAddress = new Mock<MockableI2cDevice>(MockBehavior.Loose);
-            _device.CallBase = true;
+            _device = new Tca955xSimulatedDevice(new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress));
+            _deviceWithBadAddress = new Mock<I2cSimulatedDeviceBase>(MockBehavior.Loose, new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress + Tca9554.AddressRange + 1));
+            _deviceWithBadAddress.Setup(x => x.ConnectionSettings).CallBase();
             _driver = new Mock<MockableGpioDriver>();
             _driver.CallBase = true;
             _controller = new GpioController(_driver.Object);
-            _device.Setup(x => x.ConnectionSettings).Returns(new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress));
-            _deviceWithBadAddress.Setup(x => x.ConnectionSettings).Returns(new I2cConnectionSettings(0, Tca9554.DefaultI2cAddress + Tca9554.AddressRange + 1));
         }
 
         [Fact]
         public void CreateWithInterrupt()
         {
-            var testee = new Tca9554(_device.Object, 10, _controller);
+            var testee = new Tca9554(_device, 10, _controller);
         }
 
         [Fact]
@@ -46,22 +45,13 @@ namespace Iot.Device.Tca955x.Tests
         [Fact]
         public void CreateWithoutInterrupt()
         {
-            var testee = new Tca9554(_device.Object, -1);
+            var testee = new Tca9554(_device, -1);
         }
 
         [Fact]
         public void TestRead()
         {
-            _device.Setup(x => x.Write(new byte[1]
-            {
-                0
-            }));
-            _device.Setup(x => x.Read(It.IsAny<byte[]>())).Callback((byte[] b) =>
-            {
-                b[0] = 1;
-            });
-
-            var testee = new Tca9554(_device.Object, -1);
+            var testee = new Tca9554(_device, -1);
             var tcaController = new GpioController(testee);
             Assert.Equal(8, tcaController.PinCount);
             GpioPin pin0 = tcaController.OpenPin(0);
@@ -78,7 +68,7 @@ namespace Iot.Device.Tca955x.Tests
         {
             // Arrange
             var interruptPin = 10;
-            var testee = new Tca9554(_device.Object, interruptPin, _controller);
+            var testee = new Tca9554(_device, interruptPin, _controller);
             var tcaController = new GpioController(testee);
             tcaController.OpenPin(1, PinMode.Input);
             bool callbackInvoked = false;
@@ -92,23 +82,15 @@ namespace Iot.Device.Tca955x.Tests
                 mre.Set();
             }
 
-            // Change the device setup to simulate pin1 as high
-            _device.Setup(x => x.Read(It.IsAny<byte[]>())).Callback((byte[] b) =>
-            {
-                b[0] = 0x02;
-            });
+            _device.SetPinState(1, PinValue.High);
 
             // Register callback for rising edge
             tcaController.RegisterCallbackForPinValueChangedEvent(1, PinEventTypes.Falling, Callback);
 
             // Change the device setup to simulate pin1 as low.
-            _device.Setup(x => x.Read(It.IsAny<byte[]>())).Callback((byte[] b) =>
-            {
-                b[0] = 0x00;
-            });
-
+            _device.SetPinState(1, PinValue.Low);
             // Act
-            // Simulate the hardware int pin pin change using the _controller mock
+            // Simulate the hardware int pin change using the _controller mock
             _driver.Object.FireEventHandler(interruptPin, PinEventTypes.Rising);
             mre.Wait(2000); // Wait for the callback to be invoked
 
@@ -122,7 +104,7 @@ namespace Iot.Device.Tca955x.Tests
         [Fact]
         public void TestReadOfIllegalPinThrows()
         {
-            var testee = new Tca9554(_device.Object, -1);
+            var testee = new Tca9554(_device, -1);
             var tcaController = new GpioController(testee);
             Assert.Equal(8, tcaController.PinCount);
             GpioPin pin0 = tcaController.OpenPin(0);
@@ -136,12 +118,12 @@ namespace Iot.Device.Tca955x.Tests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                var testee = new Tca9554(_device.Object, -1, _controller);
+                var testee = new Tca9554(_device, -1, _controller);
             });
 
             Assert.Throws<ArgumentException>(() =>
             {
-                var testee = new Tca9554(_device.Object, 2);
+                var testee = new Tca9554(_device, 2);
             });
         }
 

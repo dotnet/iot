@@ -94,8 +94,10 @@ public abstract class I2cSimulatedDeviceBase : I2cDevice
     /// <param name="inputBuffer">Buffer with input data to the device, buffer[0] is usually the command byte</param>
     /// <param name="outputBuffer">The return data from the device</param>
     /// <returns>How many bytes where read. Should usually match the length of the output buffer</returns>
-    /// <remarks>This doesn't use <see cref="Span{T}"/> as argument type to be mockable</remarks>
-    protected abstract int WriteRead(byte[] inputBuffer, byte[] outputBuffer);
+    /// <remarks>This doesn't use <see cref="Span{T}"/> as argument type to be mockable. Be sure
+    /// to use this method in mocks, not any that take <see cref="Span{T}"/> or <see cref="Memory{T}"/>, as that
+    /// will cause runtime exceptions</remarks>
+    public abstract int WriteRead(byte[] inputBuffer, byte[] outputBuffer);
 
     /// <inheritdoc />
     public override void Read(Span<byte> buffer)
