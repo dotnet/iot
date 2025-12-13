@@ -46,7 +46,7 @@ namespace Ina236.Tests
             return newValue;
         }
 
-        protected override int WriteRead(byte[] inputBuffer, byte[] outputBuffer)
+        public override int WriteRead(byte[] inputBuffer, byte[] outputBuffer)
         {
             if (inputBuffer.Length > 0)
             {
