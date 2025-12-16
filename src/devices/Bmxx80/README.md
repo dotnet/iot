@@ -97,17 +97,17 @@ The following fritzing diagram illustrates one way to wire up the BMP280 with a 
 
 General:
 
-| Bmp280 | Raspberry |
-|--------|:---------:|
-|Vin| Power pin|
-|GND| Ground|
+| Bmp280 | Raspberry  |
+|--------|:----------:|
+| Vin    | Power pin  |
+| GND    | Ground     |
 
 I2C:
 
-| Bmp280 | Raspberry |
-|--------|:---------:|
-|SCK| I2C clock pin|
-|SDI| I2C data pin|
+| Bmp280 | Raspberry      |
+|--------|:--------------:|
+| SCK    | I2C clock pin  |
+| SDI    | I2C data pin   |
 
 ### Connection Type
 

@@ -31,12 +31,12 @@ The sample application demonstrates the use of the binding API for sensor calibr
 
 The MH-Z19B gas module provides a serial communication interface (UART) which can be directly wired to a Raspberry PI board. The module is supplied with 5V. The UART level is at 3.3V and no level shifter is required.
 
-|Function| Raspi pin| MH-Z19 pin|
-|--------|-----------|------------|
-|Vcc +5V |2 (+5V)  |6 (Vin)     |
-|GND  |6 (GND)  |7 (GND)     |
-|UART  |8 (TXD0)  |2 (RXD)     |
-|UART  |10 (RXD0)  |3 (TXD)     |
+| Function | Raspi pin  | MH-Z19 pin |
+|----------|------------|------------|
+| Vcc +5V  | 2 (+5V)    | 6 (Vin)    |
+| GND      | 6 (GND)    | 7 (GND)    |
+| UART     | 8 (TXD0)   | 2 (RXD)    |
+| UART     | 10 (RXD0)  | 3 (TXD)    |
 
 Table: MH-Z19B to RPi 3 connection
 
