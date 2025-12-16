@@ -4,7 +4,7 @@ The DHT temperature and humidity sensors are very popular. This projects support
 
 ## Documentation
 
-|  | DHT10 | DHT11 | DHT12 | DHT21 | DHT22 |
+| | DHT10 | DHT11 | DHT12 | DHT21 | DHT22 |
 | :------: | :------: | :------: | :------: | :------: | :------: |
 | Image | ![dht10](./imgs/dht10.jpg) | ![dht11](./imgs/dht11.jpg) | ![dht12](./imgs/dht12.jpg) | ![dht21](./imgs/dht21.jpg) | ![dht22](./imgs/dht22.jpg) |
 | Temperature Range | -40 ~ 80 ℃ | 0 ~ 60 ℃ | -20 ~ 60 ℃ | -40 ~ 80 ℃ | -40 ~ 80 ℃ |
