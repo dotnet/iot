@@ -11,12 +11,6 @@ pr:
     - main
     - release/3.0
 
-parameters:
-- name: runMarkdownChecks
-  displayName: 'Run Markdown Checks'
-  type: boolean
-  default: false
-
 variables:
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - name: OfficialBuildId
@@ -42,13 +36,6 @@ stages:
           BuildConfiguration: Debug
 
     steps:
-    - powershell: |
-        npm install -g markdownlint-cli
-        markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
-      displayName: 'Execute Markdownlint'
-      condition: and(eq(variables['build.reason'], 'PullRequest'), ${{ parameters.runMarkdownChecks }})
-      continueOnError: true
-
       # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
     - script: build.cmd -ci
         -configuration $(BuildConfiguration)
@@ -83,20 +70,6 @@ stages:
       displayName: Publish Signing Scripts
       artifact: config
       condition: eq(variables['BuildConfiguration'], 'Release')
-
-  - job: Markdown_link_check
-    displayName: Markdown Link Check
-    pool:
-      vmImage: windows-latest
-    condition: and(eq(variables['build.reason'], 'PullRequest'), ${{ parameters.runMarkdownChecks }})
-
-    # Use Version 3.10.3 of markdown-link-check, as 3.11.0 is broken (completely ignores the json file)
-    steps:
-    - powershell: |
-        npm install -g markdown-link-check@3.10.3
-        ls -r *.md | % { markdown-link-check -v -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
-      displayName: 'Execute markdown-link-check'
-      continueOnError: true
 
   - job: Linux
     displayName: Linux Build
