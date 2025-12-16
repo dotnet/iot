@@ -2,7 +2,7 @@
 
 See the following resources to get started.
 
-## Repo Layout
+### Repo Layout
 
 This repository mainly contains two different components:
 
