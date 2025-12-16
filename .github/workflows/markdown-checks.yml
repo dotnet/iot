@@ -1,7 +1,6 @@
 name: Markdown_Checks_CI
 
 on:
-  workflow_dispatch:
   pull_request:
 
 permissions:
@@ -23,7 +22,7 @@ jobs:
         run: npm install -g markdownlint-cli
         
       - name: Run markdownlint
-        run: markdownlint -c .markdownlint.json .
+        run: markdownlint -c ${{ github.workspace }}/.markdownlint.json ${{ github.workspace }}
         continue-on-error: true
 
   markdown-link-check:
