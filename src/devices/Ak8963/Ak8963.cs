@@ -33,7 +33,7 @@ namespace Iot.Device.Magnetometer
         /// Default timeout to use when timeout is not provided in the reading methods
         /// </summary>
         [Property]
-        public TimeSpan DefaultTimeout { get; set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan DefaultTimeout { get; set; } = TimeSpan.FromSeconds(2);
 
         /// <summary>
         /// Default constructor for an independent AK8963
