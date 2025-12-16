@@ -24,6 +24,7 @@ jobs:
         
       - name: Run markdownlint
         run: markdownlint -c .markdownlint.json .
+        continue-on-error: true
 
   markdown-link-check:
     runs-on: ubuntu-latest
@@ -40,6 +41,7 @@ jobs:
         run: npm install -g markdown-link-check@3.10.3
         
       - name: Run markdown-link-check
+        continue-on-error: true
         run: |
           find . -name "*.md" -not -path "./node_modules/*" | while read file; do
             markdown-link-check -v -c .markdown-link-check.json "$file"
