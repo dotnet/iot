@@ -297,7 +297,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void GetDataFromStaticIntField()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticIntField.GetFirst, nameof(GetDataFromStaticIntField), true, 7, 7);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticIntField.GetFirst, nameof(GetDataFromStaticIntField), true, 2, 5);
         }
 
         [Fact]
