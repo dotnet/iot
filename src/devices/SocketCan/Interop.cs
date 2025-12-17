@@ -152,7 +152,7 @@ namespace Iot.Device.SocketCan
             return ifr.ifr_ifindex;
         }
 
-        public static unsafe DateTime GetLastTimeStamp(SafeHandle handle)
+        public static unsafe DateTimeOffset GetLastTimeStamp(SafeHandle handle)
         {
             // From Linux 6.12.33+deb13-amd64 x86_64
             const uint SIOCGSTAMP = 0x8906;
@@ -164,11 +164,8 @@ namespace Iot.Device.SocketCan
                 throw new IOException("Could not get socketcan timestamp");
             }
 
-            DateTime dt_utc = DateTimeOffset.FromUnixTimeSeconds(tv.tv_sec)
-                            .AddTicks(tv.tv_usec * 10) // 1 tick = 100 ns
-                            .UtcDateTime;
-
-            return dt_utc;  // UtcDateTime
+            // tv_usec is in [us]. DateTimeOffset in ticks of [100 ns], that's why * 10 is needed
+            return DateTimeOffset.FromUnixTimeSeconds(tv.tv_sec).AddTicks(tv.tv_usec * 10);
         }
 
         [StructLayout(LayoutKind.Sequential)]

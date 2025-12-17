@@ -74,7 +74,7 @@ void ReceiveAllExample()
 
     while (true)
     {
-        if (can.TryReadFrame(buffer, out int frameLength, out CanId id, out DateTime ts))
+        if (can.TryReadFrame(buffer, out int frameLength, out CanId id, out DateTimeOffset ts))
         {
             Span<byte> data = new Span<byte>(buffer, 0, frameLength);
             string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
