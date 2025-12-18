@@ -31,11 +31,6 @@ namespace Iot.Device.Board
             _openPins = new HashSet<int>();
         }
 
-        protected override int GetLogicalPinNumber(int pinNumber)
-        {
-            return pinNumber;
-        }
-
         protected override void OpenPinCore(int pinNumber)
         {
             _board.ReservePin(pinNumber, PinUsage.Gpio, this);

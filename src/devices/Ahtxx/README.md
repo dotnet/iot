@@ -25,10 +25,10 @@ The binding supports the following sensor functions:
 You need to choose the class depending on the sensor type.
 
 |Sensor|Required class|
-|-----|---------------|
-|AHT10|Aht10          |
-|Aht15|Aht10          |
-|Aht20|Aht20          |
+|-----|--------------|
+|AHT10|Aht10|
+|Aht15|Aht10|
+|Aht20|Aht20|
 
 ## Usage
 

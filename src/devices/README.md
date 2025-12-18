@@ -69,6 +69,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
+* [LPS22HB - Piezoresistive pressure and thermometer sensor](Lps22hb/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
 * [SCD4x - CO<sub>2</sub>, Temperature & Humidity Sensor](Scd4x/README.md)
 * [Sense HAT](SenseHat/README.md)
@@ -89,6 +90,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
 * [LM75 - Digital Temperature Sensor](Lm75/README.md)
+* [LPS22HB - Piezoresistive pressure and thermometer sensor](Lps22hb/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
 * [Max31856 - cold-junction compensated thermocouple to digital converter](Max31856/README.md)
 * [MAX31865 - Resistance Temperature Detector Amplifier](Max31865/README.md)
@@ -203,12 +205,13 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
+* [Blinkt - 8-LED indicator strip](Blinkt/README.md)
 * [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
 * [GUI Support](Gui/README.md)
 * [Holtek HT1632 - 32×8 & 24×16 LED Driver](Ht1632/README.md)
-* [HT16K33 - LED Matrix Display Driver](Display/README.md)
 * [Ili934x TFT LCD Controller](Ili934x/README.md)
 * [IS31FL3730 -- LED Matrix Display Driver](Is31fl3730/README.md)
+* [LED Displays - 5641AS, HT16K33 and LED Matrix Display Driver](Display/README.md)
 * [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen](Pcd8544/README.md)
@@ -226,6 +229,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
 * [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
+* [Tca955x - I/O Expander device family](Tca955x/README.md)
 
 ### CAN BUS libraries/modules
 
@@ -262,10 +266,11 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
+* [Blinkt - 8-LED indicator strip](Blinkt/README.md)
 * [Explorer HAT Pro (Pimoroni)](ExplorerHat/README.md)
-* [HT16K33 - LED Matrix Display Driver](Display/README.md)
 * [IS31FL3730 -- LED Matrix Display Driver](Is31fl3730/README.md)
 * [IS31FL3731 -- LED Matrix Display Driver](Is31fl3731/README.md)
+* [LED Displays - 5641AS, HT16K33 and LED Matrix Display Driver](Display/README.md)
 * [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [On-board LED driver](BoardLed/README.md)
 * [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
@@ -288,7 +293,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### USB devices
 
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
-* [SPI, GPIO and I2C drivers for FT232H, FT2232H, FT4232H](Ft232H/README.md)
+* [SPI, GPIO and I2C drivers for FT232H, FT232HP, FT2232H, FT2232HP, FT2232HA, FT4232H, FT4232HA, FT4232HP](Ft232H/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP](StUsb4500/README.md)
 
@@ -299,7 +304,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Charlieplex Segment binding](Charlieplex/README.md)
 * [Digital liquid level switch](LiquidLevel/README.md)
 * [Generic shift register](ShiftRegister/README.md)
-* [GpioDriver for other boards](Gpio/README.md)
+* [GpioDriver for other boards and virtual GpioController and virtual GpioPin](Gpio/README.md)
 * [Key Matrix](KeyMatrix/README.md)
 * [M5Stack Support bindings](M5Stack/README.md)
 * [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
@@ -320,7 +325,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [1-wire](OneWire/README.md)
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [Board abstraction](Board/README.md)
-* [GpioDriver for other boards](Gpio/README.md)
+* [GpioDriver for other boards and virtual GpioController and virtual GpioPin](Gpio/README.md)
 * [MotorHat](MotorHat/README.md)
 * [NMEA 0183 Protocol](Nmea0183/README.md)
 * [Pca9685 - I2C PWM Driver](Pca9685/README.md)
@@ -328,7 +333,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Software PWM](SoftPwm/README.md)
 * [Software SPI](SoftwareSpi/README.md)
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
-* [SPI, GPIO and I2C drivers for FT232H, FT2232H, FT4232H](Ft232H/README.md)
+* [SPI, GPIO and I2C drivers for FT232H, FT232HP, FT2232H, FT2232HP, FT2232HA, FT4232H, FT4232HA, FT4232HP](Ft232H/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [System.Device.Model - attributes for device bindings](System.Device.Model/README.md)
 
@@ -504,10 +509,10 @@ private GpioController _controller;
 private bool _shouldDispose;
 private int _pinToUse;
 
-public MyBinding(int pinToUse, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
+public MyBinding(int pinToUse, GpioController controller = null, bool shouldDispose = true)
 {
   _shouldDispose = gpioController is null || shouldDispose;
-  _controller = gpioController ?? new GpioController(pinNumberingScheme);  
+  _controller = gpioController ?? new GpioController();  
   _pinToUse = pinToUse;
   _controller.OpenPin(_pinToUse);
   // Initialize the rest of initialization

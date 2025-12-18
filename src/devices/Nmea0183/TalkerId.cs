@@ -259,6 +259,11 @@ namespace Iot.Device.Nmea0183
         public static TalkerId WeatherInstruments => new TalkerId('W', 'I');
 
         /// <summary>
+        /// Nmea2000 to Nmea0183 bridges from Yacht Devices use this talker by default.
+        /// </summary>
+        public static TalkerId YachtDevicesInterface => new TalkerId('Y', 'D');
+
+        /// <summary>
         /// Transducer
         /// </summary>
         /// <returns>TalkerId instance</returns>

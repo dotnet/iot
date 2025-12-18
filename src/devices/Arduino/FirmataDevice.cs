@@ -1508,6 +1508,21 @@ namespace Iot.Device.Arduino
             SendCommand(seq);
         }
 
+        public TimeSpan GetAnalogInputSamplingInterval()
+        {
+            FirmataCommandSequence seq = new();
+            seq.WriteByte((byte)FirmataSysexCommand.SAMPLING_INTERVAL_QUERY);
+            seq.WriteByte((byte)FirmataCommand.END_SYSEX);
+            byte[] reply = SendCommandAndWait(seq, TimeSpan.FromSeconds(1), (q, bytes) => bytes[0] == (byte)FirmataSysexCommand.SAMPLING_INTERVAL, out _lastCommandError);
+            if (_lastCommandError != CommandError.None)
+            {
+                throw new IOException($"Command failed with error {_lastCommandError}");
+            }
+
+            int millis = FirmataCommandSequence.DecodeInt14(reply, 1);
+            return TimeSpan.FromMilliseconds(millis);
+        }
+
         public void ConfigureSpiDevice(SpiConnectionSettings connectionSettings)
         {
             if (connectionSettings.ChipSelectLine >= 15)

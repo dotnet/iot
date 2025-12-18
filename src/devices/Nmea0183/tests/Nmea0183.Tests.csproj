@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="Calibration_Cirrus.xml" />
+    <None Remove="Calibration_Cirrus_2025.xml" />
     <None Remove="Calibration_Cirrus_v1.xml" />
     <None Remove="Calibration_Cirrus_v3.xml" />
     <None Remove="Calibration_Cirrus_v5.xml" />
@@ -18,11 +19,14 @@
     <None Remove="Nmea-2021-08-25-16-49.txt" />
     <None Remove="Nmea-2023-07-29-07-03.txt" />
     <None Remove="Nmea-2023-10-22-13-39.txt" />
+    <None Remove="Nmea-2025-07-24-06-40.txt" />
+    <None Remove="Nmea-2025-07-24-06-50.txt" />
     <None Remove="Nmea-AisSpecialTargets.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Calibration_Cirrus.xml" />
+    <EmbeddedResource Include="Calibration_Cirrus_2025.xml" />
     <EmbeddedResource Include="Calibration_Cirrus_v1.xml" />
     <EmbeddedResource Include="Calibration_Cirrus_v3.xml" />
     <EmbeddedResource Include="Calibration_Cirrus_v5.xml" />
@@ -31,6 +35,8 @@
     <EmbeddedResource Include="Nmea-2021-08-25-16-49.txt" />
     <EmbeddedResource Include="Nmea-2023-07-29-07-03.txt" />
     <EmbeddedResource Include="Nmea-2023-10-22-13-39.txt" />
+    <EmbeddedResource Include="Nmea-2025-07-24-06-40.txt" />
+    <EmbeddedResource Include="Nmea-2025-07-24-06-50.txt" />
     <EmbeddedResource Include="Nmea-AisSpecialTargets.txt" />
   </ItemGroup>
 

@@ -21,13 +21,13 @@ The SSD1351 is a single-chip CMOS OLED driver with controller for organic/polyme
 
 This uses AdaFruit breakount board that is wired to a Raspberry Pi as below
 
-| Function      | Raspberry Pi | SSD 1351  |
-|:------------- |:-------------| -----:|
+| Function | Raspberry Pi | SSD 1351 |
+| :------------- | :------------- | -----: |
 | 5v Power | Pin2 - 5v | + |
-| Ground | Pin4 - Gnd      |  G |
-| SPI Output | Pin19 - MOSI_0      | SI |
+| Ground | Pin4 - Gnd | G |
+| SPI Output | Pin19 - MOSI_0 | SI |
 | SPI Clock | Pin23 - SCLK_0 | CL |
-| /Data Code | Pin16 - GPIO23     | DC |
+| /Data Code | Pin16 - GPIO23 | DC |
 | /Reset | Pin18 - GPIO24 | R |
 | SPI Enable | Pin24  CEO_0 | OC |
 

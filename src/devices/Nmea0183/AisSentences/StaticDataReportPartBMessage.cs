@@ -46,5 +46,21 @@ namespace Iot.Device.Nmea0183.AisSentences
             PositionFixType = payload.ReadEnum<PositionFixType>(162, 4);
             Spare = payload.ReadUInt(166, 2);
         }
+
+        public override void Encode(Payload payload)
+        {
+            base.Encode(payload);
+            payload.WriteEnum<ShipType>(ShipType, 8);
+            payload.WriteString(VendorId, 18, true);
+            payload.WriteUInt(UnitModelCode, 4);
+            payload.WriteUInt(SerialNumber, 20);
+            payload.WriteString(CallSign, 42, true);
+            payload.WriteUInt(DimensionToBow, 9);
+            payload.WriteUInt(DimensionToStern, 9);
+            payload.WriteUInt(DimensionToPort, 6);
+            payload.WriteUInt(DimensionToStarboard, 6);
+            payload.WriteEnum<PositionFixType>(PositionFixType, 4);
+            payload.WriteUInt(Spare, 2);
+        }
     }
 }

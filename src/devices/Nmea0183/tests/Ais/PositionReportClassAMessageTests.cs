@@ -168,7 +168,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         {
             const string sentence = "!AIVDM,1,1,,A,15Mq4J0P01EREODRv4@74gv00HRq,0*71";
 
-            Parser.GeneratedSentencesId = AisParser.VdmId;
+            Parser.GeneratedSentencesId = SentenceId.Vdm;
             var message = Parser.Parse(sentence) as PositionReportClassAMessage;
             message.ShouldNotBeNull();
             message.MessageType.ShouldBe(AisMessageType.PositionReportClassA);

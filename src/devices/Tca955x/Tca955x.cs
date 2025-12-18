@@ -603,9 +603,6 @@ namespace Iot.Device.Tca955x
             _interruptPinsSubscribedEvents[pinNumber] = PinEventTypes.None;
         }
 
-        /// <inheritdoc/>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => pinNumber;
-
         /// <summary>
         /// Waits for an event to occur on the given pin.
         /// </summary>

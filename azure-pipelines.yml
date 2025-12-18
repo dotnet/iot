@@ -36,12 +36,6 @@ stages:
           BuildConfiguration: Debug
 
     steps:
-    - powershell: |
-        npm install -g markdownlint-cli
-        markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
-      displayName: 'Execute Markdownlint'
-      condition: eq(variables['build.reason'], 'PullRequest')
-
       # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
     - script: build.cmd -ci
         -configuration $(BuildConfiguration)
@@ -76,19 +70,6 @@ stages:
       displayName: Publish Signing Scripts
       artifact: config
       condition: eq(variables['BuildConfiguration'], 'Release')
-
-  - job: Markdown_link_check
-    displayName: Markdown Link Check
-    pool:
-      vmImage: windows-latest
-
-    # Use Version 3.10.3 of markdown-link-check, as 3.11.0 is broken (completely ignores the json file)
-    steps:
-    - powershell: |
-        npm install -g markdown-link-check@3.10.3
-        ls -r *.md | % { markdown-link-check -v -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
-      displayName: 'Execute markdown-link-check'
-      condition: eq(variables['build.reason'], 'PullRequest')
 
   - job: Linux
     displayName: Linux Build
@@ -180,9 +161,9 @@ stages:
       displayName: Download build artifacts
 
     - task: UseDotNet@2
-      displayName: 'Use .NET SDK 8.x'
+      displayName: 'Use .NET SDK 9.x'
       inputs:
-        version: 8.x
+        version: 9.x
 
     # Install the code signing tool
     - task: DotNetCoreCLI@2

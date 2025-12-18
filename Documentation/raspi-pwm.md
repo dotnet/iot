@@ -105,7 +105,7 @@ You are all setup, the basic example should now work with the PWM and channel yo
 
 ### Activating 2 channels
 
-| PWM0 | PWM0 GPIO | PWM0 Function | PWM0 Alt |  PWM1 | PWM1 GPIO | PWM1 Function | PWM1 Alt | dtoverlay |
+| PWM0 | PWM0 GPIO | PWM0 Function | PWM0 Alt | PWM1 | PWM1 GPIO | PWM1 Function | PWM1 Alt | dtoverlay |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PWM0 | 12 | 4 | Alt0 | PWM1 | 13 | 4 | Alt0 | dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4 |
 | PWM0 | 18 | 2 | Alt5 | PWM1 | 13 | 4 | Alt0 | dtoverlay=pwm-2chan,pin=18,func=2,pin2=13,func2=4 |

@@ -44,13 +44,13 @@ Dotnet-iot supports v0, v1 and v2 of libgpiod.
 
 The following table shows which driver supports which library version
 
-| LibGpiodDriverVersion | Libgpiod version (documented) |
-| --------------------- | ----------------------------- |
-| V1                    | 0.x to 1.0.x (Partial support)  1.1 - 1.x (Supported)|
-| V2                    | 2.x                           |
+| LibGpiodDriverVersion | Libgpiod version (documented)                         |
+| --------------------- | ----------------------------------------------------- |
+| V1                    | 0.x to 1.0.x (Partial support)  1.1 - 1.x (Supported) |
+| V2                    | 2.x                                                   |
 
 NOTE: Due to a [breaking change in the values of enums in the libgpiod](
-https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/commit/?id=783ff2e3c70788cdd1c65cba9ee0398bda5ebcda), only libgpiod versions 1.1 and later can be expected to function reliably with the V1 driver. 
+https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/commit/?id=783ff2e3c70788cdd1c65cba9ee0398bda5ebcda), only libgpiod versions 1.1 and later can be expected to function reliably with the V1 driver.
 To check what libgpiod packages you have on a deb based system, use: ``` $apt show libgpiod* ```
 
 ## Choose LibGpiodDriver Version

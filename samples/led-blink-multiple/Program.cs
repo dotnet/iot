@@ -21,7 +21,7 @@ foreach (int pin in pins)
     Console.WriteLine($"GPIO pin enabled for use: {pin}");
 }
 
-// enable program to be safely terminated via CTRL-c 
+// enable program to be safely terminated via CTRL-c
 Console.CancelKeyPress += (s, e) =>
 {
     cts.Cancel();

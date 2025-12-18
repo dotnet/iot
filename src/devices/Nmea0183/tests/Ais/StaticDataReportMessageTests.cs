@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 // Original code taken from https://github.com/yellowfeather/AisParser, under MIT License
+using System.Linq;
 using Iot.Device.Nmea0183.Ais;
 using Iot.Device.Nmea0183.AisSentences;
 using Shouldly;
@@ -23,6 +24,18 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             message.Mmsi.ShouldBe(367465380u);
             message.PartNumber.ShouldBe(0u);
             message.ShipName.ShouldBe("F/V IRON MAIDEN");
+
+            Parser.GeneratedSentencesId = SentenceId.Vdm;
+            var encoded = Parser.ToSentences(message);
+            encoded.ShouldHaveSingleItem();
+
+            // Verify our encoder works
+            string asMessage = encoded[0].ToNmeaMessage();
+            asMessage.ShouldNotBeNull();
+            var messageAgain = (StaticDataReportPartAMessage)Parser.Parse(asMessage)!;
+            messageAgain.Mmsi.ShouldBe(367465380u);
+            message.MessageType.ShouldBe(AisMessageType.StaticDataReport);
+            messageAgain.ShipName.ShouldBe("F/V IRON MAIDEN");
         }
 
         [Fact]
@@ -47,6 +60,23 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             message.DimensionToStarboard.ShouldBe(0u);
             message.PositionFixType.ShouldBe(PositionFixType.Undefined1);
             message.Spare.ShouldBe(0u);
+
+            Parser.GeneratedSentencesId = SentenceId.Vdm;
+            Parser.GeneratedReceiverChannel = 'B';
+            var encoded = Parser.ToSentences(message);
+            encoded.ShouldHaveSingleItem();
+
+            // Verify our encoder works
+            string asMessage = encoded[0].ToNmeaMessage();
+            asMessage.ShouldBe(sentence);
+            asMessage.ShouldNotBeNull();
+            var messageAgain = (StaticDataReportPartBMessage)Parser.Parse(asMessage)!;
+            messageAgain.Mmsi.ShouldBe(367465380u);
+            message.MessageType.ShouldBe(AisMessageType.StaticDataReport);
+            messageAgain.CallSign.ShouldBe("WDF5621");
+            messageAgain.VendorId.ShouldBe("STM");
+            messageAgain.DimensionToBow.ShouldBe(0u);
+            message.ShipType.ShouldBe(ShipType.Fishing);
         }
 
         [Fact]

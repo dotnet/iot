@@ -32,7 +32,7 @@ namespace Iot.Device.Nmea0183
         private readonly Dictionary<string, NmeaSinkAndSource> _sourcesAndSinks;
         private List<FilterRule> _filterRules;
         private bool _localInterfaceActive;
-        private NmeaSinkAndSource _loggingSink;
+        private LoggingSink _loggingSink;
 
         /// <summary>
         /// Creates a message router, optionally configuring the logging options
@@ -55,6 +55,18 @@ namespace Iot.Device.Nmea0183
             }
 
             _filterRules = new List<FilterRule>();
+            _filterRules.Add(new FilterRule("*", TalkerId.Any, SentenceId.Any, new[] { MessageRouter.LoggingSinkName },
+                (source, destination, message) =>
+                {
+                    if (source != null && source.LogReceive)
+                    {
+                        return message;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }, false, true));
             _localInterfaceActive = true;
         }
 
@@ -121,17 +133,20 @@ namespace Iot.Device.Nmea0183
                         continue;
                     }
 
+                    var newMsg = sentence;
                     if (filter.ForwardingAction != null)
                     {
-                        var newMsg = filter.ForwardingAction(source, sink, sentence);
-                        if (newMsg != null)
-                        {
-                            sink.SendSentence(source, newMsg);
-                        }
+                        newMsg = filter.ForwardingAction(source, sink, sentence);
                     }
-                    else
+
+                    if (newMsg != null)
                     {
-                        sink.SendSentence(source, sentence);
+                        if (sink.LogSend)
+                        {
+                            _loggingSink.LogSendMessage(sink, newMsg);
+                        }
+
+                        sink.SendSentence(source, newMsg);
                     }
                 }
             }

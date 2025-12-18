@@ -2,12 +2,12 @@
   <!-- Packaging related properties -->
   <PropertyGroup>
     <MajorVersion>4</MajorVersion>
-    <MinorVersion>0</MinorVersion>
-    <PatchVersion>1</PatchVersion>
+    <MinorVersion>1</MinorVersion>
+    <PatchVersion>0</PatchVersion>
     <Description>The System.Device.Gpio package supports general-purpose I/O (GPIO) pins, PWM, I2C, SPI and related interfaces for interacting with low level hardware pins to control hardware sensors, displays and input devices on single-board-computers; Raspberry Pi, BeagleBoard, ODROID, and other single-board-computers that are supported by Linux or Windows and can run .NET. Depending on the OS and hardware, various low-level drivers are available. Additionally, hardware interfaces connected trough Serial ports or USB are also supported.
     </Description>
     <PackageTags>.NET GPIO Pins SPI I2C PWM RPi IoT</PackageTags>
-    <PackageValidationBaselineVersion>3.1.0</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>4.0.1</PackageValidationBaselineVersion>
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
