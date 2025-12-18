@@ -48,7 +48,7 @@ namespace ArduinoCsCompiler
 
         protected override void OnErrorMessage(string message, Exception? exception)
         {
-            _compiler.OnCompilerCallback(0, MethodState.ConnectionError, exception);
+            _compiler.OnCompilerCallback(0, message, MethodState.ConnectionError, exception);
             base.OnErrorMessage(message, exception);
         }
 
@@ -211,7 +211,7 @@ namespace ArduinoCsCompiler
                     }
                     else if (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit || data[2] == (byte)ExecutorCommand.Variables)
                     {
-                        _compiler.OnCompilerCallback(data[4] | (data[5] << 7), MethodState.Debugging, data);
+                        _compiler.OnCompilerCallback(data[4] | (data[5] << 7), string.Empty, MethodState.Debugging, data);
                     }
                 }
                 else
@@ -248,14 +248,14 @@ namespace ArduinoCsCompiler
                 }
 
                 error = CommandError.Aborted;
-                _compiler.OnCompilerCallback(data[startIndex + 1] | (data[startIndex + 2] << 7), state, results);
+                _compiler.OnCompilerCallback(data[startIndex + 1] | (data[startIndex + 2] << 7), string.Empty, state, results);
             }
             else
             {
                 error = CommandError.None;
                 // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
                 var result = FirmataIlCommandSequence.Decode7BitBytes(data.Skip(startIndex + 5).ToArray(), numArgs);
-                _compiler.OnCompilerCallback(data[startIndex + 1] | (data[startIndex + 2] << 7), state, result);
+                _compiler.OnCompilerCallback(data[startIndex + 1] | (data[startIndex + 2] << 7), string.Empty, state, result);
             }
         }
 

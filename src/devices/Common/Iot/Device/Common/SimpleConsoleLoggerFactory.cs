@@ -13,7 +13,7 @@ namespace Iot.Device.Common
     /// <summary>
     /// Provides a very simple console logger that does not require a reference to Microsoft.Extensions.Logging.dll
     /// </summary>
-    public class SimpleConsoleLoggerFactory : ILoggerFactory
+    public class SimpleConsoleLoggerFactory : ILoggerFactory, ILoggerProvider
     {
         /// <summary>
         /// Constructs a console logger with the default log level.

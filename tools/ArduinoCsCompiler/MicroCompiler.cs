@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -55,6 +56,7 @@ namespace ArduinoCsCompiler
         private readonly object _activeTasksLock;
         private readonly ILogger _logger;
         private readonly Type _arraySortHelper;
+        private readonly ConcurrentQueue<string> _lastMessages;
 
         private CompilerCommandHandler _commandHandler;
 
@@ -72,6 +74,7 @@ namespace ArduinoCsCompiler
             _logger = this.GetCurrentClassLogger();
             _board = board;
             _debugger = null;
+            _lastMessages = new ConcurrentQueue<string>();
 
             _activeTasksLock = new object();
             _activeTasks = new List<ArduinoTask>();
@@ -99,6 +102,8 @@ namespace ArduinoCsCompiler
         }
 
         internal CompilerCommandHandler CommandHandler => _commandHandler;
+
+        public ILogger Logger => _logger;
 
         private static bool HasStaticFields(Type cls)
         {
@@ -144,11 +149,28 @@ namespace ArduinoCsCompiler
             }
         }
 
-        internal void OnCompilerCallback(int taskId, MethodState state, object? args)
+        /// <summary>
+        /// Information sent during execution
+        /// </summary>
+        /// <param name="taskId">The sending task</param>
+        /// <param name="message">A message sent from the device</param>
+        /// <param name="state">The task state</param>
+        /// <param name="args">Optional arguments</param>
+        /// <exception cref="NotSupportedException"></exception>
+        internal void OnCompilerCallback(int taskId, string message, MethodState state, object? args)
         {
             if (_activeExecutionSet == null)
             {
                 return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                _lastMessages.Enqueue(message);
+                while (_lastMessages.Count > 10)
+                {
+                    _lastMessages.TryDequeue(out _);
+                }
             }
 
             if (args == null)
@@ -198,6 +220,7 @@ namespace ArduinoCsCompiler
                 {
                     _logger.LogError($"Execution of method {GetMethodName(codeRef)} caused an exception. Check previous messages.");
                     // In this case, the data contains the exception tokens and the call stack tokens
+                    task.AddLastLogs(_lastMessages.ToArray());
                     task.AddData(state, ((int[])args).Cast<object>().ToArray());
                     return;
                 }
@@ -206,6 +229,7 @@ namespace ArduinoCsCompiler
                 {
                     _logger.LogError($"Execution of method {GetMethodName(codeRef)} was forcibly terminated.");
                     // Still update the task state, this will prevent a deadlock if somebody is waiting for this task to end
+                    task.AddLastLogs(_lastMessages.ToArray());
                     task.AddData(state, new object[0]);
                     return;
                 }
@@ -233,6 +257,7 @@ namespace ArduinoCsCompiler
                     if (returnType == typeof(void))
                     {
                         // Empty return set
+                        task.AddLastLogs(_lastMessages.ToArray());
                         task.AddData(state, new object[0]);
                         return;
                     }
@@ -3087,7 +3112,11 @@ namespace ArduinoCsCompiler
             }
 
             var decl = _activeExecutionSet.GetMethod(method);
-            _logger.LogInformation($"Starting execution on {decl}...");
+            if (!decl.Name.Contains("..cctor"))
+            {
+                _logger.LogInformation($"Starting execution on {decl}...");
+            }
+
             if (method.GetParameters().Length != arguments.Length)
             {
                 throw new ArgumentException($"The number of arguments for the method {method.MemberInfoSignature()} does not match. {arguments.Length} arguments were provided");
@@ -3136,6 +3165,7 @@ namespace ArduinoCsCompiler
             }
 
             _activeExecutionSet = null;
+            _lastMessages.Clear();
         }
 
         public void Dispose()
