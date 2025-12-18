@@ -118,6 +118,21 @@ namespace Iot.Device.SocketCan
         }
 
         /// <summary>
+        /// Reads frame from the bus with the timestamp when it was received.
+        /// </summary>
+        /// <param name="data">Data where output data should be written to</param>
+        /// <param name="frameLength">Length of the data read</param>
+        /// <param name="id">Recipient identifier</param>
+        /// <param name="timestamp">UTC time when this frame was received with microsecond resolution</param>
+        /// <returns></returns>
+        public bool TryReadFrame(Span<byte> data, out int frameLength, out CanId id, out DateTimeOffset timestamp)
+        {
+            bool ret = TryReadFrame(data, out frameLength, out id);
+            timestamp = Interop.GetLastTimeStamp(_handle);
+            return ret;
+        }
+
+        /// <summary>
         /// Set filter on the bus to read only from specified recipient.
         /// </summary>
         /// <param name="id">Recipient identifier</param>
