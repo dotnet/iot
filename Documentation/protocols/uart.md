@@ -1,8 +1,30 @@
 # UART/Serial Communication (RS232/RS485)
 
-UART (Universal Asynchronous Receiver/Transmitter) is a common protocol for serial communication with devices like GPS modules, Bluetooth adapters, GSM modems, and industrial sensors.
+UART (Universal Asynchronous Receiver/Transmitter) is a serial communication protocol for point-to-point communication between devices. It's widely used for interfacing with GPS modules, Bluetooth adapters, GSM modems, and industrial sensors.
 
-## Quick Start: Basic UART Usage
+## What is UART?
+
+UART uses two wires for communication:
+- **TX (Transmit)** - Sends data from device
+- **RX (Receive)** - Receives data to device
+
+Key features:
+- **Point-to-point** - One-to-one communication (not a bus)
+- **Asynchronous** - No shared clock signal (uses baud rate agreement)
+- **Full-duplex** - Can send and receive simultaneously
+- **Configurable** - Baud rate, data bits, parity, stop bits
+- **Simple** - Only 2-3 wires needed (TX, RX, GND)
+
+**Common baud rates:** 9600, 19200, 38400, 57600, 115200 bps
+
+**Variants:**
+- **RS232** - Original standard, ±12V levels, short distances (< 15m)
+- **TTL Serial** - 3.3V/5V levels (Raspberry Pi uses 3.3V), short distances
+- **RS485** - Differential signaling, long distances (up to 1200m), multi-drop capable
+
+For detailed information about when to use UART vs other protocols, see [Understanding Protocols](../fundamentals/understanding-protocols.md).
+
+## Example
 
 ```csharp
 using System.IO.Ports;

@@ -1,151 +1,319 @@
-# Enabling SPI on Raspberry Pi
+# SPI (Serial Peripheral Interface)
 
-In most of the cases, it is easy and straight forward to enable SPI for your Raspberry Pi. The basic case can be [found here](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/).
+SPI (Serial Peripheral Interface) is a high-speed, full-duplex, synchronous serial communication protocol commonly used to interface with sensors, displays, SD cards, and other peripherals. SPI is faster than I2C but requires more pins.
 
-This page will explain how to setup any SPI. Please refer to the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/) to understand the different SPI available. You should be aware as well that for Raspberry Pi4, some of the configurations are different than for the other version especially for SPI3, 4 and 5.
+## What is SPI?
 
-## Basic Hardware SPI usage
+SPI uses four wires for communication:
+- **MOSI (Master Out Slave In)** - Data line from master (Raspberry Pi) to slave device
+- **MISO (Master In Slave Out)** - Data line from slave device to master
+- **SCLK (Serial Clock)** - Clock signal for synchronizing data transmission
+- **CS/CE (Chip Select)** - Selects which device to communicate with (active low)
 
-The most simple code you can build to use SPI is the following:
+Key features:
+- **High speed** - Can operate at MHz speeds (much faster than I2C)
+- **Full-duplex** - Can send and receive data simultaneously
+- **Master-Slave architecture** - Raspberry Pi acts as master
+- **Individual chip select** - Each device requires its own CS pin
+- **No addressing** - Devices selected by CS pin, not by address
+
+**Common SPI devices:** Displays (TFT, e-paper, MAX7219), SD cards, SPI flash memory, ADCs (MCP3008), radio modules (nRF24L01), temperature sensors (MAX31855).
+
+For detailed information about when to use SPI vs other protocols, see [Understanding Protocols](../fundamentals/understanding-protocols.md).
+
+## Example
 
 ```csharp
 using System;
 using System.Device.Spi;
 
-namespace TestTest
+// Create SPI device on bus 0, chip select 0
+SpiConnectionSettings settings = new(0, 0)
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            SpiDevice spi = SpiDevice.Create(new SpiConnectionSettings(0));
-            spi.WriteByte(0x42);
-            var incoming = spi.ReadByte();
-        }
-    }
-}
+    ClockFrequency = 1_000_000,  // 1 MHz
+    Mode = SpiMode.Mode0,         // CPOL=0, CPHA=0
+    DataBitLength = 8
+};
+
+using SpiDevice spi = SpiDevice.Create(settings);
+
+// Write a byte
+spi.WriteByte(0x42);
+
+// Read a byte
+byte incoming = spi.ReadByte();
+
+// Full-duplex: write and read simultaneously
+byte[] writeBuffer = { 0x01, 0x02, 0x03 };
+byte[] readBuffer = new byte[3];
+spi.TransferFullDuplex(writeBuffer, readBuffer);
+
+Console.WriteLine($"Read: 0x{readBuffer[0]:X2}, 0x{readBuffer[1]:X2}, 0x{readBuffer[2]:X2}");
 ```
 
-This will open SPI0, with the default Chip Select. It will then write a byte to the MOSI pin and read 1 byte from the MISO pin.
+**Parameters:**
+- `0` - SPI bus number (0 is SPI0, 1 is SPI1, etc.)
+- `0` - Chip select line (0 for CE0, 1 for CE1)
+- Clock frequency depends on device (check datasheet)
+- SPI mode depends on device (Mode0, Mode1, Mode2, or Mode3)
 
-If you get something like this, it means you need to check the next sections to activate your SPI0:
+## Enabling SPI on Raspberry Pi
 
-```text
-Unhandled exception. System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'.
-   at System.Device.Spi.UnixSpiDevice.Initialize()
-   at System.Device.Spi.UnixSpiDevice.WriteByte(Byte value)
-   at SpiTest.Program.Main(String[] args) in C:\tmp\TestTest\SpiTest\Program.cs:line 11
-Aborted
+### Using raspi-config
+
+```bash
+sudo raspi-config
 ```
 
-## Enabling SPI0 without Hardware Chip Select
+Navigate to:
+1. **Interface Options** or **Interfacing Options**
+2. **SPI**
+3. Select **Yes** to enable
+4. Reboot
 
-In very short, this is the line you'll need to add into the `/boot/firmware/config.txt` file:
+### Manual Configuration
+
+Edit the config file:
 
 ```bash
 sudo nano /boot/firmware/config.txt
 ```
 
 > [!Note]
-> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
+> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the path to `sudo nano /boot/config.txt` if you have an older OS version.
 
-Add the line:
+Add:
 
 ```text
 dtparam=spi=on
 ```
 
-Save the file with `ctrl + x` then `Y` then `enter`
-
-Then reboot:
+Save (`Ctrl+X`, then `Y`, then `Enter`) and reboot:
 
 ```bash
 sudo reboot
 ```
 
-This will enable SPI0 where those are the pins which will be selected, only Software Chip Select is activated with the default pins:
+This enables **SPI0** with default pins:
 
-| SPI Function | Header Pin | GPIO # | Pin Name |
-| --- | --- | --- | --- |
-| MOSI | 19 | GPIO10 | SPI0_MOSI |
-| MISO | 21 | GPIO09 | SPI0_MISO |
-| SCLK | 23 | GPIO11 | SPI0_SCLK |
-| CE0 | 24 | GPIO08 | SPI0_CE0_N |
-| CE1 | 26 | GPIO07 | SPI0_CE1_N |
+| SPI Function | Header Pin | GPIO | Pin Name |
+|--------------|------------|------|----------|
+| MOSI         | 19         | GPIO10 | SPI0_MOSI |
+| MISO         | 21         | GPIO9  | SPI0_MISO |
+| SCLK         | 23         | GPIO11 | SPI0_SCLK |
+| CE0          | 24         | GPIO8  | SPI0_CE0_N |
+| CE1          | 26         | GPIO7  | SPI0_CE1_N |
 
-## Enabling any SPI with any Chip Select
+### Verify SPI is Enabled
 
-In order to activate  Chip Select, you'll need to add a specific dtoverlay on the `/boot/firmware/config.txt` file. If you've used the previous way of activating SPI0, you should comment the line `dtparam=spi=on` and add what follows using the `dtoverlay`configurations.
+Check for SPI device files:
 
-> [!Note]
-> Prior to *Bookworm*, Raspberry Pi OS stored the boot partition at `/boot/`. Since Bookworm, the boot partition is located at `/boot/firmware/`. Adjust the previous line to be `sudo nano /boot/firmware/config.txt` if you have an older OS version.
+```bash
+ls /dev/spi*
+```
 
-Here is the table with the different options for SP0 and SP1 (please refer to the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/) to activate other SPI)
+Should show `/dev/spidev0.0` and `/dev/spidev0.1`.
 
-## SPI0
+## SPI Modes
 
-The following dtoverlay definition can be [found here](https://github.com/raspberrypi/firmware/blob/7b99da75f55a5ad7d572ec4ebe4e8f9573deaee7/boot/overlays/README#L2437).
+SPI has four modes based on clock polarity (CPOL) and phase (CPHA):
 
-| SPI # | Chip Select # | Header Pin | Default GPIO | Pin Name |
-| --- | --- | --- | --- | --- |
-| SPI0 | CE0 | 24 | GPIO08 | SPI0_CE0_N |
-| SPI0 | CE1 | 26 | GPIO07 | SPI0_CE1_N |
+| Mode | CPOL | CPHA | Description |
+|------|------|------|-------------|
+| Mode0 | 0    | 0    | Clock idle low, data sampled on rising edge (most common) |
+| Mode1 | 0    | 1    | Clock idle low, data sampled on falling edge |
+| Mode2 | 1    | 0    | Clock idle high, data sampled on falling edge |
+| Mode3 | 1    | 1    | Clock idle high, data sampled on rising edge |
 
-If you want to change the default pins for Chip Select 0 to the GPIO pin 27 (hardware 13), and let's say GPIO pin 22 (hardware 15) for Chip Select 1, just add this line:
+**Check your device datasheet** to determine the correct mode.
+
+```csharp
+SpiConnectionSettings settings = new(0, 0)
+{
+    Mode = SpiMode.Mode0  // or Mode1, Mode2, Mode3
+};
+```
+
+## Advanced Configuration
+
+### Custom Chip Select Pins
+
+To use custom GPIO pins for chip select, use dtoverlay:
+
+```bash
+sudo nano /boot/firmware/config.txt
+```
+
+**SPI0 with custom CS pins:**
 
 ```text
+# CE0 on GPIO27, CE1 on GPIO22
 dtoverlay=spi0-2cs,cs0_pin=27,cs1_pin=22
 ```
 
-In case you only need one, for example GPIO27 (hardware 13) and you don't need the MISO pin which will free the  GPIO09 for another usage:
+**SPI0 with single CS and no MISO (output only):**
 
 ```text
+# CE0 on GPIO27, no MISO pin (frees GPIO9)
 dtoverlay=spi0-1cs,cs0_pin=27,no_miso
 ```
 
-There is only for SPI0 that you can use, in both cases with 1 or 2 Chip Select pin the `no_miso`option.
-
-> **Important note**: Those overlays are only supported in the very last Raspberry Pi OS. You will get the `System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'` error message if you are using them on an older version. You can use `spi0-cs` where in the previous examples you had `spi0-2cs` or `spi0-1cs`.
-
-As an alternative, you can as well use the following command line: `sudo raspi-config nonint do_spi 0`
-
-So the first example will now give:
+**SPI0 with three CS lines:**
 
 ```text
-dtoverlay=spi0-cs,cs0_pin=27,cs1_pin=22
+# CE0, CE1, CE2 on default pins
+dtoverlay=spi0-3cs
 ```
 
-In older version, no_miso is not supported neither. And you will always get 2 chip select activated and you don't have a way to only select one.
+### Multiple SPI Buses
 
-## SPI1 to SPI6
+Raspberry Pi supports multiple SPI buses:
 
-The following dtoverlay definition can be [found here](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L1167).
-
-You can use the same behavior as for SPI0 but you can get from 1 to 3 Chip Select and you can also prevent the creation of a specific node `/dev/spidev1.0` (here on SPI1) with a specific flag `cs0_spidev=disabled` (here for Chip Select 0). So to continue the example, if we want this behavior, the dtoverlay would be for the default GPIO pin 18:
+**SPI1 (default pins):**
 
 ```text
-dtoverlay=spi1-1cs,cs0_spidev=disabled
+dtoverlay=spi1-1cs
+# MOSI: GPIO20, MISO: GPIO19, SCLK: GPIO21, CE0: GPIO18
 ```
 
-Here is another example where we will use SPI4 with 2 Chip Select, CS0 to GPIO pin 4 (default) and we will be ok to have the creation of a `/dev/spidev4.0` node and the CS1 to GPIO 17 and we're not ok to have the node `/dev/spidev4.1`created:
+**SPI1 with custom pins:**
 
 ```text
-dtoverlay=spi4-2cs,cs1_pin=17,cs1_spidev=disabled
+dtoverlay=spi1-2cs,cs0_pin=18,cs1_pin=17
 ```
 
-## Adding your user to the right permission group
+For Raspberry Pi 4/CM4, additional buses (SPI3-SPI6) are available. See [Raspberry Pi firmware documentation](https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README) for details.
 
-If you're running, or just upgraded to a version published after August 2020, this should be already done.
-But in case, you can always check that there are the right permissions on SPI:
+### Clock Frequency
+
+Set in code (not config.txt):
+
+```csharp
+SpiConnectionSettings settings = new(0, 0)
+{
+    ClockFrequency = 1_000_000  // 1 MHz
+};
+```
+
+**Typical frequencies:**
+- 1-10 MHz - Most sensors and simple devices
+- 10-20 MHz - Fast displays and memory
+- Up to 125 MHz - Theoretical maximum on Raspberry Pi (device and wiring dependent)
+
+**Start with lower frequencies** (1 MHz) and increase if needed. Higher frequencies may require shorter wires and better signal integrity.
+
+### Permissions
+
+Add your user to the `spi` group:
 
 ```bash
-sudo nano /etc/udev/rules.d/99-com.rules
+sudo usermod -aG spi $USER
 ```
 
-You should find a line like this one:
+Log out and log back in for changes to take effect.
 
-```text
-SUBSYSTEM=="spidev", GROUP="spi", MODE="0660"
+## Troubleshooting
+
+### "Can not open SPI device file '/dev/spidev0.0'"
+
+```
+System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'.
 ```
 
-If you don't have it or if you want to adjust the permissions, this is what you'll need to add/adjust, as always save through `ctrl + x` then `Y` then `enter` and then reboot.
+**Cause:** SPI is not enabled.
+
+**Solution:** Enable SPI using `raspi-config` or manually in `/boot/firmware/config.txt` as described above.
+
+### "Permission denied"
+
+```
+System.UnauthorizedAccessException: Access to '/dev/spidev0.0' is denied
+```
+
+**Cause:** User doesn't have permission to access SPI.
+
+**Solution:**
+```bash
+sudo usermod -aG spi $USER
+# Log out and log back in
+```
+
+### Data Corruption or Wrong Values
+
+**Possible causes:**
+1. **Wrong SPI mode** - Check device datasheet for correct CPOL/CPHA
+2. **Clock frequency too high** - Try lower frequency (e.g., 1 MHz)
+3. **Wiring issues** - Check MOSI, MISO, SCLK, CS, and ground connections
+4. **Wrong bit order** - Some devices expect MSB first, others LSB first
+5. **Timing issues** - Device may need delays between transactions
+
+**Solutions:**
+- Verify SPI mode matches device datasheet
+- Lower clock frequency
+- Use shorter wires, proper grounding
+- Check if device requires specific bit order (usually MSB first)
+
+### Multiple Devices on Same Bus
+
+When using multiple SPI devices:
+
+1. **Each device needs its own CS pin**
+2. **All devices share MOSI, MISO, SCLK**
+3. **Only one device active at a time** (selected by CS)
+
+```csharp
+// Device 1 on CE0
+SpiConnectionSettings settings1 = new(0, 0);
+using SpiDevice device1 = SpiDevice.Create(settings1);
+
+// Device 2 on CE1
+SpiConnectionSettings settings2 = new(0, 1);
+using SpiDevice device2 = SpiDevice.Create(settings2);
+
+// Use devices separately - CS is managed automatically
+device1.WriteByte(0x01);
+device2.WriteByte(0x02);
+```
+
+### Device Not Responding
+
+1. **Check wiring:**
+   - MOSI connected to device's MOSI/DIN/SDI pin
+   - MISO connected to device's MISO/DOUT/SDO pin
+   - SCLK connected to device's CLK/SCK pin
+   - CS connected to device's CS/SS pin
+   - Common ground
+   - Power supply correct voltage
+
+2. **Verify SPI mode** - Match device datasheet
+
+3. **Check clock frequency** - Start low (1 MHz)
+
+4. **Verify CS behavior** - CS should go low during transfer
+
+5. **Check device enable** - Some devices need separate enable/reset
+
+## Best Practices
+
+1. **Check device datasheet** - Verify SPI mode, clock frequency, and timing requirements
+2. **Start with low clock frequency** - 1 MHz is safe for testing
+3. **Use short wires** - SPI is sensitive to signal integrity at high speeds
+4. **Common ground** - Always connect ground between Raspberry Pi and devices
+5. **One device per CS** - Don't share chip select lines
+6. **Dispose devices properly** - Use `using` statements
+7. **Add error handling** - Wrap SPI operations in try-catch blocks
+8. **Level shifting** - Use level shifters for 5V devices (Raspberry Pi is 3.3V)
+
+## Related Documentation
+
+- [Understanding Protocols](../fundamentals/understanding-protocols.md) - When to use SPI vs I2C vs UART
+- [Reading Datasheets](../fundamentals/reading-datasheets.md) - How to find SPI information in datasheets
+- [Troubleshooting Guide](../troubleshooting.md) - Common SPI issues and solutions
+- [Device Bindings](../../src/devices/README.md) - Pre-built drivers for SPI devices
+
+## External Resources
+
+- [SPI Wikipedia](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)
+- [SPI Tutorial - SparkFun](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
+- [Raspberry Pi SPI Documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/)
+- [Raspberry Pi Pinout](https://pinout.xyz/)
