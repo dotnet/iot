@@ -456,7 +456,7 @@ namespace Iot.Device.Tca955x
             // to miss edges while we are doing that anyway. Dropping interrupts in this
             // case is the best we can do and prevents flooding the consumer with events
             // that could queue up in the INT gpio pin driver.
-            
+
             // Lock required for task coordination: atomically check/start _interruptProcessingTask
             // or set _interruptPending flag to ensure proper interrupt queueing
             lock (_interruptHandlerLock)
@@ -580,14 +580,14 @@ namespace Iot.Device.Tca955x
 
             // Update subscription state using thread-safe ConcurrentDictionary operations
             _interruptPinsSubscribedEvents[pinNumber] = eventType;
-            
+
             // Read current value needs lock because it accesses I2C bus
             PinValue currentValue;
             lock (_interruptHandlerLock)
             {
                 currentValue = Read(pinNumber);
             }
-            
+
             _interruptLastInputValues.TryUpdate(pinNumber, currentValue, !currentValue);
             if (!_eventHandlers.TryAdd(pinNumber, callback))
             {
