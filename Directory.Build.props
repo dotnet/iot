@@ -17,7 +17,7 @@
 
   <PropertyGroup>
     <Language>C#</Language>
-    <LangVersion>9</LangVersion>
+    <LangVersion>12</LangVersion>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 

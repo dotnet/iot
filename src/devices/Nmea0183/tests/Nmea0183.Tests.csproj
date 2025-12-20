@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>$(DefaultTestTfms)</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <RootNamespace>Iot.Device.Nmea0183.Tests</RootNamespace>
   </PropertyGroup>
