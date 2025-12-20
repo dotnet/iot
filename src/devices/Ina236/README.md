@@ -8,6 +8,7 @@ The INA236 is a current shunt and power monitor with an I2C-compatible interface
 * High Accuracy: 0.5% (Maximum) Over Temperature
 * Filtering Options
 * Calibration Registers
+* Two variants available: Address range 0x40-0x43 or 0x60-0x63
 
 ## Documentation
 
@@ -19,36 +20,28 @@ The INA236 is a current shunt and power monitor with an I2C-compatible interface
 const byte Adafruit_Ina236_I2cAddress = 0x40;
 
 // create an INA236 device on I2C bus 1 addressing channel 64
-using (Ina219 device = new Ina219(new I2cConnectionSettings(Adafruit_Ina236_I2cBus, Adafruit_Ina219_I2cAddress)))
+// Known breakouts often have a shunt resistor of 0.008 Ohms and are designed to measure up to 10 Amperes.
+using Ina219 device = new Ina236(new I2cConnectionSettings(Adafruit_Ina236_I2cBus, Adafruit_Ina219_I2cAddress),
+    ElectricResistance.FromMilliohms(8), ElectricCurrent.FromAmperes(10.0));
+
+Console.WriteLine("Device initialized. Default settings used:");
+Console.WriteLine($"Operating Mode: {device.OperatingMode}");
+Console.WriteLine($"Number of Samples to average: {device.AverageOverNoSamples}");
+Console.WriteLine($"Bus conversion time: {device.BusConversionTime}us");
+Console.WriteLine($"Shunt conversion time: {device.ShuntConversionTime}us");
+
+while (!Console.KeyAvailable)
 {
-    // reset the device 
-    device.Reset();
-
-    // set up the bus and shunt voltage ranges and the calibration. Other values left at default.
-    device.BusVoltageRange = Ina219BusVoltageRange.Range16v;
-    device.PgaSensitivity = Ina219PgaSensitivity.PlusOrMinus40mv;
-    device.SetCalibration(33574, (float)12.2e-6);
-
-    while (true)
-    {
-        // write out the current values from the INA219 device.
-        System.Console.WriteLine($"Bus Voltage {device.ReadBusVoltage()}V Shunt Voltage {device.ReadShuntVoltage() * 1000}mV Current {device.ReadCurrent() * 1000}mA Power {device.ReadPower() * 1000}mW");
-        System.Threading.Thread.Sleep(1000);
-    }
+    // write out the current values from the INA219 device.
+    Console.WriteLine($"Bus Voltage {device.ReadBusVoltage()} Shunt Voltage {device.ReadShuntVoltage().Millivolts}mV Current {device.ReadCurrent()} Power {device.ReadPower()}");
+    Thread.Sleep(1000);
 }
+
 ```
 
 ### Notes
 
-This sample uses an Adafruit INA219 breakout board and monitors a LED wired into the 3.3 volts supply with a 150 ohm current limiting resistor. It prints the bus voltage, shunt voltage, current and power every second.
+To set up the binding, the shunt resistor value and the maximum expected current need to be provided. Known breakout boards
+(e.g. from Adafruit or Joy-It) have a shunt resistor of 0.008 Ohms. With a 10 A load, the voltage drop at the resistor is thus
+0.08 V, resulting in a power dissipation of 0.8 Watts. 
 
-The configuration and calibration is determinined as follows.
-
-* The bus voltage range can be either 16v or 32v. As this example uses a 3.3v supply then the 16v bus voltage range is chosen
-* The current through the LED is in the low tens of milliamps. If we take 50mA as a reasonable maximum current that we may want to see then the maximum voltage accross the shunt resistor is 0.1 Ohms x 50mA which works out
-at 5mV. Given this we can use a shunt voltage range of +/- 40mV
-* The maximum possible current would then be 40mV / 0.1 = 400mA
-* With a 400mA maximum current and a range of the ADC of 15bits then the LSB of the current would be 400mA/32767 = 12.2207 microamps. We will chose 12.2uA as a round number.
-* From the [INA219 Datasheet](http://www.ti.com/lit/ds/symlink/ina219.pdf) the calibration register should be set at 0.04096/(currentLSB * shunt resistance) = 33574 = 0x8326
-
-![circuit](Ina219.Sample_bb.png)
