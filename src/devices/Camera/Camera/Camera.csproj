@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <LangVersion>Latest</LangVersion>
     <RootNamespace>Iot.Device.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
-    <LangVersion>10</LangVersion>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <RootNamespace>Iot.Device.Tests.Seatalk1</RootNamespace>
