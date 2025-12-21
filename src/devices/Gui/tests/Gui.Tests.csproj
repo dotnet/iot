@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(DefaultSampleTfms)</TargetFrameworks>
-    <LangVersion>10</LangVersion>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>

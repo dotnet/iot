@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>$(DefaultSampleTfms)</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <!-- We don't want to run hardware test by default -->
     <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>
