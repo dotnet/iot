@@ -43,5 +43,4 @@ while (!Console.KeyAvailable)
 
 To set up the binding, the shunt resistor value and the maximum expected current need to be provided. Known breakout boards
 (e.g. from Adafruit or Joy-It) have a shunt resistor of 0.008 Ohms. With a 10 A load, the voltage drop at the resistor is thus
-0.08 V, resulting in a power dissipation of 0.8 Watts. 
-
+0.08 V, resulting in a power dissipation of 0.8 Watts.
