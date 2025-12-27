@@ -591,8 +591,8 @@ public class SysFsDriver : UnixDriver
                     continue;
                 }
 
-                // Can't use ExceptionHelper.GetLastErrorMessage() here because we need the error code 
-                // for the EINTR check. GetLastErrorMessage() would call GetLastWin32Error() internally, 
+                // Can't use ExceptionHelper.GetLastErrorMessage() here because we need the error code
+                // for the EINTR check. GetLastErrorMessage() would call GetLastWin32Error() internally,
                 // and we can't call GetLastWin32Error() twice as subsequent calls might return different values.
                 string errorMessage = Marshal.GetLastPInvokeErrorMessage();
                 string error = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";

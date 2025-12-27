@@ -17,7 +17,7 @@ internal static class ExceptionHelper
     {
         int errorCode = Marshal.GetLastWin32Error();
         string errorMessage = Marshal.GetLastPInvokeErrorMessage();
-        
+
         if (string.IsNullOrWhiteSpace(errorMessage))
         {
             return errorCode.ToString();
@@ -74,7 +74,7 @@ internal static class ExceptionHelper
         // Use errorInfo if provided, otherwise format errorCode
         string formattedError = errorInfo ?? FormatError(errorCode);
         string errorDisplay = string.IsNullOrEmpty(formattedError) ? string.Empty : $", error: {formattedError}";
-        
+
         return resource switch
         {
             ExceptionResource.NoChipIteratorFound => $"Unable to find a chip iterator{errorDisplay}",
