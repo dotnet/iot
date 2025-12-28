@@ -113,6 +113,6 @@ Holding Completed
 
 ## Testing
 
-The unit test project can be found in the [tests](./Tests/ButtonTests.cs) directory. You can simply run them using Visual Studio built-in test capabilities:
+The unit test project can be found in the [tests](./tests/ButtonTests.cs) directory. You can simply run them using Visual Studio built-in test capabilities:
 
 ![unit tests](./unittests.png)
