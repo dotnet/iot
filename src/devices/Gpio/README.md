@@ -36,7 +36,7 @@ When adding an existing GpioPin, by default, the new pin allocation will directl
 | Orange Pi Lite 2 | [OrangePiLite2Driver](./Drivers/OrangePiLite2Driver.cs) |
 | Orange Pi Zero | [OrangePiZeroDriver](./Drivers/OrangePiZeroDriver.cs) |
 | Orange Pi Zero 2 | [OrangePiZero2Driver](./Drivers/OrangePiZero2Driver.cs) |
-| Rock Pi 4B Plus | [RockPi4bPlusDriver](./Drivers/RockPi4bPlusDriver.cs) |
+| Rock Pi 4B Plus | [RockPi4BPlusDriver](./Drivers/RockPi4BPlusDriver.cs) |
 | Orange Pi PC | [OrangePiPCDriver](./Drivers/OrangePiPCDriver.cs) |
 
 ## Benchmarks

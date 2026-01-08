@@ -81,7 +81,7 @@ public class LibGpiodDriver : UnixDriver
             _chip = new SafeChipHandle(LibgpiodV1.gpiod_chip_open_by_number(gpioChip));
             if (_chip == null || _chip.IsInvalid || _chip.IsClosed)
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
+                throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, ExceptionHelper.GetLastErrorMessage());
             }
 
             _pinCount = LibgpiodV1.gpiod_chip_num_lines(_chip);
@@ -292,7 +292,7 @@ public class LibGpiodDriver : UnixDriver
             int result = LibgpiodV1.gpiod_line_get_value(pinHandle.Handle);
             if (result == -1)
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
+                throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, ExceptionHelper.GetLastErrorMessage(), pinNumber);
             }
 
             _pinValue[pinNumber] = result;
@@ -354,7 +354,7 @@ public class LibGpiodDriver : UnixDriver
 
             if (requestResult == -1)
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, ExceptionHelper.GetLastErrorMessage(),
                     pinNumber);
             }
 
@@ -386,7 +386,7 @@ public class LibGpiodDriver : UnixDriver
 
             if (requestResult == -1)
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, ExceptionHelper.GetLastErrorMessage(),
                     pinNumber);
             }
 

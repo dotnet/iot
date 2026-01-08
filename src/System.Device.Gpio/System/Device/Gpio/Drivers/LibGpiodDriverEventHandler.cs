@@ -40,7 +40,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
 
         if (eventSuccess < 0)
         {
-            throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, Marshal.GetLastWin32Error(), _pinNumber);
+            throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, ExceptionHelper.GetLastErrorMessage(), _pinNumber);
         }
     }
 
@@ -60,6 +60,9 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                 WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle.Handle, ref timeout);
                 if (waitResult == WaitEventResult.Error)
                 {
+                    // Can't use ExceptionHelper.GetLastErrorMessage() here because we need the error code
+                    // for the EINTR check. GetLastErrorMessage() would call GetLastWin32Error() internally,
+                    // and we can't call GetLastWin32Error() twice as subsequent calls might return different values.
                     var errorCode = Marshal.GetLastWin32Error();
                     if (errorCode == ERROR_CODE_EINTR)
                     {
@@ -67,7 +70,9 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                         continue;
                     }
 
-                    throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, errorCode, _pinNumber);
+                    string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+                    string errorInfo = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+                    throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, errorInfo, _pinNumber);
                 }
 
                 if (waitResult == WaitEventResult.EventOccured)
@@ -76,7 +81,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                     int checkForEvent = LibgpiodV1.gpiod_line_event_read(pinHandle.Handle, ref eventResult);
                     if (checkForEvent == -1)
                     {
-                        throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());
+                        throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, ExceptionHelper.GetLastErrorMessage());
                     }
 
                     PinEventTypes eventType = eventResult.event_type == 1 ? PinEventTypes.Rising : PinEventTypes.Falling;
