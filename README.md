@@ -34,24 +34,31 @@ From Visual Studio, you can just add a nuget by searching for `System.Device.Gpi
 
 You can also install the latest nightly builds of the .NET `System.Device.Gpio`, `Iot.Device.Bindings`, and `Iot.Device.Bindings.SkiaSharpAdapter` NuGet packages. These are automatically published from the latest commits to the main branch.
 
-#### GitHub Packages
+#### Azure DevOps Feed (No Authentication Required)
 
-To use GitHub Packages, you'll first need to authenticate. Create a Personal Access Token (PAT) with `read:packages` scope from your [GitHub settings](https://github.com/settings/tokens), then configure the source:
+Add the nightly feed to your project:
 
 ```shell
-# Configure the GitHub Packages source (replace YOUR_GITHUB_USERNAME and YOUR_PAT)
-dotnet nuget add source --username YOUR_GITHUB_USERNAME --password YOUR_PAT --store-password-in-clear-text --name github-dotnet-iot "https://nuget.pkg.github.com/dotnet/index.json"
+# Add the Azure DevOps nightly feed (no authentication required)
+dotnet nuget add source --name dotnet-iot-nightly "https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json"
 
 # Install packages
-dotnet add package System.Device.Gpio --source github-dotnet-iot --prerelease
-dotnet add package Iot.Device.Bindings --source github-dotnet-iot --prerelease  
-dotnet add package Iot.Device.Bindings.SkiaSharpAdapter --source github-dotnet-iot --prerelease
+dotnet add package System.Device.Gpio --source dotnet-iot-nightly --prerelease
+dotnet add package Iot.Device.Bindings --source dotnet-iot-nightly --prerelease
+dotnet add package Iot.Device.Bindings.SkiaSharpAdapter --source dotnet-iot-nightly --prerelease
+```
+
+Or add to your `NuGet.config`:
+
+```xml
+<packageSources>
+  <add key="dotnet-iot-nightly" value="https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json" />
+</packageSources>
 ```
 
 ### Official Build Status
 
 [![Build Status](https://dev.azure.com/dotnet/IoT/_apis/build/status/dotnet.iot?branchName=main)](https://dev.azure.com/dotnet/IoT/_build/latest?definitionId=179&branchName=main)
-[![Nightly Packages](https://github.com/dotnet/iot/actions/workflows/publish-nightly.yml/badge.svg)](https://github.com/dotnet/iot/actions/workflows/publish-nightly.yml)
 
 ## Contributing
 
