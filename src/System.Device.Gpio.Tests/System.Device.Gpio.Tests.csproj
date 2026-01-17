@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>10</LangVersion>
     <IsPackable>false</IsPackable>
     <!-- Keep quiet about duplicate package references from props files -->
     <NoWarn>$(NoWarn);NETSDK1023</NoWarn>

@@ -14,7 +14,6 @@
     <SystemDeviceModelPath>$(MSBuildThisFileDirectory)$(SystemDeviceModelProjectName)/$(SystemDeviceModelProjectName).csproj</SystemDeviceModelPath>
     <CommonProjectName>Common</CommonProjectName>
     <CommonProjectPath>$(MSBuildThisFileDirectory)$(CommonProjectName)/$(CommonProjectName).csproj</CommonProjectPath>
-    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
