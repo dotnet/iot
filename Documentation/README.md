@@ -1,150 +1,164 @@
-# Resources
+# .NET IoT Documentation
 
-See the following resources to get started.
+Welcome to the .NET IoT documentation! This guide will help you get started with building IoT applications using .NET on single-board computers like Raspberry Pi.
 
-## Repo Layout
+## New to .NET IoT? Start Here!
 
-This repository mainly contains two different components:
+**[Getting Started Guide](getting-started.md)** - Blink an LED in 5 minutes and learn the basics
 
-1. **System.Device.Gpio** library and tests which is the main library that has the implementation for protocols such as: GPIO, SPI, I2C, PWM. This library is fully supported by the dotnet team since it has the same level of support that dotnet/corefx does. All the code for the library lives under src/System.Device.Gpio. This library targets .NET Standard 2.0, and will work on both Windows and Linux. It's implementation consists of just IL code, so that means that it is supported across different platforms. In order to add new API to this library, an API Proposal would have to be submitted and approved first. [Here](https://github.com/dotnet/iot/issues/122) is an example of a how a good API proposal should look like.
-Doing a PR on this part of the project may result in API review, higher exigence for the code quality and longer discussions. You need to be ready for this.
-1. **Iot.Device.Bindings** device bindings library. This is a collection of types which work as wrappers (or bindings) for devices and sensors which are able to talk to a microcontroller unit (or MCU like a Raspberry Pi for example) using the protocols supported by System.Device.Gpio. For example: [BME280](../src/devices/Bmxx80/README.md) is a temperature sensor which uses SPI and I2C in order to communicate with a MCU and is able to report the current temperature. Because the process of how to compute the temperature from the data is not trivial, we have a `Bme280` class which exposes friendly methods like `ReadTemperature()` which will internally use either SPI or I2C to get the current temperature value. In order to start adding a new binding, check out our [guide on how to contribute a new binding](../tools/templates/DeviceBindingTemplate/README.md). It is worth noting that even though all device bindings will be built and packaged as a single library (Iot.Device.Bindings), the code is split under src/devices on individual projects for easier development of a single binding and developer inner-loop.
+### Learn the Fundamentals
 
-While contributing, you should read the [coding guidelines section](https://github.com/dotnet/runtime/tree/main/docs#coding-guidelines), the [device conventions](./Devices-conventions.md) and also how to [best contribute to a binding](../src/devices/README.md#contributing-a-binding).
+New to IoT hardware? These guides cover the essential concepts:
 
-## System.Device.* APIs
+- **[GPIO Basics](fundamentals/gpio-basics.md)** - Understanding digital input/output, pull-up/pull-down resistors, pin modes
+- **[Understanding Communication Protocols](fundamentals/understanding-protocols.md)** - When to use I2C, SPI, UART, or PWM
+- **[Choosing the Right Driver](fundamentals/choosing-drivers.md)** - libgpiod vs sysfs, which driver to use and why
+- **[Signal Debouncing](fundamentals/debouncing.md)** - Handling noisy button inputs properly
+- **[Reading Device Datasheets](fundamentals/reading-datasheets.md)** - How to extract essential information from datasheets
 
-* [Device Bindings](https://github.com/dotnet/iot/tree/main/src/devices) - Includes a collection of APIs representing a range of sensors, displays and human interface devices based on System.Device.* APIs.
-* [DevicesApiTester CLI](https://github.com/dotnet/iot/tree/main/tools/DevicesApiTester) - Helpful utility, based on System.Device.* APIs, that include various commands for testing connected development boards and external hardware.
+### Set Up Communication Protocols
 
-### Design Reviews
+Step-by-step guides for enabling and using hardware interfaces:
 
-* [.NET Design Reviews: GPIO (10/2/2018)](https://youtu.be/OK0jDe8wtyg)
-* [.NET Design Reviews: GPIO (10/19/2018)](https://youtu.be/wtkPtOpI3CA)
-* [.NET Design Reviews: GPIO (11/2/2018)](https://youtu.be/UZc3sbJ0-PI)
+- **[I2C Setup and Usage](protocols/i2c.md)** - Enable I2C, change default pins, scan for devices
+- **[SPI Setup and Usage](protocols/spi.md)** - Enable SPI, configure chip select pins
+- **[PWM Setup and Usage](protocols/pwm.md)** - Hardware PWM for LED dimming and motor control
+- **[UART/Serial Communication](protocols/uart.md)** - RS232/RS485, GPS modules, GSM modems
+- **[GPIO with libgpiod](protocols/gpio.md)** - Modern GPIO access on Linux
 
-### Showcase
+### Create and Deploy Projects
 
-[Mono WinForms GPIO Demo Using Toradex Colibri iMX7D and Torizon Container](https://www.youtube.com/watch?v=1d3g2VDZyXE)
+- **[Creating an IoT Project](iot-project-setup.md)** - Set up projects with .NET CLI or Visual Studio
+- **[Running in Docker Containers](deployment/containers.md)** - Containerize and deploy IoT applications
+- **[Auto-start on Boot (systemd)](deployment/systemd-services.md)** - Run apps automatically with systemd
+- **[Cross-Compilation and Deployment](deployment/cross-compilation.md)** - Build on your PC, run on Raspberry Pi
 
-## Interface Knowledge Base
+### Platform-Specific Guides
 
-### General-Purpose Input/Output (GPIO)
+- **[Raspberry Pi 5 Guide](platforms/raspberry-pi-5.md)** - Important changes and configuration for Raspberry Pi 5
+- More platform guides coming soon (Raspberry Pi 4, Orange Pi, etc.)
 
-* [GPIO Wiki](https://en.wikipedia.org/wiki/General-purpose_input/output)
-* [Digital I/O Fundamentals](http://www.ni.com/white-paper/3405/en/#toc1)
+### Reference and Troubleshooting
 
-### Inter-Integrated Circuit (I2C)
+- **[Glossary](glossary.md)** - Common terms and concepts explained
+- **[Troubleshooting Guide](troubleshooting.md)** - Solutions to common problems
+- **[Device Conventions](Devices-conventions.md)** - Guidelines for device bindings
 
-* [I2C Wiki](https://en.wikipedia.org/wiki/I%C2%B2C)
-* [I2C Tutorial](https://learn.sparkfun.com/tutorials/i2c/all)
+## Repository Layout
 
-### Serial Peripheral Interface (SPI)
+This repository contains two main components:
 
-* [SPI Wiki](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)
-* [SPI Tutorial](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
+1. **System.Device.Gpio** - Core library implementing GPIO, SPI, I2C, and PWM protocols
+   - Fully supported by the .NET team
+   - Cross-platform (Windows, Linux, macOS)
+   - Located in `src/System.Device.Gpio`
+   - API changes require [API proposal](https://github.com/dotnet/iot/issues/122) and review
 
-## Other Helpful links
+2. **Iot.Device.Bindings** - 130+ device drivers for sensors, displays, and peripherals
+   - Wrappers for common IoT devices (temperature sensors, displays, motors, etc.)
+   - Example: [BME280](../src/devices/Bmxx80/README.md) temperature/humidity/pressure sensor
+   - Located in `src/devices`, packaged as single library
+   - See [how to contribute a new binding](../tools/templates/DeviceBindingTemplate/README.md)
 
-* [Configuring Remote Debugging from Dev machine to Raspberry Pi on ARM](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
-* [.NET Core Documentation](https://docs.microsoft.com/dotnet/)
-* [Install .NET on Raspberry Pi](https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian)
-* [Deploy .NET apps on ARM single-board computers](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
-* [.NET Core ARM64 Status](https://github.com/dotnet/announcements/issues/82)
-* [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
-* [How to Prepare a Publish Profile](How-to-Deploy-an-IoT-App.md)
+### Contributing
 
-## Development Boards
+When contributing, please read:
 
-> **NOTE**: It has been verified that .NET Core will work on the following development boards.  However, there has only been limited testing so far.  It is recommended you experiment with a Raspberry Pi 3+.
+- [Coding Guidelines](https://github.com/dotnet/runtime/tree/main/docs#coding-guidelines)
+- [Device Conventions](./Devices-conventions.md)
+- [Contributing a Binding](../src/devices/README.md#contributing-a-binding)
 
-### Raspberry Pi
+## System.Device.* APIs and Tools
 
-#### General information for Raspberry Pi
+- **[Device Bindings](https://github.com/dotnet/iot/tree/main/src/devices)** - 130+ pre-built drivers for sensors, displays, and peripherals
+- **[DevicesApiTester CLI](https://github.com/dotnet/iot/tree/main/tools/DevicesApiTester)** - Command-line tool for testing GPIO, I2C, SPI, and connected hardware
 
-* [Raspberry Pi Website](https://www.raspberrypi.org/)
-* [Raspberry Pi GitHub Website](https://github.com/raspberrypi)
-* [Raspberry Pi Wiki](https://en.wikipedia.org/wiki/Raspberry_Pi)
-* [Raspberry Pi GPIO Pinout](https://learn.sparkfun.com/tutorials/raspberry-gpio/gpio-pinout)
-* [Raspberry Pi GPIO Tutorial](https://learn.sparkfun.com/tutorials/raspberry-gpio/all)
+## Learning Resources
 
-#### How-Tos for Raspberry Pi
+### External Tutorials and References
 
-* [Enable SPI on Raspberry Pi](./raspi-spi.md)
-* [Enable I2C on Raspberry Pi](./raspi-i2c.md)
-* [Control GPIO pins within rootless Docker container on Raspberry Pi](./raspi-Docker-GPIO.md)
-* [Enable Hardware PWM on Raspberry Pi](./raspi-pwm.md)
-* [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
-* [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)
-* [Design a Raspberry Pi Hat in 10 Minutes](https://www.youtube.com/watch?v=1P7GOLFCCgs)
+**Protocol Documentation:**
 
-#### Product details for Raspberry Pi
+- [GPIO Wikipedia](https://en.wikipedia.org/wiki/General-purpose_input/output) | [Digital I/O Fundamentals](http://www.ni.com/white-paper/3405/en/#toc1)
+- [I2C Wikipedia](https://en.wikipedia.org/wiki/I%C2%B2C) | [I2C Tutorial - SparkFun](https://learn.sparkfun.com/tutorials/i2c/all)
+- [SPI Wikipedia](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) | [SPI Tutorial - SparkFun](https://learn.sparkfun.com/tutorials/serial-peripheral-interface-spi/all)
 
-* [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/)
+**Official Documentation:**
+
+- [.NET IoT Official Docs](https://docs.microsoft.com/dotnet/iot/)
+- [Install .NET on Raspberry Pi](https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian)
+- [Deploy .NET apps on ARM](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
+
+**Development:**
+
+- [Remote Debugging (VS Code + Raspberry Pi)](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
+- [.NET Core Docker Samples](https://github.com/dotnet/dotnet-docker/tree/master/samples)
+
+### Design Reviews and Showcases
+
+- [.NET Design Reviews: GPIO (10/2/2018)](https://youtu.be/OK0jDe8wtyg)
+- [.NET Design Reviews: GPIO (10/19/2018)](https://youtu.be/wtkPtOpI3CA)
+- [.NET Design Reviews: GPIO (11/2/2018)](https://youtu.be/UZc3sbJ0-PI)
+- [Mono WinForms GPIO Demo (Toradex + Torizon)](https://www.youtube.com/watch?v=1d3g2VDZyXE)
+## Supported Hardware Platforms
+
+.NET IoT has been verified to work on the following development boards:
+
+### Raspberry Pi (Recommended)
+
+**Resources:**
+
+- [Raspberry Pi Website](https://www.raspberrypi.org/) | [GitHub](https://github.com/raspberrypi) | [Wikipedia](https://en.wikipedia.org/wiki/Raspberry_Pi)
+- [GPIO Pinout Diagram](https://pinout.xyz/)
+- [GPIO Tutorial - SparkFun](https://learn.sparkfun.com/tutorials/raspberry-gpio/all)
+
+**Guides:**
+
+- [Raspberry Pi 5 Specific Guide](platforms/raspberry-pi-5.md)
+- [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
+- [Design a Raspberry Pi HAT](https://www.youtube.com/watch?v=1P7GOLFCCgs)
+
+**Models:** Raspberry Pi 3, 4, 5, Zero series (Pi 3+ recommended for best experience)
 
 ### BeagleBoard
 
-#### General information for BeagleBoard
-
-* [BeagleBoard Website](https://beagleboard.org/bone)
-* [BeagleBoard GitHub Website](https://github.com/beagleboard)
-* [BeagleBoard Wiki](https://en.wikipedia.org/wiki/BeagleBoard)
-
-#### How-Tos for BeagleBoard
-
-* [Example of .NET Core on a BBB](https://github.com/Redouane64/beaglebone-dotnet/tree/master/Examples/LEDBlink)
-
-#### Product details for BeagleBoard
-
-* [BeagleBone Black (BBB)](https://beagleboard.org/black)
-* [BeagleBone Green (BBG)](https://beagleboard.org/green)
+- [BeagleBoard Website](https://beagleboard.org/bone) | [GitHub](https://github.com/beagleboard) | [Wikipedia](https://en.wikipedia.org/wiki/BeagleBoard)
+- [.NET on BeagleBone Example](https://github.com/Redouane64/beaglebone-dotnet/tree/master/Examples/LEDBlink)
+- Models: BeagleBone Black, BeagleBone Green
 
 ### Pine64
 
-#### General information for Pine64
+- [Pine64 Website](https://www.pine64.org/)
+- Models: PINE A64-LTS
 
-* [Pine64 Website](https://www.pine64.org/)
-
-#### Product details for Pine64
-
-* [PINE A64-LTS](https://www.pine64.org/?page_id=46823)
-
-## Platforms
-
-### Linux
-
-#### GPIO
-
-* [Use libgpiod to control GPIOs on Linux](./gpio-linux-libgpiod.md)
+> **Note:** While .NET IoT works on these boards, testing has been most extensive on Raspberry Pi. Other boards may require additional configuration.
 
 ## Maker Resources
 
-### Prototyping
+### Prototyping Tutorials
 
-#### How-Tos
+- [Blinking LED with .NET - Scott Hanselman](https://www.hanselman.com/blog/InstallingTheNETCore2xSDKOnARaspberryPiAndBlinkingAnLEDWithSystemDeviceGpio.aspx)
+- [Breadboards & Perfboards - Collin's Lab](https://www.youtube.com/watch?v=w0c3t0fJhXU)
+- [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
 
-* [Blinking LED Blog Post by Scott Hanselman](https://www.hanselman.com/blog/InstallingTheNETCore2xSDKOnARaspberryPiAndBlinkingAnLEDWithSystemDeviceGpio.aspx)
-* [Collin's Lab: Breadboards & Perfboards](https://www.youtube.com/watch?v=w0c3t0fJhXU)
-* [How to Use a Breadboard](https://www.youtube.com/watch?v=6WReFkfrUIk)
+### PCB Design Software
 
-#### Software
+- [KiCad EDA](http://kicad.org/) - Professional, open-source
+- [Fritzing](http://fritzing.org/home/) - Beginner-friendly
+- [Autodesk EAGLE](https://www.autodesk.com/products/eagle/free-download) - Industry standard
+- [FreeCAD](https://www.freecadweb.org/downloads.php) - 3D modeling
 
-* [Autodesk EAGLE PCB Designing Software](https://www.autodesk.com/products/eagle/free-download)
-* [FreeCAD](https://www.freecadweb.org/downloads.php)
-* [Fritzing](http://fritzing.org/home/)
-* [KiCad EDA](http://kicad.org/)
+### Community and Project Sharing
 
-### Social
+- [Hackaday.io](https://hackaday.io) - Project hosting and community
+- [Hackster.io](https://www.hackster.io/) - Tutorials and projects
+- [Instructables](https://www.instructables.com/) - Step-by-step guides
 
-* [Hackaday.io](https://hackaday.io)
-* [hackster.io](https://www.hackster.io/)
-* [instructables](https://www.instructables.com/)
+### Component Vendors
 
-### Vendors
-
-* [Adafruit](https://www.adafruit.com/)
-* [CanaKit](https://www.canakit.com/)
-* [Digikey](https://www.digikey.com/)
-* [Jameco Electronics](https://www.jameco.com)
-* [Sparkfun Electronics](https://www.sparkfun.com)
-* [SunFounder](https://www.sunfounder.com/)
+- [Adafruit](https://www.adafruit.com/) - Maker-friendly components, excellent tutorials
+- [SparkFun Electronics](https://www.sparkfun.com) - High-quality parts, great documentation
+- [DigiKey](https://www.digikey.com/) - Huge selection, professional
+- [CanaKit](https://www.canakit.com/) - Raspberry Pi kits and accessories
+- [Jameco Electronics](https://www.jameco.com) - Electronics components
+- [SunFounder](https://www.sunfounder.com/) - Raspberry Pi kits and sensors
