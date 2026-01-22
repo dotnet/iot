@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 # Device Bindings
 
 This directory is intended for device bindings, sensors, displays, human interface devices and anything else that requires software to control. We want to establish a rich set of quality .NET bindings to make it  straightforward to use .NET to connect devices together to produce weird and wonderful IoT applications.
