@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>$(DefaultTestTfms)</TargetFramework>
     <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <RootNamespace>Iot.Device.Gpio.Tests</RootNamespace>
   </PropertyGroup>

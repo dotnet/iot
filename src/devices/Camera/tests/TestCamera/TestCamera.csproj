@@ -4,7 +4,6 @@
     <TargetFramework>$(DefaultTestTfms)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>Latest</LangVersion>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

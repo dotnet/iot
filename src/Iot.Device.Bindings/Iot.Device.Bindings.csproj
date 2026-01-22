@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
-    <LangVersion>10</LangVersion>
     <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);BUILDING_IOT_DEVICE_BINDINGS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

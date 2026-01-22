@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
     <Configurations>Debug;Release</Configurations>
     <Copyright>The .NET Foundation</Copyright>
     <Company>The .NET Foundation</Company>
