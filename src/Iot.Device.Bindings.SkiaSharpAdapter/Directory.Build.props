@@ -2,7 +2,7 @@
   <!-- Packaging related properties -->
   <PropertyGroup>
     <MajorVersion>4</MajorVersion>
-    <MinorVersion>1</MinorVersion>
+    <MinorVersion>2</MinorVersion>
     <PatchVersion>0</PatchVersion>
     <Description>This package contains the BitmapImage adapter using SkiaSharp. This library is an optional package to provide imaging functionality for Iot.Device.Bidnings.dll</Description>
     <PackageTags>.NET Core IoT Device Bindings SkiaSharp Adapter</PackageTags>
