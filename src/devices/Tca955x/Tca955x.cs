@@ -116,6 +116,11 @@ namespace Iot.Device.Tca955x
                 // This is only be done once as there is only one INT pin interrupt for the entire ioexpander
                 _controller.RegisterCallbackForPinValueChangedEvent(_interrupt, PinEventTypes.Falling, InterruptHandler);
             }
+
+            // Initialize the output cache by reading the current output register values
+            Span<byte> outputRegisters = stackalloc byte[2];
+            InternalRead(GetRegisterIndex(0, Register.OutputPort), outputRegisters);
+            _gpioOutputCache = (ushort)(outputRegisters[0] | (outputRegisters[1] << 8));
         }
 
         /// <summary>
@@ -653,14 +658,6 @@ namespace Iot.Device.Tca955x
             {
                 _controller?.Dispose();
                 _controller = null;
-            }
-            else
-            {
-                // We don't own the interrupt controller, so we must unregister our interrupt handler
-                if (_controller != null && _interrupt != -1)
-                {
-                    _controller.UnregisterCallbackForPinValueChangedEvent(_interrupt, InterruptHandler);
-                }
             }
 
             _busDevice?.Dispose();
