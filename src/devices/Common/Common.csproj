@@ -12,6 +12,7 @@
   <ItemGroup>
     <Compile Include="ClassVisibility.cs" />
     <Compile Include="MathExtensions.cs" />
+    <Compile Include="System\Device\I2c\I2cSimulatedDeviceBase.cs" />
     <Compile Include="Iot/Device/Common/*.cs" />
     <Compile Include="Iot/Device/Graphics/*.cs" />
     <Compile Include="Iot/Device/Multiplexing/*.cs" />
