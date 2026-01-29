@@ -10,13 +10,13 @@ Application note on how to operate PN5180 without a [library](https://www.nxp.co
 
 ## Board
 
-You will find different implementation of this board. All boards should have full SPI pins plus the reset and busy ones and additionnaly 5V and or 3.3V plus ground. This pictures shows an example of one of the implementation connected with a [FT4222](../FT4222/README.md) chipset to provide the necessary GPIO and SPI features:
+You will find different implementation of this board. All boards should have full SPI pins plus the reset and busy ones and additionnaly 5V and or 3.3V plus ground. This pictures shows an example of one of the implementation connected with a [FT4222](../Ft4222/README.md) chipset to provide the necessary GPIO and SPI features:
 
 ![PN5180](./pn5180_ft4222.png)
 
 ## Usage
 
-You will find a full example in the [samples directory](./samples/Program.cs). This example covers the usage of most of the public functions and properties. This example shows as well how to use the [FT4222](../FT4222/README.md) as a SPI and GPIO controller. Note that the development for the PN5180 has been done fully on a Windows 10 64 bit machine using this FT42222 to add the IoT capabilities.
+You will find a full example in the [samples directory](./samples/Program.cs). This example covers the usage of most of the public functions and properties. This example shows as well how to use the [FT4222](../Ft4222/README.md) as a SPI and GPIO controller. Note that the development for the PN5180 has been done fully on a Windows 10 64 bit machine using this FT42222 to add the IoT capabilities.
 
 PN5180 is operated thru SPI and GPIO. GPIO is used to control the SPI behavior as the PN5180 is using SPI in specific way. This does then require to manually manage the pin selection for SPI. And another pin called pin busy is used to understand when the PN5180 is available to receive and send information.
 
