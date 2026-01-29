@@ -1,7 +1,7 @@
+# .NET IoT Libraries
+
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/iot)
 [![Discord](https://img.shields.io/discord/755370044946513932?label=Discord)](https://discord.gg/kqWhBbj)
-
-# .NET IoT Libraries
 
 .NET can be used to build applications for [IoT](https://en.wikipedia.org/wiki/Internet_of_things) devices and scenarios. IoT applications typically interact with sensors, displays and input devices that require the use of [GPIO pins](https://en.wikipedia.org/wiki/General-purpose_input/output), serial ports or similar hardware.
 
