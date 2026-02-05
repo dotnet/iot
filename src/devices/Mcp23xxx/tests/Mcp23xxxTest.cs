@@ -48,11 +48,32 @@ namespace Iot.Device.Mcp23xxx.Tests
             public Mcp23xxxChipMock ChipMock { get; }
             public GpioController Controller { get; }
 
+            /// <summary>
+            /// Optional GpioDriverMock for tests that use reset pin functionality.
+            /// </summary>
+            public GpioDriverMock? ResetDriverMock { get; }
+
+            /// <summary>
+            /// Optional GpioController (backed by ResetDriverMock) for tests that use reset pin functionality.
+            /// </summary>
+            public GpioController? ResetController { get; }
+
             public TestDevice(Mcp23xxx device, Mcp23xxxChipMock chipMock)
             {
                 Device = device;
                 ChipMock = chipMock;
                 Controller = new GpioController(Device);
+                ResetDriverMock = null;
+                ResetController = null;
+            }
+
+            public TestDevice(Mcp23xxx device, Mcp23xxxChipMock chipMock, GpioDriverMock resetDriverMock, GpioController resetController)
+            {
+                Device = device;
+                ChipMock = chipMock;
+                Controller = new GpioController(Device);
+                ResetDriverMock = resetDriverMock;
+                ResetController = resetController;
             }
         }
 
