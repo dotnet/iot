@@ -10,8 +10,14 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class EnableDisableTests : Mcp23xxxTest
     {
-        private readonly GpioDriverMock _driverMock = new GpioDriverMock();
-        private readonly GpioController _gpioMock = new GpioController(_driverMock);
+        private readonly GpioDriverMock _driverMock;
+        private readonly GpioController _gpioMock;
+
+        public EnableDisableTests()
+        {
+            _driverMock = new GpioDriverMock();
+            _gpioMock = new GpioController(_driverMock);
+        }
 
         [Theory]
         [MemberData(nameof(ResetTestDevices))]
