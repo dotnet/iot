@@ -23,6 +23,7 @@ This skill helps Copilot agents verify that device bindings use proper hardware 
 **Device bindings must use System.Device.* abstractions exclusively.**
 
 The repository provides cross-platform abstractions:
+
 - `System.Device.Gpio` for GPIO pins
 - `System.Device.I2c` for I²C communication
 - `System.Device.Spi` for SPI communication  
@@ -33,6 +34,7 @@ These abstractions handle platform differences internally.
 ### 2. Anti-Patterns to Detect
 
 #### ❌ Direct File System Access
+
 ```csharp
 // WRONG - hardcoded Linux GPIO paths
 const string GpioPath = "/sys/class/gpio";
@@ -43,6 +45,7 @@ var i2cDevice = new I2cUnixDevice("/dev/i2c-1", 0x48);
 ```
 
 ✅ **CORRECT - Use abstractions:**
+
 ```csharp
 using System.Device.Gpio;
 using System.Device.I2c;
@@ -55,6 +58,7 @@ using I2cDevice device = I2cDevice.Create(settings);
 ```
 
 #### ❌ P/Invoke and DllImport
+
 ```csharp
 // WRONG - platform-specific P/Invoke
 [DllImport("libc.so.6")]
@@ -68,6 +72,7 @@ private static extern bool DeviceIoControl(...);
 ✅ **CORRECT - Device abstractions handle this internally**
 
 #### ❌ OS Detection and Branching
+
 ```csharp
 // WRONG - OS-specific branching
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -87,6 +92,7 @@ if (Environment.OSVersion.Platform == PlatformID.Unix)
 ```
 
 ✅ **CORRECT - Abstractions handle platform differences:**
+
 ```csharp
 // Works on all platforms
 using GpioController controller = new();
@@ -94,6 +100,7 @@ controller.OpenPin(17, PinMode.Output);
 ```
 
 #### ❌ Process Execution for Hardware Access
+
 ```csharp
 // WRONG - shelling out to OS utilities
 Process.Start("gpio", "mode 17 out");
@@ -127,12 +134,14 @@ grep -r "Process.Start\|ProcessStartInfo" src/devices/<DeviceName>/
 Some cases may require platform-specific code:
 
 #### When Platform-Specific Code is Acceptable
+
 1. **Feature is inherently platform-specific** (e.g., Windows-only hardware)
 2. **Properly guarded with clear error messages**
 3. **Documented as platform-specific in XML comments**
 4. **Fails gracefully on unsupported platforms**
 
 ✅ **Example of acceptable platform-specific code:**
+
 ```csharp
 /// <summary>
 /// Enables hardware feature X. Only supported on Linux.
@@ -155,7 +164,9 @@ public void EnableAdvancedFeature()
 ### 5. Using Device Abstractions Correctly
 
 #### GPIO Controller Usage
+
 ✅ **DO:**
+
 ```csharp
 public class LedDevice : IDisposable
 {
@@ -183,7 +194,9 @@ public class LedDevice : IDisposable
 ```
 
 #### I2C Device Usage
+
 ✅ **DO:**
+
 ```csharp
 public class I2cSensor : IDisposable
 {
@@ -211,7 +224,9 @@ public class I2cSensor : IDisposable
 ```
 
 #### SPI Device Usage
+
 ✅ **DO:**
+
 ```csharp
 public class SpiDisplay : IDisposable
 {
@@ -240,6 +255,7 @@ public class SpiDisplay : IDisposable
 Sample applications should also follow abstraction principles:
 
 ✅ **DO:**
+
 ```csharp
 // Platform-agnostic sample
 using System.Device.Gpio;
@@ -255,6 +271,7 @@ Console.WriteLine($"Temperature: {sensor.ReadTemperature().DegreesCelsius}°C");
 ```
 
 ❌ **DON'T:**
+
 ```csharp
 // Platform-specific sample
 #if LINUX
@@ -267,6 +284,7 @@ Console.WriteLine($"Temperature: {sensor.ReadTemperature().DegreesCelsius}°C");
 ### 7. Testing Cross-Platform Compatibility
 
 #### Build on Multiple Platforms
+
 ```bash
 # Test builds on different configurations
 dotnet build -c Release
@@ -278,6 +296,7 @@ dotnet build -c Release
 ```
 
 #### Verify No Platform-Specific References
+
 ```bash
 # Check project file for platform-specific packages
 cat src/devices/<DeviceName>/<DeviceName>.csproj | grep -i "windows\|linux\|unix"
@@ -288,9 +307,11 @@ cat src/devices/<DeviceName>/<DeviceName>.csproj | grep -i "windows\|linux\|unix
 ### 8. Common Cross-Platform Issues
 
 #### Timing Differences
+
 Some operations may have different timing characteristics across platforms:
 
 ✅ **DO:**
+
 ```csharp
 // Use conservative timing that works everywhere
 Thread.Sleep(10); // Safe across platforms
@@ -301,9 +322,11 @@ while (sw.ElapsedMilliseconds < 10) { }
 ```
 
 #### Endianness
+
 Be aware of byte order when working with multi-byte values:
 
 ✅ **DO:**
+
 ```csharp
 // Use BitConverter with explicit endianness
 int value = BinaryPrimitives.ReadInt16LittleEndian(buffer);
@@ -314,6 +337,7 @@ int value = BinaryPrimitives.ReadInt16LittleEndian(buffer);
 When code must be platform-specific:
 
 ✅ **DO:**
+
 ```csharp
 /// <summary>
 /// Enables high-speed mode. 
@@ -354,6 +378,7 @@ Use this when reviewing device binding for hardware abstraction:
 ## Common Violations and Fixes
 
 ### Violation 1: Direct GPIO Access
+
 ```csharp
 // ❌ WRONG
 File.WriteAllText("/sys/class/gpio/export", "17");
@@ -365,6 +390,7 @@ controller.OpenPin(17, PinMode.Output);
 ```
 
 ### Violation 2: Platform Detection
+
 ```csharp
 // ❌ WRONG
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -377,6 +403,7 @@ using GpioController controller = new();
 ```
 
 ### Violation 3: Process Execution
+
 ```csharp
 // ❌ WRONG
 Process.Start("i2cget", "-y 1 0x48");
@@ -391,6 +418,7 @@ device.Read(data);
 ## Quick Validation Script
 
 Save as `check-abstraction.sh`:
+
 ```bash
 #!/bin/bash
 DEVICE_DIR=$1
@@ -418,6 +446,7 @@ echo "Hardware abstraction check complete!"
 ```
 
 Usage:
+
 ```bash
 chmod +x check-abstraction.sh
 ./check-abstraction.sh src/devices/Bmp280

@@ -19,7 +19,8 @@ This skill helps Copilot agents create new IoT device bindings (sensors, display
 ### 1. Device Structure Setup
 
 Create the following directory structure under `src/devices/<DeviceName>`:
-```
+
+```text
 src/devices/<DeviceName>/
 ├── <DeviceName>.csproj
 ├── <DeviceName>.cs (main class)
@@ -39,6 +40,7 @@ src/devices/<DeviceName>/
 - Avoid singletons and global state
 
 **Example Constructor:**
+
 ```csharp
 public Bmp280(I2cDevice i2cDevice, I2cAddress address = I2cAddress.Primary)
 {
@@ -50,9 +52,12 @@ public Bmp280(I2cDevice i2cDevice, I2cAddress address = I2cAddress.Primary)
 ### 3. API Design Patterns
 
 - Use **`TryRead*` methods** that return `bool` and set `out` parameters for sensor readings
+
   ```csharp
   public bool TryReadTemperature(out Temperature temperature)
   ```
+
+
 - Use **UnitsNet** types for physical quantities (Temperature, Pressure, Length, etc.)
 - Properties for values that don't change between calls
 - Methods for values that may change
@@ -67,6 +72,7 @@ public Bmp280(I2cDevice i2cDevice, I2cAddress address = I2cAddress.Primary)
 - Design for failure: ensure exceptions leave device in consistent state
 
 **Example Disposal:**
+
 ```csharp
 protected virtual void Dispose(bool disposing)
 {
@@ -105,6 +111,7 @@ protected virtual void Dispose(bool disposing)
 ### 7. Sample Application
 
 Create a runnable sample in `samples/Program.cs`:
+
 - Keep it simple and readable
 - Demonstrate typical usage patterns
 - Show proper disposal (using statements)
@@ -112,6 +119,7 @@ Create a runnable sample in `samples/Program.cs`:
 - Don't hardcode board-specific paths
 
 **Example Sample:**
+
 ```csharp
 using System;
 using System.Device.I2c;
@@ -147,6 +155,7 @@ while (true)
 ### 10. Build Validation
 
 After creating the device:
+
 ```bash
 cd src/devices/<DeviceName>
 ../../../dotnet.sh build
@@ -161,6 +170,7 @@ grep -r "Environment.OSVersion\|DllImport\|P/Invoke" .
 ## Review Checklist
 
 Before completing:
+
 - [ ] Public API follows repo naming/style
 - [ ] Members are XML-documented with units (°C, Pa, %RH, lux, etc.)
 - [ ] Constructor accepts caller-provided transports
@@ -177,6 +187,7 @@ Before completing:
 ## Examples
 
 ### Good Device Binding Example
+
 ```csharp
 public class Dht22 : IDisposable
 {

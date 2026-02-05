@@ -22,6 +22,7 @@ This skill helps Copilot agents diagnose and fix build issues in the .NET IoT re
 ### 1. Understanding Build Requirements
 
 **CRITICAL Prerequisites:**
+
 - Azure DevOps feeds access required for full builds
 - .NET 8.0.300 SDK (specified in `global.json`)
 - Build takes 30-45 minutes normally - **NEVER CANCEL**
@@ -30,9 +31,11 @@ This skill helps Copilot agents diagnose and fix build issues in the .NET IoT re
 ### 2. Common Build Issues and Solutions
 
 #### SDK Resolution Errors
+
 **Symptom:** `Could not resolve SDK Microsoft.DotNet.Arcade.Sdk`
 
 **Diagnosis:**
+
 ```bash
 # Check SDK version
 ./dotnet.sh --version
@@ -42,6 +45,7 @@ cat global.json
 ```
 
 **Solutions:**
+
 1. Azure DevOps feeds are inaccessible (network restriction)
    - Document as known limitation
    - Try alternative build approaches (see below)
@@ -50,9 +54,11 @@ cat global.json
    - `./dotnet.sh --version` will auto-download if needed
 
 #### Package Not Found Errors
+
 **Symptom:** NuGet package restore failures
 
 **Diagnosis:**
+
 ```bash
 # Check NuGet sources
 cat NuGet.config
@@ -62,14 +68,17 @@ cat NuGet.config
 ```
 
 **Solutions:**
+
 1. Verify NuGet.config has correct sources
 2. Check if Azure DevOps feeds are accessible
 3. Try clearing NuGet cache: `dotnet nuget locals all --clear`
 
 #### Memory Issues During Build
+
 **Symptom:** Out of memory errors, process killed
 
 **Solutions:**
+
 ```bash
 # Disable parallel builds
 ./build.sh --restore --build /maxCpuCount:1
@@ -80,9 +89,11 @@ cd src/devices/Bmp280
 ```
 
 #### Timeout Issues
+
 **Symptom:** Build appears hung or times out
 
 **Important:** Builds legitimately take 30-45 minutes
+
 - Set timeout to **60+ minutes** for full builds
 - Set timeout to **45+ minutes** for test runs
 - Use `initial_wait` parameter appropriately in bash commands
@@ -92,6 +103,7 @@ cd src/devices/Bmp280
 When Azure DevOps feeds are inaccessible:
 
 #### Build Individual Samples
+
 ```bash
 # Samples use public NuGet packages
 cd samples/led-blink
@@ -99,6 +111,7 @@ cd samples/led-blink
 ```
 
 #### Test Basic IoT Functionality
+
 ```bash
 ./dotnet.sh new console -o test-project
 cd test-project
@@ -108,6 +121,7 @@ cd test-project
 ```
 
 #### Build Individual Device Bindings
+
 ```bash
 cd src/devices/<DeviceName>
 ../../../dotnet.sh build
@@ -116,6 +130,7 @@ cd src/devices/<DeviceName>
 ### 4. Build Commands by Scenario
 
 #### Full Repository Build
+
 ```bash
 # Use this for complete validation
 ./build.sh --restore --build --configuration Release
@@ -124,12 +139,14 @@ cd src/devices/<DeviceName>
 ```
 
 #### Build with Packages
+
 ```bash
 # For testing distribution
 ./build.sh --restore --build --pack --configuration Release
 ```
 
 #### Run Tests
+
 ```bash
 # All tests
 ./build.sh --test --configuration Release
@@ -140,6 +157,7 @@ cd src/devices/<DeviceName>
 ```
 
 #### Individual Device Build
+
 ```bash
 cd src/devices/Dhtxx
 ../../../dotnet.sh build
@@ -149,6 +167,7 @@ cd src/devices/Dhtxx
 ### 5. Debugging Compilation Errors
 
 #### After Code Changes
+
 ```bash
 # Build the specific project you changed
 cd src/devices/<DeviceName>
@@ -159,6 +178,7 @@ cd src/devices/<DeviceName>
 ```
 
 #### Check for Common Issues
+
 ```bash
 # Verify .editorconfig compliance
 # Build will show analyzer warnings
@@ -188,6 +208,7 @@ gh run view <run-id> --log
 ```
 
 #### Markdown Linting
+
 ```bash
 npm install -g markdownlint-cli
 markdownlint -c .markdownlint.json .
@@ -196,6 +217,7 @@ markdownlint -c .markdownlint.json .
 ### 7. Log Locations
 
 When builds fail, check logs:
+
 - Build logs: `artifacts/log/{Configuration}/`
 - Test results: Published in CI artifacts
 - Individual project logs: In project's bin/obj folders
@@ -203,6 +225,7 @@ When builds fail, check logs:
 ### 8. Cross-Platform Build Issues
 
 #### Linux vs Windows Issues
+
 - Check for platform-specific files: `*.Linux.cs` vs `*.Windows.cs`
 - Verify configurations in Visual Studio
 - Use `System.Device.*` abstractions, not OS-specific APIs
@@ -232,6 +255,7 @@ grep -r "Environment.OSVersion\|DllImport\|P/Invoke" src/devices/<DeviceName>/
 ### 10. When to Escalate
 
 Document and inform user when:
+
 - Azure DevOps feeds are confirmed inaccessible (network policy)
 - Build requires infrastructure changes
 - Pre-existing test failures unrelated to changes

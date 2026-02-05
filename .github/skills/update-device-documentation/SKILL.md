@@ -54,7 +54,9 @@ Links to:
 ### 2. Writing Effective Device Documentation
 
 #### Device Overview Section
+
 ✅ **DO:**
+
 ```markdown
 # BME280 - Combined Temperature, Pressure, and Humidity Sensor
 
@@ -63,12 +65,15 @@ manufactured by Bosch. It provides high precision measurements over I2C or SPI.
 ```
 
 Include:
+
 - Full device name and manufacturer
 - What the device measures/does
 - Communication protocol(s) supported
 
 #### Documentation Section
+
 ✅ **DO:**
+
 ```markdown
 ## Documentation
 
@@ -80,6 +85,7 @@ Always link to official datasheets and specifications.
 ### 3. Usage Examples
 
 #### Code Example Requirements
+
 - Show complete, runnable code
 - Use `using` statements for proper disposal
 - Include necessary namespace imports
@@ -88,6 +94,7 @@ Always link to official datasheets and specifications.
 - Don't hardcode board-specific values
 
 ✅ **DO:**
+
 ```csharp
 ## Usage
 
@@ -136,13 +143,16 @@ while (true)
 ### 4. Wiring Information
 
 #### Wiring Diagram Requirements
+
 Include wiring information showing:
+
 - Pin connections between device and board
 - Required pull-up/pull-down resistors
 - Power supply requirements
 - Common connection mistakes to avoid
 
 ✅ **DO:**
+
 ```markdown
 ## Wiring
 
@@ -167,6 +177,7 @@ Include wiring information showing:
 Document important implementation details:
 
 ✅ **DO:**
+
 ```markdown
 ## Binding Notes
 
@@ -190,9 +201,11 @@ Document important implementation details:
 ### 6. XML Documentation for APIs
 
 #### Public API Documentation
+
 Every public member needs XML documentation:
 
 ✅ **DO:**
+
 ```csharp
 /// <summary>
 /// Reads the current temperature from the BME280 sensor.
@@ -213,7 +226,9 @@ public bool TryReadTemperature(out Temperature temperature)
 ```
 
 #### Include Units in Documentation
+
 Always specify units:
+
 ```csharp
 /// <summary>
 /// Gets or sets the temperature oversampling rate.
@@ -228,6 +243,7 @@ public Sampling TemperatureSampling { get; set; }
 Document ranges and valid values:
 
 ✅ **DO:**
+
 ```csharp
 /// <summary>
 /// Measurement sampling rate options.
@@ -277,6 +293,7 @@ markdownlint -c .markdownlint.json src/devices/Bme280/README.md
 ### 9. Common Documentation Patterns
 
 #### For Sensor Devices
+
 ```markdown
 ## Specifications
 
@@ -288,6 +305,7 @@ markdownlint -c .markdownlint.json src/devices/Bme280/README.md
 ```
 
 #### For Display Devices
+
 ```markdown
 ## Specifications
 
@@ -298,6 +316,7 @@ markdownlint -c .markdownlint.json src/devices/Bme280/README.md
 ```
 
 #### For Motor/Actuator Devices
+
 ```markdown
 ## Specifications
 

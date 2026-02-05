@@ -20,16 +20,20 @@ This skill helps Copilot agents review and fix device bindings to ensure they fo
 ### 1. API Naming Conventions
 
 #### Methods vs Properties
+
 - **Methods** (e.g., `ReadTemperature()`, `GetTemperature()`) for values that may change between calls
 - **Properties** (e.g., `SomeRegister`) for values that don't change (except via setter)
 
 #### Naming Patterns
+
 - Follow .NET naming rules: PascalCase for public members/types, camelCase for locals/fields
 - Interfaces start with `I` (e.g., `ITemperatureSensor`)
 - Async methods must have `Async` suffix and synchronous equivalent
 
 #### Read Methods
+
 ✅ **DO:**
+
 ```csharp
 public bool TryReadTemperature(out Temperature temperature)
 public Temperature ReadTemperature()
@@ -37,6 +41,7 @@ public bool TryGetPressure(out Pressure pressure)
 ```
 
 ❌ **DON'T:**
+
 ```csharp
 public double GetTemp() // Use Temperature type, not double
 public double ReadTemperature() // Should return Temperature or use Try pattern
@@ -46,7 +51,9 @@ public Temperature? ReadTemperature() // Use Try pattern instead of nullable
 ### 2. Value Types and Units
 
 #### Use UnitsNet Types
+
 ✅ **DO:**
+
 ```csharp
 using UnitsNet;
 
@@ -56,14 +63,17 @@ public ElectricPotential ReadVoltage()
 ```
 
 ❌ **DON'T:**
+
 ```csharp
 public double GetTemperatureCelsius() // Use Temperature type
 public float GetPressurePa() // Use Pressure type
 ```
 
 #### When UnitsNet Not Available
+
 - Use SI units (International System of Units)
 - Document units clearly in XML comments
+
 ```csharp
 /// <summary>
 /// Reads humidity in percent (0-100).
@@ -73,7 +83,9 @@ public double ReadHumidity()
 ```
 
 #### Handling Invalid Values
+
 ✅ **DO:**
+
 ```csharp
 public bool TryReadTemperature(out Temperature temperature)
 {
@@ -89,6 +101,7 @@ public bool TryReadTemperature(out Temperature temperature)
 ```
 
 ❌ **DON'T:**
+
 ```csharp
 public double ReadTemperature()
 {
@@ -99,17 +112,20 @@ public double ReadTemperature()
 ### 3. Constructor Design
 
 #### Required Parameters Only
+
 - Constructor should only require parameters device cannot work without
 - Everything else should have default values
 - Use Settings class for devices with many parameters
 
 ✅ **DO:**
+
 ```csharp
 public Bmp280(I2cDevice i2cDevice, I2cAddress address = I2cAddress.Primary)
 public Dht22(int pin, GpioController? controller = null, bool shouldDispose = true)
 ```
 
 ❌ **DON'T:**
+
 ```csharp
 public Bmp280(I2cDevice i2cDevice, int pollingDelay, bool enableFilter, 
               Oversampling tempOversampling, Oversampling pressOversampling)
@@ -117,7 +133,9 @@ public Bmp280(I2cDevice i2cDevice, int pollingDelay, bool enableFilter,
 ```
 
 #### Integer Invalid Values
+
 - Use `-1` for invalid/unassigned integer values (not `null` or `Nullable<int>`)
+
 ```csharp
 public int Pin { get; set; } = -1; // -1 indicates unassigned
 ```
@@ -125,9 +143,11 @@ public int Pin { get; set; } = -1; // -1 indicates unassigned
 ### 4. Resource Management
 
 #### IDisposable Implementation
-**MUST implement IDisposable if device owns hardware resources**
+
+MUST implement IDisposable if device owns hardware resources.
 
 ✅ **DO:**
+
 ```csharp
 public class Bmp280 : IDisposable
 {
@@ -157,10 +177,12 @@ public class Bmp280 : IDisposable
 ```
 
 #### Transport Ownership
+
 - **I2cDevice, SpiDevice, PwmChannel**: 1:1 with hardware, **should be disposed by device**
 - **GpioController**: Can be shared, **add optional `shouldDispose` flag** (default true)
 
 ✅ **DO:**
+
 ```csharp
 public Dht22(int pin, GpioController? controller = null, bool shouldDispose = true)
 {
@@ -182,7 +204,9 @@ public void Dispose()
 ### 5. Register and Address Management
 
 #### Use Enums for Registers
+
 ✅ **DO:**
+
 ```csharp
 private enum Register : byte
 {
@@ -200,6 +224,7 @@ byte value = Read(Register.ChipId);
 ```
 
 ❌ **DON'T:**
+
 ```csharp
 private const byte CHIP_ID_REG = 0xD0; // Use enum instead
 byte value = Read(0xD0); // Magic number
@@ -208,7 +233,9 @@ byte value = Read(0xD0); // Magic number
 ### 6. Error Handling
 
 #### Input Validation
+
 ✅ **DO:**
+
 ```csharp
 public Sensor(int pin)
 {
@@ -226,7 +253,9 @@ public void SetSamplingRate(int rate)
 ```
 
 #### Hardware Failures
+
 ✅ **DO:**
+
 ```csharp
 public bool TryReadTemperature(out Temperature temperature)
 {
@@ -250,6 +279,7 @@ public bool TryReadTemperature(out Temperature temperature)
 ```
 
 ❌ **DON'T:**
+
 ```csharp
 public Temperature ReadTemperature()
 {
@@ -267,11 +297,13 @@ public Temperature ReadTemperature()
 ### 7. Visibility and Access Modifiers
 
 #### Public API Minimalism
+
 - Only most useful APIs should be public
 - Advanced features should be `protected` (allows inheritance)
 - Internal implementation details should be `private` or `internal`
 
 ✅ **DO:**
+
 ```csharp
 public class Sensor
 {
@@ -289,7 +321,9 @@ public class Sensor
 ### 8. Documentation Requirements
 
 #### XML Comments
+
 ✅ **DO:**
+
 ```csharp
 /// <summary>
 /// Reads the current temperature from the sensor.
@@ -305,6 +339,7 @@ public bool TryReadTemperature(out Temperature temperature)
 ### 9. Common Anti-Patterns to Fix
 
 ❌ **Console I/O in Library Code**
+
 ```csharp
 public void ReadSensor()
 {
@@ -314,17 +349,20 @@ public void ReadSensor()
 ```
 
 ❌ **Thread-Static Caches**
+
 ```csharp
 [ThreadStatic]
 private static byte[]? _buffer; // Hidden state, avoid
 ```
 
 ❌ **Background Threads Without Clear Ownership**
+
 ```csharp
 private Thread? _pollingThread; // Ensure proper disposal and control
 ```
 
 ❌ **Board-Specific Hardcoded Paths**
+
 ```csharp
 const string GpioPath = "/sys/class/gpio"; // Use abstractions
 ```
