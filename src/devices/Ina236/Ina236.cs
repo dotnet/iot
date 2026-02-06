@@ -29,7 +29,7 @@ namespace Iot.Device.Adc
         /// Type B has addresses 0x44 to 0x47, depending on the ADDR pin.
         /// </summary>
         public const int DefaultI2cAddress = 0x40;
-        private I2cDevice _i2cDevice;
+        private I2cDevice? _i2cDevice;
         private ElectricResistance _shuntResistance;
         private ElectricCurrent _currentLsb;
         private ElectricCurrent _maxCurrent;
@@ -55,15 +55,17 @@ namespace Iot.Device.Adc
 
             _maxCurrent = maxCurrent;
 
-            Reset(_shuntResistance, _maxCurrent);
+            Reset();
         }
 
         /// <summary>
         /// Reset the INA236 to default values;
         /// </summary>
         [Command]
-        public void Reset(ElectricResistance shuntResistance, ElectricCurrent current)
+        public void Reset()
         {
+            ObjectDisposedException.ThrowIf(_i2cDevice == null, typeof(I2cDevice));
+
             // Reset the device by sending a value to the configuration register with the reset bit set.
             WriteRegister(Ina236Register.Configuration, 0x8000);
 
@@ -75,8 +77,8 @@ namespace Iot.Device.Adc
             }
 
             // See datasheet. Use twice the value to allow later rounding
-            ElectricCurrent currentLsbMinimum = current / Pow(2.0, 15) * 2;
-            double exactCalibrationValue = 0.00512 / (currentLsbMinimum.Amperes * shuntResistance.Ohms);
+            ElectricCurrent currentLsbMinimum = _maxCurrent / Pow(2.0, 15) * 2;
+            double exactCalibrationValue = 0.00512 / (currentLsbMinimum.Amperes * _shuntResistance.Ohms);
             int valueToSet = (int)exactCalibrationValue;
             if (valueToSet > 0xFFFF)
             {
@@ -89,7 +91,7 @@ namespace Iot.Device.Adc
             // calibrationValue * (x * resistance) = 0.00512 // / resistance
             // calibrationValue * x = 0.00512 / resistance // / calibrationvalue
             // x = 0.00512 / resistance / calibrationValue
-            double exactLsbMinimum = 0.00512 / shuntResistance.Ohms / valueToSet;
+            double exactLsbMinimum = 0.00512 / _shuntResistance.Ohms / valueToSet;
 
             _currentLsb = ElectricCurrent.FromAmperes(exactLsbMinimum);
 
@@ -259,7 +261,7 @@ namespace Iot.Device.Adc
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null!;
+            _i2cDevice = null;
         }
 
         /// <summary>
@@ -318,6 +320,8 @@ namespace Iot.Device.Adc
         /// <returns>Am unsiged short integer representing the regsiter contents.</returns>
         private ushort ReadRegisterUnsigned(Ina236Register register)
         {
+            ObjectDisposedException.ThrowIf(_i2cDevice == null, typeof(I2cDevice));
+
             Span<byte> buffer = stackalloc byte[2];
 
             byte registerNumber = (byte)register;
@@ -335,6 +339,7 @@ namespace Iot.Device.Adc
         /// <returns>A signed short integer representing the regsiter contents.</returns>
         private short ReadRegisterSigned(Ina236Register register)
         {
+            ObjectDisposedException.ThrowIf(_i2cDevice == null, typeof(I2cDevice));
             Span<byte> buffer = stackalloc byte[2];
 
             byte registerNumber = (byte)register;
@@ -352,6 +357,7 @@ namespace Iot.Device.Adc
         /// <param name="value">The value to be written to the register.</param>
         private void WriteRegister(Ina236Register register, ushort value)
         {
+            ObjectDisposedException.ThrowIf(_i2cDevice == null, typeof(I2cDevice));
             Span<byte> buffer = stackalloc byte[3];
 
             // set the first byte of the buffer to the register to be written

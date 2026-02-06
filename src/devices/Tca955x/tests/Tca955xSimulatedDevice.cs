@@ -38,7 +38,7 @@ namespace Tca955x.Tests
             }
         }
 
-        public override int WriteRead(byte[] inputBuffer, byte[] outputBuffer)
+        public override void WriteRead(byte[] inputBuffer, byte[] outputBuffer)
         {
             if (inputBuffer.Length >= 1)
             {
@@ -48,7 +48,7 @@ namespace Tca955x.Tests
             if (CurrentRegister == 0)
             {
                 outputBuffer[0] = _register0.Value;
-                return 1;
+                return;
             }
 
             if (CurrentRegister == 2)
@@ -61,7 +61,7 @@ namespace Tca955x.Tests
                 if (outputBuffer.Length > 0)
                 {
                     outputBuffer[0] = _register2.Value;
-                    return 1;
+                    return;
                 }
             }
 
@@ -75,11 +75,9 @@ namespace Tca955x.Tests
                 if (outputBuffer.Length > 0)
                 {
                     outputBuffer[0] = _register3.Value;
-                    return 1;
+                    return;
                 }
             }
-
-            return 0;
         }
     }
 }
