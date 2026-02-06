@@ -3,8 +3,6 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Device;
 using System.Device.I2c;
 using System.Device.Model;
 using UnitsNet;
@@ -323,10 +321,10 @@ namespace Iot.Device.Adc
             Span<byte> buffer = stackalloc byte[2];
 
             byte registerNumber = (byte)register;
-            // set a value in the buffer representing the register that we want to read and send it to the INA219
+            // set a value in the buffer representing the register that we want to read and send it to the INA236
             _i2cDevice.WriteRead(new ReadOnlySpan<byte>(ref registerNumber), buffer);
 
-            // massage the big endian value read from the INA219 unto a ushort.
+            // massage the big endian value read from the INA236 unto a ushort.
             return BinaryPrimitives.ReadUInt16BigEndian(buffer);
         }
 
@@ -340,10 +338,10 @@ namespace Iot.Device.Adc
             Span<byte> buffer = stackalloc byte[2];
 
             byte registerNumber = (byte)register;
-            // set a value in the buffer representing the register that we want to read and send it to the INA219
+            // set a value in the buffer representing the register that we want to read and send it to the INA236
             _i2cDevice.WriteRead(new ReadOnlySpan<byte>(ref registerNumber), buffer);
 
-            // massage the big endian value read from the INA219 unto a ushort.
+            // massage the big endian value read from the INA236 unto a ushort.
             return BinaryPrimitives.ReadInt16BigEndian(buffer);
         }
 

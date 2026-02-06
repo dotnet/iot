@@ -1,4 +1,4 @@
-﻿# INA219 - Bidirectional Current/Power Monitor
+﻿# INA236 - Bidirectional Current/Power Monitor
 
 The INA236 is a current shunt and power monitor with an I2C-compatible interface. It is an improved version of the INA219 with a higher accuracy and an extra voltage sensor for the secondary side. The device monitors both shunt voltage drop and bus supply voltage, with programmable conversion times and filtering. A programmable calibration value, combined with an internal multiplier, enables direct readouts of current in amperes. An additional multiplying register calculates power in watts.
 

@@ -3,11 +3,7 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Device.I2c;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ina236.Tests
 {
@@ -46,7 +42,7 @@ namespace Ina236.Tests
             return newValue;
         }
 
-        public override int WriteRead(byte[] inputBuffer, byte[] outputBuffer)
+        public override void WriteRead(byte[] inputBuffer, byte[] outputBuffer)
         {
             if (inputBuffer.Length > 0)
             {
@@ -64,8 +60,6 @@ namespace Ina236.Tests
                 ushort ret = (ushort)register2.ReadRegister();
                 BinaryPrimitives.WriteUInt16BigEndian(outputBuffer, ret);
             }
-
-            return outputBuffer.Length;
         }
     }
 }

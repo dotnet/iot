@@ -19,7 +19,7 @@ namespace Iot.Device.Adc
         SingeShuntVoltage = 0b001,
 
         /// <summary>
-        /// Generate s single measurement of the shunt voltage value, then wait for a command again
+        /// Generate a single measurement of the shunt voltage value, then wait for a command again
         /// </summary>
         SingleBusVoltage = 0b010,
 
@@ -44,7 +44,7 @@ namespace Iot.Device.Adc
         ContinuousBusVoltage = 0b110,
 
         /// <summary>
-        /// Continuously measure both bus and shut voltages.
+        /// Continuously measure both bus and shunt voltages.
         /// This is the default setting.
         /// </summary>
         ContinuousShuntAndBusVoltage = 0b111,
