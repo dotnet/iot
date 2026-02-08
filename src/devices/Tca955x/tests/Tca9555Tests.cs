@@ -50,7 +50,7 @@ namespace Iot.Device.Tca955x.Tests
             var value = pin0.Read();
             Assert.Equal(PinValue.High, value);
             pin0.Dispose();
-            Assert.False(tcaController.IsPinOpen(8));
+            Assert.False(tcaController.IsPinOpen(0));
         }
 
         [Fact]
