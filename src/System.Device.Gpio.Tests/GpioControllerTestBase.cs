@@ -249,8 +249,8 @@ public abstract class GpioControllerTestBase
             controller.OpenPin(OutputPin, PinMode.Output);
             controller.Write(OutputPin, PinValue.Low);
             controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, Callback);
-            // Sometimes, we get an extra event just at the beginning - wait for it and then drop it
-            ev.WaitOne(1000);
+            // Sometimes, we get an extra event just at the beginning - therefore wait a bit
+            Thread.Sleep(100);
             wasCalled = false;
             controller.Write(OutputPin, PinValue.High);
             controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback);
