@@ -61,7 +61,8 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     [Fact]
     public void InputPullResistorsWork()
     {
-        while (!Debugger.IsAttached)
+        int j = 20;
+        while (!Debugger.IsAttached && j-- > 0)
         {
             Logger.WriteLine("Waiting for debugger");
             Thread.Sleep(1000);
@@ -74,6 +75,7 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
             controller.ClosePin(OpenPin);
 
             controller.OpenPin(OpenPin, PinMode.InputPullUp);
+            Thread.Sleep(100);
             Assert.Equal(PinValue.High, controller.Read(OpenPin));
 
             for (int i = 0; i < 100; i++)
