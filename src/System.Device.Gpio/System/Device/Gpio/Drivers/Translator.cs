@@ -14,7 +14,7 @@ internal static class Translator
     {
         return pinMode switch
         {
-            PinMode.Input => (GpiodLineDirection.Input, null),
+            PinMode.Input => (GpiodLineDirection.Input, GpiodLineBias.Disabled),
             PinMode.Output => (GpiodLineDirection.Output, null),
             PinMode.InputPullDown => (GpiodLineDirection.Input, GpiodLineBias.PullDown),
             PinMode.InputPullUp => (GpiodLineDirection.Input, GpiodLineBias.PullUp),
