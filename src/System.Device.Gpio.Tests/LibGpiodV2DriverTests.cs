@@ -15,6 +15,11 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
 {
     private const int ChipNumber = 0;
 
+    /// <summary>
+    /// Leave this pin open (unconnected) for the tests
+    /// </summary>
+    private const int OpenPin = 23;
+
     public LibGpiodV2DriverTests(ITestOutputHelper testOutputHelper)
         : base(testOutputHelper)
     {
@@ -45,6 +50,32 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
             Assert.NotNull(driverInfo);
             Assert.Equal(chip, driverInfo);
             ctrl.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Tests for setting the pull up/pull down resistors on the Raspberry Pi (supported on Pi3 and Pi4, but with different techniques)
+    /// </summary>
+    [Fact]
+    public void InputPullResistorsWork()
+    {
+        using (GpioController controller = new GpioController(GetTestDriver()))
+        {
+            controller.OpenPin(Input, PinMode.InputPullUp);
+            Assert.Equal(PinValue.High, controller.Read(OpenPin));
+
+            for (int i = 0; i < 100; i++)
+            {
+                controller.SetPinMode(OpenPin, PinMode.InputPullDown);
+                Assert.Equal(PinValue.Low, controller.Read(OpenPin));
+
+                controller.SetPinMode(OpenPin, PinMode.InputPullUp);
+                Assert.Equal(PinValue.High, controller.Read(OpenPin));
+            }
+
+            // change one more time so that when running test in a loop we start with the inverted option
+            controller.SetPinMode(OpenPin, PinMode.InputPullDown);
+            Assert.Equal(PinValue.Low, controller.Read(OpenPin));
         }
     }
 
