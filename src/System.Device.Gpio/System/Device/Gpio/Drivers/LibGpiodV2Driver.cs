@@ -133,7 +133,8 @@ public sealed class LibGpiodV2Driver : UnixDriver
                     lineSettings.SetEdgeDetection(GpiodLineEdge.None);
                 }
             }
-            else if (bias != null)
+
+            if (bias != null)
             {
                 lineSettings.SetBias(bias.Value);
             }
