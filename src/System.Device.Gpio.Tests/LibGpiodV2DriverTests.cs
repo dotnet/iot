@@ -61,7 +61,7 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     {
         using (GpioController controller = new GpioController(GetTestDriver()))
         {
-            controller.OpenPin(Input, PinMode.InputPullUp);
+            controller.OpenPin(OpenPin, PinMode.InputPullUp);
             Assert.Equal(PinValue.High, controller.Read(OpenPin));
 
             for (int i = 0; i < 100; i++)
