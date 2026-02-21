@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
+using System.Diagnostics;
+using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -59,8 +61,18 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     [Fact]
     public void InputPullResistorsWork()
     {
+        while (!Debugger.IsAttached)
+        {
+            Logger.WriteLine("Waiting for debugger");
+            Thread.Sleep(1000);
+        }
+
         using (GpioController controller = new GpioController(GetTestDriver()))
         {
+            controller.OpenPin(OpenPin, PinMode.Input);
+            Thread.Sleep(1000);
+            controller.ClosePin(OpenPin);
+
             controller.OpenPin(OpenPin, PinMode.InputPullUp);
             Assert.Equal(PinValue.High, controller.Read(OpenPin));
 
