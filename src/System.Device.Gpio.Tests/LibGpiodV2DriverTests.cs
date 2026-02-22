@@ -55,6 +55,14 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
         }
     }
 
+    private static void VerifyStateUsingRpiDriver(int pin, PinMode expectedMode)
+    {
+        using var rpi = new GpioController(new RaspberryPi3Driver());
+        rpi.OpenPin(pin);
+        var mode = rpi.GetPinMode(pin);
+        Assert.Equal(expectedMode, mode);
+    }
+
     /// <summary>
     /// Tests for setting the pull up/pull down resistors on the Raspberry Pi (supported on Pi3 and Pi4, but with different techniques)
     /// </summary>
@@ -72,10 +80,12 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
         {
             controller.OpenPin(OpenPin, PinMode.Input);
             Thread.Sleep(1000);
+            VerifyStateUsingRpiDriver(OpenPin, PinMode.Input);
             controller.ClosePin(OpenPin);
 
             controller.OpenPin(OpenPin, PinMode.InputPullUp);
             Thread.Sleep(100);
+            VerifyStateUsingRpiDriver(OpenPin, PinMode.InputPullUp);
             Assert.Equal(PinValue.High, controller.Read(OpenPin));
 
             for (int i = 0; i < 100; i++)
@@ -83,6 +93,7 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
                 Logger.WriteLine($"Starting iteration {i}");
                 controller.SetPinMode(OpenPin, PinMode.InputPullDown);
                 Thread.Sleep(100);
+                VerifyStateUsingRpiDriver(OpenPin, PinMode.InputPullDown);
                 Assert.Equal(PinValue.Low, controller.Read(OpenPin));
 
                 controller.SetPinMode(OpenPin, PinMode.InputPullUp);
