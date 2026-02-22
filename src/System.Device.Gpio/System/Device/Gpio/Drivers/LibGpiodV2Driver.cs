@@ -144,12 +144,6 @@ public sealed class LibGpiodV2Driver : UnixDriver
         {
             if (_requestedLineByLineOffset.TryGetValue(offset, out RequestedLines? requestedLines))
             {
-                GpiodLineDirection gpiodLineDirection = requestedLines.LineConfig.GetLineSettings(offset).GetDirection();
-                if (gpiodLineDirection == direction)
-                {
-                    return;
-                }
-
                 ReconfigureExistingRequest(requestedLines, offset, ChangeExistingLineSettings);
                 return;
             }
