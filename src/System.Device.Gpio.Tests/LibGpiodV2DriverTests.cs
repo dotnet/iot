@@ -52,6 +52,10 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
             var driverInfo = driver.GetChipInfo();
             Assert.NotNull(driverInfo);
             Assert.Equal(chip, driverInfo);
+
+            var otherInfo = ctrl.QueryComponentInformation();
+            Assert.NotNull(otherInfo);
+            Assert.True(otherInfo.Name.Contains("libgpiod", StringComparison.OrdinalIgnoreCase));
             ctrl.Dispose();
         }
     }
