@@ -4,6 +4,7 @@
 using System.Device.Gpio.Drivers;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -55,12 +56,23 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
         }
     }
 
-    private static void VerifyStateUsingRpiDriver(int pin, PinMode expectedMode)
+    /// <summary>
+    /// This uses the RPI3 driver to verify that the libgpiod driver did what it was expected to do
+    /// by directly reading out the hardware registers.
+    /// </summary>
+    private void VerifyStateUsingRpiDriver(int pin, PinMode expectedMode)
     {
-        using var rpi = new GpioController(new RaspberryPi3Driver());
-        rpi.OpenPin(pin);
-        var mode = rpi.GetPinMode(pin);
-        Assert.Equal(expectedMode, mode);
+        try
+        {
+            using var rpi = new GpioController(new RaspberryPi3Driver());
+            rpi.OpenPin(pin);
+            var mode = rpi.GetPinMode(pin);
+            Assert.Equal(expectedMode, mode);
+        }
+        catch (PlatformNotSupportedException x)
+        {
+            Logger.WriteLine($"Unable to compare with RaspberryPi driver, as not a supported board type: {x.Message}");
+        }
     }
 
     /// <summary>
@@ -69,37 +81,29 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     [Fact]
     public void InputPullResistorsWork()
     {
-        int j = 20;
-        while (!Debugger.IsAttached && j-- > 0)
-        {
-            Logger.WriteLine("Waiting for debugger");
-            Thread.Sleep(1000);
-        }
-
         using (GpioController controller = new GpioController(GetTestDriver()))
         {
+            // Verify all states
             controller.OpenPin(OpenPin, PinMode.Input);
-            Thread.Sleep(1000);
             VerifyStateUsingRpiDriver(OpenPin, PinMode.Input);
             controller.ClosePin(OpenPin);
 
             controller.OpenPin(OpenPin, PinMode.InputPullUp);
-            Thread.Sleep(100);
+            Thread.Sleep(50);
             VerifyStateUsingRpiDriver(OpenPin, PinMode.InputPullUp);
             Assert.Equal(PinValue.High, controller.Read(OpenPin));
 
             for (int i = 0; i < 100; i++)
             {
-                Logger.WriteLine($"Starting iteration {i}");
                 controller.SetPinMode(OpenPin, PinMode.Input);
                 VerifyStateUsingRpiDriver(OpenPin, PinMode.Input);
                 controller.SetPinMode(OpenPin, PinMode.InputPullDown);
-                Thread.Sleep(100);
+                Thread.Sleep(10);
                 VerifyStateUsingRpiDriver(OpenPin, PinMode.InputPullDown);
                 Assert.Equal(PinValue.Low, controller.Read(OpenPin));
 
                 controller.SetPinMode(OpenPin, PinMode.InputPullUp);
-                Thread.Sleep(100);
+                Thread.Sleep(10);
                 Assert.Equal(PinValue.High, controller.Read(OpenPin));
             }
 
