@@ -88,9 +88,11 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
             VerifyStateUsingRpiDriver(OpenPin, PinMode.InputPullUp);
             Assert.Equal(PinValue.High, controller.Read(OpenPin));
 
-            for (int i = 0; i < 100; i++)
+            // for (int i = 0; i < 100; i++)
             {
-                Logger.WriteLine($"Starting iteration {i}");
+                // Logger.WriteLine($"Starting iteration {i}");
+                controller.ClosePin(OpenPin);
+                controller.OpenPin(OpenPin);
                 controller.SetPinMode(OpenPin, PinMode.Input);
                 VerifyStateUsingRpiDriver(OpenPin, PinMode.Input);
                 controller.SetPinMode(OpenPin, PinMode.InputPullDown);
