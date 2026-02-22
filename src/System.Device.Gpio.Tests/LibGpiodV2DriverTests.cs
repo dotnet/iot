@@ -91,6 +91,8 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
             for (int i = 0; i < 100; i++)
             {
                 Logger.WriteLine($"Starting iteration {i}");
+                controller.SetPinMode(OpenPin, PinMode.Input);
+                VerifyStateUsingRpiDriver(OpenPin, PinMode.Input);
                 controller.SetPinMode(OpenPin, PinMode.InputPullDown);
                 Thread.Sleep(100);
                 VerifyStateUsingRpiDriver(OpenPin, PinMode.InputPullDown);
