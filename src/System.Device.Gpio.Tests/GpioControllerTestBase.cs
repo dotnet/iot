@@ -249,8 +249,8 @@ public abstract class GpioControllerTestBase
             controller.OpenPin(OutputPin, PinMode.Output);
             controller.Write(OutputPin, PinValue.Low);
             controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, Callback);
-            // Sometimes, we get an extra event just at the beginning - wait for it and then drop it
-            ev.WaitOne(1000);
+            // Sometimes, we get an extra event just at the beginning - therefore wait a bit
+            Thread.Sleep(100);
             wasCalled = false;
             controller.Write(OutputPin, PinValue.High);
             controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback);
@@ -334,8 +334,14 @@ public abstract class GpioControllerTestBase
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, Callback3);
                 controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, Callback4);
 
+                Thread.Sleep(100);
+                risingEventOccurredCount = 0;
+                fallingEventOccurredCount = 0;
                 controller.Write(OutputPin, PinValue.High);
                 Thread.Sleep(WaitMilliseconds);
+
+                Assert.Equal(1, risingEventOccurredCount);
+                Assert.Equal(0, fallingEventOccurredCount);
 
                 controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback1);
                 controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback2);

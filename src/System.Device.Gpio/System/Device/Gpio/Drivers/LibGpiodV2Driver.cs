@@ -10,7 +10,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
+using static Interop;
 
 namespace System.Device.Gpio.Drivers;
 
@@ -31,6 +33,8 @@ public sealed class LibGpiodV2Driver : UnixDriver
     private readonly Dictionary<Offset, RequestedLines> _requestedLineByLineOffset = new();
     private readonly CancellationTokenSource _disposalTokenSource = new();
     private readonly LibGpiodV2EventObserver _eventObserver;
+
+    private bool _isDisposed;
 
     /// <summary>
     /// Creates a driver instance for the specified GPIO chip.
@@ -133,7 +137,8 @@ public sealed class LibGpiodV2Driver : UnixDriver
                     lineSettings.SetEdgeDetection(GpiodLineEdge.None);
                 }
             }
-            else if (bias != null)
+
+            if (bias != null)
             {
                 lineSettings.SetBias(bias.Value);
             }
@@ -143,12 +148,6 @@ public sealed class LibGpiodV2Driver : UnixDriver
         {
             if (_requestedLineByLineOffset.TryGetValue(offset, out RequestedLines? requestedLines))
             {
-                GpiodLineDirection gpiodLineDirection = requestedLines.LineConfig.GetLineSettings(offset).GetDirection();
-                if (gpiodLineDirection == direction)
-                {
-                    return;
-                }
-
                 ReconfigureExistingRequest(requestedLines, offset, ChangeExistingLineSettings);
                 return;
             }
@@ -474,9 +473,16 @@ public sealed class LibGpiodV2Driver : UnixDriver
         return new GpioChipInfo(info.ChipNumber, info.GetName(), info.GetLabel(), info.GetNumLines());
     }
 
-    #region Dispose
-
-    private bool _isDisposed;
+    /// <inheritdoc/>
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "LibGpiodDriver");
+        IntPtr libgpiodVersionPtr = LibgpiodV2.gpiod_api_version();
+        string libgpiodVersion = Marshal.PtrToStringAnsi(libgpiodVersionPtr) ?? string.Empty;
+        self.Properties["LibGpiod-api-version"] = libgpiodVersion;
+        self.Properties["ChipInfo"] = GetChipInfo().ToString();
+        return self;
+    }
 
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
@@ -518,8 +524,6 @@ public sealed class LibGpiodV2Driver : UnixDriver
             }
         }
     }
-
-    #endregion
 
     private sealed record RequestedLines(LineConfig LineConfig, IReadOnlyDictionary<Offset, LineSettings> SettingsByLine, LineRequest LineRequest);
 }
