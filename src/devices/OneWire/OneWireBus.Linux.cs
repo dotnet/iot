@@ -12,8 +12,8 @@ namespace Iot.Device.OneWire
 {
     public partial class OneWireBus
     {
-        internal const string SysfsBusDevicesPath = "/sys/bus/w1/devices";
-        internal const string SysfsDevicesPath = "/sys/devices";
+        internal static string SysfsBusDevicesPath = "/sys/bus/w1/devices";
+        internal static string SysfsDevicesPath = "/sys/devices";
 
         internal static IEnumerable<string> EnumerateBusIdsInternal()
         {
@@ -70,6 +70,36 @@ namespace Iot.Device.OneWire
             }
 
             File.WriteAllText(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
+        }
+
+        /// <summary>
+        /// Sets the bus path to the specified directory for testing purpose.
+        /// </summary>
+        /// <param name="path">The path to the directory that will be set as the bus path. This path must exist and be a valid directory.</param>
+        /// <exception cref="ArgumentException">Thrown if the specified path does not exist or is not a directory.</exception>
+        public static void OverwriteSysfsBusDevicesPath(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                throw new ArgumentException($"Provided path {path} does not exist or is not a directory.");
+            }
+
+            SysfsBusDevicesPath = path;
+        }
+
+        /// <summary>
+        /// Sets the devices path to the specified directory for testing purpose.
+        /// </summary>
+        /// <param name="path">The path to the directory that will be set as the devices path. This path must exist and be a valid directory.</param>
+        /// <exception cref="ArgumentException">Thrown if the provided path does not exist or is not a directory.</exception>
+        public static void OverwriteSysfsDevicesPath(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                throw new ArgumentException($"Provided path {path} does not exist or is not a directory.");
+            }
+
+            SysfsDevicesPath = path;
         }
     }
 }
