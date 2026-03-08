@@ -8,7 +8,6 @@ namespace System.Device.Gpio
     /// <summary>
     /// Provides information about a GPIO chip
     /// </summary>
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public record GpioChipInfo(int Id, string Name, string Label, int NumLines)
     {
         /// <summary>

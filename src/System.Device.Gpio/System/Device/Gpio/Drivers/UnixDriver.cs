@@ -40,9 +40,7 @@ public abstract class UnixDriver : GpioDriver
             return driver;
         }
 
-#pragma warning disable SDGPIO0001
         if (TryCreate(() => new LibGpiodV2Driver(0), out driver))
-#pragma warning restore SDGPIO0001
         {
             return driver;
         }
@@ -53,20 +51,5 @@ public abstract class UnixDriver : GpioDriver
         }
 
         throw new PlatformNotSupportedException("No unix driver appears to be runnable");
-    }
-
-    private static bool TryCreate(Func<UnixDriver> creationAction, [NotNullWhen(true)]out UnixDriver? driver)
-    {
-        try
-        {
-            driver = creationAction();
-        }
-        catch (Exception x) when (x is PlatformNotSupportedException || x is DllNotFoundException)
-        {
-            driver = null;
-            return false;
-        }
-
-        return true;
     }
 }

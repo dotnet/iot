@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
-#pragma warning disable SDGPIO0001
 namespace System.Device.Gpio.Tests;
 
 [Trait("feature", "gpio")]
