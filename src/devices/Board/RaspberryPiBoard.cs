@@ -283,11 +283,11 @@ namespace Iot.Device.Board
                     break;
                 case 2:
                     // Available only on the compute module
-                    // GPIO​40 / PWM0 / SPI2 MISO / UART1 TX
-                    // ​GPIO​41 / PWM1 / SPI2 MOSI / UART1 RX
-                    // GPIO​42 / GPCLK1 / SPI2 SCLK / UART1 RTS
-                    // GPIO​43 / GPCLK2 / SPI2 CE0 / UART1 CTS
-                    // GPIO​44 / GPCLK1 / I2C0 SDA / I2C1 SDA / SPI2 CE1
+                    // GPIO40 / PWM0 / SPI2 MISO / UART1 TX
+                    // GPIO41 / PWM1 / SPI2 MOSI / UART1 RX
+                    // GPIO42 / GPCLK1 / SPI2 SCLK / UART1 RTS
+                    // GPIO43 / GPCLK2 / SPI2 CE0 / UART1 CTS
+                    // GPIO44 / GPCLK1 / I2C0 SDA / I2C1 SDA / SPI2 CE1
                     // GPIO45 / PWM1 / I2C0 SCL / I2C1 SCL / SPI2 CE2
                     pins.Add(40);
                     pins.Add(41);
