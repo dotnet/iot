@@ -17,7 +17,7 @@ public abstract partial class I2cBus : IDisposable
     {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
-            return CreateWindows10I2cBus(busId);
+            throw new PlatformNotSupportedException("There's no default I2C driver for Windows available.");
         }
         else
         {

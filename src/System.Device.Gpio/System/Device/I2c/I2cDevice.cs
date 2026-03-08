@@ -25,7 +25,7 @@ public abstract partial class I2cDevice : IDisposable
     {
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
-            return CreateWindows10I2cDevice(settings);
+            throw new PlatformNotSupportedException("There's no default I2C driver on Windows available");
         }
         else
         {
