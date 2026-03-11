@@ -15,17 +15,17 @@ namespace Iot.Device.Common
         /// <summary>
         /// Gas constant of dry Air, J / (kg * K)
         /// </summary>
-        internal const double SpecificGasConstantOfAir = 287.058;
+        public const double SpecificGasConstantOfAir = 287.058;
 
         /// <summary>
         /// Gas constant of vapor, J / (kg * K)
         /// </summary>
-        internal const double SpecificGasConstantOfVapor = 461.523;
+        public const double SpecificGasConstantOfVapor = 461.523;
 
         /// <summary>
         /// Default atmospheric temperature gradient = 0.0065K/m (or 0.65K per 100m)
         /// </summary>
-        internal const double DefaultTemperatureGradient = 0.0065;
+        public const double DefaultTemperatureGradient = 0.0065;
 
         /// <summary>
         /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
@@ -204,6 +204,7 @@ namespace Iot.Device.Common
         public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
         {
             double meters = ((Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, 1 / 5.255) - 1) * airTemperature.Kelvins) / DefaultTemperatureGradient;
+            // double meters = (airTemperature.Kelvins / DefaultTemperatureGradient) * (1 - Math.Pow(pressure / seaLevelPressure, 1.0 / 5.255));
             return Length.FromMeters(meters);
         }
 

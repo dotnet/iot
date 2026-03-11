@@ -101,12 +101,16 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(1011.22, 900, 1013.25, 15)]
-        [InlineData(111.18, 1000, 1013.25, 15)]
+        [InlineData(0, 1013.25, 1013.25, 15)]
+        [InlineData(999.96, 898.75, 1013.25, 15)]
+        [InlineData(3000, 701.09, 1013.25, 15)]
         [InlineData(547.1, 950, 1013.25, 15)]
         public void AltitudeIsCalculatedCorrectly(double expected, double hpa, double seaLevelHpa, double celsius)
         {
             Length altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa), Pressure.FromHectopascals(seaLevelHpa), Temperature.FromDegreesCelsius(celsius));
+
+            double meters1 = (Math.Pow(seaLevelHpa / hpa, -1 / 5.255) - 1) * ((celsius + 273.15) / -WeatherHelper.DefaultTemperatureGradient);
+            double meters2 = ((celsius + 273.15) / WeatherHelper.DefaultTemperatureGradient) * (1 - Math.Pow(hpa / seaLevelHpa, 1.0 / 5.255));
             Assert.Equal(expected, Math.Round(altitude.Meters, 2));
         }
 
@@ -157,6 +161,17 @@ namespace Iot.Device.Common.Tests
             Pressure result = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascals(measuredValue),
                 Temperature.FromDegreesCelsius(temperature), Length.FromMeters(altitude));
             Assert.Equal(expected, result.Hectopascals, 2);
+        }
+
+        [Theory]
+        [InlineData(1113.25, -801.147)]
+        [InlineData(1013.25, 0.0)]
+        [InlineData(913.25, 867.955)]
+        [InlineData(813.25, 1816.617)]
+        public void Pressure2Msl(double pressureHPa, double expectedHeightMsl)
+        {
+            var heightMsl = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(pressureHPa));
+            Assert.Equal(heightMsl.Meters, expectedHeightMsl, 0.1);
         }
 
         [Theory]
