@@ -83,9 +83,7 @@ namespace Iot.Device.Mcp23xxx.Tests
                 TheoryData<TestDevice> devices = new TheoryData<TestDevice>();
 
                 // Don't want to use the same bus mock for each
-                GpioDriverMock driverMock;
-
-                driverMock = new GpioDriverMock();
+                GpioDriverMock driverMock = new GpioDriverMock();
                 I2cDeviceMock i2c = new I2cDeviceMock(1);
                 devices.Add(new TestDevice(new Mcp23008(i2c, reset: 1, controller: new GpioController(driverMock)), i2c.DeviceMock, driverMock));
                 driverMock = new GpioDriverMock();
