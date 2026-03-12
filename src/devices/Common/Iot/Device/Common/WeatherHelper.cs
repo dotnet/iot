@@ -201,16 +201,6 @@ namespace Iot.Device.Common
         #region Pressure
 
         /// <summary>
-        /// Calculates the altitude in meters from the given pressure and air temperature. Assumes mean sea-level pressure.
-        /// </summary>
-        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
-        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
-        /// <returns>The altitude</returns>
-        [Obsolete("Behavior is confusing. Use CalculateAltitude(Pressure, Pressure, Temperature) instead")]
-        public static Length CalculateAltitude(Pressure pressure, Temperature airTemperature) =>
-            CalculateAltitude(pressure, MeanSeaLevelPressure, airTemperature);
-
-        /// <summary>
         /// Calculates the altitude in meters from the given pressure and sea-level pressure.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
