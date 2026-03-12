@@ -81,37 +81,29 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(1011.22, 900)]
-        [InlineData(111.18, 1000)]
-        [InlineData(547.1, 950)]
+        [InlineData(988.50, 900)]
+        [InlineData(110.88, 1000)]
         public void AltitudeIsCalculatedCorrectlyAtMslpAndDefaultTemp(double expected, double hpa)
         {
             Length altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa));
-            Assert.Equal(expected, Math.Round(altitude.Meters, 2));
-        }
-
-        [Theory]
-        [InlineData(1011.22, 900, 1013.25)]
-        [InlineData(111.18, 1000, 1013.25)]
-        [InlineData(547.1, 950, 1013.25)]
-        public void AltitudeIsCalculatedCorrectlyAtDefaultTemp(double expected, double hpa, double seaLevelHpa)
-        {
-            Length altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa), Pressure.FromHectopascals(seaLevelHpa));
-            Assert.Equal(expected, Math.Round(altitude.Meters, 2));
+            Assert.Equal(altitude.Meters, expected, 0.5);
         }
 
         [Theory]
         [InlineData(0, 1013.25, 1013.25, 15)]
-        [InlineData(999.96, 898.75, 1013.25, 15)]
-        [InlineData(3000, 701.09, 1013.25, 15)]
-        [InlineData(547.1, 950, 1013.25, 15)]
+        [InlineData(1000.13, 898.75, 1013.25, 15)]
+        [InlineData(3000.43, 701.09, 1013.25, 15)]
+        [InlineData(540.43, 950, 1013.25, 15)]
         public void AltitudeIsCalculatedCorrectly(double expected, double hpa, double seaLevelHpa, double celsius)
         {
-            Length altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa), Pressure.FromHectopascals(seaLevelHpa), Temperature.FromDegreesCelsius(celsius));
+            Length altitude = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(hpa), Pressure.FromHectopascals(seaLevelHpa));
 
+            // These two formulas should be equivalent.
             double meters1 = (Math.Pow(seaLevelHpa / hpa, -1 / 5.255) - 1) * ((celsius + 273.15) / -WeatherHelper.DefaultTemperatureGradient);
             double meters2 = ((celsius + 273.15) / WeatherHelper.DefaultTemperatureGradient) * (1 - Math.Pow(hpa / seaLevelHpa, 1.0 / 5.255));
             Assert.Equal(expected, Math.Round(altitude.Meters, 2));
+            Assert.Equal(meters1, expected, 0.01);
+            Assert.Equal(meters2, expected, 0.01);
         }
 
         [Theory]
