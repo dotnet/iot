@@ -199,19 +199,37 @@ namespace Iot.Device.Common
         #endregion TemperatureAndRelativeHumidity
 
         #region Pressure
-        // Formula  from https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Internationale_Höhenformel, solved
-        // for different parameters
+
+        /// <summary>
+        /// Calculates the altitude in meters from the given pressure and sea-level pressure.
+        /// </summary>
+        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="seaLevelPressure">The sea-level pressure. In aviation, this is called the QNH value and provided by weather reports or ATC</param>
+        /// <remarks>
+        /// Formula  from https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Internationale_Höhenformel, solved
+        /// </remarks>
+        /// <returns>The altitude over mean sea level</returns>
+        public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure)
+        {
+            double meters = (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, -1.0 / 5.255) - 1) * (DefaultSeaLevelTemperature.Kelvins / -DefaultTemperatureGradient);
+            return Length.FromMeters(meters);
+        }
 
         /// <summary>
         /// Calculates the altitude in meters from the given pressure, sea-level pressure and air temperature.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure. In aviation, this is called the QNH value and provided by weather reports or ATC</param>
+        /// <param name="temperatureAtObservation">Temperature at observation point. Since this depends on the altitude (which we don't know), we use an iterative approach here</param>
         /// <returns>The altitude over mean sea level</returns>
-        public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure)
+        public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature temperatureAtObservation)
         {
+            // The first iteration is to get an approximation of the current height, so we can do the temperature compensation
             double meters = (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, -1.0 / 5.255) - 1) * (DefaultSeaLevelTemperature.Kelvins / -DefaultTemperatureGradient);
-            return Length.FromMeters(meters);
+            // It gets hotter when going down (when in the Troposphere)
+            Temperature temperatureAtSeaLevel = temperatureAtObservation + TemperatureDelta.FromDegreesCelsius(DefaultTemperatureGradient * meters);
+            double meters2 = (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, -1.0 / 5.255) - 1) * (temperatureAtSeaLevel.Kelvins / -DefaultTemperatureGradient);
+            return Length.FromMeters(meters2);
         }
 
         /// <summary>

@@ -242,5 +242,23 @@ namespace Iot.Device.Common.Tests
             var density = WeatherHelper.CalculateWindForce(airDensity, Speed.FromKilometersPerHour(windSpeed), 1.0);
             Assert.Equal(expected, density.NewtonsPerSquareMeter, 1);
         }
+
+        [Theory]
+        [InlineData(0, 1013.25, 15, 0)]
+        [InlineData(0, 1020, 15, 0)]
+        [InlineData(0, 1020, -20, 0)]
+        [InlineData(400, 970, 15, 397.989)]
+        [InlineData(400, 970, -5, 399.047)]
+        [InlineData(2000, 940, -5, 1995.953)]
+        public void RoundTripAltitudeAndPressure(double originalAltitude, double originalPressure, double originalTemperature, double expectedResult)
+        {
+            // The expectedResult and the originalAltitude should ideally be equal.
+            Pressure qnh = WeatherHelper.CalculateBarometricPressure(Pressure.FromHectopascals(originalPressure),
+                Temperature.FromDegreesCelsius(originalTemperature), Length.FromMeters(originalAltitude));
+
+            Length altitudeResult = WeatherHelper.CalculateAltitude(Pressure.FromHectopascals(originalPressure), qnh, Temperature.FromDegreesCelsius(originalTemperature));
+
+            Assert.Equal(expectedResult, altitudeResult.Meters, 1E-3);
+        }
     }
 }
