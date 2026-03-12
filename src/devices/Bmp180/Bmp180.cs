@@ -98,7 +98,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Height in meters above sea level
         /// </returns>
-        public Length ReadAltitude() => ReadAltitude(WeatherHelper.MeanSeaLevel);
+        public Length ReadAltitude() => ReadAltitude(WeatherHelper.MeanSeaLevelPressure);
 
         /// <summary>
         ///  Calculates the pressure at sea level when given a known altitude

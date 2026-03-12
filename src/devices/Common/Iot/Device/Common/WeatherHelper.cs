@@ -38,7 +38,7 @@ namespace Iot.Device.Common
         /// <summary>
         /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
         /// </summary>
-        public static readonly Pressure MeanSeaLevel = Pressure.FromPascals(101325);
+        public static Pressure MeanSeaLevelPressure => Pressure.FromPascals(101325);
 
         #region TemperatureAndRelativeHumidity
 
@@ -201,6 +201,16 @@ namespace Iot.Device.Common
         #region Pressure
 
         /// <summary>
+        /// Calculates the altitude in meters from the given pressure and air temperature. Assumes mean sea-level pressure.
+        /// </summary>
+        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
+        /// <returns>The altitude</returns>
+        [Obsolete("Behavior is confusing. Use CalculateAltitude(Pressure, Pressure, Temperature) instead")]
+        public static Length CalculateAltitude(Pressure pressure, Temperature airTemperature) =>
+            CalculateAltitude(pressure, MeanSeaLevelPressure, airTemperature);
+
+        /// <summary>
         /// Calculates the altitude in meters from the given pressure and sea-level pressure.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
@@ -233,12 +243,12 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Calculates the altitude in meters from the given pressure. Assumes mean sea-level pressure and temperature of 15C.
+        /// Calculates the altitude in meters from the given pressure. Assumes mean sea-level pressure.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <returns>The altitude</returns>
         public static Length CalculateAltitude(Pressure pressure) =>
-            CalculateAltitude(pressure, MeanSeaLevel);
+            CalculateAltitude(pressure, MeanSeaLevelPressure);
 
         /// <summary>
         /// Calculates the approximate sea-level pressure from given absolute pressure, altitude and air temperature.
