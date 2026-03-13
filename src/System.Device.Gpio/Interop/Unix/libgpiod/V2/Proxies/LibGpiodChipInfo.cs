@@ -68,7 +68,6 @@ internal class LibGpiodChipInfo : LibGpiodProxyBase
     /// Helper function for capturing information and creating an immutable snapshot instance.
     /// </summary>
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public GpioChipInfo MakeSnapshot()
     {
         return new GpioChipInfo(_chipNumber, GetName(), GetLabel(), GetNumLines());

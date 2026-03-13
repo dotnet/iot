@@ -116,6 +116,5 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
         }
     }
 
-#pragma warning disable SDGPIO0001
     protected override GpioDriver GetTestDriver() => new LibGpiodV2Driver(ChipNumber);
 }
