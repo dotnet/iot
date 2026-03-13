@@ -115,7 +115,7 @@ void I2cScan(Ftx232HDevice ft232h)
 void TestI2c(Ftx232HDevice ft232h)
 {
     // set this to the current sea level pressure in the area for correct altitude readings
-    Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+    Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevelPressure;
     Length stationHeight = Length.FromMeters(640); // Elevation of the sensor
     var ftI2cBus = ft232h.CreateOrGetI2cBus(ft232h.GetDefaultI2cBusNumber());
     var i2cDevice = ftI2cBus.CreateDevice(Bmp280.DefaultI2cAddress);

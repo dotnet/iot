@@ -15,22 +15,30 @@ namespace Iot.Device.Common
         /// <summary>
         /// Gas constant of dry Air, J / (kg * K)
         /// </summary>
-        internal const double SpecificGasConstantOfAir = 287.058;
+        public const double SpecificGasConstantOfAir = 287.058;
 
         /// <summary>
         /// Gas constant of vapor, J / (kg * K)
         /// </summary>
-        internal const double SpecificGasConstantOfVapor = 461.523;
+        public const double SpecificGasConstantOfVapor = 461.523;
 
         /// <summary>
         /// Default atmospheric temperature gradient = 0.0065K/m (or 0.65K per 100m)
         /// </summary>
-        internal const double DefaultTemperatureGradient = 0.0065;
+        public const double DefaultTemperatureGradient = 0.0065;
+
+        /// <summary>
+        /// The default assumed temperature at sea level.
+        /// This is used for <see cref="CalculateAltitude(Pressure, Pressure)"/> since it is not possible to calculate the temperature at sea level
+        /// for this formula, as we do not know the altitude (it is the result of that computation, after all). The QNH value does consider the
+        /// temperature, though.
+        /// </summary>
+        public static Temperature DefaultSeaLevelTemperature => Temperature.FromDegreesCelsius(15);
 
         /// <summary>
         /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
         /// </summary>
-        public static readonly Pressure MeanSeaLevel = Pressure.FromPascals(101325);
+        public static Pressure MeanSeaLevelPressure => Pressure.FromPascals(101325);
 
         #region TemperatureAndRelativeHumidity
 
@@ -191,47 +199,46 @@ namespace Iot.Device.Common
         #endregion TemperatureAndRelativeHumidity
 
         #region Pressure
-        // Formula  from https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Internationale_Höhenformel, solved
-        // for different parameters
+
+        /// <summary>
+        /// Calculates the altitude in meters from the given pressure and sea-level pressure.
+        /// </summary>
+        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+        /// <param name="seaLevelPressure">The sea-level pressure. In aviation, this is called the QNH value and provided by weather reports or ATC</param>
+        /// <remarks>
+        /// Formula  from https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Internationale_Höhenformel, solved
+        /// </remarks>
+        /// <returns>The altitude over mean sea level</returns>
+        public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure)
+        {
+            double meters = (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, -1.0 / 5.255) - 1) * (DefaultSeaLevelTemperature.Kelvins / -DefaultTemperatureGradient);
+            return Length.FromMeters(meters);
+        }
 
         /// <summary>
         /// Calculates the altitude in meters from the given pressure, sea-level pressure and air temperature.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
-        /// <param name="seaLevelPressure">The sea-level pressure</param>
-        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
-        /// <returns>The altitude</returns>
-        public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
+        /// <param name="seaLevelPressure">The sea-level pressure. In aviation, this is called the QNH value and provided by weather reports or ATC</param>
+        /// <param name="temperatureAtObservation">Temperature at observation point. Since this depends on the altitude (which we don't know), we use an iterative approach here</param>
+        /// <returns>The altitude over mean sea level</returns>
+        public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature temperatureAtObservation)
         {
-            double meters = ((Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, 1 / 5.255) - 1) * airTemperature.Kelvins) / DefaultTemperatureGradient;
-            return Length.FromMeters(meters);
+            // The first iteration is to get an approximation of the current height, so we can do the temperature compensation
+            double meters = (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, -1.0 / 5.255) - 1) * (DefaultSeaLevelTemperature.Kelvins / -DefaultTemperatureGradient);
+            // It gets hotter when going down (when in the Troposphere)
+            Temperature temperatureAtSeaLevel = temperatureAtObservation + TemperatureDelta.FromDegreesCelsius(DefaultTemperatureGradient * meters);
+            double meters2 = (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, -1.0 / 5.255) - 1) * (temperatureAtSeaLevel.Kelvins / -DefaultTemperatureGradient);
+            return Length.FromMeters(meters2);
         }
 
         /// <summary>
-        /// Calculates the altitude in meters from the given pressure and air temperature. Assumes mean sea-level pressure.
-        /// </summary>
-        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
-        /// <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
-        /// <returns>The altitude</returns>
-        public static Length CalculateAltitude(Pressure pressure, Temperature airTemperature) =>
-             CalculateAltitude(pressure, MeanSeaLevel, airTemperature);
-
-        /// <summary>
-        /// Calculates the altitude in meters from the given pressure and sea-level pressure. Assumes temperature of 15C.
-        /// </summary>
-        /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
-        /// <param name="seaLevelPressure">The sea-level pressure</param>
-        /// <returns>The altitude</returns>
-        public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure) =>
-            CalculateAltitude(pressure, seaLevelPressure, Temperature.FromDegreesCelsius(15));
-
-        /// <summary>
-        /// Calculates the altitude in meters from the given pressure. Assumes mean sea-level pressure and temperature of 15C.
+        /// Calculates the altitude in meters from the given pressure. Assumes mean sea-level pressure.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <returns>The altitude</returns>
         public static Length CalculateAltitude(Pressure pressure) =>
-            CalculateAltitude(pressure, MeanSeaLevel, Temperature.FromDegreesCelsius(15));
+            CalculateAltitude(pressure, MeanSeaLevelPressure);
 
         /// <summary>
         /// Calculates the approximate sea-level pressure from given absolute pressure, altitude and air temperature.

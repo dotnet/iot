@@ -9,7 +9,7 @@ using Iot.Device.SenseHat;
 using UnitsNet;
 
 // set this to the current sea level pressure in the area for correct altitude readings
-var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevelPressure;
 
 using SenseHat sh = new();
 int n = 0;

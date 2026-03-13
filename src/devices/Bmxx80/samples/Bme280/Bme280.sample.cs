@@ -15,7 +15,7 @@ Console.WriteLine("Hello Bme280!");
 // bus id on the raspberry pi 3
 const int busId = 1;
 // set this to the current sea level pressure in the area for correct altitude readings
-Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevelPressure;
 
 I2cConnectionSettings i2cSettings = new(busId, Bme280.DefaultI2cAddress);
 using I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);

@@ -176,7 +176,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(out Length altitude) => TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
+        public bool TryReadAltitude(out Length altitude) => TryReadAltitude(WeatherHelper.MeanSeaLevelPressure, out altitude);
 
         /// <summary>
         /// Get the current status of the device.
