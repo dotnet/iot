@@ -10,21 +10,20 @@ namespace Iot.Device.Mcp23xxx.Tests
 {
     public class EnableDisableTests : Mcp23xxxTest
     {
-        private static readonly GpioDriverMock s_driverMock = new GpioDriverMock();
-        private static readonly GpioController s_gpioMock = new GpioController(s_driverMock);
-
         [Theory]
         [MemberData(nameof(ResetTestDevices))]
         public void InitialResetState(TestDevice testDevice)
         {
-            s_gpioMock.OpenPin(1, PinMode.Input);
-            Assert.Equal(PinValue.Low, s_gpioMock.Read(1));
-            s_gpioMock.SetPinMode(1, PinMode.Output);
+            GpioDriverMock driverMock = testDevice.ResetDriverMock!;
+            GpioController gpioMock = new GpioController(driverMock);
+            gpioMock.OpenPin(1, PinMode.Input);
+            Assert.Equal(PinValue.Low, gpioMock.Read(1));
+            gpioMock.SetPinMode(1, PinMode.Output);
             testDevice.Device.Enable();
-            s_gpioMock.SetPinMode(1, PinMode.Input);
-            Assert.Equal(PinValue.High, s_gpioMock.Read(1));
-            s_gpioMock.ClosePin(1);
-            s_driverMock.Reset();
+            gpioMock.SetPinMode(1, PinMode.Input);
+            Assert.Equal(PinValue.High, gpioMock.Read(1));
+            gpioMock.ClosePin(1);
+            driverMock.Reset();
         }
 
         [Theory]
@@ -84,23 +83,31 @@ namespace Iot.Device.Mcp23xxx.Tests
                 TheoryData<TestDevice> devices = new TheoryData<TestDevice>();
 
                 // Don't want to use the same bus mock for each
+                GpioDriverMock driverMock = new GpioDriverMock();
                 I2cDeviceMock i2c = new I2cDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23008(i2c, reset: 1, controller: new GpioController(s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23008(i2c, reset: 1, controller: new GpioController(driverMock)), i2c.DeviceMock, driverMock));
+                driverMock = new GpioDriverMock();
                 i2c = new I2cDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23009(i2c, reset: 1, controller: new GpioController(s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23009(i2c, reset: 1, controller: new GpioController(driverMock)), i2c.DeviceMock, driverMock));
+                driverMock = new GpioDriverMock();
                 i2c = new I2cDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23017(i2c, reset: 1, controller: new GpioController(s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23017(i2c, reset: 1, controller: new GpioController(driverMock)), i2c.DeviceMock, driverMock));
+                driverMock = new GpioDriverMock();
                 i2c = new I2cDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23018(i2c, reset: 1, controller: new GpioController(s_driverMock)), i2c.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23018(i2c, reset: 1, controller: new GpioController(driverMock)), i2c.DeviceMock, driverMock));
 
+                driverMock = new GpioDriverMock();
                 SpiDeviceMock spi = new SpiDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23s08(spi, 0x20, reset: 1, controller: new GpioController(s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s08(spi, 0x20, reset: 1, controller: new GpioController(driverMock)), spi.DeviceMock, driverMock));
+                driverMock = new GpioDriverMock();
                 spi = new SpiDeviceMock(1);
-                devices.Add(new TestDevice(new Mcp23s09(spi, reset: 1, controller: new GpioController(s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s09(spi, reset: 1, controller: new GpioController(driverMock)), spi.DeviceMock, driverMock));
+                driverMock = new GpioDriverMock();
                 spi = new SpiDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23s17(spi, 0x20, reset: 1, controller: new GpioController(s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s17(spi, 0x20, reset: 1, controller: new GpioController(driverMock)), spi.DeviceMock, driverMock));
+                driverMock = new GpioDriverMock();
                 spi = new SpiDeviceMock(2);
-                devices.Add(new TestDevice(new Mcp23s18(spi, reset: 1, controller: new GpioController(s_driverMock)), spi.DeviceMock));
+                devices.Add(new TestDevice(new Mcp23s18(spi, reset: 1, controller: new GpioController(driverMock)), spi.DeviceMock, driverMock));
                 return devices;
             }
         }
