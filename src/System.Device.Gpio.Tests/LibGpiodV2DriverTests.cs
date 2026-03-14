@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
-#pragma warning disable SDGPIO0001
 namespace System.Device.Gpio.Tests;
 
 [Trait("feature", "gpio")]
@@ -117,6 +116,5 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
         }
     }
 
-#pragma warning disable SDGPIO0001
     protected override GpioDriver GetTestDriver() => new LibGpiodV2Driver(ChipNumber);
 }

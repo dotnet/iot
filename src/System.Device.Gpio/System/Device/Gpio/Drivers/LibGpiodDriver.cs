@@ -99,7 +99,6 @@ public class LibGpiodDriver : UnixDriver
     /// Construct an instance of this driver with the provided chip.
     /// </summary>
     /// <param name="chip">The chip to use. Should be one of the elements returned by <see cref="GetAvailableChips"/></param>
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public LibGpiodDriver(GpioChipInfo chip)
         : this(chip.Id)
     {
@@ -109,7 +108,6 @@ public class LibGpiodDriver : UnixDriver
     /// Returns the set of available chips for this driver
     /// </summary>
     /// <returns>A list of <see cref="GpioChipInfo"/> instances</returns>
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public static IList<GpioChipInfo> GetAvailableChips()
     {
         List<GpioChipInfo> result = new List<GpioChipInfo>();
@@ -466,14 +464,11 @@ public class LibGpiodDriver : UnixDriver
         IntPtr libgpiodVersionPtr = LibgpiodV1.gpiod_version_string();
         string libgpiodVersion = Marshal.PtrToStringAnsi(libgpiodVersionPtr) ?? string.Empty;
         self.Properties["LibGpiodVersion"] = libgpiodVersion;
-#pragma warning disable SDGPIO0001
         self.Properties["ChipInfo"] = GetChipInfo().ToString();
-#pragma warning restore SDGPIO0001
         return self;
     }
 
     /// <inheritdoc />
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public override GpioChipInfo GetChipInfo()
     {
         return GetAvailableChips().First(x => x.Id == _chipNumber);

@@ -14,7 +14,6 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// of events are being read.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html"/>
-[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 internal class EdgeEventBuffer : LibGpiodProxyBase
 {
     internal EdgeEventBufferSafeHandle Handle { get; }

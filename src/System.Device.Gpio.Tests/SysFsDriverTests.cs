@@ -6,7 +6,6 @@ using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
-#pragma warning disable SDGPIO0001
 namespace System.Device.Gpio.Tests;
 
 [Trait("requirement", "root")]

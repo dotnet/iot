@@ -584,14 +584,18 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
 
     private void InitializeInterruptDriver()
     {
-        try
+        if (TryCreate(() => new LibGpiodDriver(0), out _interruptDriver))
         {
-            _interruptDriver = new LibGpiodDriver(0);
+            return;
         }
-        catch (PlatformNotSupportedException)
+
+        if (TryCreate(() => new LibGpiodV2Driver(0), out _interruptDriver))
         {
-            _interruptDriver = new InterruptSysFsDriver(this);
+            return;
         }
+
+        // Let it altogether fail if this also doesn't work
+        _interruptDriver = new InterruptSysFsDriver(this);
     }
 
     private void Initialize()

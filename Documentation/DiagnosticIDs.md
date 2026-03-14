@@ -6,4 +6,4 @@ Some of the APIs in this repository are still in development and may be changed 
 
 | Diagnostic ID | Description |
 | :---------------- | :---------- |
-| `SDGPIO0001` | Experimental APIs related to LibGpiod v2 driver used by newer versions of the library |
+| `SDGPIO0001` | Experimental APIs that might be removed or changed in future |

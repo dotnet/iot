@@ -90,7 +90,6 @@ public class SysFsDriver : UnixDriver
     /// </summary>
     /// <param name="chip">The chip to select (use <see cref="GetAvailableChips"/> to query the list of available values)</param>
     /// <exception cref="PlatformNotSupportedException"></exception>
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public SysFsDriver(GpioChipInfo chip)
     {
         if (Environment.OSVersion.Platform != PlatformID.Unix)
@@ -123,7 +122,6 @@ public class SysFsDriver : UnixDriver
     /// This can be used to determine the correct gpio chip for constructor calls to <see cref="LibGpiodDriver"/>
     /// </summary>
     /// <returns>A list of chips detected</returns>
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public static IList<GpioChipInfo> GetAvailableChips()
     {
         string[] fileNames = Directory.GetFileSystemEntries(GpioBasePath, $"{GpioChip}*", SearchOption.TopDirectoryOnly);
@@ -171,7 +169,6 @@ public class SysFsDriver : UnixDriver
         return list;
     }
 
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     private static GpioChipInfo GetChipInfoForName(string name)
     {
         int idx = name.IndexOf(GpioChip, StringComparison.Ordinal);
@@ -704,7 +701,6 @@ public class SysFsDriver : UnixDriver
     }
 
     /// <inheritdoc />
-    [Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
     public override GpioChipInfo GetChipInfo()
     {
         return GetAvailableChips().First(x => x.Id == _chipNumber);
@@ -899,9 +895,7 @@ public class SysFsDriver : UnixDriver
     public override ComponentInformation QueryComponentInformation()
     {
         var self = new ComponentInformation(this, nameof(SysFsDriver));
-#pragma warning disable SDGPIO0001
         self.Properties["ChipInfo"] = GetChipInfo().ToString();
-#pragma warning restore SDGPIO0001
         return self;
     }
 }

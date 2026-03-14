@@ -9,7 +9,6 @@ namespace System.Device.Gpio.Drivers;
 /// <summary>
 /// Exception in the context of calling libgpiod
 /// </summary>
-[Experimental(DiagnosticIds.SDGPIO0001, UrlFormat = DiagnosticIds.UrlFormat)]
 public class GpiodException : IOException
 {
     /// <summary>
