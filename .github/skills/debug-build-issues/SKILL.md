@@ -283,6 +283,6 @@ Document and inform user when:
 
 ## References
 
-- [Copilot Instructions - Build Section](../../copilot-instructions.md#bootstrap-and-build-process)
-- [Contributing Guidelines](../../../Documentation/CONTRIBUTING.md)
-- [Azure Pipelines Config](../../../azure-pipelines.yml)
+- [Copilot Instructions - Build Section](https://github.com/dotnet/iot/blob/main/.github/copilot-instructions.md#bootstrap-and-build-process)
+- [Contributing Guidelines](https://github.com/dotnet/iot/blob/main/Documentation/CONTRIBUTING.md)
+- [Azure Pipelines Config](https://github.com/dotnet/iot/blob/main/azure-pipelines.yml)

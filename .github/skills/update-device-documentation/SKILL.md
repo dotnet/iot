@@ -405,7 +405,7 @@ Connect DHT22 to Raspberry Pi:
 
 ## References
 
-- [Device Conventions](../../../Documentation/Devices-conventions.md)
-- [Contributing Guidelines](../../../Documentation/CONTRIBUTING.md)
-- [Copilot Instructions](../../copilot-instructions.md)
-- [Markdown Style Guide](.markdownlint.json)
+- [Device Conventions](https://github.com/dotnet/iot/blob/main/Documentation/Devices-conventions.md)
+- [Contributing Guidelines](https://github.com/dotnet/iot/blob/main/Documentation/CONTRIBUTING.md)
+- [Copilot Instructions](https://github.com/dotnet/iot/blob/main/.github/copilot-instructions.md)
+- [Markdown Style Guide](https://github.com/dotnet/iot/blob/main/.markdownlint.json)
