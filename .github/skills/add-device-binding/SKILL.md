@@ -189,9 +189,6 @@ cd src/devices/<DeviceName>
 
 cd samples
 ../../../../dotnet.sh build
-
-# Check for hardware abstraction violations
-grep -r "Environment.OSVersion\|DllImport\|P/Invoke" .
 ```
 
 ## Review Checklist
