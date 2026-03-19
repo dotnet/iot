@@ -25,7 +25,7 @@ src/devices/<DeviceName>/
 ├── <DeviceName>.csproj
 ├── <DeviceName>.cs (main class)
 ├── samples/
-│   ├── <DeviceName>.samples.csproj
+│   ├── <DeviceName>.Samples.csproj
 │   └── Program.cs
 ├── tests/ (if applicable)
 │   └── <DeviceName>.Tests.csproj
