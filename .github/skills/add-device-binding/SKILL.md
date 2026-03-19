@@ -35,8 +35,8 @@ src/devices/<DeviceName>/
 ### 2. Constructor & Dependencies
 
 - Accept hardware transports from the caller: `I2cDevice`, `SpiDevice`, `GpioController`, pin numbers, bus addresses
-- Provide sensible defaults (e.g., common I²C addresses like 0x48)
-- **Never hardcode board-specific details**
+- Provide sensible defaults (e.g., common I2C addresses like 0x48)
+- **Never hardcode board-specific details** (e.g., GPIO pin numbers, bus IDs, or hardware paths like `/dev/i2c-1`)
 - Avoid singletons and global state
 
 **Example Constructor:**
@@ -68,7 +68,8 @@ public Bmp280(I2cDevice i2cDevice, I2cAddress address = I2cAddress.Primary)
 
 - **MUST implement `IDisposable`**
 - Dispose hardware resources (I2C/SPI devices, GPIO pins) in the Dispose method
-- If transport is passed by caller, dispose it unless `shouldDispose` flag says otherwise
+- **MUST provide a way for caller to retain ownership** of transports (e.g., via `shouldDispose` parameter, default true)
+- If transport is passed by caller, only dispose it when `shouldDispose` is true or when device creates it
 - Design for failure: ensure exceptions leave device in consistent state
 
 **Example Disposal:**
@@ -100,7 +101,7 @@ protected virtual void Dispose(bool disposing)
 
 - XML documentation comments on all public APIs
 - **Include units** in comments (°C, Pa, %RH, lux, etc.)
-- Document parameter ownership (does caller own the transport?)
+- Document parameter ownership: caller owns the transport unless `shouldDispose` parameter allows device to take ownership
 - README.md with:
   - Device description and capabilities
   - Wiring diagram or connection instructions
