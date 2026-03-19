@@ -102,12 +102,38 @@ protected virtual void Dispose(bool disposing)
 - XML documentation comments on all public APIs
 - **Include units** in comments (°C, Pa, %RH, lux, etc.)
 - Document parameter ownership: caller owns the transport unless `shouldDispose` parameter allows device to take ownership
-- README.md with:
-  - Device description and capabilities
-  - Wiring diagram or connection instructions
-  - Required pull-ups/pull-downs
-  - Expected ranges and units
-  - Code example demonstrating usage
+- **README.md** must follow these conventions:
+
+#### README Title (First Heading)
+
+- Format: `# DeviceName - Brief functional description`
+- Keep title short and descriptive (appears in device listings)
+- Use device's official name/model number
+- Brief description states what the device does (e.g., "Digital Temperature Sensor", "3 Axis Digital Compass")
+- Examples:
+  - `# BMP180 - barometer, altitude and temperature sensor`
+  - `# HMC5883L - 3 Axis Digital Compass`
+  - `# ADS1115 - Analog to Digital Converter`
+
+#### Documentation Section (Second Heading)
+
+- **Must be `## Documentation`** (exact name)
+- First item should **always link to official datasheet/documentation**
+- Format: `[Datasheet](URL)` or `Product [datasheet](URL)`
+- Additional items can list supported devices, features, or related docs
+- Examples:
+
+  ```markdown
+  ## Documentation
+  
+  - HMC5883L [datasheet](https://example.com/datasheet.pdf)
+  ```
+
+#### Required Sections
+
+- `## Usage` - Code examples demonstrating typical usage
+- Optional: `## Binding Notes` - Implementation-specific details
+- Optional: Circuit diagrams, wiring instructions, sensor images
 
 ### 7. Sample Application
 
