@@ -220,7 +220,7 @@ public class Dht22 : IDisposable
 
 ## References
 
-- [Device Conventions](https://github.com/dotnet/iot/blob/main/Documentation/Devices-conventions.md)
-- [Contributing Guidelines](https://github.com/dotnet/iot/blob/main/Documentation/CONTRIBUTING.md)
-- [Copilot Instructions](https://github.com/dotnet/iot/blob/main/.github/copilot-instructions.md)
+- [Device Conventions](../../../Documentation/Devices-conventions.md)
+- [Contributing Guidelines](../../../Documentation/CONTRIBUTING.md)
+- [Copilot Instructions](../../copilot-instructions.md)
 - [UnitsNet Library](https://github.com/angularsen/UnitsNet)

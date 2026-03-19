@@ -387,6 +387,6 @@ Use this when reviewing device binding APIs:
 
 ## References
 
-- [Device Conventions Document](https://github.com/dotnet/iot/blob/main/Documentation/Devices-conventions.md)
-- [Copilot Instructions - API Design](https://github.com/dotnet/iot/blob/main/.github/copilot-instructions.md#device-binding-design)
+- [Device Conventions Document](../../../Documentation/Devices-conventions.md)
+- [Copilot Instructions - API Design](../../copilot-instructions.md#device-binding-design)
 - [UnitsNet Documentation](https://github.com/angularsen/UnitsNet)

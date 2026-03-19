@@ -456,5 +456,5 @@ chmod +x check-abstraction.sh
 
 - [System.Device.Gpio Documentation](https://docs.microsoft.com/dotnet/api/system.device.gpio)
 - [System.Device.I2c Documentation](https://docs.microsoft.com/dotnet/api/system.device.i2c)
-- [Copilot Instructions - Cross-Platform](https://github.com/dotnet/iot/blob/main/.github/copilot-instructions.md#cross-platform)
-- [Device Conventions](https://github.com/dotnet/iot/blob/main/Documentation/Devices-conventions.md)
+- [Copilot Instructions - Cross-Platform](../../copilot-instructions.md#cross-platform)
+- [Device Conventions](../../../Documentation/Devices-conventions.md)
