@@ -111,6 +111,16 @@ internal class RaspberryBoardInfo
         /// Pi 5 Model B+
         /// </summary>
         RaspberryPi5,
+
+        /// <summary>
+        /// Compute module 5.
+        /// </summary>
+        RaspberryPiComputeModule5,
+
+        /// <summary>
+        /// Compute module 5 Lite (no eMMC).
+        /// </summary>
+        RaspberryPiComputeModule5Lite,
     }
 
     #region Fields
@@ -173,6 +183,8 @@ internal class RaspberryBoardInfo
         0x3140 or 0x3141 => Model.RaspberryPiComputeModule4,
         0x3130 or 0x3131 => Model.RaspberryPi400,
         0x4170 => Model.RaspberryPi5,
+        0x4180 => Model.RaspberryPiComputeModule5,
+        0x41a0 => Model.RaspberryPiComputeModule5Lite,
         _ => Model.Unknown,
     };
 

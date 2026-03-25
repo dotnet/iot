@@ -462,6 +462,8 @@ public class GpioController : IDisposable
                 return UnixDriver.Create();
 
             case RaspberryBoardInfo.Model.RaspberryPi5:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule5:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule5Lite:
 
                 // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
                 // We need to create a new driver for the Raspberry Pi 5,
