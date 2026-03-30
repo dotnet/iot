@@ -26,7 +26,7 @@ This is a list of steps which need to happen in order to release new version of 
 - Step 6: Create and generate release notes on github from tag: <https://github.com/dotnet/iot/releases/new>
 - Step 7: After package is pushed to Nuget create a PR similar to <https://github.com/dotnet/iot/pull/2464> to prepare for next release. You can adjust following copilot prompt to generate it:
 
-```
+```text
 Prepare PR similar to https://github.com/dotnet/iot/pull/2464 for next version: 4.3.0
 ```
 
