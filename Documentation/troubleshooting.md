@@ -33,7 +33,7 @@ dmesg | tail -20
 
 **Error:**
 
-```
+```text
 System.UnauthorizedAccessException: Access to GPIO is denied
 ```
 
@@ -47,7 +47,7 @@ sudo usermod -aG gpio $USER
 groups  # Verify 'gpio' is in the list
 ```
 
-2. **Wrong chip number (Raspberry Pi 5):**
+1. **Wrong chip number (Raspberry Pi 5):**
 
 ```csharp
 // Raspberry Pi 5 uses chip 4, not 0
@@ -57,7 +57,7 @@ using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 using GpioController controller = new();
 ```
 
-3. **libgpiod not installed:**
+1. **libgpiod not installed:**
 
 ```bash
 sudo apt install libgpiod2
@@ -67,7 +67,7 @@ sudo apt install libgpiod2
 
 **Error:**
 
-```
+```text
 System.InvalidOperationException: Pin 18 is already in use
 ```
 
@@ -84,7 +84,7 @@ ps aux | grep dotnet
 
 Kill the process or close it properly.
 
-2. **Pin not closed in previous run:**
+1. **Pin not closed in previous run:**
 
 Make sure to dispose GpioController:
 
@@ -100,7 +100,7 @@ controller.ClosePin(18);
 controller.Dispose();
 ```
 
-3. **Pin used by kernel driver:**
+1. **Pin used by kernel driver:**
 
 Some pins are reserved by kernel (I2C, SPI, UART). Use different pin.
 
@@ -117,13 +117,13 @@ controller.OpenPin(17, PinMode.InputPullUp);
 controller.OpenPin(17, PinMode.InputPullDown);
 ```
 
-2. **Wrong wiring:**
+1. **Wrong wiring:**
 
 - Check connections with multimeter
 - Verify ground is connected
 - Test with known-good LED circuit
 
-3. **Pin damaged:**
+1. **Pin damaged:**
 
 Test with different pin.
 
@@ -156,7 +156,7 @@ See [Debouncing Guide](fundamentals/debouncing.md) for more solutions.
 
 **Error:**
 
-```
+```text
 System.IO.IOException: Error 2. Can not open I2C device file '/dev/i2c-1'
 ```
 
@@ -178,7 +178,7 @@ sudo nano /boot/firmware/config.txt
 sudo reboot
 ```
 
-2. **Wrong bus number:**
+1. **Wrong bus number:**
 
 Try bus 0 instead of 1:
 
@@ -192,7 +192,7 @@ List available buses:
 ls /dev/i2c-*
 ```
 
-3. **User not in i2c group:**
+1. **User not in i2c group:**
 
 ```bash
 sudo usermod -aG i2c $USER
@@ -203,7 +203,7 @@ sudo usermod -aG i2c $USER
 
 **Error:**
 
-```
+```text
 System.IO.IOException: Error 121 performing I2C data transfer
 ```
 
@@ -226,17 +226,17 @@ Shows grid with addresses. Update your code with correct address:
 I2cDevice device = I2cDevice.Create(new I2cConnectionSettings(1, 0x77));
 ```
 
-2. **Wiring issues:**
+1. **Wiring issues:**
 
 - Check SDA and SCL connections
 - Verify ground is connected
 - Check for loose wires
 
-3. **Missing pull-up resistors:**
+1. **Missing pull-up resistors:**
 
 I2C requires pull-up resistors on SDA and SCL (typically 4.7kΩ). Most sensor modules have them built-in, but check:
 
-```
+```text
      3.3V
       │
      ┌┴┐
@@ -244,12 +244,12 @@ I2C requires pull-up resistors on SDA and SCL (typically 4.7kΩ). Most sensor mo
      └┬┘
 ```
 
-4. **Device not powered:**
+1. **Device not powered:**
 
 - Check device has power (3.3V or 5V as required)
 - Verify with multimeter
 
-5. **Device broken or incompatible:**
+1. **Device broken or incompatible:**
 
 Test with known-good device.
 
@@ -271,7 +271,7 @@ Reboot after change.
 
 **Error:**
 
-```
+```text
 System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'
 ```
 
@@ -285,14 +285,14 @@ sudo raspi-config
 sudo reboot
 ```
 
-2. **User not in spi group:**
+1. **User not in spi group:**
 
 ```bash
 sudo usermod -aG spi $USER
 # Log out and log back in
 ```
 
-3. **Wrong device file:**
+1. **Wrong device file:**
 
 Check available SPI devices:
 
@@ -325,7 +325,7 @@ SpiDevice device = SpiDevice.Create(new SpiConnectionSettings(0, 0)
 });
 ```
 
-2. **Clock frequency too high:**
+1. **Clock frequency too high:**
 
 Reduce clock speed:
 
@@ -333,7 +333,7 @@ Reduce clock speed:
 ClockFrequency = 500_000  // 500kHz instead of 1MHz
 ```
 
-3. **Wiring issues:**
+1. **Wiring issues:**
 
 Verify connections:
 
@@ -343,7 +343,7 @@ Verify connections:
 - CS (GPIO 8) → CS on device
 - Ground → Ground
 
-4. **Chip Select polarity:**
+1. **Chip Select polarity:**
 
 Some devices use active-high CS. Check datasheet.
 
@@ -353,7 +353,7 @@ Some devices use active-high CS. Check datasheet.
 
 **Error:**
 
-```
+```text
 System.IO.IOException: The port '/dev/ttyS0' does not exist
 ```
 
@@ -369,7 +369,7 @@ sudo raspi-config
 sudo reboot
 ```
 
-2. **Wrong device name:**
+1. **Wrong device name:**
 
 Try different port names:
 
@@ -401,14 +401,14 @@ SerialPort port = new SerialPort("/dev/serial0", 9600);  // Try device's baud ra
 
 Common rates: 9600, 19200, 38400, 57600, 115200.
 
-2. **TX/RX swapped:**
+1. **TX/RX swapped:**
 
 Verify wiring:
 
 - Raspberry Pi TX (GPIO 14) → Device RX
 - Raspberry Pi RX (GPIO 15) → Device TX
 
-3. **Serial console still active:**
+1. **Serial console still active:**
 
 Disable console:
 
@@ -418,7 +418,7 @@ sudo systemctl disable serial-getty@ttyAMA0.service
 sudo reboot
 ```
 
-4. **Wrong data format:**
+1. **Wrong data format:**
 
 Check device requires 8N1 (default) or different:
 
@@ -429,7 +429,7 @@ SerialPort port = new SerialPort("/dev/serial0", 9600,
     StopBits.One);
 ```
 
-5. **Voltage level mismatch:**
+1. **Voltage level mismatch:**
 
 Use level shifter for 5V devices (Raspberry Pi is 3.3V).
 
@@ -446,7 +446,7 @@ sudo usermod -aG dialout $USER
 
 **Error:**
 
-```
+```text
 System.ArgumentException: The chip number 0 is invalid or is not enabled
 ```
 
@@ -472,14 +472,14 @@ Reboot:
 sudo reboot
 ```
 
-2. **User not in pwm group:**
+1. **User not in pwm group:**
 
 ```bash
 sudo usermod -aG gpio $USER
 # Log out and log back in
 ```
 
-3. **Wrong pin:**
+1. **Wrong pin:**
 
 Use PWM-capable pins only: GPIO 12, 13, 18, 19.
 
@@ -499,7 +499,7 @@ Mapping:
 - GPIO 12/18: chip 0, channel 0
 - GPIO 13/19: chip 0, channel 1
 
-2. **Frequency too high/low:**
+1. **Frequency too high/low:**
 
 Try different frequencies:
 
@@ -507,7 +507,7 @@ Try different frequencies:
 PwmChannel pwm = PwmChannel.Create(0, 0, 1000, 0.5);  // 1kHz
 ```
 
-3. **Start PWM:**
+1. **Start PWM:**
 
 Don't forget to start:
 
@@ -521,7 +521,7 @@ pwm.Start();
 
 **Error:**
 
-```
+```text
 The command could not be loaded, possibly because:
   * You intended to execute a .NET application
 ```
@@ -542,7 +542,7 @@ source ~/.bashrc
 
 **Error:**
 
-```
+```text
 error NU1101: Unable to find package System.Device.Gpio
 ```
 
@@ -554,13 +554,13 @@ error NU1101: Unable to find package System.Device.Gpio
 dotnet restore
 ```
 
-2. **Check internet connection:**
+1. **Check internet connection:**
 
 ```bash
 ping nuget.org
 ```
 
-3. **Clear NuGet cache:**
+1. **Clear NuGet cache:**
 
 ```bash
 dotnet nuget locals all --clear
@@ -583,7 +583,7 @@ apt show libgpiod2
 # Use LibGpiodV2Driver instead of LibGpiodDriver if you have libgpiod 2.x
 ```
 
-2. **Corrupted installation:**
+1. **Corrupted installation:**
 
 Reinstall libgpiod:
 
@@ -598,7 +598,7 @@ sudo apt install libgpiod2
 
 **Error:**
 
-```
+```text
 System.DllNotFoundException: Unable to load shared library 'libgpiod'
 ```
 
@@ -624,18 +624,18 @@ sudo ldconfig  # Refresh library cache
 
 LEDs are polarized. Longer leg is positive (anode).
 
-2. **Missing resistor:**
+1. **Missing resistor:**
 
 Always use current-limiting resistor (220Ω typical).
 
-3. **Pin not set to output:**
+1. **Pin not set to output:**
 
 ```csharp
 controller.OpenPin(18, PinMode.Output);
 controller.Write(18, PinValue.High);
 ```
 
-4. **Voltage too low:**
+1. **Voltage too low:**
 
 LED forward voltage must be less than 3.3V. Blue/white LEDs may not work (need ~3.4V).
 
@@ -647,11 +647,11 @@ LED forward voltage must be less than 3.3V. Blue/white LEDs may not work (need ~
 
 Measure voltage with multimeter (should be 3.3V or 5V as required).
 
-2. **Verify wiring:**
+1. **Verify wiring:**
 
 Double-check all connections match datasheet.
 
-3. **Scan bus:**
+1. **Scan bus:**
 
 ```bash
 # I2C
@@ -661,11 +661,11 @@ i2cdetect -y 1
 ls /dev/i2c-* /dev/spidev*
 ```
 
-4. **Test with simple code:**
+1. **Test with simple code:**
 
 Try reading device ID register first (usually 0xD0 or 0x00).
 
-5. **Check datasheets:**
+1. **Check datasheets:**
 
 Verify timing requirements, startup delays, initialization sequence.
 
@@ -681,17 +681,17 @@ Use quality 5V/3A+ power supply. Check for undervoltage warning:
 vcgencmd get_throttled
 ```
 
-2. **Loose connections:**
+1. **Loose connections:**
 
 Check all wires are firmly connected.
 
-3. **EMI/RFI interference:**
+1. **EMI/RFI interference:**
 
 - Use shielded cables
 - Keep wires short
 - Add decoupling capacitors (0.1µF) near chips
 
-4. **Overheating:**
+1. **Overheating:**
 
 Check temperature:
 
@@ -706,10 +706,10 @@ Add cooling if > 70°C.
 ### Before Asking for Help
 
 1. Read error message carefully
-2. Check this troubleshooting guide
-3. Verify hardware with multimeter
-4. Test with known-good example code
-5. Search GitHub issues: [dotnet/iot issues](https://github.com/dotnet/iot/issues)
+1. Check this troubleshooting guide
+1. Verify hardware with multimeter
+1. Test with known-good example code
+1. Search GitHub issues: [dotnet/iot issues](https://github.com/dotnet/iot/issues)
 
 ### When Asking for Help
 
@@ -733,13 +733,13 @@ Include:
 ## Preventive Measures
 
 1. **Double-check wiring** before powering on
-2. **Use adequate power supply** (5V/3A minimum)
-3. **Measure voltages** with multimeter when in doubt
-4. **Dispose resources properly** - Use `using` statements
-5. **Add error handling** - Catch exceptions, log errors
-6. **Start simple** - Test hardware with basic code first
-7. **Keep backups** - SD card images of working systems
-8. **Use version control** - Git for your code
+1. **Use adequate power supply** (5V/3A minimum)
+1. **Measure voltages** with multimeter when in doubt
+1. **Dispose resources properly** - Use `using` statements
+1. **Add error handling** - Catch exceptions, log errors
+1. **Start simple** - Test hardware with basic code first
+1. **Keep backups** - SD card images of working systems
+1. **Use version control** - Git for your code
 
 ## See Also
 
