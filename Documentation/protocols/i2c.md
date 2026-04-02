@@ -136,7 +136,7 @@ By default, I2C1 uses GPIO 2 (SDA) and GPIO 3 (SCL). To use different pins, use 
 **I2C Bus 0:**
 
 | Pins | Overlay |
-|------|---------|
+| --- | --- |
 | GPIO 0 and 1 | `dtoverlay=i2c0,pins_0_1` (default) |
 | GPIO 28 and 29 | `dtoverlay=i2c0,pins_28_29` |
 | GPIO 44 and 45 | `dtoverlay=i2c0,pins_44_45` |
@@ -145,7 +145,7 @@ By default, I2C1 uses GPIO 2 (SDA) and GPIO 3 (SCL). To use different pins, use 
 **I2C Bus 1:**
 
 | Pins | Overlay |
-|------|---------|
+| --- | --- |
 | GPIO 2 and 3 | `dtoverlay=i2c1,pins_2_3` (default) |
 | GPIO 44 and 45 | `dtoverlay=i2c1,pins_44_45` |
 

@@ -176,7 +176,7 @@ Thread.Sleep(Timeout.Infinite);
 
 ### Specifying GPIO Chip Number
 
-Different platforms use different GPIO chip numbers. If auto-detection doesn't work, you can specify the chip number explicitly:
+Different platforms use different GPIO chip numbers. If the framework selection doesn't work, you can specify the chip number explicitly:
 
 ```csharp
 // Specify chip number explicitly

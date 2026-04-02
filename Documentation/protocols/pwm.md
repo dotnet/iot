@@ -107,7 +107,7 @@ sudo nano /boot/firmware/config.txt
 Add one of these overlays:
 
 | PWM Channel | GPIO Pin | Physical Pin | Overlay |
-|-------------|----------|--------------|---------|
+| --- | --- | --- | --- |
 | PWM0 | GPIO 12 | 32 | `dtoverlay=pwm,pin=12,func=4` |
 | PWM0 | GPIO 18 | 12 | `dtoverlay=pwm,pin=18,func=2` |
 | PWM1 | GPIO 13 | 33 | `dtoverlay=pwm,pin=13,func=4` |
@@ -130,7 +130,7 @@ sudo reboot
 For two independent PWM outputs:
 
 | PWM0 GPIO | PWM1 GPIO | Overlay |
-|-----------|-----------|---------|
+| --- | --- | --- |
 | GPIO 12 (pin 32) | GPIO 13 (pin 33) | `dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4` |
 | GPIO 18 (pin 12) | GPIO 13 (pin 33) | `dtoverlay=pwm-2chan,pin=18,func=2,pin2=13,func2=4` |
 | GPIO 12 (pin 32) | GPIO 19 (pin 35) | `dtoverlay=pwm-2chan,pin=12,func=4,pin2=19,func2=2` |

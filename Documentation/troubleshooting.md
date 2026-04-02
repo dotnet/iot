@@ -53,7 +53,7 @@ groups  # Verify 'gpio' is in the list
 // Raspberry Pi 5 uses chip 4, not 0
 using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 
-// Or let it auto-detect
+// Or let the framework auto-select the correct driver
 using GpioController controller = new();
 ```
 
