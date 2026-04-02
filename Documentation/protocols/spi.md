@@ -5,12 +5,14 @@ SPI (Serial Peripheral Interface) is a high-speed, full-duplex, synchronous seri
 ## What is SPI?
 
 SPI uses four wires for communication:
+
 - **MOSI (Master Out Slave In)** - Data line from master (Raspberry Pi) to slave device
 - **MISO (Master In Slave Out)** - Data line from slave device to master
 - **SCLK (Serial Clock)** - Clock signal for synchronizing data transmission
 - **CS/CE (Chip Select)** - Selects which device to communicate with (active low)
 
 Key features:
+
 - **High speed** - Can operate at MHz speeds (much faster than I2C)
 - **Full-duplex** - Can send and receive data simultaneously
 - **Master-Slave architecture** - Raspberry Pi acts as master
@@ -52,6 +54,7 @@ Console.WriteLine($"Read: 0x{readBuffer[0]:X2}, 0x{readBuffer[1]:X2}, 0x{readBuf
 ```
 
 **Parameters:**
+
 - `0` - SPI bus number (0 is SPI0, 1 is SPI1, etc.)
 - `0` - Chip select line (0 for CE0, 1 for CE1)
 - Clock frequency depends on device (check datasheet)
@@ -66,6 +69,7 @@ sudo raspi-config
 ```
 
 Navigate to:
+
 1. **Interface Options** or **Interfacing Options**
 2. **SPI**
 3. Select **Yes** to enable
@@ -96,11 +100,11 @@ sudo reboot
 
 This enables **SPI0** with default pins:
 
-| SPI Function | Header Pin | GPIO | Pin Name |
-|--------------|------------|------|----------|
-| MOSI         | 19         | GPIO10 | SPI0_MOSI |
-| MISO         | 21         | GPIO9  | SPI0_MISO |
-| SCLK         | 23         | GPIO11 | SPI0_SCLK |
+| SPI Function | Header Pin | GPIO   | Pin Name   |
+| ------------ | ---------- | ------ | ---------- |
+| MOSI         | 19         | GPIO10 | SPI0_MOSI  |
+| MISO         | 21         | GPIO9  | SPI0_MISO  |
+| SCLK         | 23         | GPIO11 | SPI0_SCLK  |
 | CE0          | 24         | GPIO8  | SPI0_CE0_N |
 | CE1          | 26         | GPIO7  | SPI0_CE1_N |
 
@@ -118,12 +122,12 @@ Should show `/dev/spidev0.0` and `/dev/spidev0.1`.
 
 SPI has four modes based on clock polarity (CPOL) and phase (CPHA):
 
-| Mode | CPOL | CPHA | Description |
-|------|------|------|-------------|
+| Mode  | CPOL | CPHA | Description                                               |
+| ----- | ---- | ---- | --------------------------------------------------------- |
 | Mode0 | 0    | 0    | Clock idle low, data sampled on rising edge (most common) |
-| Mode1 | 0    | 1    | Clock idle low, data sampled on falling edge |
-| Mode2 | 1    | 0    | Clock idle high, data sampled on falling edge |
-| Mode3 | 1    | 1    | Clock idle high, data sampled on rising edge |
+| Mode1 | 0    | 1    | Clock idle low, data sampled on falling edge              |
+| Mode2 | 1    | 0    | Clock idle high, data sampled on falling edge             |
+| Mode3 | 1    | 1    | Clock idle high, data sampled on rising edge              |
 
 **Check your device datasheet** to determine the correct mode.
 
@@ -196,6 +200,7 @@ SpiConnectionSettings settings = new(0, 0)
 ```
 
 **Typical frequencies:**
+
 - 1-10 MHz - Most sensors and simple devices
 - 10-20 MHz - Fast displays and memory
 - Up to 125 MHz - Theoretical maximum on Raspberry Pi (device and wiring dependent)
@@ -216,7 +221,7 @@ Log out and log back in for changes to take effect.
 
 ### "Can not open SPI device file '/dev/spidev0.0'"
 
-```
+```text
 System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'.
 ```
 
@@ -226,13 +231,14 @@ System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'.
 
 ### "Permission denied"
 
-```
+```text
 System.UnauthorizedAccessException: Access to '/dev/spidev0.0' is denied
 ```
 
 **Cause:** User doesn't have permission to access SPI.
 
 **Solution:**
+
 ```bash
 sudo usermod -aG spi $USER
 # Log out and log back in
@@ -241,6 +247,7 @@ sudo usermod -aG spi $USER
 ### Data Corruption or Wrong Values
 
 **Possible causes:**
+
 1. **Wrong SPI mode** - Check device datasheet for correct CPOL/CPHA
 2. **Clock frequency too high** - Try lower frequency (e.g., 1 MHz)
 3. **Wiring issues** - Check MOSI, MISO, SCLK, CS, and ground connections
@@ -248,6 +255,7 @@ sudo usermod -aG spi $USER
 5. **Timing issues** - Device may need delays between transactions
 
 **Solutions:**
+
 - Verify SPI mode matches device datasheet
 - Lower clock frequency
 - Use shorter wires, proper grounding

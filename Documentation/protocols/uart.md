@@ -5,10 +5,12 @@ UART (Universal Asynchronous Receiver/Transmitter) is a serial communication pro
 ## What is UART?
 
 UART uses two wires for communication:
+
 - **TX (Transmit)** - Sends data from device
 - **RX (Receive)** - Receives data to device
 
 Key features:
+
 - **Point-to-point** - One-to-one communication (not a bus)
 - **Asynchronous** - No shared clock signal (uses baud rate agreement)
 - **Full-duplex** - Can send and receive simultaneously
@@ -18,6 +20,7 @@ Key features:
 **Common baud rates:** 9600, 19200, 38400, 57600, 115200 bps
 
 **Variants:**
+
 - **RS232** - Original standard, ±12V levels, short distances (< 15m)
 - **TTL Serial** - 3.3V/5V levels (Raspberry Pi uses 3.3V), short distances
 - **RS485** - Differential signaling, long distances (up to 1200m), multi-drop capable
@@ -52,12 +55,12 @@ port.Close();
 
 Raspberry Pi has multiple serial interfaces:
 
-| Port | Device | Default Function | Speed | Recommended Use |
-|------|--------|------------------|-------|-----------------|
-| UART0 | /dev/ttyAMA0 | Bluetooth (Pi 3+) | Full speed | Internal BT (don't use) |
-| UART0 | /dev/serial0 | Symlink to primary | Full speed | General purpose |
-| UART1 | /dev/ttyS0 | Console/GPIO | Limited speed | GPIO pins (use this) |
-| USB | /dev/ttyUSB0 | USB adapter | Depends on adapter | USB-Serial dongles |
+| Port  | Device       | Default Function   | Speed              | Recommended Use         |
+| ----- | ------------ | ------------------ | ------------------ | ----------------------- |
+| UART0 | /dev/ttyAMA0 | Bluetooth (Pi 3+)  | Full speed         | Internal BT (don't use) |
+| UART0 | /dev/serial0 | Symlink to primary | Full speed         | General purpose         |
+| UART1 | /dev/ttyS0   | Console/GPIO       | Limited speed      | GPIO pins (use this)    |
+| USB   | /dev/ttyUSB0 | USB adapter        | Depends on adapter | USB-Serial dongles      |
 
 ### Typical Configuration
 
@@ -73,17 +76,17 @@ Raspberry Pi has multiple serial interfaces:
 
 ### GPIO UART Pins (Raspberry Pi)
 
-| GPIO Pin | Function | Header Pin | Description |
-|----------|----------|------------|-------------|
-| GPIO 14 | TXD (TX) | Pin 8 | Transmit data (Raspberry Pi → Device) |
-| GPIO 15 | RXD (RX) | Pin 10 | Receive data (Device → Raspberry Pi) |
-| Ground | GND | Pin 6, 9, 14, 20, 25, 30, 34, 39 | Common ground |
+| GPIO Pin | Function | Header Pin                       | Description                           |
+| -------- | -------- | -------------------------------- | ------------------------------------- |
+| GPIO 14  | TXD (TX) | Pin 8                            | Transmit data (Raspberry Pi → Device) |
+| GPIO 15  | RXD (RX) | Pin 10                           | Receive data (Device → Raspberry Pi)  |
+| Ground   | GND      | Pin 6, 9, 14, 20, 25, 30, 34, 39 | Common ground                         |
 
 ### Wiring
 
 **Basic UART connection:**
 
-```
+```text
 Raspberry Pi          Device
 GPIO 14 (TX) ────────→ RX
 GPIO 15 (RX) ←──────── TX
@@ -107,7 +110,7 @@ GND ─────────────────── GND
 
 Use a level shifter like MAX3232:
 
-```
+```text
 Raspberry Pi (3.3V) ↔ MAX3232 ↔ Device (5V/±12V RS232)
 ```
 
@@ -173,7 +176,7 @@ ls -l /dev/ttyS0 /dev/serial0
 
 Should show both devices exist:
 
-```
+```text
 crw-rw---- 1 root dialout 4, 64 Jan 10 10:00 /dev/ttyS0
 lrwxrwxrwx 1 root root 5 Jan 10 10:00 /dev/serial0 -> ttyS0
 ```
@@ -271,14 +274,14 @@ port.Open();
 
 ## Common Baud Rates
 
-| Baud Rate | Use Case | Notes |
-|-----------|----------|-------|
-| 9600 | Default for many devices | Reliable, widely supported |
-| 19200 | Moderate speed | Good for sensors |
-| 38400 | Higher speed | Still reliable |
-| 57600 | Fast communication | May have errors at distance |
-| 115200 | High speed | Common for debug consoles |
-| 230400+ | Very fast | Requires good wiring, short cables |
+| Baud Rate | Use Case                 | Notes                              |
+| --------- | ------------------------ | ---------------------------------- |
+| 9600      | Default for many devices | Reliable, widely supported         |
+| 19200     | Moderate speed           | Good for sensors                   |
+| 38400     | Higher speed             | Still reliable                     |
+| 57600     | Fast communication       | May have errors at distance        |
+| 115200    | High speed               | Common for debug consoles          |
+| 230400+   | Very fast                | Requires good wiring, short cables |
 
 **Raspberry Pi mini UART limitation:** Maximum reliable baud rate is ~250,000 with the mini UART. For higher speeds, swap to the full UART or use USB-Serial adapter.
 
@@ -407,9 +410,9 @@ RS485 is differential signaling for long distances and multi-drop networks.
 - RS485 transceiver module (MAX485, MAX3485)
 - Direction control (enable TX/RX switching)
 
-### Wiring
+### RS485 Wiring
 
-```
+```text
 Raspberry Pi      MAX485        RS485 Bus
 GPIO 14 (TX) →    DI            
 GPIO 15 (RX) ←    RO            
@@ -460,7 +463,7 @@ byte[] ReceiveData(int length)
 
 ### "Port not found" Error
 
-```
+```text
 System.IO.IOException: The port '/dev/ttyS0' does not exist
 ```
 
@@ -473,7 +476,7 @@ System.IO.IOException: The port '/dev/ttyS0' does not exist
 
 ### "Permission denied" Error
 
-```
+```text
 System.UnauthorizedAccessException: Access to the path '/dev/ttyS0' is denied
 ```
 

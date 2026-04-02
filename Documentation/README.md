@@ -2,7 +2,7 @@
 
 Welcome to the .NET IoT documentation! This guide will help you get started with building IoT applications using .NET on single-board computers like Raspberry Pi.
 
-## New to .NET IoT? Start Here!
+## New to .NET IoT? Start Here
 
 **[Getting Started Guide](getting-started.md)** - Blink an LED in 5 minutes and learn the basics
 
@@ -100,6 +100,7 @@ When contributing, please read:
 - [.NET Design Reviews: GPIO (10/19/2018)](https://youtu.be/wtkPtOpI3CA)
 - [.NET Design Reviews: GPIO (11/2/2018)](https://youtu.be/UZc3sbJ0-PI)
 - [Mono WinForms GPIO Demo (Toradex + Torizon)](https://www.youtube.com/watch?v=1d3g2VDZyXE)
+
 ## Supported Hardware Platforms
 
 .NET IoT has been verified to work on the following development boards:
