@@ -24,7 +24,7 @@ A datasheet is a technical document provided by the device manufacturer that des
 
 **Example from a typical sensor:**
 
-```
+```text
 Pin 1 (VCC):  Power supply, 3.3V-5V
 Pin 2 (GND):  Ground
 Pin 3 (SCL):  I2C Clock
@@ -44,7 +44,7 @@ Pin 4 (SDA):  I2C Data
 
 **Example:**
 
-```
+```text
 Supply Voltage (VCC):      3.3V ±10%
 Logic High Input (VIH):    ≥0.7 × VCC
 Logic Low Input (VIL):     ≤0.3 × VCC
@@ -69,7 +69,7 @@ Maximum Current Draw:      10 mA typical, 50 mA max
 
 **Example:**
 
-```
+```text
 I2C Address: 0x76 (default), can be changed to 0x77 via SDO pin
 Clock Speed: Up to 3.4 MHz (High-Speed mode)
 Pull-up Resistors: 4.7kΩ recommended for 3.3V
@@ -92,7 +92,7 @@ Pull-up Resistors: 4.7kΩ recommended for 3.3V
 
 **Example:**
 
-```
+```text
 SPI Mode: Mode 0 (CPOL=0, CPHA=0)
 Maximum Clock: 10 MHz
 Bit Order: MSB first
@@ -113,7 +113,7 @@ CS: Active Low
 
 **Example:**
 
-```
+```text
 Baud Rate: 9600 bps (default), configurable to 115200
 Data Format: 8N1 (8 data bits, no parity, 1 stop bit)
 Flow Control: None
@@ -129,7 +129,7 @@ Flow Control: None
 
 **Example from a temperature sensor:**
 
-```
+```text
 Register 0xF4 (ctrl_meas): Control measurement settings
   Bits 7-5: Temperature oversampling (000 = skip, 001 = ×1, 010 = ×2...)
   Bits 4-2: Pressure oversampling
@@ -166,7 +166,7 @@ int rawTemp = (tempData[0] << 12) | (tempData[1] << 4) | (tempData[2] >> 4);
 
 **Example:**
 
-```
+```text
 Power-on to ready time: 2 ms typical, 5 ms max
 Reset pulse width: Minimum 1 µs
 I2C START setup time: 600 ns minimum
@@ -209,7 +209,7 @@ Look for reference circuits showing:
 
 **Example:**
 
-```
+```text
         VCC (3.3V)
          │
         ┌┴┐
@@ -237,7 +237,7 @@ Look for reference circuits showing:
 
 Some devices have configurable addresses:
 
-```
+```text
 I2C Address: 0x76 (SDO to GND) or 0x77 (SDO to VCC)
 ```
 
@@ -259,7 +259,7 @@ Multi-byte values may be transmitted in different orders:
 
 **Check the datasheet:**
 
-```
+```text
 Temperature data format: MSB first
 temp_msb (0xFA): Bits 19-12
 temp_lsb (0xFB): Bits 11-4
@@ -280,7 +280,7 @@ int value = (lsb << 8) | msb;
 
 Temperature sensors often use signed integers:
 
-```
+```text
 Temperature Output: 16-bit signed integer
 Range: -40°C to +85°C
 ```
@@ -296,7 +296,7 @@ double celsius = signedTemp / 100.0; // Convert based on datasheet
 
 Many sensors require calibration coefficients:
 
-```
+```text
 Calibration registers: 0x88 to 0xA1
 Must be read once at startup and used for all conversions
 ```
@@ -382,13 +382,13 @@ int rawTemp = (tempData[0] << 12) | (tempData[1] << 4) | (tempData[2] >> 4);
 i2cdetect -y 1
 ```
 
-2. **i2cdump** - Read all registers from I2C device
+1. **i2cdump** - Read all registers from I2C device
 
 ```bash
 i2cdump -y 1 0x76
 ```
 
-3. **gpioinfo** - List available GPIO lines
+1. **gpioinfo** - List available GPIO lines
 
 ```bash
 gpioinfo
@@ -429,7 +429,7 @@ gpioinfo
 
 When starting with a new device, create a quick reference:
 
-```
+```text
 Device: BME280 Temperature/Humidity/Pressure Sensor
 Protocol: I2C
 I2C Address: 0x76 or 0x77

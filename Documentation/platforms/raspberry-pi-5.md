@@ -21,10 +21,10 @@ using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 ```
 
-**Auto-detection (recommended):**
+**Framework auto-selection (recommended):**
 
 ```csharp
-// Automatically detects correct chip
+// Framework automatically selects the correct chip and driver
 using GpioController controller = new();
 ```
 
@@ -306,9 +306,10 @@ No significant difference in GPIO speed compared to Pi 4 when using libgpiod.
 // Old (hardcoded)
 new LibGpiodDriver(0) // Won't work on Pi 5
 
-// New (auto-detect or explicit)
-new LibGpiodDriver() // Auto-detects
-new LibGpiodDriver(4) // Explicit for Pi 5
+// New (framework auto-selects the correct chip)
+new GpioController()
+// Or explicit for Pi 5
+new LibGpiodDriver(4)
 ```
 
 ### Issue 2: Real-Time Clock (RTC)
@@ -411,7 +412,7 @@ gpu_mem=128
 using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 
 // After (Pi 5 compatible)
-using GpioController controller = new(); // Auto-detect
+using GpioController controller = new(); // Framework auto-selects
 ```
 
 2. **Update documentation/comments** referencing chip numbers
@@ -439,7 +440,7 @@ gpioinfo | head -1
 
 Should show `gpiochip4` for Pi 5.
 
-**Update code to use chip 4** or let it auto-detect.
+**Update code to use chip 4** or use `new GpioController()` to let the framework select the correct driver.
 
 ### Permission Issues
 

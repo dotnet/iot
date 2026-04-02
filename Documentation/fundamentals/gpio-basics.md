@@ -58,7 +58,7 @@ controller.Write(18, PinValue.Low);
 
 LEDs require a current-limiting resistor to prevent damage:
 
-```
+```text
 GPIO Pin → LED (Anode/+) → LED (Cathode/-) → Resistor (220Ω) → Ground
 ```
 

@@ -15,18 +15,18 @@ When interfacing with sensors, displays, and other peripherals, you'll use diffe
 
 ## GPIO (General-Purpose Input/Output)
 
-### When to Use
+### When to Use GPIO
 
 - Simple on/off control (LEDs, relays)
 - Reading digital states (buttons, switches)
 - No data transfer needed
 
-### Characteristics
+### GPIO Characteristics
 
 - **Pros:** Simple, direct, no protocol overhead
 - **Cons:** One pin per device, limited to on/off states
 
-### Example
+### GPIO Example
 
 ```csharp
 using GpioController controller = new();
@@ -38,19 +38,19 @@ controller.Write(18, PinValue.High);
 
 ## I2C (Inter-Integrated Circuit)
 
-### When to Use
+### When to Use I2C
 
 - Multiple sensors on the same bus
 - Sensors near the controller (< 1 meter)
 - Low to medium speed requirements
 - Limited pin availability
 
-### Characteristics
+### I2C Characteristics
 
 - **Pros:** Only 2 wires for many devices, built-in addressing, widely supported
 - **Cons:** Relatively slow, limited cable length, address conflicts possible
 
-### Typical Devices
+### Typical I2C Devices
 
 - Temperature/humidity sensors (BME280, SHT31)
 - Small OLED displays (SSD1306)
@@ -58,14 +58,14 @@ controller.Write(18, PinValue.High);
 - Port expanders (MCP23017)
 - ADCs (ADS1115)
 
-### How It Works
+### How I2C Works
 
 - **Master-slave** architecture (Raspberry Pi is master)
 - **Two wires:** SDA (data), SCL (clock)
 - **7-bit addresses:** Each device has a unique address (0x08 to 0x7F)
 - **Pull-up resistors required** (often built-in on sensor modules)
 
-### Example
+### I2C Example
 
 ```csharp
 using System.Device.I2c;
@@ -91,19 +91,19 @@ device.Read(buffer);
 
 ## SPI (Serial Peripheral Interface)
 
-### When to Use
+### When to Use SPI
 
 - High-speed data transfer needed
 - Displays requiring fast refresh
 - SD card access
 - When I2C speed is insufficient
 
-### Characteristics
+### SPI Characteristics
 
 - **Pros:** Very fast, full-duplex (simultaneous read/write), simple protocol
 - **Cons:** More wires, limited by available CS pins, no built-in addressing
 
-### Typical Devices
+### Typical SPI Devices
 
 - Large displays (TFT, e-paper)
 - High-speed ADCs
@@ -111,7 +111,7 @@ device.Read(buffer);
 - NRF24L01 wireless modules
 - MAX7219 LED matrix drivers
 
-### How It Works
+### How SPI Works
 
 - **Master-slave** architecture
 - **Four wires (minimum):**
@@ -121,7 +121,7 @@ device.Read(buffer);
   - CS/SS (Chip Select) - selects active device
 - **Multiple devices:** Shared MOSI/MISO/SCK, separate CS for each
 
-### Example
+### SPI Example
 
 ```csharp
 using System.Device.Spi;
@@ -153,7 +153,7 @@ device.TransferFullDuplex(writeBuffer, readBuffer);
 
 ## UART/Serial (Universal Asynchronous Receiver/Transmitter)
 
-### When to Use
+### When to Use UART
 
 - Communication with GPS modules
 - Bluetooth/WiFi modules
@@ -161,12 +161,12 @@ device.TransferFullDuplex(writeBuffer, readBuffer);
 - Serial consoles and debugging
 - RS232/RS485 industrial devices
 
-### Characteristics
+### UART Characteristics
 
 - **Pros:** Widely supported, simple point-to-point, good for streaming data
 - **Cons:** Two wires per device, no built-in addressing, requires baud rate matching
 
-### Typical Devices
+### Typical UART Devices
 
 - GPS modules (Neo-6M, Neo-7M)
 - Bluetooth modules (HC-05, HC-06)
@@ -174,14 +174,14 @@ device.TransferFullDuplex(writeBuffer, readBuffer);
 - LoRa modules (E32, E22)
 - Serial sensors (PM2.5 sensors, fingerprint readers)
 
-### How It Works
+### How UART Works
 
 - **Two wires:** TX (transmit), RX (receive)
 - **Asynchronous:** No shared clock, both sides agree on baud rate
 - **Baud rate:** Speed in bits per second (common: 9600, 115200)
 - **Frame format:** Start bit, data bits (8), optional parity, stop bits
 
-### Example
+### UART Example
 
 ```csharp
 using System.IO.Ports;
@@ -211,14 +211,14 @@ port.Close();
 
 ## PWM (Pulse Width Modulation)
 
-### When to Use
+### When to Use PWM
 
 - Controlling LED brightness
 - Motor speed control
 - Servo positioning
 - Analog-like output from digital pin
 
-### Characteristics
+### PWM Characteristics
 
 - **Pros:** Smooth control, efficient, widely supported
 - **Cons:** Requires PWM-capable pins, frequency limitations
@@ -231,13 +231,13 @@ port.Close();
 - Buzzer tone generation
 - Analog output simulation
 
-### How It Works
+### How PWM Works
 
 - Rapidly toggles pin HIGH/LOW
 - **Duty cycle:** Percentage of time HIGH (0-100%)
 - **Frequency:** How many times per second to toggle (Hz)
 
-### Example
+### PWM Example
 
 ```csharp
 using System.Device.Pwm;
@@ -260,23 +260,23 @@ pwm.Stop();
 
 ## 1-Wire
 
-### When to Use
+### When to Use 1-Wire
 
 - Multiple temperature sensors (DS18B20)
 - iButton authentication
 - Simple sensor networks
 
-### Characteristics
+### 1-Wire Characteristics
 
 - **Pros:** Only one data wire, many devices, long distances (100m+)
 - **Cons:** Slow, limited device types, requires kernel driver
 
-### Typical Devices
+### Typical 1-Wire Devices
 
 - DS18B20 temperature sensor
 - DHT11/DHT22 (uses modified 1-wire protocol)
 
-### How It Works
+### How 1-Wire Works
 
 - **One data wire** + ground
 - Each device has unique 64-bit address
@@ -287,7 +287,7 @@ pwm.Stop();
 
 ## Decision Guide
 
-### Choose I2C when:
+### Choose I2C when
 
 - Connecting multiple sensors
 - Using pre-made sensor modules
@@ -295,7 +295,7 @@ pwm.Stop();
 - Low to medium speed is acceptable
 - NOT for: High-speed displays, long distances
 
-### Choose SPI when:
+### Choose SPI when
 
 - High-speed data transfer needed
 - Large displays (TFT, e-paper)
@@ -303,7 +303,7 @@ pwm.Stop();
 - Full-duplex communication needed
 - NOT for: Limited pins, multiple sensors
 
-### Choose UART when:
+### Choose UART when
 
 - Point-to-point communication
 - GPS, Bluetooth, GSM modules
@@ -311,7 +311,7 @@ pwm.Stop();
 - Streaming data (logging, telemetry)
 - NOT for: Multiple devices on one bus
 
-### Choose GPIO when:
+### Choose GPIO when
 
 - Simple on/off control
 - Button input

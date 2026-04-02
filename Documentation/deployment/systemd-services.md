@@ -97,7 +97,7 @@ Or you can check the status of the service by using in a terminal:
 
 ```shell
 # Requires root permissions
-systemctl is-active status <myiotapp>.service
+systemctl status <myiotapp>.service
 ```
 
 To stop the service run:

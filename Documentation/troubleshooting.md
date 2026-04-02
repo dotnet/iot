@@ -725,7 +725,7 @@ Include:
 
 ### Resources
 
-- [.NET IoT GitHub Discussions](https://github.com/dotnet/iot/discussions)
+- [.NET IoT GitHub Issues](https://github.com/dotnet/iot/issues)
 - [.NET IoT GitHub Issues](https://github.com/dotnet/iot/issues)
 - [Raspberry Pi Forums](https://forums.raspberrypi.com/)
 - [Stack Overflow - .NET IoT tag](https://stackoverflow.com/questions/tagged/.net-iot)

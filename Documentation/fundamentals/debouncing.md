@@ -10,14 +10,14 @@ When you press or release a mechanical button/switch, the contacts physically bo
 
 **What you expect:**
 
-```
+```text
 Button Press:   LOW ────┐
                         └──────── HIGH
 ```
 
 **What actually happens:**
 
-```
+```text
 Button Press:   LOW ─┐─┐┐──┐
                      └┘└┘└──└─── HIGH (with bounces)
 ```
@@ -243,7 +243,7 @@ Software debouncing is usually sufficient, but hardware solutions can provide be
 
 Add a capacitor in parallel with the button:
 
-```
+```text
           Button
 GPIO ─────┐  ┌───── GND
           └──┘
@@ -266,7 +266,7 @@ GPIO ─────┐  ┌───── GND
 
 Use a Schmitt trigger (like 74HC14) between button and GPIO:
 
-```
+```text
           Button    74HC14
 GPIO ─────┐  ┌────┐      ┌──── Input (clean)
           └──┘    │ ──── │
@@ -471,7 +471,7 @@ public class DebouncedRotaryEncoder
 
 ## Common Mistakes to Avoid
 
-**No debouncing at all**
+### No debouncing at all
 
 ```csharp
 // BAD: Will trigger multiple times per press
@@ -479,14 +479,14 @@ controller.RegisterCallbackForPinValueChangedEvent(pin,
     PinEventTypes.Falling, (s, e) => HandlePress());
 ```
 
-**Debounce time too short**
+### Debounce time too short
 
 ```csharp
 // BAD: 5ms may be too short for mechanical buttons
 const int debounceMs = 5; // Still getting bounces!
 ```
 
-**Blocking delays in callback**
+### Blocking delays in callback
 
 ```csharp
 // BAD: Blocks callback thread
@@ -498,7 +498,7 @@ controller.RegisterCallbackForPinValueChangedEvent(pin,
     });
 ```
 
-**Ignoring edge types**
+### Ignoring edge types
 
 ```csharp
 // BAD: Might need both Rising and Falling

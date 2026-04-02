@@ -73,7 +73,7 @@ gpioinfo
 
 Output shows available GPIO chips:
 
-```
+```text
 gpiochip0 - 58 lines:
 gpiochip1 - 8 lines:
 ```
@@ -98,27 +98,33 @@ libgpiod library has multiple versions with breaking changes. .NET IoT supports 
 | libgpiod 1.1 - 1.6 | V1 | Supported |
 | libgpiod 2.0+ | V2 | Supported |
 
-### Auto-detection
+### Framework Auto-Detection
 
-By default, .NET IoT auto-detects the installed libgpiod version:
+When you use the parameterless `GpioController()` constructor, the framework automatically selects the best driver for your platform:
+
+- **Raspberry Pi 3/4**: Uses `RaspberryPi3Driver` (direct memory access for best performance)
+- **Raspberry Pi 5**: Uses `LibGpiodDriver` with the correct GPIO chip
+- **Other Linux boards**: Tries `LibGpiodDriver` → `LibGpiodV2Driver` → `SysFsDriver`
 
 ```csharp
-// Automatically detects and uses the correct version
-using GpioController controller = new(new LibGpiodDriver());
+// Let the framework choose the best driver for your board
+using GpioController controller = new();
 ```
 
-### Manual Version Selection
+### Explicit Driver Selection
 
-Use a specific driver type for the installed libgpiod version:
+If you need a specific driver, pass it to the `GpioController` constructor:
 
 ```csharp
 using System.Device.Gpio.Drivers;
 
-// Use LibGpiodDriver for libgpiod v1 (auto-detects version)
+// Use LibGpiodDriver (for libgpiod v1)
 var driver = new LibGpiodDriver(gpioChip: 0);
+using GpioController controller = new(driver);
 
-// Use LibGpiodV2Driver for libgpiod v2 explicitly
+// Use LibGpiodV2Driver (for libgpiod v2)
 var driverV2 = new LibGpiodV2Driver(chipNumber: 0);
+using GpioController controllerV2 = new(driverV2);
 ```
 
 ## Installing libgpiod
@@ -242,7 +248,7 @@ sudo nano /etc/udev/rules.d/99-gpio.rules
 
 Add:
 
-```
+```text
 SUBSYSTEM=="gpio", KERNEL=="gpiochip*", ACTION=="add", PROGRAM="/bin/sh -c 'chown root:gpio /sys/class/gpio/export /sys/class/gpio/unexport ; chmod 220 /sys/class/gpio/export /sys/class/gpio/unexport'"
 SUBSYSTEM=="gpio", KERNEL=="gpio*", ACTION=="add", PROGRAM="/bin/sh -c 'chown root:gpio /sys%p/active_low /sys%p/direction /sys%p/edge /sys%p/value ; chmod 660 /sys%p/active_low /sys%p/direction /sys%p/edge /sys%p/value'"
 ```
@@ -258,7 +264,7 @@ sudo udevadm trigger
 
 ### "libgpiod not found" Error
 
-```
+```text
 System.DllNotFoundException: Unable to load shared library 'libgpiod' or one of its dependencies
 ```
 
@@ -270,7 +276,7 @@ sudo apt install libgpiod2
 
 ### "Permission denied" Error with LibGpiodDriver
 
-```
+```text
 System.UnauthorizedAccessException: Access to GPIO chip is denied
 ```
 
@@ -347,7 +353,7 @@ The Linux kernel is **deprecating** the sysfs GPIO interface (`/sys/class/gpio`)
 
 ```csharp
 using GpioController controller = new();
-// That's it! Auto-detection handles everything
+// The framework selects the best driver for your platform
 ```
 
 ### For Existing Projects
