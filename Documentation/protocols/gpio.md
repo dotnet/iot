@@ -5,12 +5,14 @@ General-Purpose Input/Output (GPIO) pins are programmable pins on your single-bo
 ## What is GPIO?
 
 GPIO pins allow you to:
+
 - **Output digital signals** - Turn devices on/off (LEDs, relays, motors)
 - **Read digital signals** - Detect button presses, sensor states
 - **Generate PWM signals** - Control brightness, speed (requires specific PWM-capable pins)
 - **Communicate via protocols** - Some GPIO pins support I2C, SPI, UART protocols
 
 GPIO pins operate with digital logic levels (HIGH/LOW):
+
 - **HIGH** = 3.3V on Raspberry Pi (varies by platform)
 - **LOW** = 0V (Ground)
 
@@ -62,12 +64,14 @@ using GpioController controller = new(new LibGpiodDriver());
 ```
 
 **Advantages:**
+
 - Best performance for rapid GPIO operations
 - Compatible with all modern Linux kernels (4.8+)
 - Supports multiple processes accessing GPIO simultaneously
 - Proper resource management and cleanup
 
 **Requirements:**
+
 - Install libgpiod library: `sudo apt install libgpiod2`
 - User must be in `gpio` group: `sudo usermod -aG gpio $USER`
 
@@ -106,7 +110,7 @@ If you don't specify a driver, .NET IoT automatically selects the best available
 using GpioController controller = new();
 ```
 
-**Recommendation:** For most applications, use the default auto-detection. Only specify a driver explicitly if you have specific requirements.
+**Recommendation:** For most applications, use the parameterless `new GpioController()` constructor. The framework automatically selects the best driver for your platform (e.g., `RaspberryPi3Driver` on Pi 3/4, `LibGpiodDriver` on Pi 5). Only specify a driver explicitly if you have specific requirements.
 
 ## Pin Modes
 
@@ -163,6 +167,7 @@ Thread.Sleep(Timeout.Infinite);
 ```
 
 **Event types:**
+
 - `PinEventTypes.Rising` - LOW → HIGH transition
 - `PinEventTypes.Falling` - HIGH → LOW transition  
 - `PinEventTypes.Rising | PinEventTypes.Falling` - Both transitions
@@ -179,6 +184,7 @@ using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 ```
 
 **Find your chip number:**
+
 ```bash
 gpioinfo
 ```
@@ -187,14 +193,16 @@ gpioinfo
 
 .NET IoT provides two driver types for different versions of the libgpiod library:
 
-- **`LibGpiodDriver`** - Supports libgpiod v1 (0.x - 1.x). Auto-detects the correct version.
-- **`LibGpiodV2Driver`** - Supports libgpiod v2 (2.x).
+- **`LibGpiodDriver`** - For libgpiod v1 (0.x - 1.x) only.
+- **`LibGpiodV2Driver`** - For libgpiod v2 (2.x) only.
+
+The parameterless `new GpioController()` constructor automatically tries `LibGpiodDriver` first, then `LibGpiodV2Driver`, then `SysFsDriver`.
 
 ```csharp
 using System.Device.Gpio.Drivers;
 
-// Auto-detection (recommended) - works with both v1 and v2
-using GpioController controller = new(new LibGpiodDriver());
+// Framework auto-selects the best driver
+using GpioController controller = new();
 
 // Explicitly use libgpiod v2 driver
 using GpioController controllerV2 = new(new LibGpiodV2Driver(chipNumber: 0));
@@ -203,12 +211,14 @@ using GpioController controllerV2 = new(new LibGpiodV2Driver(chipNumber: 0));
 ### Installing libgpiod
 
 **From package manager:**
+
 ```bash
 sudo apt update
 sudo apt install libgpiod2
 ```
 
 **From source (for latest version):**
+
 ```bash
 # Install dependencies
 sudo apt update && sudo apt install -y autogen autoconf autoconf-archive libtool libtool-bin pkg-config build-essential
@@ -229,11 +239,12 @@ sudo ldconfig
 
 ### "Permission denied" Error
 
-```
+```text
 System.UnauthorizedAccessException: Access to GPIO is denied
 ```
 
 **Solution:** Add user to gpio group:
+
 ```bash
 sudo usermod -aG gpio $USER
 # Log out and log back in
@@ -243,33 +254,37 @@ sudo usermod -aG gpio $USER
 
 **On Raspberry Pi 5:**
 Raspberry Pi 5 uses chip number **4** instead of 0:
+
 ```csharp
 using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 ```
 
 **Find correct chip:**
+
 ```bash
 gpioinfo
 ```
 
 ### "libgpiod not found" Error
 
-```
+```text
 System.DllNotFoundException: Unable to load shared library 'libgpiod'
 ```
 
 **Solution:** Install libgpiod:
+
 ```bash
 sudo apt install libgpiod2
 ```
 
 ### Pin Already in Use
 
-```
+```text
 System.InvalidOperationException: Pin 18 is already in use
 ```
 
 **Solutions:**
+
 1. Another process is using the pin - close it or reboot
 2. Pin not properly disposed in previous run - ensure you use `using` statements
 3. Pin reserved by kernel (I2C, SPI, etc.) - use different pin

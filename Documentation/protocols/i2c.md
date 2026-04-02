@@ -5,10 +5,12 @@ I2C (Inter-Integrated Circuit) is a two-wire serial communication protocol used 
 ## What is I2C?
 
 I2C uses two wires for communication:
+
 - **SDA (Serial Data)** - Data line for sending and receiving data
 - **SCL (Serial Clock)** - Clock line for synchronizing data transmission
 
 Key features:
+
 - **Multi-device support** - Up to 127 devices on a single bus (address range 0x08-0x7F)
 - **Master-Slave architecture** - Raspberry Pi acts as master, devices are slaves
 - **7-bit addressing** - Each device has a unique address
@@ -46,6 +48,7 @@ Console.WriteLine($"Read: 0x{readBuffer[0]:X2}, 0x{readBuffer[1]:X2}");
 ```
 
 **Parameters:**
+
 - `1` - I2C bus number (bus 1 is default on Raspberry Pi)
 - `0x76` - Device I2C address (7-bit, check device datasheet)
 
@@ -60,12 +63,14 @@ sudo raspi-config
 ```
 
 Navigate to:
+
 1. **Interface Options** or **Interfacing Options**
 2. **I2C**
 3. Select **Yes** to enable
 4. Reboot
 
 Or use command line:
+
 ```bash
 sudo raspi-config nonint do_i2c 0  # 0 enables, 1 disables
 sudo reboot
@@ -129,6 +134,7 @@ Reboot after changes.
 By default, I2C1 uses GPIO 2 (SDA) and GPIO 3 (SCL). To use different pins, use overlays:
 
 **I2C Bus 0:**
+
 | Pins | Overlay |
 |------|---------|
 | GPIO 0 and 1 | `dtoverlay=i2c0,pins_0_1` (default) |
@@ -137,6 +143,7 @@ By default, I2C1 uses GPIO 2 (SDA) and GPIO 3 (SCL). To use different pins, use 
 | GPIO 46 and 47 | `dtoverlay=i2c0,pins_46_47` |
 
 **I2C Bus 1:**
+
 | Pins | Overlay |
 |------|---------|
 | GPIO 2 and 3 | `dtoverlay=i2c1,pins_2_3` (default) |
@@ -213,10 +220,9 @@ for (int address = 8; address < 0x80; address++)
 {
     try
     {
-        I2cDevice i2c = I2cDevice.Create(new I2cConnectionSettings(1, address));
+        using I2cDevice i2c = I2cDevice.Create(new I2cConnectionSettings(1, address));
         i2c.ReadByte();  // Try to read
         validAddresses.Add(address);
-        i2c.Dispose();
     }
     catch (IOException)
     {
@@ -235,7 +241,7 @@ foreach (var addr in validAddresses)
 
 ### "Can not open I2C device file '/dev/i2c-1'"
 
-```
+```text
 System.IO.IOException: Error 2. Can not open I2C device file '/dev/i2c-1'.
 ```
 
@@ -245,11 +251,12 @@ System.IO.IOException: Error 2. Can not open I2C device file '/dev/i2c-1'.
 
 ### "Error 121 performing I2C data transfer"
 
-```
+```text
 System.IO.IOException: Error 121 performing I2C data transfer.
 ```
 
 **Possible causes:**
+
 1. **Wrong device address** - Use `i2cdetect -y 1` to find correct address
 2. **Wiring issues** - Check SDA, SCL, and ground connections
 3. **Missing pull-up resistors** - Most I2C devices need 4.7kΩ pull-ups (usually built into modules)
@@ -260,13 +267,14 @@ System.IO.IOException: Error 121 performing I2C data transfer.
 
 ### "Permission denied"
 
-```
+```text
 System.UnauthorizedAccessException: Access to '/dev/i2c-1' is denied
 ```
 
 **Cause:** User doesn't have permission to access I2C.
 
 **Solution:**
+
 ```bash
 sudo usermod -aG i2c $USER
 # Log out and log back in
@@ -287,6 +295,7 @@ sudo usermod -aG i2c $USER
 4. **Use i2cdetect:** Scan bus to see if device appears
 
 5. **Try slower speed:** Some devices have trouble with fast mode:
+
    ```text
    dtparam=i2c_arm_baudrate=100000
    ```
@@ -294,6 +303,7 @@ sudo usermod -aG i2c $USER
 ### Multiple Devices with Same Address
 
 If you need multiple devices with the same I2C address:
+
 - Use I2C multiplexer (like TCA9548A)
 - Use different I2C buses if available
 - Some devices allow address configuration via pins
