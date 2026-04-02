@@ -581,4 +581,4 @@ dotnet run -c Release
 - [.NET IoT Documentation](https://docs.microsoft.com/dotnet/iot/)
 - [Device Bindings Samples](../src/devices)
 - [.NET CLI Reference](https://docs.microsoft.com/dotnet/core/tools/)
-- [Visual Studio IoT Development](https://learn.microsoft.com/visualstudio/iot/)
+- [.NET IoT Deployment Guide](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
