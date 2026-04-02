@@ -319,5 +319,5 @@ If you need multiple devices with the same I2C address:
 
 - [I2C Wikipedia](https://en.wikipedia.org/wiki/I%C2%B2C)
 - [I2C Tutorial - SparkFun](https://learn.sparkfun.com/tutorials/i2c/all)
-- [Raspberry Pi I2C Documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/)
+- [Raspberry Pi I2C Documentation](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html)
 - [I2C Bus Specification](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)

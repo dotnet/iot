@@ -168,7 +168,7 @@ Track both press and release with proper debouncing.
 ```csharp
 using System.Device.Gpio;
 
-public class DebouncedButton
+public class DebouncedButton : IDisposable
 {
     private readonly GpioController _controller;
     private readonly int _pin;

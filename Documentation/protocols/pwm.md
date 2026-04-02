@@ -346,7 +346,7 @@ Some servos use slightly different pulse widths. Experiment with duty cycle valu
 ## Related Documentation
 
 - [Understanding Protocols](../fundamentals/understanding-protocols.md) - When to use PWM vs other protocols
-- [GPIO Basics](fundamentals/gpio-basics.md) - Understanding digital I/O
+- [GPIO Basics](../fundamentals/gpio-basics.md) - Understanding digital I/O
 - [Troubleshooting Guide](../troubleshooting.md) - Common PWM issues
 - [Device Bindings](../../src/devices/README.md) - Drivers for PWM-based devices
 

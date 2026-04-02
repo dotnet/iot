@@ -51,7 +51,7 @@ groups  # Verify 'gpio' is in the list
 
 ```csharp
 // Raspberry Pi 5 uses chip 4, not 0
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(4));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 
 // Or let it auto-detect
 using GpioController controller = new();
@@ -579,9 +579,8 @@ dotnet restore
 # Check installed version
 apt show libgpiod2
 
-# Force specific driver version
-export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V2
-dotnet run
+# Try using the V2-specific driver in your code
+# Use LibGpiodV2Driver instead of LibGpiodDriver if you have libgpiod 2.x
 ```
 
 2. **Corrupted installation:**

@@ -79,7 +79,6 @@ Now that you have your first IoT application running, explore these topics to de
 ### Platform-Specific Guides
 
 - [Raspberry Pi 5 Guide](platforms/raspberry-pi-5.md) - Specific instructions for Raspberry Pi 5
-- [Raspberry Pi 4 Guide](platforms/raspberry-pi-4.md) - Specific instructions for Raspberry Pi 4
 
 ### Deploy Your Application
 

@@ -79,8 +79,12 @@ This automatically:
 **Step 3: Run Container**
 
 ```bash
-# Grant access to GPIO
-docker run --rm --device /dev/gpiomem myiotapp:latest
+# Grant access to GPIO chip (for libgpiod-based apps)
+# Raspberry Pi 1-4
+docker run --rm --device /dev/gpiochip0 myiotapp:latest
+
+# Raspberry Pi 5
+docker run --rm --device /dev/gpiochip4 myiotapp:latest
 ```
 
 ### Method 2: Using a Dockerfile
@@ -113,8 +117,8 @@ ENTRYPOINT ["dotnet", "MyIotApp.dll"]
 # Build for ARM64
 docker build -t myiotapp .
 
-# Run with GPIO access
-docker run --rm --device /dev/gpiomem myiotapp
+# Run with GPIO access (libgpiod)
+docker run --rm --device /dev/gpiochip0 myiotapp
 ```
 
 ## GPIO Access in Containers
@@ -123,23 +127,7 @@ docker run --rm --device /dev/gpiomem myiotapp
 
 Containers are isolated from the host. GPIO devices need to be explicitly mounted.
 
-### Solution 1: Mount /dev/gpiomem (Recommended)
-
-```bash
-docker run --rm --device /dev/gpiomem myiotapp
-```
-
-**Pros:**
-
-- Secure (limited access)
-- Fast (direct memory access)
-- Works with libgpiod
-
-**Cons:**
-
-- Requires `/dev/gpiomem` to exist (most modern systems)
-
-### Solution 2: Mount /dev/gpiochip* (For libgpiod)
+### Solution 1: Mount /dev/gpiochip* (Recommended)
 
 ```bash
 # Raspberry Pi 1-4
@@ -151,6 +139,24 @@ docker run --rm --device /dev/gpiochip4 myiotapp
 # Mount all GPIO chips
 docker run --rm --device /dev/gpiochip0 --device /dev/gpiochip1 myiotapp
 ```
+
+**Pros:**
+
+- Works with LibGpiodDriver (the recommended driver)
+- Secure (limited access)
+- Compatible with all modern platforms including Raspberry Pi 5
+
+**Cons:**
+
+- Need to know correct chip number (use `gpioinfo` to find it)
+
+### Solution 2: Mount /dev/gpiomem (Legacy)
+
+```bash
+docker run --rm --device /dev/gpiomem myiotapp
+```
+
+**Note:** This only works with the legacy `RaspberryPi3Driver` which uses direct memory access. It does **not** work with `LibGpiodDriver`. If your app uses `LibGpiodDriver` (the default on modern systems), use Solution 1 instead.
 
 ### Solution 3: Mount sysfs (Legacy, Not Recommended)
 
@@ -178,12 +184,12 @@ Starting with .NET 8, official Docker images use non-root user `app` (UID 1654).
 
 ```bash
 # Inside container, check device permissions
-docker run -it --rm --device /dev/gpiomem --entrypoint /bin/bash myiotapp
-app@container:/app$ ls -l /dev/gpiomem
-crw-rw---- 1 root gpio 245, 0 Jan 28 18:45 /dev/gpiomem
+docker run -it --rm --device /dev/gpiochip0 --entrypoint /bin/bash myiotapp
+app@container:/app$ ls -l /dev/gpiochip0
+crw-rw---- 1 root gpio 254, 0 Jan 28 18:45 /dev/gpiochip0
 ```
 
-`/dev/gpiomem` is owned by group `gpio` (GID varies by system, commonly 997 or 996).
+`/dev/gpiochip0` is owned by group `gpio` (GID varies by system, commonly 997 or 996).
 
 The container's `app` user (GID 1654) cannot access it.
 
@@ -200,7 +206,7 @@ getent group gpio
 
 ```bash
 # Use app user (1654) with gpio group (997)
-docker run --rm -u "1654:997" --device /dev/gpiomem myiotapp
+docker run --rm -u "1654:997" --device /dev/gpiochip0 myiotapp
 ```
 
 **Or add APP_UID to gpio group in Dockerfile:**
@@ -274,7 +280,7 @@ docker run --rm -u "1654:<dialout_gid>" --device /dev/ttyS0 myiotapp
 
 ```bash
 docker run --rm \
-  --device /dev/gpiomem \
+  --device /dev/gpiochip0 \
   --device /dev/i2c-1 \
   --device /dev/spidev0.0 \
   --device /dev/ttyS0 \
@@ -295,7 +301,7 @@ services:
     restart: unless-stopped
     user: "1654:997"  # app:gpio
     devices:
-      - /dev/gpiomem
+      - /dev/gpiochip0
       - /dev/i2c-1
       - /dev/spidev0.0
     environment:
@@ -375,7 +381,7 @@ docker push yourusername/myiotapp:latest
 
 # On Raspberry Pi
 docker pull yourusername/myiotapp:latest
-docker run --rm --device /dev/gpiomem yourusername/myiotapp:latest
+docker run --rm --device /dev/gpiochip0 yourusername/myiotapp:latest
 ```
 
 ### Method 2: Save and Load
@@ -389,7 +395,7 @@ scp myiotapp.tar.gz pi@raspberrypi.local:~
 
 # On Raspberry Pi
 gunzip -c myiotapp.tar.gz | docker load
-docker run --rm --device /dev/gpiomem myiotapp:latest
+docker run --rm --device /dev/gpiochip0 myiotapp:latest
 ```
 
 ## Example: Complete IoT App with Docker
@@ -434,7 +440,7 @@ services:
     restart: unless-stopped
     user: "1654:997"
     devices:
-      - /dev/gpiomem
+      - /dev/gpiochip0
       - /dev/i2c-1
     environment:
       - DOTNET_ENVIRONMENT=Production
@@ -490,7 +496,7 @@ docker inspect mycontainer
 **Check device permissions:**
 
 ```bash
-docker exec -it mycontainer ls -l /dev/gpiomem
+docker exec -it mycontainer ls -l /dev/gpiochip0
 ```
 
 **Solution:** Set correct user/group with `-u` flag.
@@ -500,7 +506,7 @@ docker exec -it mycontainer ls -l /dev/gpiomem
 **Verify device exists on host:**
 
 ```bash
-ls -l /dev/gpiomem /dev/i2c-* /dev/spidev*
+ls -l /dev/gpiochip* /dev/i2c-* /dev/spidev*
 ```
 
 **Solution:** Mount device with `--device` flag.

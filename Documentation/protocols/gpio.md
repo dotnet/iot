@@ -16,14 +16,7 @@ GPIO pins operate with digital logic levels (HIGH/LOW):
 
 ## Pin Numbering
 
-.NET IoT uses **BCM (Broadcom) GPIO numbering**, not physical pin numbers:
-
-```csharp
-// GPIO 18 refers to BCM GPIO18 (which is physical pin 12 on Raspberry Pi)
-controller.OpenPin(18, PinMode.Output);
-```
-
-**Important:** Always use GPIO/BCM numbers in your code. Use a pinout diagram for your specific board to map GPIO numbers to physical positions. For Raspberry Pi, see [pinout.xyz](https://pinout.xyz/).
+.NET IoT uses **BCM (Broadcom) GPIO numbering**, not physical pin numbers. For example, GPIO 18 corresponds to physical pin 12 on a Raspberry Pi. Always use GPIO/BCM numbers in your code. For a complete mapping, see [pinout.xyz](https://pinout.xyz/).
 
 ## Basic Example
 
@@ -56,43 +49,42 @@ The `GpioController` class is the main entry point for GPIO operations in .NET I
 
 .NET IoT provides several GPIO driver implementations:
 
-#### 1. LibGpiodDriver (Recommended for Linux)
+#### LibGpiodDriver (Recommended for Linux)
 
-Uses the modern `libgpiod` library to access GPIO through the Linux character device interface.
+Uses the modern `libgpiod` library to access GPIO on Linux.
 
 ```csharp
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 
 // Explicitly use LibGpiodDriver
-// Chip number: 0 for Pi 3/4, 4 for Pi 5
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(0));
+using GpioController controller = new(new LibGpiodDriver());
 ```
 
 **Advantages:**
-- Modern, actively maintained
-- Better security and resource management
+- Best performance for rapid GPIO operations
+- Compatible with all modern Linux kernels (4.8+)
 - Supports multiple processes accessing GPIO simultaneously
-- Required for Linux kernel 4.8+
+- Proper resource management and cleanup
 
 **Requirements:**
 - Install libgpiod library: `sudo apt install libgpiod2`
 - User must be in `gpio` group: `sudo usermod -aG gpio $USER`
 
-#### 2. RaspberryPi3Driver
+#### RaspberryPi3Driver
 
 A legacy driver specific to Raspberry Pi that uses direct memory access. This driver is now deprecated in favor of LibGpiodDriver.
 
 ```csharp
 using System.Device.Gpio.Drivers;
 
-// Legacy approach - not recommended
-using GpioController controller = new(PinNumberingScheme.Logical, new RaspberryPi3Driver());
+// Legacy approach - not recommended for new projects
+using GpioController controller = new(new RaspberryPi3Driver());
 ```
 
 **Note:** This driver is kept for backward compatibility but should not be used in new projects. Use LibGpiodDriver instead.
 
-#### 3. SysFsDriver (Deprecated)
+#### SysFsDriver (Deprecated)
 
 Uses the older `/sys/class/gpio` interface, which is deprecated in modern Linux kernels.
 
@@ -100,14 +92,10 @@ Uses the older `/sys/class/gpio` interface, which is deprecated in modern Linux 
 using System.Device.Gpio.Drivers;
 
 // Legacy driver - only use if you must
-using GpioController controller = new(PinNumberingScheme.Logical, new SysFsDriver());
+using GpioController controller = new(new SysFsDriver());
 ```
 
 **When to use:** Only for very old Linux kernels (pre-4.8) or legacy compatibility.
-
-#### 4. Windows10Driver
-
-For Windows 10 IoT Core (now discontinued).
 
 ### Auto-Detection
 
@@ -166,7 +154,7 @@ controller.RegisterCallbackForPinValueChangedEvent(
     PinEventTypes.Falling,  // Trigger on HIGH → LOW
     (sender, args) =>
     {
-        Console.WriteLine($"Button pressed at {args.ChangeTime}");
+        Console.WriteLine($"Button pressed on pin {args.PinNumber}");
     });
 
 // Keep program running
@@ -183,14 +171,11 @@ Thread.Sleep(Timeout.Infinite);
 
 ### Specifying GPIO Chip Number
 
-Different platforms use different GPIO chip numbers:
+Different platforms use different GPIO chip numbers. If auto-detection doesn't work, you can specify the chip number explicitly:
 
 ```csharp
-// Raspberry Pi 3/4
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(0));
-
-// Raspberry Pi 5
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(4));
+// Specify chip number explicitly
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 ```
 
 **Find your chip number:**
@@ -198,37 +183,21 @@ using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDr
 gpioinfo
 ```
 
-### LibGpiodDriver Versions
+### LibGpiodDriver and LibGpiodV2Driver
 
-libgpiod library has multiple versions. .NET IoT supports both v1 and v2:
+.NET IoT provides two driver types for different versions of the libgpiod library:
 
-| LibGpiodDriverVersion | Libgpiod Library Version |
-|-----------------------|--------------------------|
-| V1                    | 0.x - 1.x                |
-| V2                    | 2.x                      |
+- **`LibGpiodDriver`** - Supports libgpiod v1 (0.x - 1.x). Auto-detects the correct version.
+- **`LibGpiodV2Driver`** - Supports libgpiod v2 (2.x).
 
-**Auto-detection (recommended):**
-```csharp
-// Automatically detects and uses correct version
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(0));
-```
-
-**Manual version selection:**
 ```csharp
 using System.Device.Gpio.Drivers;
 
-// Force V1 driver
-var driver = new LibGpiodDriver(0, LibGpiodDriverVersion.V1);
-using GpioController controller = new(PinNumberingScheme.Logical, driver);
+// Auto-detection (recommended) - works with both v1 and v2
+using GpioController controller = new(new LibGpiodDriver());
 
-// Force V2 driver
-var driver2 = new LibGpiodDriver(0, LibGpiodDriverVersion.V2);
-```
-
-**Or using environment variable:**
-```bash
-export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V1
-dotnet run
+// Explicitly use libgpiod v2 driver
+using GpioController controllerV2 = new(new LibGpiodV2Driver(chipNumber: 0));
 ```
 
 ### Installing libgpiod
@@ -275,7 +244,7 @@ sudo usermod -aG gpio $USER
 **On Raspberry Pi 5:**
 Raspberry Pi 5 uses chip number **4** instead of 0:
 ```csharp
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(4));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 ```
 
 **Find correct chip:**

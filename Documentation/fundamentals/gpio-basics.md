@@ -143,7 +143,7 @@ controller.RegisterCallbackForPinValueChangedEvent(
     PinEventTypes.Falling, // Trigger on button press (HIGH → LOW)
     (sender, args) =>
     {
-        Console.WriteLine($"Button pressed at {args.ChangeTime}");
+        Console.WriteLine($"Button pressed on pin {args.PinNumber}");
     });
 
 Console.WriteLine("Press the button. Ctrl+C to exit.");

@@ -112,7 +112,7 @@ systemctl stop <myiotapp>.service
 ```shell
 # Requires root permissions
  systemctl daemon-reload
- systemctl enable myscript.service
+ systemctl enable <myiotapp>.service
 ```
 
 ## To disable your service
@@ -122,7 +122,7 @@ Run this in terminal to disable the program on boot:
 ```shell
 # Requires root permissions
  systemctl daemon-reload
- systemctl disable myscript.service
+ systemctl disable <myiotapp>.service
 ```
 
 ## Security considerations

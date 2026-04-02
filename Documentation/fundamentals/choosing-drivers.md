@@ -62,7 +62,7 @@ using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 
 // Specify chip number (usually 0, but 4 on Raspberry Pi 5)
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(chipNumber: 0));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 ```
 
 **Finding your chip number:**
@@ -86,7 +86,7 @@ On most Raspberry Pi models, use `gpiochip0` (chip number 0). On Raspberry Pi 5,
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 
-using GpioController controller = new(PinNumberingScheme.Logical, new SysFsDriver());
+using GpioController controller = new(new SysFsDriver());
 ```
 
 ## LibGpiodDriver Versions
@@ -104,28 +104,21 @@ By default, .NET IoT auto-detects the installed libgpiod version:
 
 ```csharp
 // Automatically detects and uses the correct version
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver());
+using GpioController controller = new(new LibGpiodDriver());
 ```
 
 ### Manual Version Selection
 
-Force a specific driver version:
+Use a specific driver type for the installed libgpiod version:
 
 ```csharp
 using System.Device.Gpio.Drivers;
 
-// Force V1 driver
-var driver = new LibGpiodDriver(chipNumber: 0, LibGpiodDriverVersion.V1);
+// Use LibGpiodDriver for libgpiod v1 (auto-detects version)
+var driver = new LibGpiodDriver(gpioChip: 0);
 
-// Force V2 driver
-var driver = new LibGpiodDriver(chipNumber: 0, LibGpiodDriverVersion.V2);
-```
-
-Or use environment variable:
-
-```bash
-export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V1
-dotnet run
+// Use LibGpiodV2Driver for libgpiod v2 explicitly
+var driverV2 = new LibGpiodV2Driver(chipNumber: 0);
 ```
 
 ## Installing libgpiod
@@ -200,7 +193,7 @@ using System.Diagnostics;
 // Test pin toggle speed
 void BenchmarkDriver(GpioDriver driver)
 {
-    using GpioController controller = new(PinNumberingScheme.Logical, driver);
+    using GpioController controller = new(driver);
     controller.OpenPin(18, PinMode.Output);
 
     Stopwatch sw = Stopwatch.StartNew();
@@ -294,7 +287,7 @@ Raspberry Pi 5 uses chip number **4** instead of 0:
 
 ```csharp
 // Raspberry Pi 5
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(chipNumber: 4));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 ```
 
 **Detect automatically:**
@@ -311,17 +304,16 @@ If you get strange behavior or errors:
 # Check installed libgpiod version
 apt show libgpiod2
 
-# Force specific driver version
-export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V2
-dotnet run
+# Try using the V2-specific driver if you have libgpiod 2.x
+# In your code, use LibGpiodV2Driver instead of LibGpiodDriver
 ```
 
 ## Platform-Specific Recommendations
 
 ### Raspberry Pi (All Models)
 
-- **Raspberry Pi 5:** Use `LibGpiodDriver(chipNumber: 4)`
-- **Raspberry Pi 4, 3, Zero:** Use `LibGpiodDriver(chipNumber: 0)`
+- **Raspberry Pi 5:** Use `LibGpiodDriver(gpioChip: 4)`
+- **Raspberry Pi 4, 3, Zero:** Use `LibGpiodDriver(gpioChip: 0)`
 - **Always install:** `sudo apt install libgpiod2`
 
 ### Other SBCs (Orange Pi, Banana Pi, etc.)
@@ -364,7 +356,7 @@ using GpioController controller = new();
 
 ```csharp
 // Old (SysFsDriver)
-using GpioController controller = new(PinNumberingScheme.Logical, new SysFsDriver());
+using GpioController controller = new(new SysFsDriver());
 
 // New (LibGpiodDriver) - just remove the driver parameter
 using GpioController controller = new();

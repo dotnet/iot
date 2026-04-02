@@ -15,10 +15,10 @@ The Raspberry Pi 5 introduces significant changes from previous models. This gui
 
 ```csharp
 // Raspberry Pi 1-4
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(0));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 
 // Raspberry Pi 5
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(4));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 ```
 
 **Auto-detection (recommended):**
@@ -123,7 +123,7 @@ using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 
 // Explicitly specify chip 4 for Raspberry Pi 5
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(4));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
 
 // Blink LED on GPIO 18
 controller.OpenPin(18, PinMode.Output);
@@ -408,7 +408,7 @@ gpu_mem=128
 
 ```csharp
 // Before (Pi 4)
-using GpioController controller = new(PinNumberingScheme.Logical, new LibGpiodDriver(0));
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 
 // After (Pi 5 compatible)
 using GpioController controller = new(); // Auto-detect
