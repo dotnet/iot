@@ -282,51 +282,51 @@ Configuration tool for Raspberry Pi. Used to enable I2C, SPI, UART, etc.
 
 ## Units and Abbreviations
 
-| Term | Meaning | Example |
-|------|---------|---------|
-| mA | Milliampere (1/1000 A) | GPIO max current: 16mA |
-| mV | Millivolt (1/1000 V) | Logic level: 2800mV |
-| µA | Microampere (1/1,000,000 A) | Sleep current: 10µA |
-| kHz | Kilohertz (1000 Hz) | I2C speed: 400kHz |
-| MHz | Megahertz (1,000,000 Hz) | SPI speed: 10MHz |
-| kΩ | Kilohm (1000 Ω) | Pull-up: 4.7kΩ |
-| µF | Microfarad (1/1,000,000 F) | Capacitor: 0.1µF |
-| pF | Picofarad (1/1,000,000,000,000 F) | Capacitor: 22pF |
+| Term | Meaning                           | Example                |
+| ---- | --------------------------------- | ---------------------- |
+| mA   | Milliampere (1/1000 A)            | GPIO max current: 16mA |
+| mV   | Millivolt (1/1000 V)              | Logic level: 2800mV    |
+| µA   | Microampere (1/1,000,000 A)       | Sleep current: 10µA    |
+| kHz  | Kilohertz (1000 Hz)               | I2C speed: 400kHz      |
+| MHz  | Megahertz (1,000,000 Hz)          | SPI speed: 10MHz       |
+| kΩ   | Kilohm (1000 Ω)                   | Pull-up: 4.7kΩ         |
+| µF   | Microfarad (1/1,000,000 F)        | Capacitor: 0.1µF       |
+| pF   | Picofarad (1/1,000,000,000,000 F) | Capacitor: 22pF        |
 
 ## Acronyms
 
-| Acronym | Full Name |
-|---------|-----------|
-| ADC | Analog-to-Digital Converter |
-| BCM | Broadcom |
-| CS | Chip Select |
-| DAC | Digital-to-Analog Converter |
-| GPIO | General-Purpose Input/Output |
-| GND | Ground |
-| HAT | Hardware Attached on Top |
-| I2C | Inter-Integrated Circuit |
-| IoT | Internet of Things |
-| LED | Light-Emitting Diode |
-| LSB | Least Significant Bit |
-| MCU | Microcontroller Unit |
-| MISO | Master In Slave Out |
-| MOSI | Master Out Slave In |
-| MSB | Most Significant Bit |
-| PCB | Printed Circuit Board |
-| PWM | Pulse Width Modulation |
-| RTC | Real-Time Clock |
-| RX | Receive |
-| SBC | Single-Board Computer |
-| SCK | Serial Clock |
-| SCL | Serial Clock Line |
-| SDA | Serial Data Line |
-| SoC | System on Chip |
-| SPI | Serial Peripheral Interface |
-| SS | Slave Select |
-| TX | Transmit |
-| UART | Universal Asynchronous Receiver/Transmitter |
-| USB | Universal Serial Bus |
-| VCC | Voltage Common Collector (power) |
+| Acronym | Full Name                                   |
+| ------- | ------------------------------------------- |
+| ADC     | Analog-to-Digital Converter                 |
+| BCM     | Broadcom                                    |
+| CS      | Chip Select                                 |
+| DAC     | Digital-to-Analog Converter                 |
+| GPIO    | General-Purpose Input/Output                |
+| GND     | Ground                                      |
+| HAT     | Hardware Attached on Top                    |
+| I2C     | Inter-Integrated Circuit                    |
+| IoT     | Internet of Things                          |
+| LED     | Light-Emitting Diode                        |
+| LSB     | Least Significant Bit                       |
+| MCU     | Microcontroller Unit                        |
+| MISO    | Master In Slave Out                         |
+| MOSI    | Master Out Slave In                         |
+| MSB     | Most Significant Bit                        |
+| PCB     | Printed Circuit Board                       |
+| PWM     | Pulse Width Modulation                      |
+| RTC     | Real-Time Clock                             |
+| RX      | Receive                                     |
+| SBC     | Single-Board Computer                       |
+| SCK     | Serial Clock                                |
+| SCL     | Serial Clock Line                           |
+| SDA     | Serial Data Line                            |
+| SoC     | System on Chip                              |
+| SPI     | Serial Peripheral Interface                 |
+| SS      | Slave Select                                |
+| TX      | Transmit                                    |
+| UART    | Universal Asynchronous Receiver/Transmitter |
+| USB     | Universal Serial Bus                        |
+| VCC     | Voltage Common Collector (power)            |
 
 ## Common Confusions
 

@@ -406,16 +406,16 @@ gpioinfo
 
 ## Common Datasheet Sections
 
-| Section Name | What to Look For |
-|--------------|------------------|
-| Features | High-level capabilities |
-| Absolute Maximum Ratings | Don't exceed these! |
+| Section Name               | What to Look For               |
+| -------------------------- | ------------------------------ |
+| Features                   | High-level capabilities        |
+| Absolute Maximum Ratings   | Don't exceed these!            |
 | Electrical Characteristics | Voltage, current, timing specs |
-| Pin Configuration | Pin numbers and functions |
-| Functional Description | How the device works |
-| Application Information | Example circuits |
-| Register Map | Addresses and bit definitions |
-| Package Information | Physical dimensions |
+| Pin Configuration          | Pin numbers and functions      |
+| Functional Description     | How the device works           |
+| Application Information    | Example circuits               |
+| Register Map               | Addresses and bit definitions  |
+| Package Information        | Physical dimensions            |
 
 ## When Datasheets Are Unclear
 

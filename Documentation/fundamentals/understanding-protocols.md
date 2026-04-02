@@ -4,14 +4,14 @@ When interfacing with sensors, displays, and other peripherals, you'll use diffe
 
 ## Quick Comparison
 
-| Protocol | Speed | Wiring | Devices | Best For |
-|----------|-------|--------|---------|----------|
-| **GPIO** | N/A | 1 wire/device | 1 per pin | Simple on/off, buttons, LEDs |
-| **I2C** | Slow-Medium (100-400 kHz) | 2 wires (SDA, SCL) | 100+ (addressable) | Sensors, small displays, multi-device |
-| **SPI** | Fast (10+ MHz) | 4+ wires (MOSI, MISO, SCK, CS) | Limited by CS pins | Displays, high-speed sensors, SD cards |
-| **UART/Serial** | Medium (9600-115200 baud) | 2 wires (TX, RX) | 1 per port | GPS modules, GSM, Bluetooth, debugging |
-| **PWM** | N/A | 1 wire/device | 1 per pin | LED dimming, motor speed, servos |
-| **1-Wire** | Slow | 1 wire + ground | Many (addressable) | Temperature sensors (DS18B20) |
+| Protocol        | Speed                     | Wiring                         | Devices            | Best For                               |
+| --------------- | ------------------------- | ------------------------------ | ------------------ | -------------------------------------- |
+| **GPIO**        | N/A                       | 1 wire/device                  | 1 per pin          | Simple on/off, buttons, LEDs           |
+| **I2C**         | Slow-Medium (100-400 kHz) | 2 wires (SDA, SCL)             | 100+ (addressable) | Sensors, small displays, multi-device  |
+| **SPI**         | Fast (10+ MHz)            | 4+ wires (MOSI, MISO, SCK, CS) | Limited by CS pins | Displays, high-speed sensors, SD cards |
+| **UART/Serial** | Medium (9600-115200 baud) | 2 wires (TX, RX)               | 1 per port         | GPS modules, GSM, Bluetooth, debugging |
+| **PWM**         | N/A                       | 1 wire/device                  | 1 per pin          | LED dimming, motor speed, servos       |
+| **1-Wire**      | Slow                      | 1 wire + ground                | Many (addressable) | Temperature sensors (DS18B20)          |
 
 ## GPIO (General-Purpose Input/Output)
 
@@ -140,12 +140,12 @@ device.TransferFullDuplex(writeBuffer, readBuffer);
 
 ### SPI Modes
 
-| Mode | CPOL | CPHA | Clock Idle | Sampling Edge |
-|------|------|------|------------|---------------|
-| Mode0 | 0 | 0 | Low | Rising |
-| Mode1 | 0 | 1 | Low | Falling |
-| Mode2 | 1 | 0 | High | Falling |
-| Mode3 | 1 | 1 | High | Rising |
+| Mode  | CPOL | CPHA | Clock Idle | Sampling Edge |
+| ----- | ---- | ---- | ---------- | ------------- |
+| Mode0 | 0    | 0    | Low        | Rising        |
+| Mode1 | 0    | 1    | Low        | Falling       |
+| Mode2 | 1    | 0    | High       | Falling       |
+| Mode3 | 1    | 1    | High       | Rising        |
 
 **Most devices use Mode0** - check your device datasheet.
 

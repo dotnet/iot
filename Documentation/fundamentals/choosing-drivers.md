@@ -34,15 +34,15 @@ For Windows 10 IoT Core (now discontinued).
 
 ## Quick Comparison
 
-| Feature | LibGpiodDriver | SysFsDriver |
-|---------|----------------|-------------|
-| **Status** | Active, Recommended | Deprecated |
-| **Kernel Version** | 4.8+ | All |
-| **Performance** | Better | Good |
-| **Security** | Excellent | Limited |
-| **Multi-process** | Safe | Unsafe |
-| **Resource Cleanup** | Automatic | Manual |
-| **Future Support** | Yes | No (being removed) |
+| Feature              | LibGpiodDriver      | SysFsDriver        |
+| -------------------- | ------------------- | ------------------ |
+| **Status**           | Active, Recommended | Deprecated         |
+| **Kernel Version**   | 4.8+                | All                |
+| **Performance**      | Better              | Good               |
+| **Security**         | Excellent           | Limited            |
+| **Multi-process**    | Safe                | Unsafe             |
+| **Resource Cleanup** | Automatic           | Manual             |
+| **Future Support**   | Yes                 | No (being removed) |
 
 ## Default Behavior
 
@@ -93,10 +93,10 @@ using GpioController controller = new(new SysFsDriver());
 
 libgpiod library has multiple versions with breaking changes. .NET IoT supports both v1 and v2:
 
-| Library Version | Driver Version | Status |
-|----------------|----------------|--------|
-| libgpiod 1.1 - 1.6 | V1 | Supported |
-| libgpiod 2.0+ | V2 | Supported |
+| Library Version    | Driver Version | Status    |
+| ------------------ | -------------- | --------- |
+| libgpiod 1.1 - 1.6 | V1             | Supported |
+| libgpiod 2.0+      | V2             | Supported |
 
 ### Framework Auto-Detection
 

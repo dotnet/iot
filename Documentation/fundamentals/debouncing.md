@@ -287,13 +287,13 @@ Use specialized debounce ICs like MAX6816/MAX6817:
 
 ### General Guidelines
 
-| Application | Debounce Time | Reason |
-|-------------|---------------|---------|
-| Tactile buttons | 20-50ms | Typical bounce duration |
-| Mechanical switches | 50-100ms | Longer bounce |
-| Rotary encoders | 1-5ms | Fast transitions needed |
-| Limit switches | 50-100ms | Heavy contacts, longer bounce |
-| Reed switches | 10-20ms | Light contacts |
+| Application         | Debounce Time | Reason                        |
+| ------------------- | ------------- | ----------------------------- |
+| Tactile buttons     | 20-50ms       | Typical bounce duration       |
+| Mechanical switches | 50-100ms      | Longer bounce                 |
+| Rotary encoders     | 1-5ms         | Fast transitions needed       |
+| Limit switches      | 50-100ms      | Heavy contacts, longer bounce |
+| Reed switches       | 10-20ms       | Light contacts                |
 
 ### Tuning Method
 

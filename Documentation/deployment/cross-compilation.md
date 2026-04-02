@@ -16,10 +16,10 @@ dotnet publish -c Release -r linux-arm64 --self-contained true
 
 **Common Runtime Identifiers (RIDs):**
 
-| Target | RID |
-|--------|-----|
-| Raspberry Pi 3/4/5 (64-bit OS) | `linux-arm64` |
-| Raspberry Pi 3/Zero (32-bit OS) | `linux-arm` |
+| Target                          | RID           |
+| ------------------------------- | ------------- |
+| Raspberry Pi 3/4/5 (64-bit OS)  | `linux-arm64` |
+| Raspberry Pi 3/Zero (32-bit OS) | `linux-arm`   |
 
 ### Deploy to Raspberry Pi
 

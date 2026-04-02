@@ -186,12 +186,12 @@ For loads exceeding 16mA (motors, relays, high-power LEDs):
 
 ## Pin Mode Summary
 
-| PinMode | Description | Typical Use |
-|---------|-------------|-------------|
-| `Output` | Drive pin HIGH or LOW | LEDs, control signals |
-| `Input` | Read pin state (floating) | Rarely used |
-| `InputPullUp` | Read pin, default HIGH | Buttons (active-low) |
-| `InputPullDown` | Read pin, default LOW | Sensors (active-high) |
+| PinMode         | Description               | Typical Use           |
+| --------------- | ------------------------- | --------------------- |
+| `Output`        | Drive pin HIGH or LOW     | LEDs, control signals |
+| `Input`         | Read pin state (floating) | Rarely used           |
+| `InputPullUp`   | Read pin, default HIGH    | Buttons (active-low)  |
+| `InputPullDown` | Read pin, default LOW     | Sensors (active-high) |
 
 ## Best Practices
 
