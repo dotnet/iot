@@ -36,7 +36,7 @@ gpioinfo
 
 Look for the chip with GPIO0-GPIO27 (the main user GPIO):
 
-```
+```text
 gpiochip4 - 54 lines:
     line   0:      "ID_SDA"       unused   input  active-high 
     line   1:      "ID_SCL"       unused   input  active-high 
@@ -46,7 +46,7 @@ gpiochip4 - 54 lines:
 ### 2. Hardware Changes
 
 | Feature | Raspberry Pi 4 | Raspberry Pi 5 |
-|---------|----------------|----------------|
+| --------- | ---------------- | ---------------- |
 | CPU | BCM2711 (Cortex-A72) | BCM2712 (Cortex-A76) |
 | CPU Speed | 1.5 GHz | 2.4 GHz |
 | RAM | 1GB, 2GB, 4GB, 8GB | 4GB, 8GB |
@@ -88,7 +88,7 @@ gpiochip4 - 54 lines:
 
 The 40-pin GPIO header remains compatible with Raspberry Pi 2/3/4:
 
-```
+```text
 3.3V  (1) (2)  5V
 GPIO2 (3) (4)  5V
 GPIO3 (5) (6)  GND
@@ -415,7 +415,7 @@ using GpioController controller = new(new LibGpiodDriver(gpioChip: 0));
 using GpioController controller = new(); // Framework auto-selects
 ```
 
-2. **Update documentation/comments** referencing chip numbers
+1. **Update documentation/comments** referencing chip numbers
 
 ### Testing Checklist
 

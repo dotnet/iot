@@ -126,7 +126,7 @@ Press `Ctrl+C` to stop.
 
 ## Creating a Project with Visual Studio
 
-### Prerequisites
+### Prerequisites for Visual Studio
 
 - Visual Studio 2022 or later
 - .NET 8.0 SDK or later
@@ -183,7 +183,7 @@ See [Remote Debugging Guide](https://learn.microsoft.com/en-us/dotnet/iot/debugg
 
 ### Minimal Project
 
-```
+```text
 MyIotApp/
 ├── MyIotApp.csproj
 ├── Program.cs
@@ -194,7 +194,7 @@ MyIotApp/
 
 ### Recommended Project Structure
 
-```
+```text
 MyIotApp/
 ├── MyIotApp.csproj
 ├── Program.cs

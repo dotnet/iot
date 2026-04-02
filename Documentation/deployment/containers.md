@@ -53,13 +53,13 @@ Log out and back in for group changes to take effect.
 
 ### Method 1: Using .NET SDK Container Building Tools (Recommended)
 
-**Step 1: Add Package (only needed for .NET < 8.0.200)**
+### Step 1 - Add Package (only needed for .NET < 8.0.200)
 
 ```bash
 dotnet add package Microsoft.NET.Build.Containers
 ```
 
-**Step 2: Publish as Container**
+### Step 2 - Publish as Container
 
 ```bash
 # For ARM64 (Raspberry Pi 4, 5)
@@ -76,7 +76,7 @@ This automatically:
 - Tags as `latest`
 - Loads into local Docker registry
 
-**Step 3: Run Container**
+### Step 3 - Run Container
 
 ```bash
 # Grant access to GPIO chip (for libgpiod-based apps)
@@ -402,7 +402,7 @@ docker run --rm --device /dev/gpiochip0 myiotapp:latest
 
 **Project structure:**
 
-```
+```text
 MyIotApp/
 ├── MyIotApp.csproj
 ├── Program.cs
@@ -448,7 +448,7 @@ services:
 
 **.dockerignore:**
 
-```
+```text
 bin/
 obj/
 .git/
