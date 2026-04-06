@@ -24,7 +24,7 @@ configuration:
       actions:
       - closeIssue
       - addReply:
-          reply: Hello ${issueAuthor}, the reviewers on this PR have requested changes and there has not been any activity for **14 days**, so it will be closed for housekeeping pourposes. Feel free to reopen or send a new one if you wish to resume the progress.
+          reply: Hello ${issueAuthor}, the reviewers on this PR have requested changes and there has not been any activity for **14 days**, so it will be closed for housekeeping purposes. Feel free to reopen or send a new one if you wish to resume the progress.
     - description: Add no recent activity label to pull requests
       frequencies:
       - hourly:
