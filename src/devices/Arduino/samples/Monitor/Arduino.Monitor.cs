@@ -13,15 +13,18 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using CommandLine;
 using Iot.Device.Adc;
 using Iot.Device.Arduino;
 using Iot.Device.Arduino.Sample;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Board;
 using Iot.Device.Button;
 using Iot.Device.Common;
 using Iot.Device.HardwareMonitor;
 using UnitsNet;
+using UnitsNet.Units;
 
 namespace Arduino.Samples
 {
@@ -33,18 +36,32 @@ namespace Arduino.Samples
         /// <param name="args">The first argument gives the Port name. Default "COM4"</param>
         public static void Main(string[] args)
         {
-            string portName = "COM4";
-            if (args.Length > 0)
+            var parser = new Parser(x =>
             {
-                portName = args[0];
+                x.AutoHelp = true;
+                x.AutoVersion = true;
+                x.CaseInsensitiveEnumValues = true;
+                x.ParsingCulture = CultureInfo.InvariantCulture;
+                x.CaseSensitive = false;
+                x.HelpWriter = Console.Out;
+            });
+
+            var parsed = parser.ParseArguments<CommandLineOptions>(args);
+            if (parsed.Errors.Any())
+            {
+                // Errors are already printed by the parser, just exit.
+                return;
             }
 
-            using (var port = new SerialPort(portName, 115200))
+            CommandLineOptions options = parsed.Value;
+
+            using (var port = new SerialPort(options.PortName, options.BaudRate))
             {
-                Console.WriteLine($"Connecting to Arduino on {portName}");
+                Console.WriteLine($"Connecting to Arduino on {options.PortName}");
                 try
                 {
                     port.Open();
+                    port.BaseStream.ReadTimeout = 60000;
                 }
                 catch (UnauthorizedAccessException x)
                 {
@@ -56,7 +73,7 @@ namespace Arduino.Samples
                 try
                 {
                     Console.WriteLine($"Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
-                    DisplayModes(board);
+                    DisplayModes(board, options);
                 }
                 catch (TimeoutException x)
                 {
@@ -79,11 +96,11 @@ namespace Arduino.Samples
             }
         }
 
-        public static void DisplayModes(ArduinoBoard board)
+        public static void DisplayModes(ArduinoBoard board, CommandLineOptions options)
         {
             const int ButtonPin = 2;
-            const int MaxMode = 10;
-            Length stationAltitude = Length.FromMeters(650);
+            const int MaxMode = 12;
+            Length stationAltitude = Length.FromMeters(options.Altitude);
             int mode = 0;
             var gpioController = board.CreateGpioController();
 
@@ -109,18 +126,33 @@ namespace Arduino.Samples
 
             button.Press += ChangeMode;
 
-            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bmp280.DefaultI2cAddress));
+            Console.WriteLine("Scanning for I2C devices...");
+            var bus = board.CreateOrGetI2cBus(board.GetDefaultI2cBusNumber());
+            var scanned = bus.PerformBusScan(lowest: 0x71);
+
+            int assumedBmp280Address = Bmp280.DefaultI2cAddress;
+            if (scanned.Contains(Bmp280.DefaultI2cAddress))
+            {
+                assumedBmp280Address = Bmp280.DefaultI2cAddress;
+            }
+            else if (scanned.Contains(Bmp280.SecondaryI2cAddress))
+            {
+                assumedBmp280Address = Bmp280.SecondaryI2cAddress;
+            }
+
+            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, assumedBmp280Address));
             Bmp280? bmp;
             try
             {
                 bmp = new Bmp280(device);
                 bmp.StandbyTime = StandbyTime.Ms250;
                 bmp.SetPowerMode(Bmx280PowerMode.Normal);
+                Console.WriteLine($"Found BMP280 at {assumedBmp280Address}");
             }
             catch (IOException)
             {
                 bmp = null;
-                Console.WriteLine("BMP280 not available");
+                Console.WriteLine($"BMP280 not available at detected address {assumedBmp280Address}");
             }
 
             DhtSensor? dht = board.GetCommandHandler<DhtSensor>();
@@ -137,6 +169,8 @@ namespace Arduino.Samples
             string modeName = string.Empty;
             string previousModeName = string.Empty;
             int firstCharInText = 0;
+            Temperature temp = Temperature.Zero;
+            Pressure pressure = Pressure.Zero;
             while (true)
             {
                 if (Console.KeyAvailable && Console.ReadKey(true).KeyChar == 'x')
@@ -170,10 +204,10 @@ namespace Arduino.Samples
                     }
 
                     case 3:
-                        modeName = "Temperature / Barometric Pressure";
-                        if (bmp != null && bmp.TryReadTemperature(out Temperature temp) && bmp.TryReadPressure(out Pressure p2))
+                        modeName = "Temperature / Reduced Pressure V1";
+                        if (bmp != null && bmp.TryReadTemperature(out temp) && bmp.TryReadPressure(out pressure))
                         {
-                            Pressure p3 = WeatherHelper.CalculateBarometricPressure(p2, temp, stationAltitude);
+                            Pressure p3 = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
                             disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s1}", temp, p3));
                         }
                         else
@@ -182,7 +216,37 @@ namespace Arduino.Samples
                         }
 
                         break;
+
                     case 4:
+                        modeName = "Raw Pressure";
+                        if (bmp != null && bmp.TryReadPressure(out pressure))
+                        {
+                            pressure = pressure.ToUnit(PressureUnit.Hectopascal);
+                            disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1}", pressure));
+                        }
+                        else
+                        {
+                            disp.Output.ReplaceLine(1, "N/A");
+                        }
+
+                        break;
+
+                    case 5:
+                        modeName = "Reduced Pressure V2";
+                        if (bmp != null && bmp.TryReadTemperature(out temp) && bmp.TryReadPressure(out pressure))
+                        {
+                            Pressure p3 = WeatherHelper.CalculateSeaLevelPressure(pressure, stationAltitude, temp);
+                            p3 = p3.ToUnit(PressureUnit.Hectopascal);
+                            disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1}", p3));
+                        }
+                        else
+                        {
+                            disp.Output.ReplaceLine(1, "N/A");
+                        }
+
+                        break;
+
+                    case 6:
                         modeName = "Temperature / Humidity";
                         if (dht.TryReadDht(3, 11, out temp, out var humidity))
                         {
@@ -195,9 +259,9 @@ namespace Arduino.Samples
 
                         break;
 
-                    case 5:
+                    case 7:
                         modeName = "Dew point";
-                        if (bmp != null && bmp.TryReadPressure(out p2) && dht.TryReadDht(3, 11, out temp, out humidity))
+                        if (dht.TryReadDht(3, 11, out temp, out humidity))
                         {
                             Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
                             disp.Output.ReplaceLine(1, dewPoint.ToString("s1", CultureInfo.CurrentCulture));
@@ -208,7 +272,7 @@ namespace Arduino.Samples
                         }
 
                         break;
-                    case 6:
+                    case 8:
                         modeName = "CPU Temperature";
                         if (hardwareMonitor.TryGetAverageCpuTemperature(out temp))
                         {
@@ -220,7 +284,7 @@ namespace Arduino.Samples
                         }
 
                         break;
-                    case 7:
+                    case 9:
                         modeName = "GPU Temperature";
                         if (hardwareMonitor.TryGetAverageGpuTemperature(out temp))
                         {
@@ -232,12 +296,12 @@ namespace Arduino.Samples
                         }
 
                         break;
-                    case 8:
+                    case 10:
                         modeName = "CPU Load";
                         disp.Output.ReplaceLine(1, hardwareMonitor.GetCpuLoad().ToString("s1", CultureInfo.CurrentCulture));
                         break;
 
-                    case 9:
+                    case 11:
                         modeName = "Total power dissipation";
                         var powerSources = hardwareMonitor.GetSensorList().Where(x => x.SensorType == SensorType.Power);
                         Power totalPower = Power.Zero;
@@ -252,7 +316,7 @@ namespace Arduino.Samples
                         disp.Output.ReplaceLine(1, totalPower.ToString("s1", CultureInfo.CurrentCulture));
                         break;
 
-                    case 10:
+                    case 12:
                         modeName = "Energy consumed";
                         var energySources = hardwareMonitor.GetSensorList().Where(x => x.SensorType == SensorType.Energy);
                         Energy totalEnergy = Energy.FromWattHours(0); // Set up the desired output unit

@@ -78,7 +78,7 @@ namespace Iot.Device.Arduino.Sample
 
         private static void TestI2cBmp280(ArduinoBoard board)
         {
-            using var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bmp280.DefaultI2cAddress));
+            using var device = board.CreateI2cDevice(new I2cConnectionSettings(0, 0x76));
             using var bmp = new Bmp280(device);
             bmp.StandbyTime = StandbyTime.Ms250;
             bmp.SetPowerMode(Bmx280PowerMode.Normal);
