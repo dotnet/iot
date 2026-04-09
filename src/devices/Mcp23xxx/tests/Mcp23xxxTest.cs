@@ -71,7 +71,10 @@ namespace Iot.Device.Mcp23xxx.Tests
 
             public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
             {
-                Write(writeBuffer);
+                // Only pass the command bytes (OpCode + RegisterAddress) to Write.
+                // Remaining bytes in writeBuffer are don't-care padding for full-duplex reads
+                // and should not be written as register data.
+                Write(writeBuffer.Slice(0, Math.Min(writeBuffer.Length, 2)));
                 Read(readBuffer);
             }
 
