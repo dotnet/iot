@@ -31,6 +31,8 @@ While contributing, you should read the [coding guidelines section](https://gith
 
 ### General-Purpose Input/Output (GPIO)
 
+* [GPIO Guide for Beginners](./gpio-beginners-guide.md) - Getting started with GPIO using .NET IoT
+* [Using libgpiod to control GPIOs](./gpio-linux-libgpiod.md) - Advanced libgpiod driver configuration
 * [GPIO Wiki](https://en.wikipedia.org/wiki/General-purpose_input/output)
 * [Digital I/O Fundamentals](http://www.ni.com/white-paper/3405/en/#toc1)
 
