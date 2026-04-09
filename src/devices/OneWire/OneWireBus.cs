@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,13 +13,31 @@ namespace Iot.Device.OneWire
     public partial class OneWireBus
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OneWireBus"/> class
+        /// Initializes a new instance of the <see cref="OneWireBus"/> class.
         /// </summary>
         /// <param name="busId">The platform id of the 1-wire bus.</param>
-        public OneWireBus(string busId) => BusId = busId;
+        public OneWireBus(string busId)
+            : this(busId, DefaultSysfsBusDevicesPath, DefaultSysfsDevicesPath)
+        {
+        }
 
         /// <summary>
-        /// The 1-wire device id.
+        /// Initializes a new instance of the <see cref="OneWireBus"/> class with custom sysfs paths.
+        /// This constructor allows overriding the default sysfs paths for testing or non-standard environments.
+        /// </summary>
+        /// <param name="busId">The platform id of the 1-wire bus.</param>
+        /// <param name="sysfsBusDevicesPath">The sysfs path for bus device enumeration (default: "/sys/bus/w1/devices").</param>
+        /// <param name="sysfsDevicesPath">The sysfs path for device access (default: "/sys/devices").</param>
+        /// <exception cref="ArgumentNullException">Thrown when any parameter is null.</exception>
+        public OneWireBus(string busId, string sysfsBusDevicesPath, string sysfsDevicesPath)
+        {
+            BusId = busId ?? throw new ArgumentNullException(nameof(busId));
+            _sysfsBusDevicesPath = sysfsBusDevicesPath ?? throw new ArgumentNullException(nameof(sysfsBusDevicesPath));
+            _sysfsDevicesPath = sysfsDevicesPath ?? throw new ArgumentNullException(nameof(sysfsDevicesPath));
+        }
+
+        /// <summary>
+        /// The 1-wire bus id.
         /// </summary>
         public string BusId { get; }
 
@@ -26,7 +45,7 @@ namespace Iot.Device.OneWire
         /// Enumerate names of all 1-wire busses in the system.
         /// </summary>
         /// <returns>A list of discovered bus ids.</returns>
-        public static IEnumerable<string> EnumerateBusIds() => EnumerateBusIdsInternal();
+        public static IEnumerable<string> EnumerateBusIds() => EnumerateBusIdsInternal(DefaultSysfsBusDevicesPath);
 
         /// <summary>
         /// Enumerates all devices currently detected on this bus. Platform can update device list
@@ -36,7 +55,7 @@ namespace Iot.Device.OneWire
         /// <returns>A list of discovered devices.</returns>
         public IEnumerable<string> EnumerateDeviceIds(DeviceFamily family = DeviceFamily.Any)
         {
-            foreach (var devId in EnumerateDeviceIdsInternal(BusId, family))
+            foreach (var devId in EnumerateDeviceIdsInternal(_sysfsDevicesPath, BusId, family))
             {
                 yield return devId;
             }
@@ -48,13 +67,13 @@ namespace Iot.Device.OneWire
         /// <param name="numDevices">Max number of devices to scan for before finishing. Use -1 for platform default.</param>
         /// <param name="numScans">Number of scans to do to find numDevices devices. Use -1 for platform default.</param>
         /// <returns>Task representing the async work.</returns>
-        public Task ScanForDeviceChangesAsync(int numDevices = -1, int numScans = -1) => ScanForDeviceChangesInternalAsync(this, numDevices, numScans);
+        public Task ScanForDeviceChangesAsync(int numDevices = -1, int numScans = -1) => ScanForDeviceChangesInternalAsync(numDevices, numScans);
 
         /// <summary>
         /// Start a new scan for device changes on the bus.
         /// </summary>
         /// <param name="numDevices">Max number of devices to scan for before finishing. Use -1 for platform default.</param>
         /// <param name="numScans">Number of scans to do to find numDevices devices. Use -1 for platform default.</param>
-        public void ScanForDeviceChanges(int numDevices = -1, int numScans = -1) => ScanForDeviceChangesInternal(this, numDevices, numScans);
+        public void ScanForDeviceChanges(int numDevices = -1, int numScans = -1) => ScanForDeviceChangesInternal(numDevices, numScans);
     }
 }

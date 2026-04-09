@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 
 namespace Iot.Device.OneWire
@@ -16,9 +17,23 @@ namespace Iot.Device.OneWire
         /// <param name="busId">The 1-wire bus the device is found on.</param>
         /// <param name="devId">The id of the device.</param>
         public OneWireDevice(string busId, string devId)
+            : this(busId, devId, OneWireBus.DefaultSysfsDevicesPath)
         {
-            BusId = busId;
-            DeviceId = devId;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OneWireDevice"/> class with a custom sysfs devices path.
+        /// This constructor allows overriding the default sysfs path for testing or non-standard environments.
+        /// </summary>
+        /// <param name="busId">The 1-wire bus the device is found on.</param>
+        /// <param name="devId">The id of the device.</param>
+        /// <param name="sysfsDevicesPath">The sysfs path for device access (default: "/sys/devices").</param>
+        /// <exception cref="ArgumentNullException">Thrown when any parameter is null.</exception>
+        public OneWireDevice(string busId, string devId, string sysfsDevicesPath)
+        {
+            BusId = busId ?? throw new ArgumentNullException(nameof(busId));
+            DeviceId = devId ?? throw new ArgumentNullException(nameof(devId));
+            SysfsDevicesPath = sysfsDevicesPath ?? throw new ArgumentNullException(nameof(sysfsDevicesPath));
             Family = OneWireBus.GetDeviceFamilyInternal(busId, devId);
         }
 
@@ -29,9 +44,9 @@ namespace Iot.Device.OneWire
         /// <returns>A list of devices found.</returns>
         public static IEnumerable<(string BusId, string DevId)> EnumerateDeviceIds(DeviceFamily family = DeviceFamily.Any)
         {
-            foreach (var busId in OneWireBus.EnumerateBusIdsInternal())
+            foreach (var busId in OneWireBus.EnumerateBusIdsInternal(OneWireBus.DefaultSysfsBusDevicesPath))
             {
-                foreach (var devId in OneWireBus.EnumerateDeviceIdsInternal(busId, family))
+                foreach (var devId in OneWireBus.EnumerateDeviceIdsInternal(OneWireBus.DefaultSysfsDevicesPath, busId, family))
                 {
                     yield return (busId, devId);
                 }
@@ -52,5 +67,10 @@ namespace Iot.Device.OneWire
         /// The device family id of this device.
         /// </summary>
         public DeviceFamily Family { get; }
+
+        /// <summary>
+        /// The sysfs path used for device access.
+        /// </summary>
+        internal string SysfsDevicesPath { get; }
     }
 }

@@ -78,3 +78,26 @@ All temperature devices with family id of 0x10, 0x28, 0x3B, or 0x42 supported.
 
 - [MAX31820](https://datasheets.maximintegrated.com/en/ds/MAX31820.pdf)
 - [DS18B20](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
+
+## Testing with custom sysfs paths
+
+The `OneWireBus`, `OneWireDevice`, and `OneWireThermometerDevice` classes accept custom sysfs paths via constructor overloads, enabling integration testing without physical hardware.
+
+```csharp
+// Create a fake sysfs directory structure for testing
+string testBusPath = "/path/to/test/bus/w1/devices";
+string testDevicesPath = "/path/to/test/devices";
+
+// Create bus with custom paths
+var bus = new OneWireBus("w1_bus_master1", testBusPath, testDevicesPath);
+
+// Enumerate devices from custom paths
+foreach (string devId in bus.EnumerateDeviceIds())
+{
+    Console.WriteLine(devId);
+}
+
+// Create thermometer device with custom path
+var thermometer = new OneWireThermometerDevice("w1_bus_master1", "28-00000abcdef", testDevicesPath);
+var temperature = thermometer.ReadTemperature();
+```
