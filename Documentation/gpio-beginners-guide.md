@@ -176,7 +176,7 @@ Thread.Sleep(Timeout.Infinite);
 - `PinEventTypes.Falling` — High → Low transition
 - `PinEventTypes.Rising | PinEventTypes.Falling` — both directions
 
-> **Note:** Physical buttons "bounce" — a single press can generate several rapid transitions. For reliable button handling, see the debouncing techniques described in [PR #2438's debouncing guide](https://github.com/dotnet/iot/pull/2438).
+> **Note:** Physical buttons "bounce" — a single press can generate several rapid transitions. If you experience duplicate button events, you need debouncing. A simple approach is to ignore events that arrive within a short time window (e.g., 50 ms) of the previous event.
 
 ## Complete Example: Button-Controlled LED
 
@@ -199,7 +199,8 @@ Console.WriteLine("Hold the button to light the LED. Ctrl+C to exit.");
 
 while (true)
 {
-    // Button pressed = Low (because of InputPullUp)
+    // Button pressed (Low) → turn LED on (High)
+    // Button released (High) → turn LED off (Low)
     PinValue buttonState = controller.Read(buttonPin);
     controller.Write(ledPin, buttonState == PinValue.Low ? PinValue.High : PinValue.Low);
     Thread.Sleep(50);
