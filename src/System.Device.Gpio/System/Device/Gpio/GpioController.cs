@@ -463,46 +463,43 @@ public class GpioController : IDisposable
 
             case RaspberryBoardInfo.Model.RaspberryPi5:
 
-                // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
-                // We need to create a new driver for the Raspberry Pi 5,
-                // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
-                // The RP1 chip reports 54 lines.
+                // Raspberry Pi 5 uses an entirely different GPIO controller (RP1) which reports 54 lines.
                 // Try V1 (libgpiod.so.2) first, then V2 (libgpiod.so.3) for compatibility
                 // with different Raspberry Pi OS versions.
-                GpioChipInfo? selectedChip = null;
-                bool useV2 = false;
-
-                try
+                if (GpioDriver.TryCreate(() => CreatePi5Driver(LibGpiodDriver.GetAvailableChips(), id => new LibGpiodDriver(id)), out GpioDriver? pi5Driver))
                 {
-                    selectedChip = LibGpiodDriver.GetAvailableChips().FirstOrDefault(x => x.NumLines == 54);
-                }
-                catch (Exception ex) when (ex is DllNotFoundException or PlatformNotSupportedException)
-                {
+                    return pi5Driver;
                 }
 
-                if (selectedChip is null)
+                if (GpioDriver.TryCreate(() => CreatePi5Driver(LibGpiodV2Driver.GetAvailableChips(), id => new LibGpiodV2Driver(id)), out pi5Driver))
                 {
-                    try
-                    {
-                        selectedChip = LibGpiodV2Driver.GetAvailableChips().FirstOrDefault(x => x.NumLines == 54);
-                        useV2 = true;
-                    }
-                    catch (Exception ex) when (ex is DllNotFoundException or PlatformNotSupportedException)
-                    {
-                    }
+                    return pi5Driver;
                 }
 
-                if (selectedChip is null)
-                {
-                    throw new NotSupportedException("Couldn't find the default GPIO chip. You might need to create the LibGpiodDriver explicitly");
-                }
-
-                return useV2 ? new LibGpiodV2Driver(selectedChip.Id) : new LibGpiodDriver(selectedChip.Id);
+                throw new NotSupportedException("Couldn't find the default GPIO chip. You might need to create the LibGpiodDriver explicitly");
 
             default:
 
                 return UnixDriver.Create();
         }
+    }
+
+    /// <summary>
+    /// Creates a libgpiod-based driver for the Raspberry Pi 5 RP1 chip (54 lines).
+    /// </summary>
+    /// <param name="chips">Available GPIO chips from a specific libgpiod version.</param>
+    /// <param name="driverFactory">Factory to create the driver for the selected chip.</param>
+    /// <returns>A GPIO driver for the RP1 chip.</returns>
+    /// <exception cref="PlatformNotSupportedException">The RP1 chip was not found.</exception>
+    private static GpioDriver CreatePi5Driver(IList<GpioChipInfo> chips, Func<int, GpioDriver> driverFactory)
+    {
+        var selectedChip = chips.FirstOrDefault(x => x.NumLines == 54);
+        if (selectedChip is null)
+        {
+            throw new PlatformNotSupportedException("Couldn't find the RP1 GPIO chip");
+        }
+
+        return driverFactory(selectedChip.Id);
     }
 
     /// <summary>
