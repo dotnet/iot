@@ -280,7 +280,7 @@ namespace Arduino.Samples
                         break;
                     case 10:
                         modeName = "CPU Load";
-                        values = sensors.GetSensor(SensorHandling.Gpu);
+                        values = sensors.GetSensor(SensorHandling.Cpu);
                         if (values.Load.HasValue)
                         {
                             modeData = values.Load.Value.ToString("s1", CultureInfo.CurrentCulture);
