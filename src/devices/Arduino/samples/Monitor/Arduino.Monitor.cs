@@ -55,6 +55,12 @@ namespace Arduino.Samples
 
             CommandLineOptions options = parsed.Value;
 
+            if (options.ListPorts)
+            {
+                Console.WriteLine("COM ports available:");
+                Console.WriteLine(string.Join(", ", SerialPort.GetPortNames()));
+            }
+
             using (var port = new SerialPort(options.PortName, options.BaudRate))
             {
                 Console.WriteLine($"Connecting to Arduino on {options.PortName}");
@@ -63,7 +69,7 @@ namespace Arduino.Samples
                     port.Open();
                     port.BaseStream.ReadTimeout = 60000;
                 }
-                catch (UnauthorizedAccessException x)
+                catch (Exception x) when (x is UnauthorizedAccessException || x is FileNotFoundException)
                 {
                     Console.WriteLine($"Could not open COM port: {x.Message} Possible reason: Arduino IDE connected or serial console open");
                     return;
@@ -104,12 +110,15 @@ namespace Arduino.Samples
             int mode = 0;
             var gpioController = board.CreateGpioController();
 
-            GpioButton button = new GpioButton(ButtonPin, false, true, gpioController, false, TimeSpan.FromMilliseconds(200));
+            GpioButton button = new GpioButton(ButtonPin, TimeSpan.FromDays(1), TimeSpan.FromSeconds(5),
+                false, true, gpioController, false, TimeSpan.FromMilliseconds(1000));
             CharacterDisplay disp = new CharacterDisplay(board);
             Console.WriteLine("Display output test");
             Console.WriteLine("The button on GPIO 2 changes modes");
             Console.WriteLine("Press x to exit");
             disp.Output.ScrollUpDelay = TimeSpan.FromMilliseconds(500);
+            disp.Output.ReplaceLine(0, "Initializing...");
+
             AutoResetEvent buttonClicked = new AutoResetEvent(false);
 
             void ChangeMode(object? sender, EventArgs pinValueChangedEventArgs)
@@ -121,6 +130,7 @@ namespace Arduino.Samples
                     mode = 1;
                 }
 
+                Console.WriteLine($"Mode changed to {mode}");
                 buttonClicked.Set();
             }
 
@@ -165,7 +175,7 @@ namespace Arduino.Samples
 
             OpenHardwareMonitor hardwareMonitor = new OpenHardwareMonitor();
             hardwareMonitor.EnableDerivedSensors();
-            TimeSpan sleeptime = TimeSpan.FromMilliseconds(500);
+            TimeSpan sleeptime = TimeSpan.FromMilliseconds(400);
             string modeName = string.Empty;
             string previousModeName = string.Empty;
             int firstCharInText = 0;

@@ -24,5 +24,8 @@ namespace Iot.Device.Arduino.Sample
 
         [Option("altitude", Default = 650, HelpText = "Specify the station altitude (geoidal height, meters)")]
         public float Altitude { get; set; } = 650;
+
+        [Option("listports", Default = false, HelpText = "Print out the list of known COM ports")]
+        public bool ListPorts { get; set; }
     }
 }
