@@ -136,51 +136,18 @@ namespace Arduino.Samples
 
             button.Press += ChangeMode;
 
-            Console.WriteLine("Scanning for I2C devices...");
-            var bus = board.CreateOrGetI2cBus(board.GetDefaultI2cBusNumber());
-            var scanned = bus.PerformBusScan(lowest: 0x71);
-
-            int assumedBmp280Address = Bmp280.DefaultI2cAddress;
-            if (scanned.Contains(Bmp280.DefaultI2cAddress))
-            {
-                assumedBmp280Address = Bmp280.DefaultI2cAddress;
-            }
-            else if (scanned.Contains(Bmp280.SecondaryI2cAddress))
-            {
-                assumedBmp280Address = Bmp280.SecondaryI2cAddress;
-            }
-
-            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, assumedBmp280Address));
-            Bmp280? bmp;
-            try
-            {
-                bmp = new Bmp280(device);
-                bmp.StandbyTime = StandbyTime.Ms250;
-                bmp.SetPowerMode(Bmx280PowerMode.Normal);
-                Console.WriteLine($"Found BMP280 at {assumedBmp280Address}");
-            }
-            catch (IOException)
-            {
-                bmp = null;
-                Console.WriteLine($"BMP280 not available at detected address {assumedBmp280Address}");
-            }
-
-            DhtSensor? dht = board.GetCommandHandler<DhtSensor>();
-            if (dht == null)
-            {
-                // Note that this is a software error, hardware support is not tested here.
-                Console.WriteLine("DHT Sensor module missing");
-                return;
-            }
-
-            OpenHardwareMonitor hardwareMonitor = new OpenHardwareMonitor();
-            hardwareMonitor.EnableDerivedSensors();
-            TimeSpan sleeptime = TimeSpan.FromMilliseconds(400);
             string modeName = string.Empty;
+            string modeData = string.Empty;
             string previousModeName = string.Empty;
             int firstCharInText = 0;
-            Temperature temp = Temperature.Zero;
-            Pressure pressure = Pressure.Zero;
+            TimeSpan sleeptime = TimeSpan.FromMilliseconds(400);
+
+            // While accessing the display, we should not try to do any other sensor operation,
+            // as it may cause the display to display garbage (probably because we handle some bits while
+            // the display select line is set)
+            Object displayLock = new object();
+            var sensors = new SensorHandling(board, displayLock);
+            SensorValues? values;
             while (true)
             {
                 if (Console.KeyAvailable && Console.ReadKey(true).KeyChar == 'x')
@@ -188,20 +155,17 @@ namespace Arduino.Samples
                     break;
                 }
 
-                // Default
-                sleeptime = TimeSpan.FromMilliseconds(500);
-
                 switch (mode)
                 {
                     case 0:
                         modeName = "Display ready";
-                        disp.Output.ReplaceLine(1, "Button for mode");
+                        modeData = "Button for mode";
                         // Just text
                         break;
                     case 1:
                     {
                         modeName = "Time";
-                        disp.Output.ReplaceLine(1, DateTime.Now.ToLongTimeString());
+                        modeData = DateTime.Now.ToLongTimeString();
                         sleeptime = TimeSpan.FromMilliseconds(200);
                         break;
                     }
@@ -209,136 +173,153 @@ namespace Arduino.Samples
                     case 2:
                     {
                         modeName = "Date";
-                        disp.Output.ReplaceLine(1, DateTime.Now.ToShortDateString());
+                        modeData = DateTime.Now.ToShortDateString();
                         break;
                     }
 
                     case 3:
                         modeName = "Temperature / Reduced Pressure V1";
-                        if (bmp != null && bmp.TryReadTemperature(out temp) && bmp.TryReadPressure(out pressure))
+                        values = sensors.GetSensor(SensorHandling.BmpSensor);
+                        if (values.Temperature.HasValue && values.Pressure.HasValue)
                         {
-                            Pressure p3 = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
-                            disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s1}", temp, p3));
+                            Pressure p3 = WeatherHelper.CalculateBarometricPressure(values.Pressure.Value, values.Temperature.Value, stationAltitude);
+                            modeData = string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s1}", values.Temperature.Value, p3);
                         }
                         else
                         {
-                            disp.Output.ReplaceLine(1, "N/A");
+                            modeData = "N/A";
                         }
 
                         break;
 
                     case 4:
                         modeName = "Raw Pressure";
-                        if (bmp != null && bmp.TryReadPressure(out pressure))
+                        values = sensors.GetSensor(SensorHandling.BmpSensor);
+                        if (values.Pressure.HasValue)
                         {
-                            pressure = pressure.ToUnit(PressureUnit.Hectopascal);
-                            disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1}", pressure));
+                            var pressure = values.Pressure.Value.ToUnit(PressureUnit.Hectopascal);
+                            modeData = $"{pressure.Hectopascals:F2} hPa";
                         }
                         else
                         {
-                            disp.Output.ReplaceLine(1, "N/A");
+                            modeData = "N/A";
                         }
 
                         break;
 
                     case 5:
                         modeName = "Reduced Pressure V2";
-                        if (bmp != null && bmp.TryReadTemperature(out temp) && bmp.TryReadPressure(out pressure))
+                        values = sensors.GetSensor(SensorHandling.BmpSensor);
+                        if (values.Temperature.HasValue && values.Pressure.HasValue)
                         {
-                            Pressure p3 = WeatherHelper.CalculateSeaLevelPressure(pressure, stationAltitude, temp);
+                            Pressure p3 = WeatherHelper.CalculateSeaLevelPressure(values.Pressure.Value, stationAltitude, values.Temperature.Value);
                             p3 = p3.ToUnit(PressureUnit.Hectopascal);
-                            disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1}", p3));
+                            modeData = string.Format(CultureInfo.CurrentCulture, "{0:s1}", p3);
                         }
                         else
                         {
-                            disp.Output.ReplaceLine(1, "N/A");
+                            modeData = "N/A";
                         }
 
                         break;
 
                     case 6:
                         modeName = "Temperature / Humidity";
-                        if (dht.TryReadDht(3, 11, out temp, out var humidity))
+                        values = sensors.GetSensor(SensorHandling.DhtSensor);
+                        if (values.Temperature.HasValue && values.Humidity.HasValue)
                         {
-                            disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s0}", temp, humidity));
+                            modeData = string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s0}", values.Temperature.Value,
+                                values.Humidity.Value);
                         }
                         else
                         {
-                            disp.Output.ReplaceLine(1, "N/A");
+                            modeData = "N/A";
                         }
 
                         break;
 
                     case 7:
                         modeName = "Dew point";
-                        if (dht.TryReadDht(3, 11, out temp, out humidity))
+                        values = sensors.GetSensor(SensorHandling.DhtSensor);
+                        if (values.Temperature.HasValue && values.Humidity.HasValue)
                         {
-                            Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
-                            disp.Output.ReplaceLine(1, dewPoint.ToString("s1", CultureInfo.CurrentCulture));
+                            Temperature dewPoint = WeatherHelper.CalculateDewPoint(values.Temperature.Value, values.Humidity.Value);
+                            modeData = dewPoint.ToString("s1", CultureInfo.CurrentCulture);
                         }
                         else
                         {
-                            disp.Output.ReplaceLine(1, "N/A");
+                            modeData = "N/A";
                         }
 
                         break;
                     case 8:
                         modeName = "CPU Temperature";
-                        if (hardwareMonitor.TryGetAverageCpuTemperature(out temp))
+                        values = sensors.GetSensor(SensorHandling.Cpu);
+                        if (values.Temperature.HasValue)
                         {
-                            disp.Output.ReplaceLine(1, temp.ToString("s1", CultureInfo.CurrentCulture));
+                            modeData = values.Temperature.Value.ToString("s1", CultureInfo.CurrentCulture);
                         }
                         else
                         {
-                            disp.Output.ReplaceLine(1, "N/A");
+                            modeData = "N/A";
                         }
 
                         break;
                     case 9:
                         modeName = "GPU Temperature";
-                        if (hardwareMonitor.TryGetAverageGpuTemperature(out temp))
+                        values = sensors.GetSensor(SensorHandling.Gpu);
+                        if (values.Temperature.HasValue)
                         {
-                            disp.Output.ReplaceLine(1, temp.ToString("s1", CultureInfo.CurrentCulture));
+                            modeData = values.Temperature.Value.ToString("s1", CultureInfo.CurrentCulture);
                         }
                         else
                         {
-                            disp.Output.ReplaceLine(1, "N/A");
+                            modeData = "N/A";
                         }
 
                         break;
                     case 10:
                         modeName = "CPU Load";
-                        disp.Output.ReplaceLine(1, hardwareMonitor.GetCpuLoad().ToString("s1", CultureInfo.CurrentCulture));
+                        values = sensors.GetSensor(SensorHandling.Gpu);
+                        if (values.Load.HasValue)
+                        {
+                            modeData = values.Load.Value.ToString("s1", CultureInfo.CurrentCulture);
+                        }
+                        else
+                        {
+                            modeData = "N/A";
+                        }
+
                         break;
 
                     case 11:
                         modeName = "Total power dissipation";
-                        var powerSources = hardwareMonitor.GetSensorList().Where(x => x.SensorType == SensorType.Power);
-                        Power totalPower = Power.Zero;
-                        foreach (var power in powerSources)
+                        values = sensors.GetSensor(SensorHandling.Cpu);
+
+                        if (values.Power.HasValue)
                         {
-                            if (power.Name != "CPU Cores" && power.TryGetValue(out Power powerConsumption)) // included in CPU Package
-                            {
-                                totalPower = totalPower + powerConsumption;
-                            }
+                            modeData = values.Power.Value.ToString("s1", CultureInfo.CurrentCulture);
+                        }
+                        else
+                        {
+                            modeData = "N/A";
                         }
 
-                        disp.Output.ReplaceLine(1, totalPower.ToString("s1", CultureInfo.CurrentCulture));
                         break;
 
                     case 12:
                         modeName = "Energy consumed";
-                        var energySources = hardwareMonitor.GetSensorList().Where(x => x.SensorType == SensorType.Energy);
-                        Energy totalEnergy = Energy.FromWattHours(0); // Set up the desired output unit
-                        foreach (var e in energySources)
+                        values = sensors.GetSensor(SensorHandling.Cpu);
+
+                        if (values.Energy.HasValue)
                         {
-                            if (!e.Name.StartsWith("CPU Cores") && e.TryGetValue(out Energy powerConsumption)) // included in CPU Package
-                            {
-                                totalEnergy = totalEnergy + powerConsumption;
-                            }
+                            modeData = values.Energy.Value.ToString("s1", CultureInfo.CurrentCulture);
+                        }
+                        else
+                        {
+                            modeData = "N/A";
                         }
 
-                        disp.Output.ReplaceLine(1, totalEnergy.ToString("s1", CultureInfo.CurrentCulture));
                         break;
                 }
 
@@ -355,25 +336,35 @@ namespace Arduino.Samples
                         firstCharInText = 0;
                     }
 
-                    disp.Output.ReplaceLine(0, modeName.Substring(firstCharInText));
+                    lock (displayLock)
+                    {
+                        disp.Output.ReplaceLine(0, modeName.Substring(firstCharInText));
+                    }
                 }
 
                 if (modeName != previousModeName)
                 {
-                    disp.Output.ReplaceLine(0, modeName);
+                    lock (displayLock)
+                    {
+                        disp.Output.ReplaceLine(0, modeName);
+                    }
 
                     previousModeName = modeName;
                     firstCharInText = 0;
                 }
 
+                lock (displayLock)
+                {
+                    disp.Output.ReplaceLine(1, modeData);
+                }
+
                 buttonClicked.WaitOne(sleeptime);
             }
 
-            hardwareMonitor.Dispose();
+            sensors.Dispose();
             button.Dispose();
             disp.Output.Clear();
             disp.Dispose();
-            bmp?.Dispose();
             gpioController.Dispose();
         }
     }
