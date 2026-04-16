@@ -2,6 +2,22 @@
 
 General-Purpose Input/Output (GPIO) pins are programmable pins on your single-board computer that can be used to interface with external devices. This guide covers how to get started with GPIO in .NET IoT, including a quick-start example, the `GpioController` API, driver selection, and troubleshooting.
 
+## Contents
+
+- [What You Need](#what-you-need)
+- [Quick Start: Blink an LED](#quick-start-blink-an-led)
+- [Pin Numbering](#pin-numbering)
+- [Digital Input](#digital-input)
+- [Pin Modes](#pin-modes)
+- [Reading and Writing](#reading-and-writing)
+- [Interrupt-Driven Input (Events)](#interrupt-driven-input-events)
+- [Complete Example: Button-Controlled LED](#complete-example-button-controlled-led)
+- [GpioController and Drivers](#gpiocontroller-and-drivers)
+- [Troubleshooting](#troubleshooting)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
+- [External Resources](#external-resources)
+
 ## What You Need
 
 - A **Linux single-board computer with GPIO headers** and libgpiod installed (for example, a Raspberry Pi 3, 4, or 5 running Raspberry Pi OS)
@@ -202,8 +218,8 @@ using GpioController controller = new();
 | --- | --- |
 | `LibGpiodDriver` | Modern Linux with libgpiod v1 — the recommended default |
 | `LibGpiodV2Driver` | Modern Linux with libgpiod v2 |
-| `RaspberryPi3Driver` | Raspberry Pi 3/4 — auto-selected, legacy direct memory access |
-| `SysFsDriver` | Very old Linux kernels (pre-4.8) only — **deprecated** |
+| `RaspberryPi3Driver` | Raspberry Pi 3/4 — very fast (direct memory access) but requires root permissions; not recommended unless you specifically need the performance |
+| `SysFsDriver` | Very slow but works on any Linux version — **deprecated** |
 
 ### Auto-Detection
 
@@ -237,23 +253,6 @@ sudo apt install libgpiod2
 ```
 
 For more detail on libgpiod versions and building from source, see [Using libgpiod to control GPIOs](../gpio-linux-libgpiod.md).
-
-## Raspberry Pi 5 Note
-
-Raspberry Pi 5 moved its GPIO to a different chip number. If you are explicitly constructing a driver, use chip **4** instead of 0:
-
-```csharp
-// Raspberry Pi 5 only
-using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
-```
-
-The parameterless `new GpioController()` constructor handles this automatically on Pi 5, so you only need to worry about this when creating a driver manually.
-
-To find the correct chip number on any board:
-
-```bash
-gpioinfo
-```
 
 ## Troubleshooting
 
@@ -296,6 +295,30 @@ System.InvalidOperationException: Pin 18 is already in use
 ### GPIO Operations Have No Effect / Wrong Pin
 
 Make sure you are using **BCM/GPIO numbers**, not physical pin numbers. GPIO 18 is physical pin 12 — they are different numbers for the same pin. Consult [pinout.xyz](https://pinout.xyz/).
+
+### Wrong GPIO Chip on Raspberry Pi 5
+
+Older Raspberry Pi 5 kernel versions exposed user GPIO on chip **4** instead of the standard chip **0**. If GPIO operations have no effect on a Pi 5, first try updating your kernel:
+
+```bash
+sudo apt update && sudo apt upgrade
+sudo reboot
+```
+
+If updating is not an option, you can detect the correct chip by looking at the number of lines (pins) on each chip — the user GPIO chip typically has around 54 lines:
+
+```bash
+for chip in /dev/gpiochip*; do
+  echo "$chip: $(gpioinfo "$chip" | wc -l) lines"
+done
+```
+
+Then pass that chip number when constructing the driver:
+
+```csharp
+// Use the chip number from the detection script above
+using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));
+```
 
 ## Best Practices
 
