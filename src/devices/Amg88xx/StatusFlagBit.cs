@@ -11,17 +11,17 @@ namespace Iot.Device.Amg88xx
     internal enum StatusFlagBit : byte
     {
         /// <summary>
-        /// Interrupt occured
+        /// Interrupt occurred
         /// </summary>
         INTF = 1,
 
         /// <summary>
-        /// Temperature output overflow occured for one or more pixel
+        /// Temperature output overflow occurred for one or more pixel
         /// </summary>
         OVF_IRS = 2,
 
         /// <summary>
-        /// Thermistor output overflow occured
+        /// Thermistor output overflow occurred
         /// Note: the bit is only menthioned in early versions of the reference specification.
         /// It is not clear whether this is a specification error or a change in a newer
         /// revision of the sensor.
