@@ -218,8 +218,8 @@ using GpioController controller = new();
 | --- | --- |
 | `LibGpiodDriver` | Modern Linux with libgpiod v1 — the recommended default |
 | `LibGpiodV2Driver` | Modern Linux with libgpiod v2 |
-| `RaspberryPi3Driver` | Raspberry Pi 3/4 — very fast (direct memory access) but requires root permissions; not recommended unless you specifically need the performance |
-| `SysFsDriver` | Very slow but works on any Linux version — **deprecated** |
+| `RaspberryPi3Driver` | Raspberry Pi 3/4 — very fast (direct memory access) but requires root permissions; auto-selected on Pi 3/4 but consider using `LibGpiodDriver` when root access is not available |
+| `SysFsDriver` | Works on any Linux version but very slow — **deprecated** in favor of libgpiod-based drivers |
 
 ### Auto-Detection
 
