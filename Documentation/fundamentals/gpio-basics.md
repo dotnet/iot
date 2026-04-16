@@ -55,7 +55,7 @@ LEDs require a current-limiting resistor to prevent damage:
 GPIO Pin ──► LED (Anode/+) ──► LED (Cathode/−) ──► Resistor (220 Ω) ──► Ground
 ```
 
-> **Why a resistor?** LEDs need very little current. Without a resistor, the LED draws too much current and can burn out or damage your Pi. A 220 Ω resistor limits the current to a safe level (~6 mA).
+> **Why a resistor?** LEDs need very little current. Without a resistor, the LED draws too much current and can burn out or damage your board. With a 220 Ω resistor on a 3.3 V output, the current is at most 3.3 V / 220 Ω ≈ 15 mA (less in practice due to the LED's own voltage drop). This is safe for a standard 20 mA indicator LED but **not** for high-brightness or power LEDs — those draw much more current and should be driven through a transistor or MOSFET instead.
 
 ## Digital Input
 
@@ -184,7 +184,7 @@ Not all GPIO pins are suitable for general use:
 1. **Always dispose of GpioController** — Use `using` statements or call `.Dispose()`
 2. **Use `InputPullUp` or `InputPullDown`** — Never leave input pins floating
 3. **Respect voltage levels** — Raspberry Pi GPIO operates at 3.3 V; connecting 5 V **will damage the pin**
-4. **Use resistors with LEDs** — Calculate the value or use 220 Ω as a safe default
+4. **Use resistors with LEDs** — A 220 Ω resistor on a 3.3 V GPIO pin results in roughly 15 mA, which is fine for a standard 20 mA indicator LED. High-brightness and power LEDs draw much more current and should **not** be connected to a GPIO pin directly — use a transistor or MOSFET instead
 5. **Check pin assignments** — Some GPIO pins are shared with I2C, SPI, or UART; using them for general GPIO disables those interfaces
 6. **Document your pin usage** — Especially in projects using multiple pins
 

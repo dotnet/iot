@@ -4,7 +4,7 @@ General-Purpose Input/Output (GPIO) pins are programmable pins on your single-bo
 
 ## What You Need
 
-- A **Raspberry Pi** (3, 4, or 5) running Raspberry Pi OS
+- A **Linux single-board computer with GPIO headers** and libgpiod installed (for example, a Raspberry Pi 3, 4, or 5 running Raspberry Pi OS)
 - **.NET 8.0 SDK** or later installed ([installation guide](https://learn.microsoft.com/dotnet/core/install/linux-debian))
 - A **breadboard**, a few **jumper wires**, an **LED**, and a **220 Ω resistor**
 
@@ -29,7 +29,7 @@ using System;
 using System.Device.Gpio;
 using System.Threading;
 
-const int ledPin = 18; // GPIO 18 = physical pin 12 on Raspberry Pi
+const int ledPin = 18; // GPIO 18 = physical pin 12 on Raspberry Pi (see https://pinout.xyz/)
 
 using GpioController controller = new();
 
@@ -74,6 +74,35 @@ You should see the LED blink once per second.
 
 For a complete mapping, see [pinout.xyz](https://pinout.xyz/).
 
+## Digital Input
+
+Digital input is the counterpart to digital output: instead of driving a pin HIGH or LOW, you **read** the voltage present on a pin. This lets you detect external signals — most commonly a button press.
+
+To read a pin, open it in an input mode and call `Read`:
+
+```csharp
+controller.OpenPin(17, PinMode.InputPullUp);
+
+PinValue value = controller.Read(17);
+if (value == PinValue.Low)
+{
+    Console.WriteLine("Button pressed");
+}
+```
+
+A typical button circuit connects the GPIO pin to Ground through the button. When the button is pressed the pin sees LOW; when released the internal pull-up resistor pulls it back to HIGH.
+
+```text
+GPIO 17 ──► one leg of button
+GND     ──► other leg of button
+```
+
+### Why InputPullUp?
+
+When a button is **not** pressed, the pin is not connected to anything. In plain `Input` mode, this leaves the pin "floating" — its voltage drifts randomly, giving unreliable readings. `InputPullUp` activates an internal resistor that holds the pin at HIGH by default, so the only way it goes LOW is when the button physically connects it to Ground. `InputPullDown` works the opposite way (default LOW, button connects to 3.3 V).
+
+See [GPIO Basics](../fundamentals/gpio-basics.md) for a detailed explanation of pull-up and pull-down resistors.
+
 ## Pin Modes
 
 GPIO pins can be configured in different modes:
@@ -88,8 +117,6 @@ controller.OpenPin(17, PinMode.InputPullUp);
 // Input with pull-down resistor (default LOW, button press = HIGH)
 controller.OpenPin(17, PinMode.InputPullDown);
 ```
-
-**Best practice:** Always use `InputPullUp` or `InputPullDown` for input pins. Plain `Input` mode leaves the pin "floating" (undefined voltage), causing unreliable readings. See [GPIO Basics](../fundamentals/gpio-basics.md) for a detailed explanation of pull-up and pull-down resistors.
 
 ## Reading and Writing
 
