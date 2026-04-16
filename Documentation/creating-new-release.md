@@ -8,29 +8,28 @@ This is a list of steps which need to happen in order to release new version of 
 
 - Step 1: Ensure all PRs meant for this release are merged.
   - While the process is ongoing, make sure no new PRs get merged in order to ensure that the official build doesn't get reset.
-- Step 2: Regenerate device listing:
+- Step 2: Regenerate device listing - this can be done with copilot:
   - `dotnet run` on <https://github.com/dotnet/iot/tree/main/tools/device-listing>
   - Fix all warnings, re-run if needed to ensure no warnings.
   - Always manually review the changes paying attention the generated document looks clear.
   - Adjust categories/code of the generator if necessary.
 - Step 3: Create new package:
   - Go to <https://dev.azure.com/dotnet/IoT/_build?definitionId=179>
-  - Select "Run Pipeline", select row which says `variables` and add new one: `DotNetFinalVersionKind=release` (no quotes anywhere).
+  - Select "Run Pipeline", select row which says `variables` change `DotNetFinalVersionKind` and set value to `release` (no quotes anywhere).
   - Run and wait for it to finish.
   - Once it is done and passes go to the artifacts section of the build, and find an artifact called 'Built packages' and from there download the two stable packages.
   - Validate the package: double check version, check there are no unintentional changes.
 - Step 4: Manually push package to Nuget - people who had access to push in the past: @joperezr @rbhanda
 - Step 5: Add git tag:
-  - Use `git tag -a <version> <commit_hash>` to locally create a tag.
-  - Use `git push origin <version>` to push it (`<version>` is i.e. `1.3`).
-- Step 6: Edit release notes on github:
-  - Follow example: <https://github.com/dotnet/iot/releases/tag/1.2>
-  - Copy the list of commits, clean those related to dependencies update.
-    - Use i.e.: <https://github.com/dotnet/iot/compare/1.1...1.2> to see list of commits.
-  - Categorize them by: `System.Gpio`, `Iot.Device.Bindings`, `Other` changes.
-  - Rephrase/group them for consistency.
-  - Add the list of contributors ordered by the number of commits or alphabetically. Command: `git shortlog -s 1.4..1.5` is very helpful but doesn't give github user names
-- Step 7: After package is pushed to Nuget create a PR similar to <https://github.com/dotnet/iot/pull/1310> to prepare for next release.
+  - Use `git tag -a <version> <commit_hash>` to locally create a tag, if on latest locally you can also use `HEAD` instead of commit hash but do ensure you've synced your changes.
+  - Use `git push origin <version>` to push it (`<version>` is i.e. `v4.1.0`).
+- Step 6: Create and generate release notes on github from tag: <https://github.com/dotnet/iot/releases/new>
+- Step 7: After package is pushed to Nuget create a PR similar to <https://github.com/dotnet/iot/pull/2464> to prepare for next release. You can adjust following copilot prompt to generate it:
+
+```text
+Prepare PR similar to https://github.com/dotnet/iot/pull/2464 for next version: 4.3.0
+```
+
 - Step 8: Update dependencies on old version of the package:
   - Option 1: Wait for `dependabot` to automatically create dependencies update PR (similar to: [System.Device.Gpio](https://github.com/dotnet/iot/pulls?q=is%3Apr+Bump+System.Device.Gpio+is%3Aclosed+author%3Aapp%2Fdependabot); [Iot.Device.Bindings](https://github.com/dotnet/iot/pulls?q=is%3Apr+Bump+Iot.Device.Bindings+is%3Aclosed+author%3Aapp%2Fdependabot))
   - Options 2: Alternatively update versions manually to avoid swarm of PRs.
