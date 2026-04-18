@@ -112,15 +112,33 @@ namespace Iot.Device.Gpio.Drivers
         /// Additional PMU IOC IOMUX register offsets for GPIO0.
         /// GPIO0 pins require writes to both BUS_IOC and the corresponding PMU IOC domain.
         /// Indexed as [port, 0=LOW / 1=HIGH].
-        /// GPIO0_B HIGH is split: B4 in PMU1_IOC, B5–B7 in PMU2_IOC (handled as PMU2).
+        /// GPIO0_B HIGH is split: B4 uses PMU1_IOC, while B5–B7 use PMU2_IOC.
         /// </summary>
         private static readonly int[,] _gpio0PmuIomux = new int[,]
         {
             { PMU1_IOC + 0x0000, PMU1_IOC + 0x0004 },  // GPIO0_A: LOW, HIGH
-            { PMU1_IOC + 0x0008, PMU2_IOC + 0x0000 },  // GPIO0_B: LOW (B0–B3), HIGH (B4–B7)
+            { PMU1_IOC + 0x0008, PMU1_IOC + 0x000C },  // GPIO0_B: LOW (B0–B3), HIGH default (B4)
             { PMU2_IOC + 0x0004, PMU2_IOC + 0x0008 },  // GPIO0_C: LOW, HIGH
             { PMU2_IOC + 0x000C, PMU2_IOC + 0x0010 },  // GPIO0_D: LOW, HIGH
         };
+
+        private static int GetGpio0PmuIomuxOffset(int port, int pin)
+        {
+            if (port == 1)
+            {
+                if (pin == 4)
+                {
+                    return PMU1_IOC + 0x000C;
+                }
+
+                if (pin >= 5 && pin <= 7)
+                {
+                    return PMU2_IOC + 0x0000;
+                }
+            }
+
+            return _gpio0PmuIomux[port, pin < 4 ? 0 : 1];
+        }
 
         private IntPtr _iocPointer = IntPtr.Zero;
         private IntPtr _cruPointer = IntPtr.Zero;
