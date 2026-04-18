@@ -95,3 +95,63 @@ PinValue value = gpio.Read(pinNumber);
 ## References
 
 Rockchip open source documents: <http://opensource.rock-chips.com/wiki_Main_Page>
+
+## Supported SoCs and Boards
+
+### SoC Drivers
+
+| SoC | Driver |
+| :-: | :-: |
+| RK3328 | [Rk3328Driver](Rk3328Driver.cs) |
+| RK3399 | [Rk3399Driver](Rk3399Driver.cs) |
+| RK3588 / RK3588S | [Rk3588Driver](Rk3588Driver.cs) |
+
+### Board Drivers (RK3588 / RK3588S)
+
+| Board | SoC | Header Pins | Driver |
+| :-: | :-: | :-: | :-: |
+| Orange Pi 5 | RK3588S | 26-pin | [OrangePi5Driver](../OrangePi5Driver.cs) |
+| Orange Pi 5B | RK3588S | 26-pin | [OrangePi5BDriver](../OrangePi5BDriver.cs) |
+| Orange Pi 5 Plus | RK3588 | 40-pin | [OrangePi5PlusDriver](../OrangePi5PlusDriver.cs) |
+| Orange Pi 5 Pro | RK3588S | 40-pin | [OrangePi5ProDriver](../OrangePi5ProDriver.cs) |
+| Orange Pi 5 Max | RK3588 | 40-pin | [OrangePi5MaxDriver](../OrangePi5MaxDriver.cs) |
+| Orange Pi 5 Ultra | RK3588S | 40-pin | [OrangePi5UltraDriver](../OrangePi5UltraDriver.cs) |
+
+### Usage (Orange Pi 5 Pro)
+
+```csharp
+using System;
+using System.Device.Gpio;
+using Iot.Device.Gpio.Drivers;
+
+// Option 1: Map from physical header pin number (e.g. pin 19 on the 40-pin header)
+int pin = OrangePi5ProDriver.MapPhysicalPinNumber(19);  // -> logical 42
+
+// Option 2: Map from GPIO name (e.g. GPIO1_B2 -> bank 1, port B, pin 2)
+int pin2 = RockchipDriver.MapPinNumber(gpioNumber: 1, port: 'B', portNumber: 2);  // -> logical 42
+
+using GpioController controller = new GpioController(new OrangePi5ProDriver());
+
+// Output example
+controller.OpenPin(pin, PinMode.Output);
+controller.Write(pin, PinValue.High);
+
+// Input example with pull-up (reads High when idle, Low when shorted to GND)
+controller.OpenPin(pin, PinMode.InputPullUp);
+PinValue value = controller.Read(pin);
+```
+
+### Pin Number Mapping
+
+The RK3588 uses a naming convention of `GPIO{bank}_{port}{pin}` (e.g. `GPIO1_B2`). To convert to the logical pin number used by the driver:
+
+`logical = 32 * bank + 8 * port + pin`
+
+Where port A=0, B=1, C=2, D=3. For example, `GPIO1_B2` = 32×1 + 8×1 + 2 = **42**.
+
+You can use either helper:
+
+| Method | Example | Description |
+| :-- | :-- | :-- |
+| `RockchipDriver.MapPinNumber(1, 'B', 2)` | → 42 | From GPIO name (works with any Rockchip SoC) |
+| `OrangePi5ProDriver.MapPhysicalPinNumber(19)` | → 42 | From physical header pin (board-specific) |

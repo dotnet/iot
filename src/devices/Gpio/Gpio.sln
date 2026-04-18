@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gpio.Tests", "tests\Gpio.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board", "..\Board\Board.csproj", "{BB45F1F6-25AB-43E4-945E-F2B9673EA684}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iot.Device.Gpio.Samples.OrangePi5", "samples\orangepi5\Iot.Device.Gpio.Samples.OrangePi5.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,12 +103,25 @@ Global
 		{BB45F1F6-25AB-43E4-945E-F2B9673EA684}.Release|x64.Build.0 = Release|Any CPU
 		{BB45F1F6-25AB-43E4-945E-F2B9673EA684}.Release|x86.ActiveCfg = Release|Any CPU
 		{BB45F1F6-25AB-43E4-945E-F2B9673EA684}.Release|x86.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x64.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|x86.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x64.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x64.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x86.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{455A62CA-C3D1-40AA-BD70-985E14129A92} = {45EC0518-E2FF-4278-ABDB-E0A2D79E71BE}
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890} = {45EC0518-E2FF-4278-ABDB-E0A2D79E71BE}
 		{02FB3A2F-CA90-4ACA-8A83-F270E13BD07C} = {9CF7DED7-33FE-4177-95CC-626CA3E2B5B2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

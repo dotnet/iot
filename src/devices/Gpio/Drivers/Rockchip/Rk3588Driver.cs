@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -257,11 +257,9 @@ namespace Iot.Device.Gpio.Drivers
                 iomuxBitOffset = (unmapped.PortNumber - 4) * 4;
             }
 
-            uint iomuxValue = *iomuxPointer;
-            // write-enable for 4 mux bits
-            iomuxValue |= 0b1111U << (iomuxBitOffset + 16);
-            // clear mux to 0 (GPIO mode)
-            iomuxValue &= ~(0b1111U << iomuxBitOffset);
+            // Write-enable for 4 mux bits, data = 0 (GPIO mode).
+            // These registers use write-enable in [31:16]; do NOT read before write.
+            uint iomuxValue = 0b1111U << (iomuxBitOffset + 16);
 
             // --- For GPIO0, also write to PMU IOC IOMUX register ---
             uint* pmuIomuxPointer = null;
@@ -274,28 +272,24 @@ namespace Iot.Device.Gpio.Drivers
                     : _gpio0PmuIomux[unmapped.Port, 1];
 
                 pmuIomuxPointer = (uint*)(_iocPointer + pmuIomuxOffset);
-                pmuIomuxValue = *pmuIomuxPointer;
-                pmuIomuxValue |= 0b1111U << (iomuxBitOffset + 16);
-                pmuIomuxValue &= ~(0b1111U << iomuxBitOffset);
+                // Write-enable for 4 mux bits, data = 0 (GPIO mode)
+                pmuIomuxValue = 0b1111U << (iomuxBitOffset + 16);
             }
 
             // --- Set pull-up / pull-down ---
             GetPullRegisterAndBit(unmapped.GpioNumber, unmapped.Port, unmapped.PortNumber, out int pullOffset, out int pullBitOffset);
 
             uint* pullPointer = (uint*)(_iocPointer + pullOffset);
-            uint pullValue = *pullPointer;
-            // write-enable for 2 pull bits
-            pullValue |= 0b11U << (pullBitOffset + 16);
-            // clear pull bits first
-            pullValue &= ~(0b11U << pullBitOffset);
-            // RK3588 pull encoding (PULL_TYPE_IO_1V8_ONLY): pull-up = 0b01; pull-down = 0b10; none = 0b00
+            // Write-enable for 2 pull bits; do NOT read before write.
+            // RK3588 pull encoding (PULL_TYPE_IO_1V8_ONLY): none = 0b00; pull-down = 0b01; pull-up = 0b11
+            uint pullValue = 0b11U << (pullBitOffset + 16);
             switch (mode)
             {
                 case PinMode.InputPullUp:
-                    pullValue |= 0b01U << pullBitOffset;
+                    pullValue |= 0b11U << pullBitOffset;
                     break;
                 case PinMode.InputPullDown:
-                    pullValue |= 0b10U << pullBitOffset;
+                    pullValue |= 0b01U << pullBitOffset;
                     break;
                 default:
                     break;
@@ -394,37 +388,34 @@ namespace Iot.Device.Gpio.Drivers
 
         private void EnableGpio(bool enable)
         {
-            uint* pmuCruGatePointer, cruGatePointer;
-            uint pmuCruValue, cruValue;
-
-            // PMU CRU CLKGATE_CON5 offset is 0x0814 (GPIO0 pclk and dbclk)
-            // Bit 0: PCLK_GPIO0, Bit 1: DBCLK_GPIO0
-            pmuCruGatePointer = (uint*)(_pmuCruPointer + 0x0814);
-            pmuCruValue = *pmuCruGatePointer;
-
-            // CRU CLKGATE_CON9 offset is 0x0824 (GPIO1–GPIO4 pclk and dbclk)
-            // Bits 0–3: PCLK_GPIO1–4, Bits 4–7: DBCLK_GPIO1–4
-            cruGatePointer = (uint*)(_cruPointer + 0x0824);
-            cruValue = *cruGatePointer;
-
-            // software write enable
-            pmuCruValue |= 0b11U << 16;
-            cruValue |= 0xFFU << 16;
-
+            // CRU gate registers use write-enable in [31:16]; do NOT read before write.
+            // When gate bit is HIGH, clock is gated (disabled); LOW = enabled.
+            //
+            // Register and bit assignments from Linux kernel clk-rk3588.c:
+            //   GPIO0: PMU_CLKGATE_CON(5) offset 0x0814, bit 5 = PCLK_GPIO0, bit 6 = DBCLK_GPIO0
+            //   GPIO1: CRU CLKGATE_CON(16) offset 0x0840, bit 14 = PCLK_GPIO1, bit 15 = DBCLK_GPIO1
+            //   GPIO2: CRU CLKGATE_CON(17) offset 0x0844, bit 0/1 = PCLK/DBCLK_GPIO2
+            //   GPIO3: CRU CLKGATE_CON(17) offset 0x0844, bit 2/3 = PCLK/DBCLK_GPIO3
+            //   GPIO4: CRU CLKGATE_CON(17) offset 0x0844, bit 4/5 = PCLK/DBCLK_GPIO4
             if (enable)
             {
-                // when HIGH, clock is gated (disabled); clear to enable
-                pmuCruValue &= ~0b11U;
-                cruValue &= ~0xFFU;
-            }
-            else
-            {
-                pmuCruValue |= 0b11U;
-                cruValue |= 0xFFU;
+                // GPIO0: PMU CRU CLKGATE_CON(5), write-enable bits 5-6, data = 0 (enable)
+                uint* pmuCruGate5 = (uint*)(_pmuCruPointer + 0x0814);
+                *pmuCruGate5 = 0b11U << (5 + 16);
+
+                // GPIO1: CRU CLKGATE_CON(16), write-enable bits 14-15, data = 0 (enable)
+                uint* cruGate16 = (uint*)(_cruPointer + 0x0840);
+                *cruGate16 = 0b11U << (14 + 16);
+
+                // GPIO2–4: CRU CLKGATE_CON(17), write-enable bits 0-5, data = 0 (enable)
+                uint* cruGate17 = (uint*)(_cruPointer + 0x0844);
+                *cruGate17 = 0b111111U << 16;
             }
 
-            *pmuCruGatePointer = pmuCruValue;
-            *cruGatePointer = cruValue;
+            // Do NOT gate GPIO clocks on disable/dispose.
+            // Other kernel drivers may depend on these clocks, and
+            // PMU_CLKGATE_CON(5) shares bits with critical system clocks (PCLK_PMU0_ROOT).
+            // The kernel's clock framework will manage gating as needed.
         }
 
         private void Initialize()
