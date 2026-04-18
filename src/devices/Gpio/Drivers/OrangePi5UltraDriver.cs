@@ -52,7 +52,7 @@ namespace Iot.Device.Gpio.Drivers
         /// <exception cref="ArgumentException">The pin is not a GPIO pin (power, ground, etc.).</exception>
         public static int MapPhysicalPinNumber(int physicalPin)
         {
-            if (physicalPin < 0 || physicalPin >= _physicalToGpio.Length)
+            if (physicalPin <= 0 || physicalPin >= _physicalToGpio.Length)
             {
                 throw new ArgumentException($"Physical pin {physicalPin} is out of range (1-40).", nameof(physicalPin));
             }
