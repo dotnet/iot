@@ -450,42 +450,76 @@ namespace Iot.Device.Gpio.Drivers
                     return;
                 }
 
-                int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
-                if (fileDescriptor == -1)
+                int fileDescriptor = -1;
+                int mapLength = Environment.SystemPageSize * 16;
+                IntPtr iocMap = IntPtr.Zero;
+                IntPtr cruMap = IntPtr.Zero;
+                IntPtr pmuCruMap = IntPtr.Zero;
+                IntPtr mapFailed = new IntPtr(-1);
+                bool success = false;
+
+                try
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                    fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
+                    if (fileDescriptor == -1)
+                    {
+                        throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                    }
+
+                    // IOC register region: covers all IOC domains (PMU1 through EMMC, ~56 KB)
+                    iocMap = Interop.mmap(IntPtr.Zero, mapLength, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)(IoControllerBase & ~_mapMask));
+                    if (iocMap == mapFailed)
+                    {
+                        int error = Marshal.GetLastWin32Error();
+                        throw new IOException($"Error {error} initializing the Gpio driver (IOC initialize error).");
+                    }
+
+                    // CRU register region: clock gating for GPIO1–GPIO4 (CLKGATE_CON9 at offset 0x0824)
+                    cruMap = Interop.mmap(IntPtr.Zero, mapLength, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)(ClockResetUnit & ~_mapMask));
+                    if (cruMap == mapFailed)
+                    {
+                        int error = Marshal.GetLastWin32Error();
+                        throw new IOException($"Error {error} initializing the Gpio driver (CRU initialize error).");
+                    }
+
+                    // PMU CRU register region: clock gating for GPIO0 (PMU_CLKGATE_CON5 at offset 0x0814)
+                    pmuCruMap = Interop.mmap(IntPtr.Zero, mapLength, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)(PmuClockResetUnit & ~_mapMask));
+                    if (pmuCruMap == mapFailed)
+                    {
+                        int error = Marshal.GetLastWin32Error();
+                        throw new IOException($"Error {error} initializing the Gpio driver (PMU CRU initialize error).");
+                    }
+
+                    _iocPointer = iocMap;
+                    _cruPointer = cruMap;
+                    _pmuCruPointer = pmuCruMap;
+                    success = true;
                 }
-
-                // IOC register region: covers all IOC domains (PMU1 through EMMC, ~56 KB)
-                IntPtr iocMap = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize * 16, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)(IoControllerBase & ~_mapMask));
-                // CRU register region: clock gating for GPIO1–GPIO4 (CLKGATE_CON9 at offset 0x0824)
-                IntPtr cruMap = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize * 16, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)(ClockResetUnit & ~_mapMask));
-                // PMU CRU register region: clock gating for GPIO0 (PMU_CLKGATE_CON5 at offset 0x0814)
-                IntPtr pmuCruMap = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize * 16, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)(PmuClockResetUnit & ~_mapMask));
-
-                if (iocMap.ToInt64() == -1)
+                finally
                 {
-                    Interop.munmap(iocMap, 0);
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (IOC initialize error).");
+                    if (fileDescriptor != -1)
+                    {
+                        Interop.close(fileDescriptor);
+                    }
+
+                    if (!success)
+                    {
+                        if (pmuCruMap != IntPtr.Zero && pmuCruMap != mapFailed)
+                        {
+                            Interop.munmap(pmuCruMap, mapLength);
+                        }
+
+                        if (cruMap != IntPtr.Zero && cruMap != mapFailed)
+                        {
+                            Interop.munmap(cruMap, mapLength);
+                        }
+
+                        if (iocMap != IntPtr.Zero && iocMap != mapFailed)
+                        {
+                            Interop.munmap(iocMap, mapLength);
+                        }
+                    }
                 }
-
-                if (cruMap.ToInt64() == -1)
-                {
-                    Interop.munmap(cruMap, 0);
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (CRU initialize error).");
-                }
-
-                if (pmuCruMap.ToInt64() == -1)
-                {
-                    Interop.munmap(pmuCruMap, 0);
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (PMU CRU initialize error).");
-                }
-
-                _iocPointer = iocMap;
-                _cruPointer = cruMap;
-                _pmuCruPointer = pmuCruMap;
-
-                Interop.close(fileDescriptor);
             }
         }
     }
