@@ -9,7 +9,7 @@ namespace Iot.Device.Gpio.Drivers
     /// A GPIO driver for the Orange Pi 5 Ultra (40-pin header).
     /// </summary>
     /// <remarks>
-    /// SoC: Rockchip RK3588
+    /// SoC: Rockchip RK3588S
     /// Pin mapping sourced from wiringOP (orangepi-xunlong/wiringOP).
     /// </remarks>
     public class OrangePi5UltraDriver : Rk3588Driver

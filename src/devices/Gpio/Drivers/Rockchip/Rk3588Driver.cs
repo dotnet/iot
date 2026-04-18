@@ -45,6 +45,8 @@ namespace Iot.Device.Gpio.Drivers
         private const int VCCIO6_IOC = 0xC000;
         private const int EMMC_IOC = 0xD000;
 
+        private static readonly int s_mappingLength = Environment.SystemPageSize * 16;
+
         /// <summary>
         /// Pull-up/pull-down control register offsets per port, indexed by GpioNumber * 4 + Port.
         /// Derived from the Linux kernel <c>rk3588_p_regs</c> table in <c>pinctrl-rockchip.c</c>.
@@ -285,9 +287,7 @@ namespace Iot.Device.Gpio.Drivers
 
             if (unmapped.GpioNumber == 0)
             {
-                int pmuIomuxOffset = unmapped.PortNumber < 4
-                    ? _gpio0PmuIomux[unmapped.Port, 0]
-                    : _gpio0PmuIomux[unmapped.Port, 1];
+                int pmuIomuxOffset = GetGpio0PmuIomuxOffset(unmapped.Port, unmapped.PortNumber);
 
                 pmuIomuxPointer = (uint*)(_iocPointer + pmuIomuxOffset);
                 // Write-enable for 4 mux bits, data = 0 (GPIO mode)
@@ -350,19 +350,19 @@ namespace Iot.Device.Gpio.Drivers
 
             if (_iocPointer != IntPtr.Zero)
             {
-                Interop.munmap(_iocPointer, 0);
+                Interop.munmap(_iocPointer, s_mappingLength);
                 _iocPointer = IntPtr.Zero;
             }
 
             if (_cruPointer != IntPtr.Zero)
             {
-                Interop.munmap(_cruPointer, 0);
+                Interop.munmap(_cruPointer, s_mappingLength);
                 _cruPointer = IntPtr.Zero;
             }
 
             if (_pmuCruPointer != IntPtr.Zero)
             {
-                Interop.munmap(_pmuCruPointer, 0);
+                Interop.munmap(_pmuCruPointer, s_mappingLength);
                 _pmuCruPointer = IntPtr.Zero;
             }
 
@@ -451,7 +451,7 @@ namespace Iot.Device.Gpio.Drivers
                 }
 
                 int fileDescriptor = -1;
-                int mapLength = Environment.SystemPageSize * 16;
+                int mapLength = s_mappingLength;
                 IntPtr iocMap = IntPtr.Zero;
                 IntPtr cruMap = IntPtr.Zero;
                 IntPtr pmuCruMap = IntPtr.Zero;

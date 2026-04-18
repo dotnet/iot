@@ -30,7 +30,7 @@ namespace Sunxi.Gpio.Samples
                 // Output test: toggle the pin HIGH/LOW every second.
                 // Measure voltage on pin 19 with a multimeter — should alternate ~3.3V / 0V.
                 controller.OpenPin(pin, PinMode.Output);
-                Console.WriteLine($"Output mode: toggling pin {pin} (Ctrl+C to exit)...");
+                Console.WriteLine($"Output mode: toggling pin {pin} (press any key to exit)...");
                 bool high = false;
 
                 while (!Console.KeyAvailable)
@@ -47,7 +47,7 @@ namespace Sunxi.Gpio.Samples
                 // Input test: read pin state in a simple loop.
                 // With InputPullUp, pin reads High when idle, Low when shorted to GND.
                 controller.OpenPin(pin, PinMode.InputPullUp);
-                Console.WriteLine($"Input mode: reading pin {pin} (Ctrl+C to exit)...");
+                Console.WriteLine($"Input mode: reading pin {pin} (press any key to exit)...");
                 PinValue lastState = controller.Read(pin);
                 Console.WriteLine($"Initial state: {lastState}");
 
