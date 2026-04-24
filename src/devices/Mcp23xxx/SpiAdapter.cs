@@ -37,18 +37,15 @@ namespace Iot.Device.Mcp23xxx
             /// <inheritdoc/>
             public override void Read(byte registerAddress, Span<byte> buffer)
             {
+                int fullLength = buffer.Length + 2;
+
                 // Include OpCode and Register Address.
-                Span<byte> writeBuffer = stackalloc byte[]
-                {
-                    GetOpCode(_deviceAddress, isReadCommand: true),
-                    registerAddress
-                };
+                // writeBuffer must be the same length as readBuffer for TransferFullDuplex.
+                Span<byte> writeBuffer = stackalloc byte[fullLength];
+                writeBuffer[0] = GetOpCode(_deviceAddress, isReadCommand: true);
+                writeBuffer[1] = registerAddress;
 
-                Span<byte> readBuffer = stackalloc byte[buffer.Length + 2];
-
-                // Should this also contain the op code and register?
-                // Why are we transferring full duplex if we only really
-                // need to read?
+                Span<byte> readBuffer = stackalloc byte[fullLength];
                 _device.TransferFullDuplex(writeBuffer, readBuffer);
 
                 // First 2 bytes are from sending OpCode and Register Address.
