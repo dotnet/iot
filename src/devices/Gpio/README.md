@@ -32,6 +32,12 @@ When adding an existing GpioPin, by default, the new pin allocation will directl
 | Board | Driver |
 | :-: | :-: |
 | Orange Pi 4 | [OrangePi4Driver](./Drivers/OrangePi4Driver.cs) |
+| Orange Pi 5 | [OrangePi5Driver](./Drivers/OrangePi5Driver.cs) |
+| Orange Pi 5B | [OrangePi5BDriver](./Drivers/OrangePi5BDriver.cs) |
+| Orange Pi 5 Plus | [OrangePi5PlusDriver](./Drivers/OrangePi5PlusDriver.cs) |
+| Orange Pi 5 Pro | [OrangePi5ProDriver](./Drivers/OrangePi5ProDriver.cs) |
+| Orange Pi 5 Max | [OrangePi5MaxDriver](./Drivers/OrangePi5MaxDriver.cs) |
+| Orange Pi 5 Ultra | [OrangePi5UltraDriver](./Drivers/OrangePi5UltraDriver.cs) |
 | Orange Pi Lite | [OrangePiLiteDriver](./Drivers/OrangePiLiteDriver.cs) |
 | Orange Pi Lite 2 | [OrangePiLite2Driver](./Drivers/OrangePiLite2Driver.cs) |
 | Orange Pi Zero | [OrangePiZeroDriver](./Drivers/OrangePiZeroDriver.cs) |
