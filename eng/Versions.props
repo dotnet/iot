@@ -16,7 +16,7 @@
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.1</MicrosoftExtensionsLoggingConsolePackageVersion>
     <MicrosoftExtensionsLoggingPackageVersion>10.0.7</MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsLoggingAbstractionsPackageVersion>8.0.3</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
-    <SystemTextJsonPackageVersion>8.0.5</SystemTextJsonPackageVersion>
+    <SystemTextJsonPackageVersion>10.0.7</SystemTextJsonPackageVersion>
     <SystemIOPipelinesVersion>10.0.7</SystemIOPipelinesVersion>
   </PropertyGroup>
 </Project>
