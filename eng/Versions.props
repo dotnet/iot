@@ -7,7 +7,7 @@
     <MicrosoftDotNetGenAPIPackageVersion>9.0.0-beta.26220.3</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
     <SystemDrawingCommonPackageVersion>8.0.8</SystemDrawingCommonPackageVersion>
-    <SystemIOPortsPackageVersion>8.0.0</SystemIOPortsPackageVersion>
+    <SystemIOPortsPackageVersion>10.0.7</SystemIOPortsPackageVersion>
     <MicrosoftWin32RegistryPackageVersion>5.0.0</MicrosoftWin32RegistryPackageVersion>
     <SystemManagementPackageVersion>8.0.0</SystemManagementPackageVersion>
     <SystemThreadingTasksExtensionsPackageVersion>4.6.3</SystemThreadingTasksExtensionsPackageVersion>
