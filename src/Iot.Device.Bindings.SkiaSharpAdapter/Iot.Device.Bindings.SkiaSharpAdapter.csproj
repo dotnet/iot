@@ -19,9 +19,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
-    <PackageReference Include="SkiaSharp" Version="2.88.6" />
+    <PackageReference Include="SkiaSharp" Version="3.119.2" />
     <!-- The NativeAssets packages for Windows and MacOS are included in the above by default -->
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.6" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
     <Content Include="$(RepoRoot)src/devices/README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
   </ItemGroup>
 
