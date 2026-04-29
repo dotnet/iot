@@ -15,7 +15,7 @@
      <!-- Need to reference the internal package versions directly or we get package conflict errors -->
      <PackageReference Include="xunit.core" Version="2.9.3" />
      <PackageReference Include="xunit.assert" Version="2.9.3" />
-     <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
        <PrivateAssets>all</PrivateAssets>
        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
