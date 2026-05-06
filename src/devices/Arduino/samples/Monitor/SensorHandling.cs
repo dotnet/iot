@@ -153,7 +153,7 @@ namespace Iot.Device.Arduino.Sample
                     _sensorValues[Gpu].Clear();
                 }
 
-                Thread.Sleep(500);
+                Thread.Sleep(100);
             }
         }
 

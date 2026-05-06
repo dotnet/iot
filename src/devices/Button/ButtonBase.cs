@@ -130,12 +130,15 @@ namespace Iot.Device.Button
             IsPressed = false;
 
             ButtonUp?.Invoke(this, new EventArgs());
-            Press?.Invoke(this, new EventArgs());
 
             if (IsHoldingEnabled && _holdingState == ButtonHoldingState.Started)
             {
                 _holdingState = ButtonHoldingState.Completed;
                 Holding?.Invoke(this, new ButtonHoldingEventArgs { HoldingState = ButtonHoldingState.Completed });
+            }
+            else
+            {
+                Press?.Invoke(this, new EventArgs());
             }
 
             if (IsDoublePressEnabled)
