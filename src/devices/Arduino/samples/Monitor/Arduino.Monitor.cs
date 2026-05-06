@@ -105,13 +105,15 @@ namespace Arduino.Samples
         public static void DisplayModes(ArduinoBoard board, CommandLineOptions options)
         {
             const int ButtonPin = 2;
-            const int MaxMode = 12;
+            const int MaxMode = 13;
             Length stationAltitude = Length.FromMeters(options.Altitude);
             int mode = 0;
             var gpioController = board.CreateGpioController();
 
-            GpioButton button = new GpioButton(ButtonPin, TimeSpan.FromDays(1), TimeSpan.FromSeconds(5),
-                false, true, gpioController, false, TimeSpan.FromMilliseconds(1000));
+            GpioButton button = new GpioButton(ButtonPin, TimeSpan.FromDays(1), TimeSpan.FromSeconds(2),
+                false, true, gpioController, false, TimeSpan.FromMilliseconds(200));
+            button.IsHoldingEnabled = true;
+
             CharacterDisplay disp = new CharacterDisplay(board);
             Console.WriteLine("Display output test");
             Console.WriteLine("The button on GPIO 2 changes modes");
@@ -120,6 +122,10 @@ namespace Arduino.Samples
             disp.Output.ReplaceLine(0, "Initializing...");
 
             AutoResetEvent buttonClicked = new AutoResetEvent(false);
+
+            Pressure? qnhValue = null;
+
+            bool buttonWasHolding = false;
 
             void ChangeMode(object? sender, EventArgs pinValueChangedEventArgs)
             {
@@ -134,7 +140,16 @@ namespace Arduino.Samples
                 buttonClicked.Set();
             }
 
+            void ButtonHolding(object? sender, ButtonHoldingEventArgs e)
+            {
+                if (e.HoldingState == ButtonHoldingState.Completed)
+                {
+                    buttonWasHolding = true;
+                }
+            }
+
             button.Press += ChangeMode;
+            button.Holding += ButtonHolding;
 
             string modeName = string.Empty;
             string modeData = string.Empty;
@@ -148,6 +163,7 @@ namespace Arduino.Samples
             Object displayLock = new object();
             var sensors = new SensorHandling(board, displayLock);
             SensorValues? values;
+
             while (true)
             {
                 if (Console.KeyAvailable && Console.ReadKey(true).KeyChar == 'x')
@@ -184,6 +200,12 @@ namespace Arduino.Samples
                         {
                             Pressure p3 = WeatherHelper.CalculateBarometricPressure(values.Pressure.Value, values.Temperature.Value, stationAltitude);
                             modeData = string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s1}", values.Temperature.Value, p3);
+                            if (buttonWasHolding)
+                            {
+                                qnhValue = p3;
+                                modeName = "QNH Value stored";
+                                buttonWasHolding = false;
+                            }
                         }
                         else
                         {
@@ -215,6 +237,12 @@ namespace Arduino.Samples
                             Pressure p3 = WeatherHelper.CalculateSeaLevelPressure(values.Pressure.Value, stationAltitude, values.Temperature.Value);
                             p3 = p3.ToUnit(PressureUnit.Hectopascal);
                             modeData = string.Format(CultureInfo.CurrentCulture, "{0:s1}", p3);
+                            if (buttonWasHolding)
+                            {
+                                qnhValue = p3;
+                                modeName = "QNH Value stored";
+                                buttonWasHolding = false;
+                            }
                         }
                         else
                         {
@@ -314,6 +342,22 @@ namespace Arduino.Samples
                         if (values.Energy.HasValue)
                         {
                             modeData = values.Energy.Value.ToString("s1", CultureInfo.CurrentCulture);
+                        }
+                        else
+                        {
+                            modeData = "N/A";
+                        }
+
+                        break;
+
+                    case 13:
+                        modeName = "Altitude from QNH";
+                        values = sensors.GetSensor(SensorHandling.BmpSensor);
+                        if (qnhValue.HasValue && values.Pressure.HasValue && values.Temperature.HasValue)
+                        {
+                            Length altitude = WeatherHelper.CalculateAltitude(values.Pressure.Value, qnhValue.Value, 
+                                values.Temperature.Value);
+                            modeData = $"{altitude.Meters:F2} m";
                         }
                         else
                         {
