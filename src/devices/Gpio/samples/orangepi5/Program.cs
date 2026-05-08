@@ -5,6 +5,7 @@ using System;
 using System.Device.Gpio;
 using System.Threading;
 using Iot.Device.BoardLed;
+using Iot.Device.Gpio;
 using Iot.Device.Gpio.Drivers;
 
 namespace Sunxi.Gpio.Samples
@@ -15,13 +16,13 @@ namespace Sunxi.Gpio.Samples
         {
             // Physical header pin 19 = GPIO1_B2 (logical 42) — safe, not in PMU domain.
             // Avoid GPIO0 pins (physical 8, 10) as they may control the PMIC.
-            int physicalPin = 19;
-            int pin = OrangePi5ProDriver.MapPhysicalPinNumber(physicalPin);
+            int pin = 19;
             bool outputMode = args.Length > 0 && args[0] == "--output";
 
-            Console.WriteLine($"Physical pin {physicalPin} -> GPIO logical pin {pin}");
-
-            using GpioController controller = new GpioController(new OrangePi5ProDriver());
+            // Create a VirtualGpioController that maps physical header pin numbers
+            // to logical GPIO numbers, so you can use physical pin numbers directly.
+            using GpioController baseController = new GpioController(new OrangePi5ProDriver());
+            using VirtualGpioController controller = OrangePi5ProDriver.CreatePhysicalPinMapping(baseController);
             using BoardLed led = new BoardLed("blue_led");
             led.Trigger = "none";
 

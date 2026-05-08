@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.Gpio;
+using Iot.Device.Gpio;
 
 namespace Iot.Device.Gpio.Drivers
 {
@@ -45,22 +47,23 @@ namespace Iot.Device.Gpio.Drivers
         protected override int PinCount => 40;
 
         /// <summary>
-        /// Maps a physical header pin number (1-40) to the driver's logical GPIO number.
+        /// Creates a <see cref="VirtualGpioController"/> that maps physical header pin numbers to logical GPIO numbers.
         /// </summary>
-        /// <param name="physicalPin">Physical pin number on the 40-pin header (1-40).</param>
-        /// <returns>Logical GPIO pin number for use with <see cref="System.Device.Gpio.GpioController"/>.</returns>
-        /// <exception cref="ArgumentException">The pin is not a GPIO pin (power, ground, etc.).</exception>
-        public static int MapPhysicalPinNumber(int physicalPin)
+        /// <param name="controller">A <see cref="GpioController"/> wrapping this driver.</param>
+        /// <returns>A <see cref="VirtualGpioController"/> using physical pin numbering.</returns>
+        public static VirtualGpioController CreatePhysicalPinMapping(GpioController controller)
         {
-            if (physicalPin <= 0 || physicalPin >= _physicalToGpio.Length)
+            return new MappingGpioController(controller, ConvertPinNumberFromPhysicalToLogical);
+        }
+
+        private static int ConvertPinNumberFromPhysicalToLogical(int pinNumber)
+        {
+            if (pinNumber <= 0 || pinNumber >= _physicalToGpio.Length)
             {
-                throw new ArgumentException($"Physical pin {physicalPin} is out of range (1-40).", nameof(physicalPin));
+                return -1;
             }
 
-            int gpio = _physicalToGpio[physicalPin];
-            return gpio != -1
-                ? gpio
-                : throw new ArgumentException($"Physical pin {physicalPin} is not a GPIO pin (power/ground).", nameof(physicalPin));
+            return _physicalToGpio[pinNumber];
         }
     }
 }

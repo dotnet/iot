@@ -122,23 +122,25 @@ Rockchip open source documents: <http://opensource.rock-chips.com/wiki_Main_Page
 ```csharp
 using System;
 using System.Device.Gpio;
+using Iot.Device.Gpio;
 using Iot.Device.Gpio.Drivers;
 
-// Option 1: Map from physical header pin number (e.g. pin 19 on the 40-pin header)
-int pin = OrangePi5ProDriver.MapPhysicalPinNumber(19);  // -> logical 42
+// Option 1: Use physical header pin numbers via VirtualGpioController
+using GpioController baseController = new GpioController(new OrangePi5ProDriver());
+using VirtualGpioController controller = OrangePi5ProDriver.CreatePhysicalPinMapping(baseController);
 
-// Option 2: Map from GPIO name (e.g. GPIO1_B2 -> bank 1, port B, pin 2)
-int pin2 = RockchipDriver.MapPinNumber(gpioNumber: 1, port: 'B', portNumber: 2);  // -> logical 42
-
-using GpioController controller = new GpioController(new OrangePi5ProDriver());
-
-// Output example
-controller.OpenPin(pin, PinMode.Output);
-controller.Write(pin, PinValue.High);
+// Now use physical pin numbers directly (e.g. pin 19 on the 40-pin header)
+controller.OpenPin(19, PinMode.Output);
+controller.Write(19, PinValue.High);
 
 // Input example with pull-up (reads High when idle, Low when shorted to GND)
-controller.OpenPin(pin, PinMode.InputPullUp);
-PinValue value = controller.Read(pin);
+controller.OpenPin(19, PinMode.InputPullUp);
+PinValue value = controller.Read(19);
+
+// Option 2: Use logical GPIO numbers directly (e.g. GPIO1_B2 -> 42)
+int pin = RockchipDriver.MapPinNumber(gpioNumber: 1, port: 'B', portNumber: 2);  // -> logical 42
+using GpioController logicalController = new GpioController(new OrangePi5ProDriver());
+logicalController.OpenPin(pin, PinMode.Output);
 ```
 
 ### Pin Number Mapping
@@ -149,9 +151,9 @@ The RK3588 uses a naming convention of `GPIO{bank}_{port}{pin}` (e.g. `GPIO1_B2`
 
 Where port A=0, B=1, C=2, D=3. For example, `GPIO1_B2` = 32×1 + 8×1 + 2 = **42**.
 
-You can use either helper:
+You can use either approach:
 
 | Method | Example | Description |
 | :-- | :-- | :-- |
 | `RockchipDriver.MapPinNumber(1, 'B', 2)` | → 42 | From GPIO name (works with any Rockchip SoC) |
-| `OrangePi5ProDriver.MapPhysicalPinNumber(19)` | → 42 | From physical header pin (board-specific) |
+| `CreatePhysicalPinMapping(controller)` | pin 19 → 42 | Maps physical header pins via `VirtualGpioController` |
