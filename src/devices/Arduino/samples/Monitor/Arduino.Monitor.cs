@@ -355,7 +355,7 @@ namespace Arduino.Samples
                         values = sensors.GetSensor(SensorHandling.BmpSensor);
                         if (qnhValue.HasValue && values.Pressure.HasValue && values.Temperature.HasValue)
                         {
-                            Length altitude = WeatherHelper.CalculateAltitude(values.Pressure.Value, qnhValue.Value, 
+                            Length altitude = WeatherHelper.CalculateAltitude(values.Pressure.Value, qnhValue.Value,
                                 values.Temperature.Value);
                             modeData = $"{altitude.Meters:F2} m";
                         }
