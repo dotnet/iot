@@ -7,13 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="GpioSpeedBenchmark.cs" />
-    <Compile Remove="orangepi5\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\BoardLed\BoardLed.csproj" />
-    <ProjectReference Include="..\Iot.Device.Gpio.csproj" />
+    <ProjectReference Include="..\..\..\BoardLed\BoardLed.csproj" />
+    <ProjectReference Include="..\..\Iot.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>
