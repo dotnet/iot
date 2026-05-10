@@ -16,6 +16,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
 * [AXP192 - Enhanced single Cell Li-Battery and Power System Management IC](Axp192/README.md)
 * [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
+* [INA236 - Bidirectional Current/Power Monitor](Ina236/README.md)
 * [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
 * [MCP3xxx family of Analog to Digital Converters](Mcp3xxx/README.md)
 * [TLC1543 - 10-bit ADC with 11 input channels](Tlc1543/README.md)
@@ -339,6 +340,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [AXP192 - Enhanced single Cell Li-Battery and Power System Management IC](Axp192/README.md)
 * [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
+* [INA236 - Bidirectional Current/Power Monitor](Ina236/README.md)
 * [IP5306 - Power management](Ip5306/README.md)
 * [M5Stack Support bindings](M5Stack/README.md)
 * [PiJuice - power supply for Raspberry Pi](PiJuice/README.md)

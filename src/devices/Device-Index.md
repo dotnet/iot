@@ -49,6 +49,7 @@
 * [HX711: Load Cell amplifier and 24-Bit ADC Module](Hx711/README.md)
 * [Ili934x TFT LCD Controller](Ili934x/README.md)
 * [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
+* [INA236 - Bidirectional Current/Power Monitor](Ina236/README.md)
 * [IP5306 - Power management](Ip5306/README.md)
 * [IS31FL3730 -- LED Matrix Display Driver](Is31fl3730/README.md)
 * [IS31FL3731 -- LED Matrix Display Driver](Is31fl3731/README.md)
