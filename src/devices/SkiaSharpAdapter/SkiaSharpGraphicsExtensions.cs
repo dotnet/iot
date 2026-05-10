@@ -27,7 +27,10 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
         {
             if (image is SkiaSharpBitmap img)
             {
-                var resized = img.WrappedBitmap.Resize(new SKSizeI(size.Width, size.Height), SKFilterQuality.Medium);
+                // SKFilterQuality.Medium maps to a linear filter with a linear mipmap.
+                // See https://api.skia.org/SkSamplingOptions_8h_source.html
+                var sampling = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear);
+                var resized = img.WrappedBitmap.Resize(new SKSizeI(size.Width, size.Height), sampling);
                 return new SkiaSharpBitmap(resized, image.PixelFormat);
             }
 
@@ -77,11 +80,15 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
         public static SizeF MeasureText(this IGraphics graphics, string text, string fontFamilyName, int size)
         {
             var canvas = GetCanvas(graphics);
-            SKFont fnt = new SKFont(SKTypeface.FromFamilyName(fontFamilyName), size);
-            var paint = new SKPaint(fnt);
-            paint.TextAlign = SKTextAlign.Left;
-            paint.TextEncoding = SKTextEncoding.Utf16;
-            float width = paint.MeasureText(text);
+            using SKTypeface typeface = SKTypeface.FromFamilyName(fontFamilyName);
+            using SKFont fnt = new SKFont(typeface, size);
+            // Match the previous behavior of SKPaint(fnt).MeasureText(text). The obsolete SKPaint
+            // text path defaulted IsAntialias=false, so we mirror that by disabling font edging.
+            // The string overload of MeasureText handles UTF-16 (the natural encoding of managed
+            // strings), matching TextEncoding=Utf16; the previous TextAlign=Left did not affect
+            // the returned width.
+            fnt.Edging = SKFontEdging.Alias;
+            float width = fnt.MeasureText(text);
             return new SizeF(width, size);
         }
 
@@ -91,11 +98,14 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
         public static void DrawText(this IGraphics graphics, string text, string fontFamilyName, int size, Color color, Point position)
         {
             var canvas = GetCanvas(graphics);
-            SKFont fnt = new SKFont(SKTypeface.FromFamilyName(fontFamilyName), size);
-            var paint = new SKPaint(fnt);
+            using SKTypeface typeface = SKTypeface.FromFamilyName(fontFamilyName);
+            using SKFont fnt = new SKFont(typeface, size);
+            // Match the previous behavior of canvas.DrawText(t, pt, new SKPaint(fnt) { ... }).
+            // The obsolete SKPaint text path defaulted IsAntialias=false, which produced aliased
+            // glyphs; mirror that by disabling font edging so output is pixel-identical.
+            fnt.Edging = SKFontEdging.Alias;
+            using var paint = new SKPaint();
             paint.Color = new SKColor((uint)color.ToArgb());
-            paint.TextAlign = SKTextAlign.Left;
-            paint.TextEncoding = SKTextEncoding.Utf16;
             int lineSpacing = size + 2;
             SKPoint currentPosition = new SKPoint(position.X, position.Y + size); // drawing begins to the right and above the given point.
             var texts = text.Split(new char[]
@@ -106,7 +116,9 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
             // The DrawText implementation of SkiaSharp does not work with line breaks, so do that manually.
             foreach (var t in texts)
             {
-                canvas.DrawText(t, currentPosition, paint);
+                // The string + SKFont overload uses UTF-16 encoding (natural for managed strings),
+                // matching the previous TextEncoding=Utf16. SKTextAlign.Left preserves the original alignment.
+                canvas.DrawText(t, currentPosition, SKTextAlign.Left, fnt, paint);
                 currentPosition.Y += lineSpacing;
             }
         }
