@@ -29,10 +29,13 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Adds a value to the filter queue
+        /// Adds an element to the filter queue
         /// </summary>
-        /// <param name="value">A value object</param>
-        public virtual void AddValue(TSourceElement value)
+        /// <param name="value">A filter queue element</param>
+        /// <remarks>
+        /// It's typically favorable to use a method of the derived class instead.
+        /// </remarks>
+        public virtual void AddElement(TSourceElement value)
         {
             _valueQueue.Enqueue(value);
         }
@@ -81,13 +84,13 @@ namespace Iot.Device.Common
         /// <returns>The filtered value</returns>
         /// <remarks>Filtering is only needed when the value queue is kept longer than the filter
         /// size for some reason</remarks>
-        protected abstract TResult FilterAndCompute(IEnumerable<TSourceElement> values);
+        protected abstract TResult? FilterAndCompute(IEnumerable<TSourceElement> values);
 
         /// <summary>
         /// Computes the current value of the filter
         /// </summary>
         /// <returns></returns>
-        public virtual TResult CurrentValue()
+        public virtual TResult? CurrentValue()
         {
             RemoveOldElements();
             TSourceElement[] valueArray;
