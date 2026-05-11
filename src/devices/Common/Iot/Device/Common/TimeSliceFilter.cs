@@ -16,7 +16,7 @@ namespace Iot.Device.Common
     /// </summary>
     /// <typeparam name="T">A number type</typeparam>
     public class TimeSliceFilter<T> : ValueFilter<(T, DateTimeOffset), T>
-        where T : INumber<T>
+        where T : struct, INumber<T>
     {
         private TimeSpan _maxAge;
 
@@ -61,6 +61,15 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
+        /// Adds an element to the front of the filter queue with the current timestamp
+        /// </summary>
+        /// <param name="value">The value to insert</param>
+        public void Add(T value)
+        {
+            AddElement((value, DateTimeOffset.UtcNow));
+        }
+
+        /// <summary>
         /// Default computation function. Can be overriden (or configured via constructor argument)
         /// </summary>
         /// <param name="values">The set of values the calculation needs to operate on</param>
@@ -82,6 +91,69 @@ namespace Iot.Device.Common
             var now = DateTimeOffset.UtcNow;
             TimeSpan age = now - element.Item2;
             return (age > MaxAge);
+        }
+
+        /// <summary>
+        /// Calculates the arithmetic average of the current filter entries.
+        /// </summary>
+        /// <param name="values">The values to average over</param>
+        /// <returns>The return value</returns>
+        public static T? AverageFilter(List<T> values)
+        {
+            T sum = default(T);
+            T numElements = default(T);
+            if (values.Count == 0)
+            {
+                return null;
+            }
+
+            foreach (var value in values)
+            {
+                sum += value;
+                numElements++;
+            }
+
+            return sum / numElements;
+        }
+
+        /// <summary>
+        /// Returns the maximum of the current queue
+        /// </summary>
+        public static T? Maximum(List<T> values)
+        {
+            if (values.Count == 0)
+            {
+                return null;
+            }
+
+            T result = values[0];
+
+            foreach (var value in values)
+            {
+                result = T.Max(value, result);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the maximum of the current queue
+        /// </summary>
+        public static T? Minimum(List<T> values)
+        {
+            if (values.Count == 0)
+            {
+                return null;
+            }
+
+            T result = values[0];
+
+            foreach (var value in values)
+            {
+                result = T.Min(value, result);
+            }
+
+            return result;
         }
     }
 }
