@@ -9,7 +9,7 @@
     <SystemDrawingCommonPackageVersion>10.0.7</SystemDrawingCommonPackageVersion>
     <SystemIOPortsPackageVersion>10.0.7</SystemIOPortsPackageVersion>
     <MicrosoftWin32RegistryPackageVersion>5.0.0</MicrosoftWin32RegistryPackageVersion>
-    <SystemManagementPackageVersion>10.0.7</SystemManagementPackageVersion>
+    <SystemManagementPackageVersion>10.0.8</SystemManagementPackageVersion>
     <SystemThreadingTasksExtensionsPackageVersion>4.6.3</SystemThreadingTasksExtensionsPackageVersion>
     <SystemMemoryPackageVersion>4.6.3</SystemMemoryPackageVersion>
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
