@@ -1,29 +1,192 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Arduino_Compiler_CI
 
-# Controls when the workflow will run
-on:
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-  pull_request:
+# Mostly opt-in workflow. The Arduino compiler build is narrow in scope and has
+# been flaky, so it no longer runs on every PR. It auto-runs only on PRs that
+# touch files known to affect the Arduino build:
+#   - global.json                 (SDK version pin)
+#   - eng/ArduinoCsCI.cmd         (the build script itself)
+#   - tools/ArduinoCsCompiler/**  (the Arduino compiler sources)
+#
+# For any other PR, a repository collaborator with write or admin permission
+# can opt in by commenting:
+#
+#     /run-arduino-tests
+#
+# Maintainers can also trigger it manually from the Actions tab.
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+on:
+  workflow_dispatch:
+  issue_comment:
+    types: [created]
+  pull_request:
+    paths:
+      - 'global.json'
+      - 'eng/ArduinoCsCI.cmd'
+      - 'tools/ArduinoCsCompiler/**'
+
+permissions:
+  contents: read
+  issues: write
+
 jobs:
-  # This workflow contains a single job called "build"
+  # Validates the trigger, authorizes the commenter, resolves the PR head ref,
+  # and emits outputs the build job needs. Also reacts to the comment and posts
+  # a "build started" message linking back to this run.
+  gate:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       startsWith(github.event.comment.body, '/run-arduino-tests'))
+    runs-on: ubuntu-latest
+    outputs:
+      head_sha: ${{ steps.resolve.outputs.head_sha }}
+      head_repo: ${{ steps.resolve.outputs.head_repo }}
+      pr_number: ${{ steps.resolve.outputs.pr_number }}
+      run_url: ${{ steps.resolve.outputs.run_url }}
+    steps:
+      - name: Authorize commenter
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          perm=$(gh api "repos/${REPO}/collaborators/${ACTOR}/permission" --jq '.permission')
+          echo "Commenter '${ACTOR}' has permission: ${perm}"
+          case "${perm}" in
+            admin|write) ;;
+            *)
+              echo "::error::User '${ACTOR}' is not authorized to trigger the Arduino build (requires write or admin)."
+              exit 1
+              ;;
+          esac
+
+      - name: Resolve PR head and run URL
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SERVER_URL: ${{ github.server_url }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_url="${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}"
+          echo "run_url=${run_url}" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            pr_number="${{ github.event.issue.number }}"
+            pr_json=$(gh api "repos/${REPO}/pulls/${pr_number}")
+            head_sha=$(echo "${pr_json}" | jq -r '.head.sha')
+            head_repo=$(echo "${pr_json}" | jq -r '.head.repo.full_name')
+            echo "pr_number=${pr_number}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${head_sha}" >> "$GITHUB_OUTPUT"
+            echo "head_repo=${head_repo}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Auto-trigger from a path-filtered pull_request event. Use the
+            # head ref directly from the event payload.
+            echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+            echo "head_repo=${{ github.event.pull_request.head.repo.full_name }}" >> "$GITHUB_OUTPUT"
+          else
+            # workflow_dispatch — build the ref the workflow was dispatched on.
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+            echo "head_repo=${REPO}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: React to triggering comment
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" \
+            -f content=rocket >/dev/null
+
+      - name: Post "build started" comment
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.resolve.outputs.pr_number }}
+          HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
+          RUN_URL: ${{ steps.resolve.outputs.run_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          body=$(printf '🚀 Arduino compiler build started for commit `%s`.\n\n[View run](%s)' "${HEAD_SHA}" "${RUN_URL}")
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            -f body="${body}" >/dev/null
+
   build:
-    # The type of runner that the job will run on
+    needs: gate
     runs-on: windows-latest
     strategy:
-        matrix:
-            configuration: [Release]
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+      matrix:
+        configuration: [Release]
     steps:
-      - name: Checkout
-        uses: actions/checkout@master
-        
-      - run: |
-          eng/ArduinoCsCI.cmd %USERPROFILE% ${{ matrix.configuration }}
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.gate.outputs.head_repo }}
+          ref: ${{ needs.gate.outputs.head_sha }}
+          fetch-depth: 1
 
+      - name: Run Arduino CI build
+        shell: cmd
+        run: |
+          eng\ArduinoCsCI.cmd %USERPROFILE% ${{ matrix.configuration }}
 
+  report:
+    needs: [gate, build]
+    # By default GitHub Actions skips a job whose `needs:` failed or were cancelled,
+    # which would prevent us from ever posting the ❌ failure comment that this job
+    # exists to deliver. The `always()` status-check function overrides that default
+    # and forces the `if:` expression to be evaluated regardless of upstream outcomes.
+    # The remaining conjuncts are the actual run condition:
+    #   - github.event_name == 'issue_comment'  -> only post a PR comment when triggered
+    #     by `/run-arduino-tests`; skip for manual workflow_dispatch runs (no PR).
+    #   - needs.gate.result == 'success'         -> only post if the gate accepted the
+    #     trigger and resolved the PR number; otherwise we have nothing to comment on.
+    # Note: this condition does NOT require `build` to succeed — `needs.build.result`
+    # is inspected inside the step below to choose ✅ / ❌ / 🚫 / ⚠️ accordingly.
+    if: always() && github.event_name == 'issue_comment' && needs.gate.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post result comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ needs.gate.outputs.pr_number }}
+          HEAD_SHA: ${{ needs.gate.outputs.head_sha }}
+          RUN_URL: ${{ needs.gate.outputs.run_url }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${BUILD_RESULT}" in
+            success)   icon="✅"; status="succeeded" ;;
+            failure)   icon="❌"; status="failed" ;;
+            cancelled) icon="🚫"; status="was cancelled" ;;
+            *)         icon="⚠️"; status="finished with status '${BUILD_RESULT}'" ;;
+          esac
+          body=$(printf '%s Arduino compiler build %s for commit `%s`.\n\n[View run](%s)' "${icon}" "${status}" "${HEAD_SHA}" "${RUN_URL}")
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            -f body="${body}" >/dev/null
