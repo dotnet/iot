@@ -136,6 +136,17 @@ jobs:
 
   report:
     needs: [gate, build]
+    # By default GitHub Actions skips a job whose `needs:` failed or were cancelled,
+    # which would prevent us from ever posting the ❌ failure comment that this job
+    # exists to deliver. The `always()` status-check function overrides that default
+    # and forces the `if:` expression to be evaluated regardless of upstream outcomes.
+    # The remaining conjuncts are the actual run condition:
+    #   - github.event_name == 'issue_comment'  -> only post a PR comment when triggered
+    #     by `/run-arduino-tests`; skip for manual workflow_dispatch runs (no PR).
+    #   - needs.gate.result == 'success'         -> only post if the gate accepted the
+    #     trigger and resolved the PR number; otherwise we have nothing to comment on.
+    # Note: this condition does NOT require `build` to succeed — `needs.build.result`
+    # is inspected inside the step below to choose ✅ / ❌ / 🚫 / ⚠️ accordingly.
     if: always() && github.event_name == 'issue_comment' && needs.gate.result == 'success'
     runs-on: ubuntu-latest
     steps:
