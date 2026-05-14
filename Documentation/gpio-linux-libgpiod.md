@@ -2,27 +2,30 @@
 
 ## Quick usage: blink LED example
 
-This example targets a RaspberryPi 3/4, see comments for more information:
+This example targets a Raspberry Pi 3/4, see comments for more information:
 
 ```c#
-// side note: on the Raspberry Pi the GPIO chip line offsets are the same numbers as the usual BCM GPIO numbering, which is convenient
+using System.Device.Gpio;
+using System.Device.Gpio.Drivers;
+
+// On the Raspberry Pi the GPIO chip line offsets match BCM GPIO numbering
 const int ledGpio = 15;
 
-// on the Pi3,4 you most likely want 0, on the Pi5 number 4, see 'gpioinfo' tool
-const int chipNumber = 0;
 // 'using' will dispose the controller when it falls out of scope, which will un-claim lines
+// On Pi 3/4 the parameterless constructor auto-selects the best driver
+using var controller = new GpioController();
 
-// alternatively be more explicit: 'new GpioController(chipNumber, new LibGpiodDriver())'
-using var gpioController = new GpioController(chipNumber);
+// To explicitly use LibGpiodDriver (e.g. on Pi5 where chip 4 is needed):
+// using var controller = new GpioController(new LibGpiodDriver(gpioChip: 4));
 
-gpioController.OpenPin(ledGpio);
+controller.OpenPin(ledGpio, PinMode.Output);
 
 for (int i = 0; i < 5; i++)
 {
     controller.Write(ledGpio, PinValue.High);
-    await Task.Delay(1000);
+    Thread.Sleep(1000);
     controller.Write(ledGpio, PinValue.Low);
-    await Task.Delay(1000);
+    Thread.Sleep(1000);
 }
 ```
 
@@ -44,32 +47,36 @@ Dotnet-iot supports v0, v1 and v2 of libgpiod.
 
 The following table shows which driver supports which library version
 
-| LibGpiodDriverVersion | Libgpiod version (documented)                         |
-| --------------------- | ----------------------------------------------------- |
-| V1                    | 0.x to 1.0.x (Partial support)  1.1 - 1.x (Supported) |
-| V2                    | 2.x                                                   |
+| .NET IoT Driver | Libgpiod version (documented) |
+| --------------- | ----------------------------------------------------- |
+| `LibGpiodDriver` | 0.x to 1.0.x (Partial support)  1.1 - 1.x (Supported) |
+| `LibGpiodV2Driver` | 2.x |
 
 NOTE: Due to a [breaking change in the values of enums in the libgpiod](
 https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/commit/?id=783ff2e3c70788cdd1c65cba9ee0398bda5ebcda), only libgpiod versions 1.1 and later can be expected to function reliably with the V1 driver.
 To check what libgpiod packages you have on a deb based system, use: ``` $apt show libgpiod* ```
 
-## Choose LibGpiodDriver Version
+## Choose the Right Driver Class
 
-If you want to explicitly select the version of the libgpiod driver, to target a specific library version, there are following options:
+.NET IoT provides two separate driver classes for different versions of the libgpiod library:
 
-1. constructor of LibGpiodDriver:
+- **`LibGpiodDriver`** — for libgpiod v1 (library versions 0.x through 1.x)
+- **`LibGpiodV2Driver`** — for libgpiod v2 (library versions 2.x)
 
-   ```c#
-   new LibGpiodDriver(chipNumber, LibGpiodDriverVersion.V1)
-   ```
+To use a specific driver:
 
-2. Environment variable:
+```c#
+using System.Device.Gpio;
+using System.Device.Gpio.Drivers;
 
-   ```shell
-   export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V1 // or V2...
-   ```
+// For libgpiod v1
+using var controller = new GpioController(new LibGpiodDriver(gpioChip: 0));
 
-When not explicitly specified, dotnet iot automatically tries to find a driver compatible to what library version is installed.
+// For libgpiod v2
+using var controller = new GpioController(new LibGpiodV2Driver(chipNumber: 0));
+```
+
+When not explicitly specified (i.e., when using `new GpioController()`), .NET IoT automatically tries to find a compatible driver for the installed library version.
 
 ## Install libgpiod
 
