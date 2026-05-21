@@ -112,7 +112,9 @@ When the button is pressed, GPIO 17 gets connected to Ground (Low). When release
 Instead of checking the pin over and over in a loop (polling), you can register a callback that fires when the pin's value changes. This is more efficient and more responsive:
 
 ```csharp
+using System;
 using System.Device.Gpio;
+using System.Threading;
 
 using GpioController controller = new();
 controller.OpenPin(17, PinMode.InputPullUp);
@@ -142,8 +144,8 @@ Thread.Sleep(Timeout.Infinite);
 ### Raspberry Pi GPIO Specifications
 
 - **Output Voltage:** 3.3 V (not 5 V!)
-- **Max current per pin:** ~16 mA (safe limit)
-- **Max total current (all pins):** ~50 mA
+- **Per-pin drive strength:** 8 mA by default on BCM283x SoCs, configurable up to 16 mA. Treat 8 mA as the safe figure unless you have explicitly raised the drive strength.
+- **Max total current across all GPIO pins:** model-dependent; on the original Pi the documented limit was ~50 mA, newer models tolerate more. Aim well below the limit and use external drivers for anything power-hungry.
 - **Input voltage tolerance:** 0 V to 3.3 V (**5 V will damage the pin!**)
 
 ### Connecting 5 V Devices
@@ -156,7 +158,7 @@ Thread.Sleep(Timeout.Infinite);
 
 ### Driving High-Current Devices
 
-For loads exceeding 16 mA (motors, relays, high-power LEDs), use a transistor or MOSFET as a switch powered from an external supply. The GPIO pin controls the transistor's gate, not the device directly.
+For loads exceeding the per-pin drive strength (motors, relays, high-power LEDs), use a transistor or MOSFET as a switch powered from an external supply. The GPIO pin controls the transistor's gate, not the device directly.
 
 ## Pin Mode Summary
 
@@ -174,7 +176,7 @@ Not all GPIO pins are suitable for general use:
 - **GPIO 2, 3:** I2C (have hardware pull-up resistors)
 - **GPIO 14, 15:** UART (default serial console)
 - **GPIO 9, 10, 11:** SPI
-- **GPIO 18, 19:** PWM-capable
+- **GPIO 12, 13, 18, 19:** hardware-PWM-capable
 - **Safe for general use:** 17, 22, 23, 24, 25, 27
 
 **Tip:** Check your specific Raspberry Pi model's pinout at [pinout.xyz](https://pinout.xyz/).

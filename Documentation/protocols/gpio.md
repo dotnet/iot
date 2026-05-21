@@ -154,6 +154,13 @@ if (value == PinValue.Low)
 Instead of continuously polling, use events for efficient input handling:
 
 ```csharp
+using System;
+using System.Device.Gpio;
+using System.Threading;
+
+using GpioController controller = new();
+controller.OpenPin(17, PinMode.InputPullUp);
+
 controller.RegisterCallbackForPinValueChangedEvent(
     17,
     PinEventTypes.Falling, // trigger on HIGH → LOW (button press)
@@ -218,15 +225,15 @@ using GpioController controller = new();
 | --- | --- |
 | `LibGpiodDriver` | Modern Linux with libgpiod v1 — the recommended default |
 | `LibGpiodV2Driver` | Modern Linux with libgpiod v2 |
-| `RaspberryPi3Driver` | Raspberry Pi 3/4 — very fast (direct memory access) but requires root permissions; auto-selected on Pi 3/4 but consider using `LibGpiodDriver` when root access is not available |
+| `RaspberryPi3Driver` | Raspberry Pi 3/4 — very fast (direct memory access). Requires root or membership of a privileged group because it maps `/dev/mem`. Auto-selected on Pi 3/4 when available; if you are running without root, pass `new LibGpiodDriver()` explicitly instead. |
 | `SysFsDriver` | Works on any Linux version but very slow — **deprecated** in favor of libgpiod-based drivers |
 
 ### Auto-Detection
 
 When you use `new GpioController()`, the framework selects automatically:
 
-- **Raspberry Pi 3/4:** `RaspberryPi3Driver`
-- **Raspberry Pi 5:** `LibGpiodDriver` (with correct GPIO chip)
+- **Raspberry Pi 3/4:** `RaspberryPi3Driver` (falls back to `LibGpiodDriver` when direct memory access is not available; see note above about root permissions)
+- **Raspberry Pi 5:** `LibGpiodDriver`. On recent Raspberry Pi OS kernels the user GPIO chip is `gpiochip0` and auto-detection picks the right chip. Older Pi 5 kernels exposed user GPIO on `gpiochip4` — see [Wrong GPIO Chip on Raspberry Pi 5](#wrong-gpio-chip-on-raspberry-pi-5) below if that affects you.
 - **Other Linux boards:** Tries `LibGpiodDriver` → `LibGpiodV2Driver` → `SysFsDriver`
 
 For an in-depth comparison, see [Choosing the Right Driver](../fundamentals/choosing-drivers.md).

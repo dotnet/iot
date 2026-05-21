@@ -51,8 +51,8 @@ Uses the older `/sys/class/gpio` interface, which is deprecated in modern Linux 
 | **Kernel Version** | 4.8+ | All |
 | **Performance** | Better | Good |
 | **Multi-process** | Safe | Unsafe |
-| **Resource Cleanup** | Automatic | Manual |
-| **Future Support** | Yes | No (being removed) |
+| **Resource Cleanup on crash** | Kernel releases lines automatically when the process exits | Exported pins can linger under `/sys/class/gpio/` if the process is killed |
+| **Future Support** | Yes | Deprecated; sysfs GPIO interface is being phased out in the Linux kernel |
 
 ## Auto-Detection
 
@@ -60,8 +60,8 @@ When you use `new GpioController()`, the framework automatically selects the bes
 
 | Board | Driver selected |
 | --- | --- |
-| Raspberry Pi 3 / 4 | `RaspberryPi3Driver` |
-| Raspberry Pi 5 | `LibGpiodDriver` (with correct GPIO chip) |
+| Raspberry Pi 3 / 4 | `RaspberryPi3Driver` (requires root or membership of a privileged group, because it maps `/dev/mem`; if you run without root, pass `new LibGpiodDriver()` explicitly) |
+| Raspberry Pi 5 | `LibGpiodDriver`. On recent Raspberry Pi OS kernels the user GPIO chip is `gpiochip0` and auto-detection picks the right chip; older Pi 5 kernels exposed user GPIO on `gpiochip4` and need an explicit chip number (see below) |
 | Other Linux boards | Tries `LibGpiodDriver` → `LibGpiodV2Driver` → `SysFsDriver` |
 
 ```csharp
@@ -93,7 +93,8 @@ gpioinfo
 ```
 
 - **Raspberry Pi 3/4:** chip number **0** (`gpiochip0`)
-- **Raspberry Pi 5:** chip number **4** (`gpiochip4`)
+- **Raspberry Pi 5 (recent kernels):** chip number **0** (`gpiochip0`)
+- **Raspberry Pi 5 (older kernels):** chip number **4** (`gpiochip4`) — see [Wrong Chip Number (Raspberry Pi 5)](#wrong-chip-number-raspberry-pi-5)
 
 ## Installing libgpiod
 
@@ -134,7 +135,7 @@ sudo apt install libgpiod2
 
 ### Wrong Chip Number (Raspberry Pi 5)
 
-Raspberry Pi 5 uses chip **4** instead of 0. If auto-detection does not work:
+Older Raspberry Pi 5 kernels exposed user GPIO on `gpiochip4` rather than `gpiochip0`. On recent Raspberry Pi OS releases the user GPIO chip is `gpiochip0` and auto-detection works; if you are stuck on an older kernel and auto-detection picks the wrong chip, update your kernel first (`sudo apt update && sudo apt upgrade && sudo reboot`). If updating is not an option, pass the chip number explicitly:
 
 ```csharp
 using GpioController controller = new(new LibGpiodDriver(gpioChip: 4));

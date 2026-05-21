@@ -7,15 +7,16 @@ This example targets a Raspberry Pi 3/4, see comments for more information:
 ```c#
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
+using System.Threading;
 
 // On the Raspberry Pi the GPIO chip line offsets match BCM GPIO numbering
-const int ledGpio = 15;
+const int ledGpio = 18;
 
 // 'using' will dispose the controller when it falls out of scope, which will un-claim lines
 // On Pi 3/4 the parameterless constructor auto-selects the best driver
 using var controller = new GpioController();
 
-// To explicitly use LibGpiodDriver (e.g. on Pi5 where chip 4 is needed):
+// To explicitly use LibGpiodDriver (e.g. on an older Pi 5 kernel where chip 4 is needed):
 // using var controller = new GpioController(new LibGpiodDriver(gpioChip: 4));
 
 controller.OpenPin(ledGpio, PinMode.Output);
@@ -118,3 +119,9 @@ The installation should be the same on all Pi's, or boards whose distro uses the
 This will install the library .so files to `/usr/lib/local`
 
 If you want to also build command line utilities `gpioinfo, gpiodetect` etc., specify `./autogen.sh --enable-tools=yes`
+
+## See also
+
+- [GPIO Protocol Guide](./protocols/gpio.md) — Quick start, `GpioController` usage, drivers, and troubleshooting
+- [GPIO Basics](./fundamentals/gpio-basics.md) — Digital I/O concepts, pull resistors, voltage levels
+- [Choosing the Right Driver](./fundamentals/choosing-drivers.md) — `LibGpiodDriver` vs `SysFsDriver` comparison
