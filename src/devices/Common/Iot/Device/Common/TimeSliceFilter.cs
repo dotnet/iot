@@ -15,8 +15,10 @@ namespace Iot.Device.Common
     /// A filter that operates on a range of elements based on age
     /// </summary>
     /// <typeparam name="T">A number type</typeparam>
-    public class TimeSliceFilter<T> : ValueFilter<(T, DateTimeOffset), T>
-        where T : struct, INumber<T>
+    public class TimeSliceFilter<T> : ValueFilter<(T, DateTimeOffset), T?>
+        where T : struct, IAdditionOperators<T, T, T>,
+        IDivisionOperators<T, double, T>,
+        IComparisonOperators<T, T, bool>
     {
         private TimeSpan _maxAge;
 
@@ -26,7 +28,7 @@ namespace Iot.Device.Common
         /// <param name="maxAge">The initial length of the filter queue</param>
         /// <param name="compute">The filter calculate function. Can be one of the predefined
         /// calculators or one's own</param>
-        public TimeSliceFilter(TimeSpan maxAge, Func<List<T>, T> compute)
+        public TimeSliceFilter(TimeSpan maxAge, Func<List<T>, T?> compute)
         {
             MaxAge = maxAge;
             Compute = compute ?? throw new ArgumentNullException(nameof(compute), "Please provide a filter function");
@@ -35,7 +37,7 @@ namespace Iot.Device.Common
         /// <summary>
         /// Computation function
         /// </summary>
-        public Func<List<T>, T> Compute
+        public Func<List<T>, T?> Compute
         {
             get;
         }
@@ -74,7 +76,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="values">The set of values the calculation needs to operate on</param>
         /// <returns>The resulting filter value</returns>
-        protected override T FilterAndCompute(IEnumerable<(T, DateTimeOffset)> values)
+        protected override T? FilterAndCompute(IEnumerable<(T, DateTimeOffset)> values)
         {
             List<T> contents = values.Select(x => x.Item1).ToList();
 
@@ -101,7 +103,7 @@ namespace Iot.Device.Common
         public static T? AverageFilter(List<T> values)
         {
             T sum = default(T);
-            T numElements = default(T);
+            double numElements = 0.0;
             if (values.Count == 0)
             {
                 return null;
@@ -110,7 +112,7 @@ namespace Iot.Device.Common
             foreach (var value in values)
             {
                 sum += value;
-                numElements++;
+                numElements += 1;
             }
 
             return sum / numElements;
@@ -130,7 +132,10 @@ namespace Iot.Device.Common
 
             foreach (var value in values)
             {
-                result = T.Max(value, result);
+                if (value > result)
+                {
+                    result = value;
+                }
             }
 
             return result;
@@ -150,7 +155,10 @@ namespace Iot.Device.Common
 
             foreach (var value in values)
             {
-                result = T.Min(value, result);
+                if (value < result)
+                {
+                    result = value;
+                }
             }
 
             return result;

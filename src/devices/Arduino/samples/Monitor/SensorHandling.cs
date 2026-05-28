@@ -10,6 +10,7 @@ using System.Threading;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Board;
+using Iot.Device.Common;
 using Iot.Device.HardwareMonitor;
 using UnitsNet;
 
@@ -31,6 +32,7 @@ namespace Iot.Device.Arduino.Sample
         private readonly CancellationTokenSource _cancellationTokenSource;
 
         private readonly ConcurrentDictionary<string, SensorValues> _sensorValues;
+        private TimeSliceFilter<Pressure> _rawPressureFilter;
 
         public SensorHandling(ArduinoBoard board, object displayLock)
         {
@@ -41,6 +43,8 @@ namespace Iot.Device.Arduino.Sample
             _sensorValues.TryAdd(DhtSensor, new SensorValues(DhtSensor));
             _sensorValues.TryAdd(Cpu, new SensorValues(Cpu));
             _sensorValues.TryAdd(Gpu, new SensorValues(Gpu));
+            _rawPressureFilter =
+                new TimeSliceFilter<Pressure>(TimeSpan.FromSeconds(0.5), TimeSliceFilter<Pressure>.AverageFilter);
 
             Console.WriteLine("Scanning for I2C devices...");
             _bus = board.CreateOrGetI2cBus(board.GetDefaultI2cBusNumber());
