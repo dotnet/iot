@@ -20,8 +20,8 @@ namespace Common.Tests
             var filter1 = new TimeSliceFilter<double>(TimeSpan.MaxValue, TimeSliceFilter<double>.AverageFilter);
             filter1.Add(1);
             filter1.Add(2);
-            double result = filter1.CurrentValue();
-            Assert.Equal(1.5, result, 0.01);
+            double? result = filter1.CurrentValue();
+            Assert.Equal(1.5, result.GetValueOrDefault(), 0.01);
         }
 
         [Fact]
@@ -33,8 +33,8 @@ namespace Common.Tests
             filter1.CurrentValue();
             filter1.MaxAge = TimeSpan.FromMinutes(1);
             filter1.Add(2);
-            double result = filter1.CurrentValue();
-            Assert.Equal(2.0, result, 0.01);
+            double? result = filter1.CurrentValue();
+            Assert.Equal(2.0, result.GetValueOrDefault(), 0.01);
         }
     }
 }
