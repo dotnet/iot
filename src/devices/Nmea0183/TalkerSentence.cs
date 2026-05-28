@@ -356,7 +356,7 @@ namespace Iot.Device.Nmea0183
                 {
                     retVal = producer(this, lastMessageTime);
                 }
-                catch (Exception x) when (x is ArgumentException || x is ArgumentOutOfRangeException || x is FormatException)
+                catch (Exception x) when (x is ArgumentException || x is ArgumentOutOfRangeException || x is FormatException || x is OverflowException)
                 {
                     retVal = null;
                 }
