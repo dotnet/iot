@@ -87,5 +87,21 @@ namespace Iot.Device.Nmea0183.Tests
 
             Assert.Empty(unknownSentenceTypes);
         }
+
+        [Theory]
+        [InlineData("$QPZDA,032402.258,,,,03E202,00,00*48")]
+        [InlineData("$QPZDA,036402.258,,,,03,200000000000000000000000002,00,00*48")]
+        [InlineData("$QPZDA,032402.258,,,,03,254444444444444444444442,00,00*48")]
+        public void MalformedZdaSentenceDoesNotThrow(string sentence)
+        {
+            DateTimeOffset lastMessageTime = DateTimeOffset.UtcNow;
+            var talkerSentence = TalkerSentence.FromSentenceString(sentence, TalkerId.Any, out var error);
+            if (talkerSentence != null)
+            {
+                // Should not throw - should return a RawSentence instead
+                var result = talkerSentence.TryGetTypedValue(ref lastMessageTime);
+                Assert.NotNull(result);
+            }
+        }
     }
 }
