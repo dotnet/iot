@@ -34,6 +34,36 @@ using (CanRaw can = new CanRaw())
 }
 ```
 
+### Reading a frame without blocking
+
+By default reading a frame blocks until data is available. Set `Blocking` to `false` to switch the
+socket to non-blocking mode. In this mode `TryReadFrame` returns `false` immediately when there is no
+frame to read.
+
+```csharp
+using (CanRaw can = new CanRaw())
+{
+    can.Blocking = false;
+    byte[] buffer = new byte[8];
+
+    while (true)
+    {
+        if (can.TryReadFrame(buffer, out int frameLength, out CanId id))
+        {
+            Span<byte> data = new Span<byte>(buffer, 0, frameLength);
+            string type = id.ExtendedFrameFormat ? "EFF" : "SFF";
+            string dataAsHex = string.Join("", data.ToArray().Select((x) => x.ToString("X2")));
+            Console.WriteLine($"Id: 0x{id.Value:X2} [{type}]: {dataAsHex}");
+        }
+        else
+        {
+            // No frame was available - do other work instead of blocking.
+            Thread.Sleep(10);
+        }
+    }
+}
+```
+
 ### Writing a frame
 
 ```csharp

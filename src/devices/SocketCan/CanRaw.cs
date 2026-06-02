@@ -19,6 +19,7 @@ namespace Iot.Device.SocketCan
     public class CanRaw : IDisposable
     {
         private SafeCanRawSocketHandle _handle;
+        private bool _blocking = true;
 
         /// <summary>
         /// Constructs CanRaw instance
@@ -27,6 +28,25 @@ namespace Iot.Device.SocketCan
         public CanRaw(string networkInterface = "can0")
         {
             _handle = new SafeCanRawSocketHandle(networkInterface);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether read operations block until a frame is available.
+        /// </summary>
+        /// <remarks>
+        /// When set to <see langword="true"/> (the default) <see cref="TryReadFrame(Span{byte}, out int, out CanId)"/>
+        /// blocks until a frame is received. When set to <see langword="false"/> the socket is switched to
+        /// non-blocking mode and <see cref="TryReadFrame(Span{byte}, out int, out CanId)"/> returns
+        /// <see langword="false"/> immediately when no frame is available to read.
+        /// </remarks>
+        public bool Blocking
+        {
+            get => _blocking;
+            set
+            {
+                Interop.SetBlocking(_handle, value);
+                _blocking = value;
+            }
         }
 
         /// <summary>
@@ -84,6 +104,14 @@ namespace Iot.Device.SocketCan
                 while (remainingBytes > 0)
                 {
                     int read = Interop.Read(_handle, (byte*)&frame, remainingBytes);
+                    if (read < 0)
+                    {
+                        // No data is available right now (non-blocking mode).
+                        id = default(CanId);
+                        frameLength = 0;
+                        return false;
+                    }
+
                     remainingBytes -= read;
                 }
             }
@@ -128,6 +156,12 @@ namespace Iot.Device.SocketCan
         public bool TryReadFrame(Span<byte> data, out int frameLength, out CanId id, out DateTimeOffset timestamp)
         {
             bool ret = TryReadFrame(data, out frameLength, out id);
+            if (!ret)
+            {
+                timestamp = default(DateTimeOffset);
+                return false;
+            }
+
             timestamp = Interop.GetLastTimeStamp(_handle);
             return ret;
         }
