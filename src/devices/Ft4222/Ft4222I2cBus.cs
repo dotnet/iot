@@ -94,7 +94,6 @@ namespace Iot.Device.Ft4222
                 throw new IOException($"Failed to initialize I2C Master mode on device: {DeviceInformation.Description}, status: {ftStatus}");
             }
         }
-        }
 
         internal void Read(int deviceAddress, Span<byte> buffer)
         {
