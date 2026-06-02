@@ -94,8 +94,10 @@ Once the `ProcessRunner` has been created and the command line has been configur
 The `ProcessSettingsFactory` exposes a few methods to prepare an instance of the `ProcessSettings` class with the correct application name.
 
 ```csharp
-var processSettings = ProcessSettingsFactory.CreateForLibcamerastill();
+var processSettings = ProcessSettingsFactory.CreateForStill();
 ```
+
+> **The `libcamera-*` applications have been renamed to `rpicam-*`** starting with `Raspberry Pi OS Bookworm`. The `CreateForStill`, `CreateForVid` and `CreateForStillAndStderr` methods automatically select the new `rpicam-*` applications when they are installed, falling back to the legacy `libcamera-*` names otherwise. If you want to force a specific naming, use `CreateForRpicamstill`/`CreateForRpicamvid` or `CreateForLibcamerastill`/`CreateForLibcameravid` respectively.
 
 In addition to the application name, the `ProcessSettings` has other two parameters:
 
@@ -174,10 +176,10 @@ The `try/catch` block is necessary because the `Dispose` method also cancel the 
 
 ### Listing the available cameras
 
-This code is only supported with the `libcamera` stack and can be used with the `libcamera-still` or `libcamera-vid` applications, but remember that those two apps send the text output on `stderr` and not `stdout`.
+This code is only supported with the `libcamera`/`rpicam` stack and can be used with the `libcamera-still`/`rpicam-still` or `libcamera-vid`/`rpicam-vid` applications, but remember that those apps send the text output on `stderr` and not `stdout`.
 
 ```csharp
-var processSettings = ProcessSettingsFactory.CreateForLibcamerastillAndStderr();
+var processSettings = ProcessSettingsFactory.CreateForStillAndStderr();
 using var proc = new ProcessRunner(processSettings);
 var text = await proc.ExecuteReadOutputAsStringAsync(string.Empty);
 IEnumerable<CameraInfo> cameras = await CameraInfo.From(text);

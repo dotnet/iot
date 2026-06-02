@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +36,29 @@ public static class ProcessSettingsFactory
     /// The process name of the libcamera application used to capture video streams on the Raspbian OS
     /// </summary>
     public const string LibcameraVid = "libcamera-vid";
+
+    /// <summary>
+    /// The process name of the rpicam application used to capture still pictures on the Raspbian OS.
+    /// This is the new name for the <see cref="LibcameraStill"/> application introduced with Raspberry Pi OS Bookworm.
+    /// </summary>
+    public const string RpicamStill = "rpicam-still";
+
+    /// <summary>
+    /// The process name of the rpicam application used to capture video streams on the Raspbian OS.
+    /// This is the new name for the <see cref="LibcameraVid"/> application introduced with Raspberry Pi OS Bookworm.
+    /// </summary>
+    public const string RpicamVid = "rpicam-vid";
+
+    /// <summary>
+    /// Returns true when the new rpicam-apps (rpicam-still / rpicam-vid) are available on the system path.
+    /// Starting with Raspberry Pi OS Bookworm the libcamera-* applications have been renamed to rpicam-*.
+    /// </summary>
+    /// <returns>True if the rpicam-apps are installed, otherwise false.</returns>
+    public static bool IsRpicamAppsInstalled()
+        => IsRpicamAppsInstalled(IsApplicationOnPath);
+
+    internal static bool IsRpicamAppsInstalled(Func<string, bool> applicationExists)
+        => applicationExists(RpicamStill) || applicationExists(RpicamVid);
 
     /// <summary>
     /// Creates a ProcessSettings instance targeting raspistill.
@@ -90,5 +114,97 @@ public static class ProcessSettingsFactory
         var settings = new ProcessSettings();
         settings.Filename = LibcameraVid;
         return settings;
+    }
+
+    /// <summary>
+    /// Creates a ProcessSettings instance targeting rpicam-still and capturing stderr.
+    /// </summary>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
+    public static ProcessSettings CreateForRpicamstillAndStderr()
+    {
+        var settings = new ProcessSettings();
+        settings.Filename = RpicamStill;
+        settings.CaptureStderrInsteadOfStdout = true;
+        return settings;
+    }
+
+    /// <summary>
+    /// Creates a ProcessSettings instance targeting rpicam-still.
+    /// </summary>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
+    public static ProcessSettings CreateForRpicamstill()
+    {
+        var settings = new ProcessSettings();
+        settings.Filename = RpicamStill;
+        return settings;
+    }
+
+    /// <summary>
+    /// Creates a ProcessSettings instance targeting rpicam-vid.
+    /// </summary>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
+    public static ProcessSettings CreateForRpicamvid()
+    {
+        var settings = new ProcessSettings();
+        settings.Filename = RpicamVid;
+        return settings;
+    }
+
+    /// <summary>
+    /// Creates a ProcessSettings instance for capturing still pictures using the libcamera/rpicam stack
+    /// and capturing stderr. The new rpicam-still application is used when available, otherwise the
+    /// legacy libcamera-still name is used (which remains available as a symbolic link on Bookworm).
+    /// </summary>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
+    public static ProcessSettings CreateForStillAndStderr()
+        => IsRpicamAppsInstalled() ? CreateForRpicamstillAndStderr() : CreateForLibcamerastillAndStderr();
+
+    /// <summary>
+    /// Creates a ProcessSettings instance for capturing still pictures using the libcamera/rpicam stack.
+    /// The new rpicam-still application is used when available, otherwise the legacy libcamera-still name
+    /// is used (which remains available as a symbolic link on Bookworm).
+    /// </summary>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
+    public static ProcessSettings CreateForStill()
+        => IsRpicamAppsInstalled() ? CreateForRpicamstill() : CreateForLibcamerastill();
+
+    /// <summary>
+    /// Creates a ProcessSettings instance for capturing video streams using the libcamera/rpicam stack.
+    /// The new rpicam-vid application is used when available, otherwise the legacy libcamera-vid name
+    /// is used (which remains available as a symbolic link on Bookworm).
+    /// </summary>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
+    public static ProcessSettings CreateForVid()
+        => IsRpicamAppsInstalled() ? CreateForRpicamvid() : CreateForLibcameravid();
+
+    private static bool IsApplicationOnPath(string fileName)
+    {
+        var pathVariable = Environment.GetEnvironmentVariable("PATH");
+        if (string.IsNullOrEmpty(pathVariable))
+        {
+            return false;
+        }
+
+        foreach (var directory in pathVariable!.Split(Path.PathSeparator))
+        {
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                continue;
+            }
+
+            try
+            {
+                if (File.Exists(Path.Combine(directory.Trim(), fileName)))
+                {
+                    return true;
+                }
+            }
+            catch (ArgumentException)
+            {
+                // Ignore invalid entries in the PATH variable
+            }
+        }
+
+        return false;
     }
 }

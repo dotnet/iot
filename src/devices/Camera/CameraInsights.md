@@ -87,12 +87,24 @@ The `OS` versions are listed here: [Raspbian OS versions](https://www.raspberryp
 
 The utilities to capture pictures or videos are fully [described in the documentation](https://www.raspberrypi.com/documentation/computers/camera_software.html). The two main utilities are the following:
 
-| Feature        | `raspicam` utilities | `libcamera` utilities |
-| -------------- | -------------------- | --------------------- |
-| Still pictures | `raspistill`         | `libcamera-still`     |
-| video          | `raspivid`           | `libcamera-vid`       |
+| Feature        | `raspicam` utilities | `libcamera` utilities | `rpicam` utilities |
+| -------------- | -------------------- | --------------------- | ------------------ |
+| Still pictures | `raspistill`         | `libcamera-still`     | `rpicam-still`     |
+| video          | `raspivid`           | `libcamera-vid`       | `rpicam-vid`       |
 
 The command line described in the documentation is very similar for both the stacks.
+
+### The `libcamera-*` to `rpicam-*` rename
+
+Starting with `Raspberry Pi OS Bookworm`, the `libcamera-apps` have been [renamed to `rpicam-apps`](https://github.com/raspberrypi/rpicam-apps/blob/main/README.md) (for example `libcamera-still` becomes `rpicam-still` and `libcamera-vid` becomes `rpicam-vid`). Users are encouraged to adopt the new application names as soon as possible.
+
+For backward compatibility, the older `libcamera-*` names are still provided on `Bookworm` as symbolic links pointing to the new `rpicam-*` executables, so existing code keeps working.
+
+The `ProcessSettingsFactory` exposes dedicated methods for each naming:
+
+- `CreateForLibcamerastill` / `CreateForLibcameravid` always use the legacy `libcamera-*` names.
+- `CreateForRpicamstill` / `CreateForRpicamvid` always use the new `rpicam-*` names.
+- `CreateForStill` / `CreateForVid` (and the related `*AndStderr` variants) automatically pick the `rpicam-*` applications when they are available on the system path, falling back to the `libcamera-*` names otherwise. These are the recommended methods because they keep working across all the supported OS releases.
 
 From `Bullseye` on, the `raspi-config` app allows to re-enable or disable the legacy camera stack.
 
