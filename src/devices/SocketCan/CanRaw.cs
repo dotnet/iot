@@ -107,7 +107,7 @@ namespace Iot.Device.SocketCan
                     if (read < 0)
                     {
                         // No data is available right now (non-blocking mode).
-                        id = default(CanId);
+                        id = default;
                         frameLength = 0;
                         return false;
                     }
@@ -158,7 +158,7 @@ namespace Iot.Device.SocketCan
             bool ret = TryReadFrame(data, out frameLength, out id);
             if (!ret)
             {
-                timestamp = default(DateTimeOffset);
+                timestamp = default;
                 return false;
             }
 
