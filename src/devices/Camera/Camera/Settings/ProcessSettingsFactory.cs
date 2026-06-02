@@ -185,7 +185,7 @@ public static class ProcessSettingsFactory
             return false;
         }
 
-        foreach (var directory in pathVariable!.Split(Path.PathSeparator))
+        foreach (var directory in pathVariable.Split(Path.PathSeparator))
         {
             if (string.IsNullOrWhiteSpace(directory))
             {
@@ -199,9 +199,9 @@ public static class ProcessSettingsFactory
                     return true;
                 }
             }
-            catch (ArgumentException)
+            catch (Exception)
             {
-                // Ignore invalid entries in the PATH variable
+                // Ignore invalid or inaccessible entries in the PATH variable
             }
         }
 
