@@ -1564,15 +1564,37 @@ namespace Iot.Device.BuildHat
         private string GetRawVersion()
         {
             PortWrite(GetFirmwareVersion);
-            PortReadLine();
-            return PortReadExisting();
+            return PortReadUntil(FirmwareVersion);
         }
 
         private string GetRawSignature()
         {
             PortWrite("signature\r");
-            PortReadLine();
-            return PortReadLine();
+            return PortReadUntil(FirmwareSignature);
+        }
+
+        // Reads complete lines from the port until one contains the expected
+        // marker. Relying on ReadLine (which waits for the newline terminator)
+        // instead of a fixed delay or ReadExisting makes the reads independent
+        // of the board speed and serial timing, which differ a lot between
+        // boards (for example a faster Raspberry Pi 5 may return before the
+        // firmware has answered). The firmware can prepend echo, prompt or
+        // asynchronous lines before the answer, so several lines may need to be
+        // skipped before the expected one is found.
+        private string PortReadUntil(string marker)
+        {
+            const int MaximumLines = 10;
+            string line = string.Empty;
+            for (int i = 0; i < MaximumLines; i++)
+            {
+                line = PortReadLine();
+                if (line.Contains(marker))
+                {
+                    break;
+                }
+            }
+
+            return line;
         }
 
         private string GetRawVoltage()
