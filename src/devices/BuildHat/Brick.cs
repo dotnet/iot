@@ -1583,6 +1583,9 @@ namespace Iot.Device.BuildHat
         // skipped before the expected one is found.
         private string PortReadUntil(string marker)
         {
+            // The expected answer normally comes within the first couple of
+            // lines; the extra budget covers echo, the prompt and any
+            // asynchronous port notifications that may be interleaved.
             const int MaximumLines = 10;
             string line = string.Empty;
             for (int i = 0; i < MaximumLines; i++)
