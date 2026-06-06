@@ -150,6 +150,14 @@ namespace Iot.Device.Nmea0183
                     FireOnParserError(x.Message, NmeaError.PortClosed);
                     continue;
                 }
+                catch (InvalidOperationException x)
+                {
+                    // NetworkStream throws this (rather than ObjectDisposedException) when the underlying
+                    // stream has been disposed and is no longer readable (CanRead == false). This can
+                    // happen during StopDecode while the parser thread is blocked inside ReadLine().
+                    FireOnParserError(x.Message, NmeaError.PortClosed);
+                    continue;
+                }
 
                 if (currentLine == null)
                 {
@@ -160,7 +168,7 @@ namespace Iot.Device.Nmea0183
                             FireOnParserError("End of stream detected.", NmeaError.PortClosed);
                         }
                     }
-                    catch (Exception x) when (x is IOException || x is ObjectDisposedException)
+                    catch (Exception x) when (x is IOException || x is ObjectDisposedException || x is InvalidOperationException)
                     {
                         // Ignore here (already reported above)
                     }
