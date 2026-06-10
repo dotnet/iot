@@ -14,7 +14,7 @@
     <SystemMemoryPackageVersion>4.6.3</SystemMemoryPackageVersion>
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.1</MicrosoftExtensionsLoggingConsolePackageVersion>
-    <MicrosoftExtensionsLoggingPackageVersion>10.0.8</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>10.0.9</MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsLoggingAbstractionsPackageVersion>10.0.8</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
     <SystemTextJsonPackageVersion>10.0.8</SystemTextJsonPackageVersion>
     <SystemIOPipelinesVersion>10.0.9</SystemIOPipelinesVersion>
