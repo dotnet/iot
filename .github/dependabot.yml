@@ -1,9 +1,17 @@
 # Dependabot configuration for the dotnet/iot repository.
 #
 # All NuGet projects across the repo (except /eng/common, which is
-# Arcade-maintained) are scanned by a single update block. Minor and patch
-# bumps are bundled into a single weekly PR; major bumps fall out as
-# individual PRs so breaking-change risk can be evaluated in isolation.
+# Arcade-maintained) are scanned by a single update block. PRs are bundled
+# into two groups:
+#
+#   - dotnet-runtime  -> System.* and Microsoft.Extensions.*
+#                        (any version bump, including majors — these all ship
+#                        together on the .NET release train, so a major like
+#                        9.x -> 10.x lands across them simultaneously and is
+#                        best reviewed as one PR).
+#   - all-dependencies -> everything else, minor/patch only. Majors of these
+#                         packages fall out as individual PRs so breaking-
+#                         change risk gets dedicated review.
 #
 # Arcade packages (Microsoft.DotNet.*) are ignored entirely — those SDKs
 # are updated outside of Dependabot via the standard Arcade flow.
@@ -20,9 +28,16 @@ updates:
     ignore:
       - dependency-name: "Microsoft.DotNet.*"
     groups:
+      dotnet-runtime:
+        patterns:
+          - "System.*"
+          - "Microsoft.Extensions.*"
       all-dependencies:
         patterns:
           - "*"
+        exclude-patterns:
+          - "System.*"
+          - "Microsoft.Extensions.*"
         update-types:
           - "minor"
           - "patch"
