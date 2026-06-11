@@ -1,20 +1,12 @@
 # Dependabot configuration for the dotnet/iot repository.
 #
-# All NuGet projects across samples, tests, and tools are scanned by a single
-# update block using the `directories:` (plural) field. Updates are bundled
-# into a small number of grouped PRs instead of one PR per package per folder.
+# All NuGet projects across the repo (except /eng/common, which is
+# Arcade-maintained) are scanned by a single update block. Minor and patch
+# bumps are bundled into a single weekly PR; major bumps fall out as
+# individual PRs so breaking-change risk can be evaluated in isolation.
 #
-# Grouping strategy:
-#   - arcade            -> Microsoft.DotNet.* and Microsoft.Build.Traversal
-#                          (always released together as part of Arcade).
-#   - dotnet-runtime    -> System.* and Microsoft.Extensions.* packages
-#                          (shipped together as part of the .NET release train).
-#   - xunit             -> xunit and its runners/analyzers.
-#   - skiasharp         -> SkiaSharp and its native asset packages.
-#   - other-minor-patch -> catch-all for any remaining minor/patch updates.
-#
-# Major version bumps are intentionally NOT grouped: they get their own PRs
-# so breaking-change risk can be evaluated individually.
+# Arcade packages (Microsoft.DotNet.*) are ignored entirely — those SDKs
+# are updated outside of Dependabot via the standard Arcade flow.
 version: 2
 updates:
   - package-ecosystem: "nuget"
@@ -25,47 +17,12 @@ updates:
       interval: "weekly"
       day: "wednesday"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "Microsoft.DotNet.*"
     groups:
-      arcade:
-        patterns:
-          - "Microsoft.DotNet.*"
-          - "Microsoft.Build.Traversal"
-        update-types:
-          - "minor"
-          - "patch"
-      dotnet-runtime:
-        patterns:
-          - "System.*"
-          - "Microsoft.Extensions.*"
-        update-types:
-          - "minor"
-          - "patch"
-      xunit:
-        patterns:
-          - "xunit"
-          - "xunit.*"
-        update-types:
-          - "minor"
-          - "patch"
-      skiasharp:
-        patterns:
-          - "SkiaSharp"
-          - "SkiaSharp.*"
-        update-types:
-          - "minor"
-          - "patch"
-      other-minor-patch:
+      all-dependencies:
         patterns:
           - "*"
-        exclude-patterns:
-          - "Microsoft.DotNet.*"
-          - "Microsoft.Build.Traversal"
-          - "System.*"
-          - "Microsoft.Extensions.*"
-          - "xunit"
-          - "xunit.*"
-          - "SkiaSharp"
-          - "SkiaSharp.*"
         update-types:
           - "minor"
           - "patch"
