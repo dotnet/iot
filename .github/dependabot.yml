@@ -19,12 +19,8 @@ version: 2
 updates:
   - package-ecosystem: "nuget"
     directories:
-      - "/samples/*"
-      - "/src/System.Device.Gpio.Tests"
-      - "/src/devices/*/tests"
-      - "/src/devices/*/samples"
-      - "/tools/DevicesApiTester"
-      - "/tools/templates/DeviceBindingTemplate/dotnet_new_device-binding_csharp/tests"
+      - "/**"
+      - "!/eng/common/**"
     schedule:
       interval: "weekly"
       day: "wednesday"
