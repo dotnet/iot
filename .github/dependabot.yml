@@ -16,7 +16,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "wednesday"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     ignore:
       - dependency-name: "Microsoft.DotNet.*"
     groups:
