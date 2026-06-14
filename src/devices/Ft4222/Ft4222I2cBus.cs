@@ -16,12 +16,30 @@ namespace Iot.Device.Ft4222
     /// <summary>
     /// FT4222 I2C Device
     /// </summary>
-    internal class Ft4222I2cBus : I2cBus
+    public class Ft4222I2cBus : I2cBus
     {
-        private const uint I2cMasterFrequencyKbps = 400;
+        /// <summary>
+        /// The default I2C master clock frequency in kbps used when none is specified.
+        /// </summary>
+        public const uint DefaultI2cMasterFrequencyKbps = 400;
+
+        /// <summary>
+        /// The minimum I2C master clock frequency in kbps supported by the FT4222.
+        /// </summary>
+        public const uint MinimumI2cMasterFrequencyKbps = 60;
+
+        /// <summary>
+        /// The maximum I2C master clock frequency in kbps supported by the FT4222.
+        /// </summary>
+        public const uint MaximumI2cMasterFrequencyKbps = 3400;
 
         private readonly Dictionary<int, I2cDevice> _usedAddresses = new Dictionary<int, I2cDevice>();
         private SafeFtHandle _ftHandle;
+
+        /// <summary>
+        /// Gets the I2C master clock frequency in kbps used by this bus.
+        /// </summary>
+        public uint I2cMasterFrequencyKbps { get; }
 
         /// <summary>
         /// Store the FTDI Device Information
@@ -29,11 +47,28 @@ namespace Iot.Device.Ft4222
         public Ft4222Device DeviceInformation { get; private set; }
 
         /// <summary>
-        /// Create a FT4222 I2C Device
+        /// Create a FT4222 I2C device using the default I2C master clock frequency.
         /// </summary>
         /// <param name="deviceInformation">Device information. Use FtCommon.GetDevices to get it.</param>
         public Ft4222I2cBus(Ft4222Device deviceInformation)
+            : this(deviceInformation, DefaultI2cMasterFrequencyKbps)
         {
+        }
+
+        /// <summary>
+        /// Create a FT4222 I2C device using the specified I2C master clock frequency.
+        /// </summary>
+        /// <param name="deviceInformation">Device information. Use FtCommon.GetDevices to get it.</param>
+        /// <param name="i2cMasterFrequencyKbps">The I2C master clock frequency in kbps. Supported range is 60 to 3400 kbps.</param>
+        public Ft4222I2cBus(Ft4222Device deviceInformation, uint i2cMasterFrequencyKbps)
+        {
+            if (i2cMasterFrequencyKbps < MinimumI2cMasterFrequencyKbps || i2cMasterFrequencyKbps > MaximumI2cMasterFrequencyKbps)
+            {
+                throw new ArgumentOutOfRangeException(nameof(i2cMasterFrequencyKbps), i2cMasterFrequencyKbps, $"I2C master clock frequency must be between {MinimumI2cMasterFrequencyKbps} and {MaximumI2cMasterFrequencyKbps} KHz.");
+            }
+
+            I2cMasterFrequencyKbps = i2cMasterFrequencyKbps;
+
             switch (deviceInformation.Type)
             {
                 case FtDeviceType.Ft4222HMode0or2With2Interfaces:
@@ -143,6 +178,7 @@ namespace Iot.Device.Ft4222
             _ftHandle = null!;
         }
 
+        /// <inheritdoc />
         public override ComponentInformation QueryComponentInformation()
         {
             var self = new ComponentInformation(this, "FT4222 I2C Bus driver");

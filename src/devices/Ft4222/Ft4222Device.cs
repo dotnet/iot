@@ -17,6 +17,12 @@ namespace Iot.Device.Ft4222
     public class Ft4222Device : FtDevice
     {
         /// <summary>
+        /// Gets or sets the I2C master clock frequency in kbps used when creating an I2C bus.
+        /// Supported range is 60 to 3400 kbps. Defaults to 400 kbps.
+        /// </summary>
+        public uint I2cBusFrequencyKbps { get; set; } = Ft4222I2cBus.DefaultI2cMasterFrequencyKbps;
+
+        /// <summary>
         /// Gets all the FT4222 connected
         /// </summary>
         /// <returns>A list of FT4222</returns>
@@ -69,7 +75,7 @@ namespace Iot.Device.Ft4222
                 throw new ArgumentOutOfRangeException(nameof(busNumber));
             }
 
-            return new I2cBusManager(this, busNumber, pins, new Ft4222I2cBus(this));
+            return new I2cBusManager(this, busNumber, pins, new Ft4222I2cBus(this, I2cBusFrequencyKbps));
         }
 
         /// <inheritdoc />
