@@ -64,7 +64,7 @@ namespace Iot.Device.Ft4222
         {
             if (i2cMasterFrequencyKbps < MinimumI2cMasterFrequencyKbps || i2cMasterFrequencyKbps > MaximumI2cMasterFrequencyKbps)
             {
-                throw new ArgumentOutOfRangeException(nameof(i2cMasterFrequencyKbps), $"I2C master clock frequency must be between {MinimumI2cMasterFrequencyKbps} and {MaximumI2cMasterFrequencyKbps} kbps.");
+                throw new ArgumentOutOfRangeException(nameof(i2cMasterFrequencyKbps), i2cMasterFrequencyKbps, $"I2C master clock frequency must be between {MinimumI2cMasterFrequencyKbps} and {MaximumI2cMasterFrequencyKbps} KHz.");
             }
 
             I2cMasterFrequencyKbps = i2cMasterFrequencyKbps;

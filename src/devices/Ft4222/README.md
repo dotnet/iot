@@ -94,7 +94,7 @@ if (bme280.TryReadTemperature(out Temperature temperature))
 }
 ```
 
-By default, the I2C bus is initialized at 400 kbps. You can change the I2C master clock frequency (supported range is 60 to 3400 kbps) by setting `I2cBusFrequencyKbps` on the `Ft4222Device` before creating the bus:
+By default, the I2C bus is initialized at 400 KHz. You can change the I2C master clock frequency (supported range is 60 to 3400 KHz) by setting `I2cBusFrequencyKbps` on the `Ft4222Device` before creating the bus:
 
 ```csharp
 Ft4222Device device = new Ft4222Device(FtCommon.GetDevices()[0]);
