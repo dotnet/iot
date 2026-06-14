@@ -178,6 +178,7 @@ namespace Iot.Device.Ft4222
             _ftHandle = null!;
         }
 
+        /// <inheritdoc />
         public override ComponentInformation QueryComponentInformation()
         {
             var self = new ComponentInformation(this, "FT4222 I2C Bus driver");
