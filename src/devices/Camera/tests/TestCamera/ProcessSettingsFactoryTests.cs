@@ -55,47 +55,47 @@ public class ProcessSettingsFactoryTests
     /// when they are available, otherwise fall back to the libcamera-* names.
     /// </summary>
     [Fact]
-public void AutoFactoryMethodsPreferRpicamWhenAvailable()
-{
-    var originalPath = Environment.GetEnvironmentVariable("PATH");
-    var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-
-    try
+    public void AutoFactoryMethodsPreferRpicamWhenAvailable()
     {
-        System.IO.Directory.CreateDirectory(tempDir);
-
-        // Start from a controlled PATH so the test is deterministic regardless of the agent environment.
-        Environment.SetEnvironmentVariable("PATH", tempDir);
-
-        // No rpicam-* present => fallback to libcamera-*.
-        Assert.Equal(ProcessSettingsFactory.LibcameraStill, ProcessSettingsFactory.CreateForStill().Filename);
-        Assert.Equal(ProcessSettingsFactory.LibcameraVid, ProcessSettingsFactory.CreateForVid().Filename);
-
-        // Only rpicam-still present => still picks rpicam-still, vid keeps falling back.
-        System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, ProcessSettingsFactory.RpicamStill), string.Empty);
-        Assert.Equal(ProcessSettingsFactory.RpicamStill, ProcessSettingsFactory.CreateForStill().Filename);
-        Assert.Equal(ProcessSettingsFactory.LibcameraVid, ProcessSettingsFactory.CreateForVid().Filename);
-
-        // Add rpicam-vid too => vid picks rpicam-vid.
-        System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, ProcessSettingsFactory.RpicamVid), string.Empty);
-        Assert.Equal(ProcessSettingsFactory.RpicamVid, ProcessSettingsFactory.CreateForVid().Filename);
-
-        var stderr = ProcessSettingsFactory.CreateForStillAndStderr();
-        Assert.Equal(ProcessSettingsFactory.RpicamStill, stderr.Filename);
-        Assert.True(stderr.CaptureStderrInsteadOfStdout);
-    }
-    finally
-    {
-        Environment.SetEnvironmentVariable("PATH", originalPath);
+        var originalPath = Environment.GetEnvironmentVariable("PATH");
+        var tempDir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
         try
         {
-            System.IO.Directory.Delete(tempDir, recursive: true);
+            System.IO.Directory.CreateDirectory(tempDir);
+
+            // Start from a controlled PATH so the test is deterministic regardless of the agent environment.
+            Environment.SetEnvironmentVariable("PATH", tempDir);
+
+            // No rpicam-* present => fallback to libcamera-*.
+            Assert.Equal(ProcessSettingsFactory.LibcameraStill, ProcessSettingsFactory.CreateForStill().Filename);
+            Assert.Equal(ProcessSettingsFactory.LibcameraVid, ProcessSettingsFactory.CreateForVid().Filename);
+
+            // Only rpicam-still present => still picks rpicam-still, vid keeps falling back.
+            System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, ProcessSettingsFactory.RpicamStill), string.Empty);
+            Assert.Equal(ProcessSettingsFactory.RpicamStill, ProcessSettingsFactory.CreateForStill().Filename);
+            Assert.Equal(ProcessSettingsFactory.LibcameraVid, ProcessSettingsFactory.CreateForVid().Filename);
+
+            // Add rpicam-vid too => vid picks rpicam-vid.
+            System.IO.File.WriteAllText(System.IO.Path.Combine(tempDir, ProcessSettingsFactory.RpicamVid), string.Empty);
+            Assert.Equal(ProcessSettingsFactory.RpicamVid, ProcessSettingsFactory.CreateForVid().Filename);
+
+            var stderr = ProcessSettingsFactory.CreateForStillAndStderr();
+            Assert.Equal(ProcessSettingsFactory.RpicamStill, stderr.Filename);
+            Assert.True(stderr.CaptureStderrInsteadOfStdout);
         }
-        catch
+        finally
         {
-            // Best-effort cleanup
+            Environment.SetEnvironmentVariable("PATH", originalPath);
+
+            try
+            {
+                System.IO.Directory.Delete(tempDir, recursive: true);
+            }
+            catch
+            {
+                // Best-effort cleanup
+            }
         }
     }
-}
 }

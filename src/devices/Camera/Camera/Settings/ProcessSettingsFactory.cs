@@ -156,8 +156,8 @@ public static class ProcessSettingsFactory
     /// legacy libcamera-still name is used (which remains available as a symbolic link on Bookworm).
     /// </summary>
     /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
-public static ProcessSettings CreateForStillAndStderr()
-    => IsApplicationOnPath(RpicamStill) ? CreateForRpicamstillAndStderr() : CreateForLibcamerastillAndStderr();
+    public static ProcessSettings CreateForStillAndStderr()
+        => IsApplicationOnPath(RpicamStill) ? CreateForRpicamstillAndStderr() : CreateForLibcamerastillAndStderr();
 
     /// <summary>
     /// Creates a ProcessSettings instance for capturing still pictures using the libcamera/rpicam stack.
@@ -165,8 +165,8 @@ public static ProcessSettings CreateForStillAndStderr()
     /// is used (which remains available as a symbolic link on Bookworm).
     /// </summary>
     /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
-public static ProcessSettings CreateForStill()
-    => IsApplicationOnPath(RpicamStill) ? CreateForRpicamstill() : CreateForLibcamerastill();
+    public static ProcessSettings CreateForStill()
+        => IsApplicationOnPath(RpicamStill) ? CreateForRpicamstill() : CreateForLibcamerastill();
 
     /// <summary>
     /// Creates a ProcessSettings instance for capturing video streams using the libcamera/rpicam stack.
@@ -174,8 +174,8 @@ public static ProcessSettings CreateForStill()
     /// is used (which remains available as a symbolic link on Bookworm).
     /// </summary>
     /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
-public static ProcessSettings CreateForVid()
-    => IsApplicationOnPath(RpicamVid) ? CreateForRpicamvid() : CreateForLibcameravid();
+    public static ProcessSettings CreateForVid()
+        => IsApplicationOnPath(RpicamVid) ? CreateForRpicamvid() : CreateForLibcameravid();
 
     private static bool IsApplicationOnPath(string fileName)
     {
