@@ -37,8 +37,8 @@ static void Main(string[] args)
     // using (DCMotor motor = DCMotor.Create(PwmChannel.Create(0, 0, frequency: 50), 23, 24))
     // Start Stop mode - wrapper with additional methods to disable/enable output regardless of the Speed value
     // using (DCMotorWithStartStop motor = new DCMotorWithStartStop(DCMotor.Create( _any version above_ )))
-    // Pin numbers use the logical (BCM) numbering scheme. See the Wiring section below.
-    // 3 pin mode: 6 -> ENA (enable/PWM), 27 -> IN1, 22 -> IN2 on the H-bridge.
+    // Pin numbers use the logical (BCM) numbering scheme (GPIOxx). See the Wiring section below.
+    // 3 pin mode: GPIO6 -> ENA (pin 6, enable/PWM), GPIO27 -> IN1 (pin 5), GPIO22 -> IN2 (pin 7) on the H-bridge.
     using (DCMotor motor = DCMotor.Create(6, 27, 22))
     {
         bool done = false;
@@ -70,15 +70,15 @@ static void Main(string[] args)
 
 ## Wiring
 
-All pin numbers passed to `DCMotor.Create` use the **logical (BCM/Broadcom)** GPIO numbering scheme, not the physical header positions. See the [Raspberry Pi GPIO pinout](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio) to map BCM numbers to physical pins.
+All pin numbers passed to `DCMotor.Create` use the **logical (BCM/Broadcom)** GPIO numbering scheme (referred to as `GPIOxx`, e.g. `GPIO6`), not the physical header positions. See the [Raspberry Pi GPIO pinout](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio) to map `GPIOxx` numbers to physical pins.
 
-The 3-pin sample `DCMotor.Create(6, 27, 22)` connects to an H-bridge (e.g. L298N) as follows:
+The 3-pin sample `DCMotor.Create(6, 27, 22)` connects to an H-bridge (e.g. the L298 IC) as follows:
 
-| `Create` argument | BCM pin | H-bridge input | Purpose |
-| ----------------- | ------- | -------------- | ------- |
-| `speedControlPin` | 6       | ENA (enable)   | PWM speed control |
-| `directionPin`    | 27      | IN1            | Motor direction |
-| `otherDirectionPin` | 22    | IN2            | Opposite of IN1 |
+| `Create` argument | Raspberry Pi pin | H-bridge input (pin) | Purpose |
+| ----------------- | ---------------- | -------------------- | ------- |
+| `speedControlPin` | GPIO6            | ENA (pin 6)          | PWM speed control |
+| `directionPin`    | GPIO27           | IN1 (pin 5)          | Motor direction |
+| `otherDirectionPin` | GPIO22         | IN2 (pin 7)          | Opposite of IN1 |
 
 The rest of the wiring:
 
