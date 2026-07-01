@@ -74,7 +74,7 @@ public class PumpController : IDisposable
     private MotorHat _motorHat = new MotorHat();
     private List<DCMotor> _motors = new List<DCMotor>();
 
-    public void Initialise()
+    public void Initialize()
     {
         _motors.Add(_motorHat.CreateDCMotor(1));
     }
