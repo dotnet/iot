@@ -9,6 +9,11 @@ namespace Iot.Device.Common.Tests
 {
     public class DelayHelperTest
     {
+        // Timing tests only verify the guaranteed lower bound (the helper waits for *at least* the
+        // requested time). A small, consistent tolerance absorbs the resolution of the underlying
+        // timer and the conversion between Stopwatch ticks and TimeSpan ticks.
+        private static readonly TimeSpan Tolerance = TimeSpan.FromMilliseconds(1);
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -20,10 +25,8 @@ namespace Iot.Device.Common.Tests
             DelayHelper.Delay(requested, allowThreadYield);
             stopwatch.Stop();
 
-            // The helper guarantees to wait for *at least* the requested time. A small tolerance is
-            // allowed to account for the resolution of the underlying timer.
             Assert.True(
-                stopwatch.Elapsed >= requested - TimeSpan.FromMilliseconds(2),
+                stopwatch.Elapsed >= requested - Tolerance,
                 $"Expected to wait at least {requested.TotalMilliseconds}ms but only waited {stopwatch.Elapsed.TotalMilliseconds}ms.");
         }
 
@@ -38,7 +41,7 @@ namespace Iot.Device.Common.Tests
             stopwatch.Stop();
 
             Assert.True(
-                stopwatch.Elapsed >= requested - TimeSpan.FromMilliseconds(1),
+                stopwatch.Elapsed >= requested - Tolerance,
                 $"Expected to wait at least {requested.TotalMilliseconds}ms but only waited {stopwatch.Elapsed.TotalMilliseconds}ms.");
         }
     }
