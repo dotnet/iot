@@ -1,13 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using System.Threading;
 
-namespace System.Device
+namespace Iot.Device
 {
     /// <summary>
-    /// Helpers for short waits.
+    /// Helpers for short, high precision waits. Prefer these over <see cref="Thread.Sleep(int)"/> when a device
+    /// binding needs to honor sub-millisecond timing requirements from a datasheet.
     /// </summary>
     static partial class DelayHelper
     {
@@ -79,7 +81,15 @@ namespace System.Device
         /// True to allow yielding the thread. If this is set to false, on single-proc systems
         /// this will prevent all other code from running.
         /// </param>
+        /// <remarks>
+        /// This overload is intended for internal use only. For millisecond scale waits prefer
+        /// <see cref="Thread.Sleep(int)"/>, which lets the operating system schedule other work.
+        /// </remarks>
+#if BUILDING_IOT_DEVICE_BINDINGS
+        internal static void DelayMilliseconds(int milliseconds, bool allowThreadYield)
+#else
         public static void DelayMilliseconds(int milliseconds, bool allowThreadYield)
+#endif
         {
             /* We have this as a separate method for now to make calling code clearer
              * and to allow us to add additional logic to the millisecond wait in the
