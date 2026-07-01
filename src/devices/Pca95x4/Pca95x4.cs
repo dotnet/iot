@@ -4,14 +4,25 @@
 using System;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Threading;
 
 namespace Iot.Device.Pca95x4
 {
     /// <summary>
     /// A general purpose parallel I/O expansion for I2C applications.
     /// </summary>
-    public class Pca95x4 : IDisposable
+    /// <remarks>
+    /// This binding derives from <see cref="GpioDriver"/> so the expander pins can be accessed
+    /// through a standard <see cref="GpioController"/> (for example <c>new GpioController(pca95x4)</c>),
+    /// in addition to the lower level register access methods exposed directly on this type.
+    /// </remarks>
+    public class Pca95x4 : GpioDriver
     {
+        /// <summary>
+        /// The number of GPIO pins provided by the PCA95x4.
+        /// </summary>
+        private const int PinCountConst = 8;
+
         private readonly int? _interrupt;
         private I2cDevice _i2cDevice;
         private GpioController? _controller = null;
@@ -164,7 +175,7 @@ namespace Iot.Device.Pca95x4
         public void InvertInputRegisterBitPolarity(int bitNumber, bool invert) => WriteBit(Register.PolarityInversion, bitNumber, invert);
 
         /// <inheritdoc/>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
             _i2cDevice = null!;
@@ -173,6 +184,60 @@ namespace Iot.Device.Pca95x4
                 _controller?.Dispose();
                 _controller = null;
             }
+
+            base.Dispose(disposing);
         }
+
+        /// <inheritdoc/>
+        protected override int PinCount => PinCountConst;
+
+        /// <inheritdoc/>
+        protected override void OpenPin(int pinNumber) => ValidateBitNumber(pinNumber);
+
+        /// <inheritdoc/>
+        protected override void ClosePin(int pinNumber)
+        {
+            // No hardware action required, the pin state is kept in the device registers.
+        }
+
+        /// <inheritdoc/>
+        protected override void SetPinMode(int pinNumber, PinMode mode)
+        {
+            if (!IsPinModeSupported(pinNumber, mode))
+            {
+                throw new ArgumentException($"The pin mode {mode} is not supported.", nameof(mode));
+            }
+
+            // A set bit in the Configuration register enables the pin as an input, a cleared bit as an output.
+            WriteBit(Register.Configuration, pinNumber, mode == PinMode.Input);
+        }
+
+        /// <inheritdoc/>
+        protected override PinMode GetPinMode(int pinNumber) =>
+            ReadBit(Register.Configuration, pinNumber) ? PinMode.Input : PinMode.Output;
+
+        /// <inheritdoc/>
+        protected override bool IsPinModeSupported(int pinNumber, PinMode mode) =>
+            mode == PinMode.Input || mode == PinMode.Output;
+
+        /// <inheritdoc/>
+        protected override PinValue Read(int pinNumber) =>
+            ReadBit(Register.InputPort, pinNumber) ? PinValue.High : PinValue.Low;
+
+        /// <inheritdoc/>
+        protected override void Write(int pinNumber, PinValue value) =>
+            WriteBit(Register.OutputPort, pinNumber, value == PinValue.High);
+
+        /// <inheritdoc/>
+        protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) =>
+            throw new NotImplementedException();
+
+        /// <inheritdoc/>
+        protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) =>
+            throw new NotImplementedException();
+
+        /// <inheritdoc/>
+        protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) =>
+            throw new NotImplementedException();
     }
 }
