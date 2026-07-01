@@ -146,11 +146,15 @@ namespace Iot.Device.Pca95x4.Tests
                 {
                     _registers[_address] = buffer[1];
 
-                    // On real hardware the Input Port reflects the actual pin levels, including
-                    // those driven by the Output Port. Mirror that behaviour for output pins.
+                    // On real hardware the Input Port reflects the actual pin levels. Pins configured
+                    // as outputs (a cleared Configuration bit) are driven by the Output Port, while
+                    // pins configured as inputs (a set Configuration bit) keep their external level.
                     if (_address == (int)Register.OutputPort)
                     {
-                        _registers[(int)Register.InputPort] = buffer[1];
+                        byte configuration = _registers[(int)Register.Configuration];
+                        byte input = _registers[(int)Register.InputPort];
+                        _registers[(int)Register.InputPort] =
+                            (byte)((input & configuration) | (buffer[1] & ~configuration));
                     }
                 }
             }

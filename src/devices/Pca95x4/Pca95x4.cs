@@ -230,14 +230,14 @@ namespace Iot.Device.Pca95x4
 
         /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) =>
-            throw new NotImplementedException();
+            throw new NotImplementedException("Event-based GPIO operations are not supported by the PCA95x4 driver.");
 
         /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) =>
-            throw new NotImplementedException();
+            throw new NotImplementedException("Event-based GPIO operations are not supported by the PCA95x4 driver.");
 
         /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) =>
-            throw new NotImplementedException();
+            throw new NotImplementedException("Event-based GPIO operations are not supported by the PCA95x4 driver.");
     }
 }
