@@ -134,7 +134,7 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
         {
             var sourceBmp = (SkiaSharpBitmap)source;
             var targetCanvas = GetCanvas(graphics);
-            targetCanvas.DrawBitmap(sourceBmp.WrappedBitmap, x, y, null);
+            targetCanvas.DrawBitmap(sourceBmp.WrappedBitmap, x, y, SKSamplingOptions.Default, null);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
                 canvas.Translate(rotatedWidth / 2.0f, rotatedHeight / 2.0f);
                 canvas.RotateDegrees((float)angle);
                 canvas.Translate(-originalWidth / 2.0f, -originalHeight / 2.0f);
-                canvas.DrawBitmap(img.WrappedBitmap, new SKPoint());
+                canvas.DrawBitmap(img.WrappedBitmap, new SKPoint(), SKSamplingOptions.Default, null);
             }
 
             PixelFormat pf = img.WrappedBitmap.ColorType switch
@@ -191,7 +191,7 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
             var sourceBmp = (SkiaSharpBitmap)source;
             var targetCanvas = GetCanvas(graphics);
             targetCanvas.DrawBitmap(sourceBmp.WrappedBitmap, new SKRect(sourceRectangle.Left, sourceRectangle.Top, sourceRectangle.Right, sourceRectangle.Bottom),
-                new SKRect(targetRectangle.Left, targetRectangle.Top, targetRectangle.Right, targetRectangle.Bottom));
+                new SKRect(targetRectangle.Left, targetRectangle.Top, targetRectangle.Right, targetRectangle.Bottom), SKSamplingOptions.Default, null);
         }
 
         /// <summary>
