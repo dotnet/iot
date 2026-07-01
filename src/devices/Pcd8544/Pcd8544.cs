@@ -778,7 +778,6 @@ namespace Iot.Device.Display
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null!;
             }
             else
             {
@@ -801,6 +800,7 @@ namespace Iot.Device.Display
                 }
             }
 
+            _controller = null!;
             _spiDevice?.Dispose();
             _spiDevice = null!;
             _pwmBacklight?.Dispose();

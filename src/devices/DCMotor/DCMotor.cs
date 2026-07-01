@@ -266,8 +266,9 @@ namespace Iot.Device.DCMotor
             if (_shouldDispose)
             {
                 Controller?.Dispose();
-                Controller = null!;
             }
+
+            Controller = null!;
         }
     }
 }

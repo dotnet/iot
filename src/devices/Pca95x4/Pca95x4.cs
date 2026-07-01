@@ -171,8 +171,9 @@ namespace Iot.Device.Pca95x4
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
             }
+
+            _controller = null;
         }
     }
 }

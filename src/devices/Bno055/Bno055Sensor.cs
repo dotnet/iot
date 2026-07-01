@@ -563,8 +563,9 @@ namespace Iot.Device.Bno055
             if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null!;
             }
+
+            _i2cDevice = null!;
         }
 
         private void WriteReg(Registers reg, byte param) => _i2cDevice.Write(new byte[] { (byte)reg, param });

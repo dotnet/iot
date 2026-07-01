@@ -1169,8 +1169,9 @@ namespace Iot.Device.Vl53L0X
             if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null!;
             }
+
+            _i2cDevice = null!;
         }
 
         private void WriteRegister(byte reg, byte param)

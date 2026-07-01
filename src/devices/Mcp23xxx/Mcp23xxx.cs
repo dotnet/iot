@@ -253,12 +253,13 @@ namespace Iot.Device.Mcp23xxx
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
 
                 _pinValues.Clear();
                 _bus?.Dispose();
-                _bus = null!;
             }
+
+            _controller = null;
+            _bus = null!;
 
             base.Dispose(disposing);
         }

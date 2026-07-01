@@ -676,8 +676,9 @@ namespace Iot.Device.Mcp25xxx
             if (_shouldDispose)
             {
                 _gpioController?.Dispose();
-                _gpioController = null;
             }
+
+            _gpioController = null;
 
             _spiDevice?.Dispose();
             _spiDevice = null!;

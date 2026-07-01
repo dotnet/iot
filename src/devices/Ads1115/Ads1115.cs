@@ -641,8 +641,9 @@ namespace Iot.Device.Ads1115
             if (_shouldDispose)
             {
                 _gpioController?.Dispose();
-                _gpioController = null;
             }
+
+            _gpioController = null;
         }
     }
 }
