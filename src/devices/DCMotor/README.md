@@ -70,7 +70,7 @@ static void Main(string[] args)
 
 ## Wiring
 
-All pin numbers passed to `DCMotor.Create` use the **logical (BCM/Broadcom)** GPIO numbering scheme, not the physical header positions.
+All pin numbers passed to `DCMotor.Create` use the **logical (BCM/Broadcom)** GPIO numbering scheme, not the physical header positions. See the [Raspberry Pi GPIO pinout](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio) to map BCM numbers to physical pins.
 
 The 3-pin sample `DCMotor.Create(6, 27, 22)` connects to an H-bridge (e.g. L298N) as follows:
 
@@ -80,7 +80,13 @@ The 3-pin sample `DCMotor.Create(6, 27, 22)` connects to an H-bridge (e.g. L298N
 | `directionPin`    | 27      | IN1            | Motor direction |
 | `otherDirectionPin` | 22    | IN2            | Opposite of IN1 |
 
-The H-bridge outputs drive the motor, the motor power supply connects to the H-bridge (never directly to the board), and the board and H-bridge grounds are connected together. See the diagram below.
+The rest of the wiring:
+
+- The H-bridge outputs drive the motor.
+- The motor power supply connects to the H-bridge (never directly to the board).
+- The board and H-bridge grounds are connected together.
+
+See the diagram below.
 
 ![schematics](./dcmotor_bb.png)
 
