@@ -226,8 +226,9 @@ namespace Iot.Device.Spi
             if (_shouldDispose)
             {
                 _gpioController?.Dispose();
-                _gpioController = null!;
             }
+
+            _gpioController = null!;
 
             base.Dispose(disposing);
         }

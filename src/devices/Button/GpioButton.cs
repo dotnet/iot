@@ -152,12 +152,13 @@ namespace Iot.Device.Button
                 if (_shouldDispose)
                 {
                     _gpioController?.Dispose();
-                    _gpioController = null!;
                 }
                 else
                 {
                     _gpioController.ClosePin(_buttonPin);
                 }
+
+                _gpioController = null!;
             }
 
             base.Dispose(disposing);

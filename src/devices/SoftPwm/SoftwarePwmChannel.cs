@@ -172,8 +172,9 @@ namespace System.Device.Pwm.Drivers
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null!;
             }
+
+            _controller = null!;
 
             base.Dispose(disposing);
         }

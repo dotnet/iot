@@ -73,8 +73,9 @@ namespace Iot.Device.Blinkt
             if (_shouldDispose)
             {
                 _gpioController?.Dispose();
-                _gpioController = null!;
             }
+
+            _gpioController = null!;
         }
 
         /// <summary>

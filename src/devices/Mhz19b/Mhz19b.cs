@@ -206,8 +206,9 @@ namespace Iot.Device.Mhz19b
             if (_shouldDispose)
             {
                 _serialPortStream?.Dispose();
-                _serialPortStream = null!;
             }
+
+            _serialPortStream = null!;
 
             if (_serialPort?.IsOpen ?? false)
             {

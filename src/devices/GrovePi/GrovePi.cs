@@ -54,8 +54,9 @@ namespace Iot.Device.GrovePiDevice
             if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null!;
             }
+
+            _i2cDevice = null!;
         }
 
         /// <summary>

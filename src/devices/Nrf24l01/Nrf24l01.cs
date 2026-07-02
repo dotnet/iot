@@ -229,8 +229,9 @@ namespace Iot.Device.Nrf24l01
             if (_shouldDispose)
             {
                 _gpio?.Dispose();
-                _gpio = null!;
             }
+
+            _gpio = null!;
         }
 
         /// <summary>

@@ -657,8 +657,9 @@ namespace Iot.Device.Tca955x
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
             }
+
+            _controller = null;
 
             _busDevice?.Dispose();
 

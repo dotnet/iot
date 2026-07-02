@@ -214,8 +214,9 @@ namespace Iot.Device.Multiplexing
             if (_shouldDispose)
             {
                 _gpioController?.Dispose();
-                _gpioController = null!;
             }
+
+            _gpioController = null!;
         }
 
         // IOutputSegment Implementation

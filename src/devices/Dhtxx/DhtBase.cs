@@ -385,13 +385,13 @@ namespace Iot.Device.DHTxx
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
             }
             else if (_controller?.IsPinOpen(_pin) ?? false)
             {
                 _controller.ClosePin(_pin);
             }
 
+            _controller = null;
             _i2cDevice?.Dispose();
             _i2cDevice = null;
         }
