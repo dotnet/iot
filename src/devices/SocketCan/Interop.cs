@@ -48,11 +48,23 @@ namespace Iot.Device.SocketCan
         [DllImport("libc", EntryPoint = "write", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern int SocketWrite(int fd, byte* buffer, int size);
 
-        [DllImport("libc", EntryPoint = "read", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libc", EntryPoint = "read", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
         private static unsafe extern int SocketRead(int fd, byte* buffer, int size);
 
         [DllImport("libc", EntryPoint = "setsockopt", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern int SetSocketOpt(int fd, int level, int optName, byte* optVal, int optlen);
+
+        [DllImport("libc", EntryPoint = "fcntl", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
+        private static extern int Fcntl(int fd, int cmd, int arg);
+
+        // values from <fcntl.h> on Linux
+        private const int F_GETFL = 3;
+        private const int F_SETFL = 4;
+        private const int O_NONBLOCK = 0x800;
+
+        // values from <errno.h> on Linux (EAGAIN and EWOULDBLOCK share the same value)
+        private const int EAGAIN = 11;
+        private const int EWOULDBLOCK = 11;
 
         public static unsafe void Write(SafeHandle handle, byte* buffer, int length)
         {
@@ -74,10 +86,33 @@ namespace Iot.Device.SocketCan
             int bytesRead = Interop.SocketRead((int)handle.DangerousGetHandle(), buffer, length);
             if (bytesRead < 0)
             {
+                int errno = Marshal.GetLastWin32Error();
+                if (errno == EAGAIN || errno == EWOULDBLOCK)
+                {
+                    // No data is currently available on a non-blocking socket.
+                    return -1;
+                }
+
                 throw new IOException("`read` operation failed");
             }
 
             return bytesRead;
+        }
+
+        public static void SetBlocking(SafeHandle handle, bool blocking)
+        {
+            int fd = (int)handle.DangerousGetHandle();
+            int flags = Fcntl(fd, F_GETFL, 0);
+            if (flags == -1)
+            {
+                throw new IOException("Could not read CAN socket flags");
+            }
+
+            int newFlags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+            if (Fcntl(fd, F_SETFL, newFlags) == -1)
+            {
+                throw new IOException("Could not set CAN socket blocking mode");
+            }
         }
 
         public static void CloseSocket(IntPtr fd) =>
