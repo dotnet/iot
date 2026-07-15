@@ -6,17 +6,17 @@
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <MicrosoftDotNetGenAPIPackageVersion>9.0.0-beta.26301.4</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
-    <SystemDrawingCommonPackageVersion>10.0.9</SystemDrawingCommonPackageVersion>
-    <SystemIOPortsPackageVersion>10.0.9</SystemIOPortsPackageVersion>
+    <SystemDrawingCommonPackageVersion>10.0.10</SystemDrawingCommonPackageVersion>
+    <SystemIOPortsPackageVersion>10.0.10</SystemIOPortsPackageVersion>
     <MicrosoftWin32RegistryPackageVersion>5.0.0</MicrosoftWin32RegistryPackageVersion>
-    <SystemManagementPackageVersion>10.0.9</SystemManagementPackageVersion>
+    <SystemManagementPackageVersion>10.0.10</SystemManagementPackageVersion>
     <SystemThreadingTasksExtensionsPackageVersion>4.6.3</SystemThreadingTasksExtensionsPackageVersion>
     <SystemMemoryPackageVersion>4.6.3</SystemMemoryPackageVersion>
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.1</MicrosoftExtensionsLoggingConsolePackageVersion>
-    <MicrosoftExtensionsLoggingPackageVersion>10.0.9</MicrosoftExtensionsLoggingPackageVersion>
-    <MicrosoftExtensionsLoggingAbstractionsPackageVersion>10.0.9</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
-    <SystemTextJsonPackageVersion>10.0.9</SystemTextJsonPackageVersion>
-    <SystemIOPipelinesVersion>10.0.9</SystemIOPipelinesVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>10.0.10</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingAbstractionsPackageVersion>10.0.10</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
+    <SystemTextJsonPackageVersion>10.0.10</SystemTextJsonPackageVersion>
+    <SystemIOPipelinesVersion>10.0.10</SystemIOPipelinesVersion>
   </PropertyGroup>
 </Project>
