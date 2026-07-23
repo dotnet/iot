@@ -24,6 +24,8 @@ Stopwatch sw = Stopwatch.StartNew();
 // using (DCMotor motor = DCMotor.Create(PwmChannel.Create(0, 0, frequency: 50), 23, 24))
 // Start Stop mode - additional methods to disable/enable output regardless of the Speed value
 // using (DCMotorWithStartStop motor = new DCMotorWithStartStop(DCMotor.Create( _any version above_ )))
+// Pin numbers use the logical (BCM) numbering scheme (GPIOxx). See README.md for wiring details.
+// 3 pin mode: GPIO6 -> ENA (pin 6, enable/PWM), GPIO27 -> IN1 (pin 5), GPIO22 -> IN2 (pin 7) on the H-bridge.
 using DCMotor motor = DCMotor.Create(6, 27, 22);
 bool done = false;
 Console.CancelKeyPress += (o, e) =>
