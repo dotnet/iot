@@ -7,6 +7,7 @@ using System.Device.Pwm;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using Iot.Device;
 
 namespace System.Device.Pwm.Drivers
 {
