@@ -84,8 +84,7 @@ public class PumpController : IDisposable
     public void Dispose()
     {
         // Disposing the MotorHat stops and releases every motor/channel it created.
-        // Order is not important and disposing the motors as well would be safe.
-        _motorHat.Dispose();
+        // If you dispose motors explicitly, dispose them before disposing the MotorHat.
     }
 }
 ```
