@@ -48,8 +48,8 @@ The `MotorHat` owns all the resources it creates. When you call `CreateDCMotor`,
 Because of this ownership model:
 
 - **Disposing the `MotorHat` is enough.** `MotorHat.Dispose()` stops every channel it handed out and then disposes the underlying PCA9685 (and its I2C device). You do not need to dispose the motors, servos or PWM channels separately.
-- **Disposing a motor as well is safe.** Disposing a `DCMotor` created by `CreateDCMotor` only stops its PWM channels; it does not dispose them. Combined with the point above, disposing both the motor and the `MotorHat` will not throw or leave the board in a random state.
-- **Order does not matter.** You can dispose the motors before or after the `MotorHat`; the result is the same.
+- **If you dispose motors explicitly, do it before disposing the `MotorHat`.** A `DCMotor` created by `CreateDCMotor` stops its PWM channels in `Dispose()`, and stopping a channel after the PCA9685 has been disposed can throw.
+- **Dispose order matters when disposing both.** Prefer nested `using` (motor inside the `MotorHat` scope) so the motor is disposed first.
 
 The recommended pattern is to keep the objects you need alive for as long as the `MotorHat` and let a single `using` (or `Dispose`) on the `MotorHat` clean everything up:
 
