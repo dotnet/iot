@@ -83,8 +83,14 @@ public class PumpController : IDisposable
 
     public void Dispose()
     {
-        // Disposing the MotorHat stops and releases every motor/channel it created.
-        // If you dispose motors explicitly, dispose them before disposing the MotorHat.
+        // Dispose motors first (their Dispose stops the PWM channels),
+        // then dispose the MotorHat which releases the underlying PCA9685 + I2C device.
+        foreach (var motor in _motors)
+        {
+            motor.Dispose();
+        }
+
+        _motorHat.Dispose();
     }
 }
 ```
