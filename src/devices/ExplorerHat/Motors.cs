@@ -91,8 +91,9 @@ namespace Iot.Device.ExplorerHat
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null!;
             }
+
+            _controller = null!;
         }
     }
 }

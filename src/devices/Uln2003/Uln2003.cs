@@ -193,8 +193,9 @@ namespace Iot.Device.Uln2003
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null!;
             }
+
+            _controller = null!;
         }
     }
 }

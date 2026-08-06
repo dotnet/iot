@@ -216,7 +216,6 @@ namespace Iot.Device.KeyMatrix
             if (_shouldDispose)
             {
                 _gpioController?.Dispose();
-                _gpioController = null;
             }
             else
             {
@@ -225,6 +224,8 @@ namespace Iot.Device.KeyMatrix
                     ClosePins();
                 }
             }
+
+            _gpioController = null;
         }
 
         private void OpenPins()

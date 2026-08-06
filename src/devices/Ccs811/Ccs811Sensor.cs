@@ -460,7 +460,6 @@ namespace Iot.Device.Ccs811
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null;
             }
             else if (_controller is object)
             {
@@ -479,6 +478,8 @@ namespace Iot.Device.Ccs811
                     _controller.ClosePin(_pinWake);
                 }
             }
+
+            _controller = null;
         }
 
         #region I2C operations

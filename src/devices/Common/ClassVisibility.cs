@@ -24,7 +24,7 @@ namespace Iot.Device.Common
     }
 }
 
-namespace System.Device
+namespace Iot.Device
 {
     public partial class DelayHelper
     {
@@ -55,9 +55,9 @@ namespace Iot.Device.Common
     }
 }
 
-namespace System.Device
+namespace Iot.Device
 {
-    internal partial class DelayHelper
+    public partial class DelayHelper
     {
     }
 }

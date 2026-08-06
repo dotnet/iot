@@ -221,7 +221,7 @@ namespace Iot.Device.BuildHat
             {
                 // Set continuous reading
                 SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
-                PortWrite($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set {powerPercent}\r");
+                PortWrite($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100 0.01; set {powerPercent}\r");
             }
             else
             {
@@ -296,7 +296,7 @@ namespace Iot.Device.BuildHat
             ActiveMotor motor = (ActiveMotor)_elements[(byte)port];
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
-            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set pulse {speed} 0.0 {seconds.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100 0.01; set pulse {speed} 0.0 {seconds.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 token.WaitHandle.WaitOne((int)(seconds * 1000));
@@ -346,7 +346,7 @@ namespace Iot.Device.BuildHat
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 0.01 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 token.WaitHandle.WaitOne((int)(duration * 1000));
@@ -436,7 +436,7 @@ namespace Iot.Device.BuildHat
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 0.01 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 int pos = motor.Position;
@@ -486,7 +486,7 @@ namespace Iot.Device.BuildHat
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 0.01 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 int pos = motor.Position;

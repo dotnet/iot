@@ -354,8 +354,9 @@ namespace Iot.Device.DistanceSensor
             if (_shouldDispose)
             {
                 _gpioController?.Dispose();
-                _gpioController = null;
             }
+
+            _gpioController = null;
 
             _i2cDevice?.Dispose();
             _i2cDevice = null!;

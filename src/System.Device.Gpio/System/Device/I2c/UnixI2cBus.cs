@@ -121,6 +121,17 @@ internal class UnixI2cBus : I2cBus
             throw new ArgumentException($"{nameof(buffer)} length is too long.", nameof(buffer));
         }
 
+        if (buffer.Length == 0)
+        {
+            // An empty write still generates a transaction on the bus (Start condition, device
+            // address, Stop condition) without transferring any data byte. Some devices (e.g. the
+            // PN532 NFC reader) rely on this to be woken up. A non-null pointer is required so that
+            // WriteReadCore emits a zero-length write message instead of skipping it.
+            byte placeholder = 0;
+            WriteReadCore((ushort)deviceAddress, &placeholder, null, 0, 0);
+            return;
+        }
+
         fixed (byte* writeBufferPointer = buffer)
         {
             WriteReadCore((ushort)deviceAddress, writeBufferPointer, null, (ushort)buffer.Length, 0);

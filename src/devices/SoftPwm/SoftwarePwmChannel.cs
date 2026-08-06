@@ -7,6 +7,7 @@ using System.Device.Pwm;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using Iot.Device;
 
 namespace System.Device.Pwm.Drivers
 {
@@ -172,8 +173,9 @@ namespace System.Device.Pwm.Drivers
             if (_shouldDispose)
             {
                 _controller?.Dispose();
-                _controller = null!;
             }
+
+            _controller = null!;
 
             base.Dispose(disposing);
         }

@@ -70,6 +70,8 @@ public abstract partial class I2cDevice : IDisposable
     /// <param name="buffer">
     /// The buffer that contains the data to be written to the I2C device.
     /// The data should not include the I2C device address.
+    /// An empty buffer generates a transaction on the bus (Start condition, device address and Stop
+    /// condition) without transferring any data byte, which some devices require to be woken up.
     /// </param>
     public abstract void Write(ReadOnlySpan<byte> buffer);
 
