@@ -111,7 +111,7 @@ namespace Iot.Device.SocketCan
             int newFlags = waitForFrameOnRead ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
             if (Fcntl(fd, F_SETFL, newFlags) == -1)
             {
-                throw new IOException("Could not set CAN socket read wait mode");
+                throw new IOException("Could not set CAN socket blocking/non-blocking mode");
             }
         }
 
