@@ -19,7 +19,7 @@ namespace Iot.Device.SocketCan
     public class CanRaw : IDisposable
     {
         private SafeCanRawSocketHandle _handle;
-        private bool _blocking = true;
+        private bool _waitForFrameOnRead = true;
 
         /// <summary>
         /// Constructs CanRaw instance
@@ -31,21 +31,21 @@ namespace Iot.Device.SocketCan
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether read operations block until a frame is available.
+        /// Gets or sets a value indicating whether a read operation waits for a frame to become available.
         /// </summary>
         /// <remarks>
         /// When set to <see langword="true"/> (the default) <see cref="TryReadFrame(Span{byte}, out int, out CanId)"/>
-        /// blocks until a frame is received. When set to <see langword="false"/> the socket is switched to
+        /// waits (blocks) until a frame is received. When set to <see langword="false"/> the socket is switched to
         /// non-blocking mode and <see cref="TryReadFrame(Span{byte}, out int, out CanId)"/> returns
         /// <see langword="false"/> immediately when no frame is available to read.
         /// </remarks>
-        public bool Blocking
+        public bool WaitForFrameOnRead
         {
-            get => _blocking;
+            get => _waitForFrameOnRead;
             set
             {
-                Interop.SetBlocking(_handle, value);
-                _blocking = value;
+                Interop.SetWaitForFrameOnRead(_handle, value);
+                _waitForFrameOnRead = value;
             }
         }
 

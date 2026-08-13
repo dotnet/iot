@@ -99,7 +99,7 @@ namespace Iot.Device.SocketCan
             return bytesRead;
         }
 
-        public static void SetBlocking(SafeHandle handle, bool blocking)
+        public static void SetWaitForFrameOnRead(SafeHandle handle, bool waitForFrameOnRead)
         {
             int fd = (int)handle.DangerousGetHandle();
             int flags = Fcntl(fd, F_GETFL, 0);
@@ -108,10 +108,10 @@ namespace Iot.Device.SocketCan
                 throw new IOException("Could not read CAN socket flags");
             }
 
-            int newFlags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+            int newFlags = waitForFrameOnRead ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
             if (Fcntl(fd, F_SETFL, newFlags) == -1)
             {
-                throw new IOException("Could not set CAN socket blocking mode");
+                throw new IOException("Could not set CAN socket read wait mode");
             }
         }
 

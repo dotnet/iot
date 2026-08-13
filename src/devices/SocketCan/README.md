@@ -36,14 +36,14 @@ using (CanRaw can = new CanRaw())
 
 ### Reading a frame without blocking
 
-By default reading a frame blocks until data is available. Set `Blocking` to `false` to switch the
+By default reading a frame waits until data is available. Set `WaitForFrameOnRead` to `false` to switch the
 socket to non-blocking mode. In this mode `TryReadFrame` returns `false` immediately when there is no
 frame to read.
 
 ```csharp
 using (CanRaw can = new CanRaw())
 {
-    can.Blocking = false;
+    can.WaitForFrameOnRead = false;
     byte[] buffer = new byte[8];
 
     while (true)
