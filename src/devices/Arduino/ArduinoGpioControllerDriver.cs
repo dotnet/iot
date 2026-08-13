@@ -149,6 +149,14 @@ namespace Iot.Device.Arduino
 
         protected override PinValue Read(int pinNumber)
         {
+            // If the pin is configured as output, return the last written value.
+            // ConfigurableFirmata only auto-reports DIGITAL_MESSAGE for ports that have at least one input-configured pin,
+            // so reading the digital port for a pure-output pin would return a stale value.
+            if (_pinModes.TryGetValue(pinNumber, out PinMode mode) && mode == PinMode.Output)
+            {
+                return _pinValues[pinNumber];
+            }
+
             _pinValues[pinNumber] = _device.ReadDigitalPin(pinNumber);
             return _pinValues[pinNumber];
         }
