@@ -56,7 +56,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase
             // to gpiod_edge_event_copy triggers a native assertion (assert(event)) which aborts the process. Guard against it here.
             if (edgeEventHandle.IsInvalid)
             {
-                throw new GpiodException($"Could not get edge event at index {index}: {LastErr.GetMsg()}");
+                throw new GpiodException($"Edge event at index {index} is not populated in the buffer.");
             }
 
             // Since events are tied to the buffer instance, different threads may not operate on the buffer and any associated events at the same
