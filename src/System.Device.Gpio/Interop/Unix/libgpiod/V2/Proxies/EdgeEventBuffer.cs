@@ -52,6 +52,13 @@ internal class EdgeEventBuffer : LibGpiodProxyBase
         return CallLibgpiod(() =>
         {
             using EdgeEventNotFreeable edgeEventHandle = LibgpiodV2.gpiod_edge_event_buffer_get_event(Handle, index);
+            // gpiod_edge_event_buffer_get_event returns NULL when the requested index is not populated in the buffer. Passing a null pointer
+            // to gpiod_edge_event_copy triggers a native assertion (assert(event)) which aborts the process. Guard against it here.
+            if (edgeEventHandle.IsInvalid)
+            {
+                throw new GpiodException($"Could not get edge event at index {index}: {LastErr.GetMsg()}");
+            }
+
             // Since events are tied to the buffer instance, different threads may not operate on the buffer and any associated events at the same
             // time. Events can be copied using ::gpiod_edge_event_copy in order to create a standalone objects - which each may safely be used from
             // a different thread concurrently.
