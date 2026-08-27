@@ -311,7 +311,7 @@ internal class LineRequest : LibGpiodProxyBase
                             break;
                         }
 
-                        var errorCode = Marshal.GetLastWin32Error();
+                        int errorCode = Marshal.GetLastWin32Error();
 
                         if (errorCode == ERROR_CODE_EINTR)
                         {
@@ -319,7 +319,13 @@ internal class LineRequest : LibGpiodProxyBase
                             continue;
                         }
 
-                        throw new GpiodException($"Error while waiting for edge events, epoll_wait: {LastErr.GetMsg()}");
+#if NET7_0_OR_GREATER
+                        string err = Marshal.GetLastPInvokeErrorMessage();
+#else
+                        string err = errorCode.ToString();
+#endif
+                        string errMsg = string.IsNullOrWhiteSpace(err) ? string.Empty : $"Error: '{err}'";
+                        throw new GpiodException($"Error while waiting for edge events, epoll_wait: {errMsg}");
                     }
 
                     bool isTimeout = ret == 0;
