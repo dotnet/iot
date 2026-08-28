@@ -26,9 +26,9 @@ namespace Iot.Device.OneWire
             }
         }
 
-        internal static IEnumerable<string> EnumerateDeviceIdsInternal(string sysfsDevicesPath, string busId, DeviceFamily family)
+        internal static IEnumerable<string> EnumerateDeviceIdsInternal(string sysfsBusDevicesPath, string busId, DeviceFamily family)
         {
-            var devIds = File.ReadLines(Path.Combine(sysfsDevicesPath, busId, "w1_master_slaves"));
+            var devIds = File.ReadLines(Path.Combine(sysfsBusDevicesPath, busId, "w1_master_slaves"));
             return family switch
             {
                 DeviceFamily.Any => devIds,

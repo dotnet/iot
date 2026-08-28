@@ -55,7 +55,7 @@ namespace Iot.Device.OneWire
         /// <returns>A list of discovered devices.</returns>
         public IEnumerable<string> EnumerateDeviceIds(DeviceFamily family = DeviceFamily.Any)
         {
-            foreach (var devId in EnumerateDeviceIdsInternal(_sysfsDevicesPath, BusId, family))
+            foreach (var devId in EnumerateDeviceIdsInternal(_sysfsBusDevicesPath, BusId, family))
             {
                 yield return devId;
             }

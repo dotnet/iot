@@ -84,12 +84,13 @@ All temperature devices with family id of 0x10, 0x28, 0x3B, or 0x42 supported.
 The `OneWireBus`, `OneWireDevice`, and `OneWireThermometerDevice` classes accept custom sysfs paths via constructor overloads, enabling integration testing without physical hardware.
 
 ```csharp
-// Create a fake sysfs directory structure for testing
-string testBusPath = "/path/to/test/bus/w1/devices";
-string testDevicesPath = "/path/to/test/devices";
+// Create a fake sysfs directory structure for testing:
+// /path/to/test/w1/devices/w1_bus_master1/w1_master_slaves
+// /path/to/test/w1/devices/w1_bus_master1/28-00000abcdef/w1_slave
+string testSysfsPath = "/path/to/test/w1/devices";
 
 // Create bus with custom paths
-var bus = new OneWireBus("w1_bus_master1", testBusPath, testDevicesPath);
+var bus = new OneWireBus("w1_bus_master1", testSysfsPath, testSysfsPath);
 
 // Enumerate devices from custom paths
 foreach (string devId in bus.EnumerateDeviceIds())
@@ -98,6 +99,6 @@ foreach (string devId in bus.EnumerateDeviceIds())
 }
 
 // Create thermometer device with custom path
-var thermometer = new OneWireThermometerDevice("w1_bus_master1", "28-00000abcdef", testDevicesPath);
+var thermometer = new OneWireThermometerDevice("w1_bus_master1", "28-00000abcdef", testSysfsPath);
 var temperature = thermometer.ReadTemperature();
 ```

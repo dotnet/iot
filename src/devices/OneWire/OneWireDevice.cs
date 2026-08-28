@@ -46,7 +46,7 @@ namespace Iot.Device.OneWire
         {
             foreach (var busId in OneWireBus.EnumerateBusIdsInternal(OneWireBus.DefaultSysfsBusDevicesPath))
             {
-                foreach (var devId in OneWireBus.EnumerateDeviceIdsInternal(OneWireBus.DefaultSysfsDevicesPath, busId, family))
+                foreach (var devId in OneWireBus.EnumerateDeviceIdsInternal(OneWireBus.DefaultSysfsBusDevicesPath, busId, family))
                 {
                     yield return (busId, devId);
                 }
