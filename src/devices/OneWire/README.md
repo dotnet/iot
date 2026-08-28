@@ -89,7 +89,7 @@ The `OneWireBus`, `OneWireDevice`, and `OneWireThermometerDevice` classes accept
 // /path/to/test/w1/devices/w1_bus_master1/28-00000abcdef/w1_slave
 string testSysfsPath = "/path/to/test/w1/devices";
 
-// Create bus with custom paths
+// Create bus with custom paths. The fake layout uses one root for bus enumeration and device access.
 var bus = new OneWireBus("w1_bus_master1", testSysfsPath, testSysfsPath);
 
 // Enumerate devices from custom paths
