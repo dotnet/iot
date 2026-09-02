@@ -77,7 +77,7 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
     /// Regression test for the event detection loop only being cancellable when an event arrives.
     /// </summary>
     [Fact]
-    public void DisposeWithRegisteredCallbackCompletesWithoutAnEdge()
+    public async Task DisposeWithRegisteredCallbackCompletesWithoutAnEdge()
     {
         var gc = new GpioController(GetTestDriver());
         gc.OpenPin(InputPin, PinMode.Input);
@@ -90,13 +90,12 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
 
         // No edge is generated on purpose: cancellation must not depend on one.
         Task dispose = Task.Run(gc.Dispose);
+        Task finished = await Task.WhenAny(dispose, Task.Delay(TimeSpan.FromSeconds(10)));
 
-        Assert.True(
-            dispose.Wait(TimeSpan.FromSeconds(10)),
-            "Dispose() did not return while the pin had a registered callback and no edge occurred.");
+        Assert.Same(dispose, finished);
 
-        // Surfaces any exception the disposal path threw rather than letting it go unobserved.
-        dispose.GetAwaiter().GetResult();
+        // Awaiting it surfaces any exception the disposal path threw.
+        await dispose;
     }
 
     /// <summary>
