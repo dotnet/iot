@@ -227,16 +227,11 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, ExceptionHelper.GetLastErrorMessage());
                     }
 
-                    if (read != EventRecordPackedSize && read != EventRecordAlignedSize)
+                    if (!TryClassifyEventRecord(eventRecord, read, out PinEventTypes eventType))
                     {
-                        // libgpiod itself treats a partial event record as EIO. Anything other
-                        // than one whole record (12 bytes packed, 16 bytes aligned) is an error,
-                        // including 0, which would otherwise spin.
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, read.ToString());
                     }
 
-                    int eventId = Marshal.ReadInt32(eventRecord, EventIdOffset);
-                    PinEventTypes eventType = eventId == GpioEventRisingEdge ? PinEventTypes.Rising : PinEventTypes.Falling;
                     OnPinValueChanged(new PinValueChangedEventArgs(eventType, _pinNumber), eventType);
                 }
             }
@@ -299,6 +294,30 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                 }
             }
         }, token);
+    }
+
+    /// <summary>
+    /// Classifies one kernel gpioevent_data record read from a line event descriptor.
+    /// </summary>
+    /// <param name="record">Buffer holding the record.</param>
+    /// <param name="length">Bytes returned by the read.</param>
+    /// <param name="eventType">The edge the record describes.</param>
+    /// <returns>
+    /// False when <paramref name="length"/> is not one whole record, which libgpiod itself
+    /// treats as EIO. Zero length is included, since continuing on it would spin.
+    /// </returns>
+    internal static bool TryClassifyEventRecord(IntPtr record, int length, out PinEventTypes eventType)
+    {
+        if (length != EventRecordPackedSize && length != EventRecordAlignedSize)
+        {
+            eventType = default;
+            return false;
+        }
+
+        eventType = Marshal.ReadInt32(record, EventIdOffset) == GpioEventRisingEdge
+            ? PinEventTypes.Rising
+            : PinEventTypes.Falling;
+        return true;
     }
 
     public void OnPinValueChanged(PinValueChangedEventArgs args, PinEventTypes detectionOfEventTypes)
