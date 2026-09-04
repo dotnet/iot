@@ -210,8 +210,8 @@ internal partial class Interop
         /// <param name="line">GPIO line handle</param>
         /// <returns>The event file descriptor, or -1 if the line was not requested for events.</returns>
         /// <remarks>
-        /// Available since libgpiod 1.0.1. Reading event records straight from this descriptor avoids
-        /// struct gpiod_line_event, whose layout depends on how the C library was compiled (_TIME_BITS).
+        /// Reading event records straight from this descriptor avoids struct gpiod_line_event,
+        /// whose layout depends on how the C library was compiled (_TIME_BITS).
         /// </remarks>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         internal static extern int gpiod_line_event_get_fd(IntPtr line);

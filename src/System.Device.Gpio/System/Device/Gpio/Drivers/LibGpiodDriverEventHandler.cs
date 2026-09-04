@@ -31,9 +31,8 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
 
     private static readonly string s_consumerName = Process.GetCurrentProcess().ProcessName;
 
-    // gpiod_line_event_get_fd was added in libgpiod 1.0.1. Older libraries fall back to the
-    // gpiod_line_event_wait path, which is correct on them: those releases long predate the
-    // 64-bit time_t transition that makes the managed struct timespec the wrong size.
+    // Cache whether the loaded libgpiod exports gpiod_line_event_get_fd. Builds without that
+    // symbol fall back to gpiod_line_event_wait where its struct layout is known to be safe.
     private static bool s_lineEventFdUnavailable;
 
     public event PinChangeEventHandler? ValueRising;
@@ -69,14 +68,14 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
             int lineEventFd = TryGetLineEventFd(safeLineHandle);
             if (lineEventFd < 0)
             {
-                // libgpiod predating 1.0.1 has no event descriptor, leaving only the legacy wait
-                // path. That path passes a managed struct timespec, which is known-correct only
-                // where sizeof(long) == sizeof(time_t). That holds on 64-bit; on 32-bit an old
-                // libgpiod source rebuilt against a _TIME_BITS=64 libc would be handed undersized
-                // structures, so refuse rather than risk the corruption this change exists to fix.
+                // Without an event descriptor, only the legacy wait path remains. That path passes
+                // a managed struct timespec, which is known-correct only where sizeof(long) ==
+                // sizeof(time_t). That holds on 64-bit; on 32-bit a libgpiod build using 64-bit
+                // time_t would be handed undersized structures, so refuse rather than risk the
+                // corruption this change exists to fix.
                 if (IntPtr.Size < sizeof(long))
                 {
-                    throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodVersionTooOld);
+                    throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodLineEventDescriptorUnavailable);
                 }
 
                 _task = InitializeLegacyEventDetectionTask(_cancellationTokenSource.Token, safeLineHandle);
@@ -123,8 +122,8 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
     }
 
     /// <summary>
-    /// Returns the line event descriptor, or -1 when the installed libgpiod predates 1.0.1 and
-    /// does not provide one, in which case the caller uses the legacy wait loop.
+    /// Returns the line event descriptor, or -1 when the loaded libgpiod does not export
+    /// gpiod_line_event_get_fd, in which case the caller uses the legacy wait loop where safe.
     /// </summary>
     private int TryGetLineEventFd(LineHandle safeLineHandle)
     {
@@ -154,11 +153,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
 
     private Task InitializeEventDetectionTask(CancellationToken token, int lineEventFd)
     {
-        // LongRunning so the default scheduler gives this a dedicated thread instead of a
-        // thread-pool worker: the loop blocks in poll() for the lifetime of the subscription,
-        // which would otherwise hold a pool thread permanently, once per subscribed pin.
-        // Keeping it a Task preserves exception capture and the join in Dispose().
-        return Task.Factory.StartNew(() =>
+        return Task.Run(() =>
         {
             // POLLIN | POLLPRI mirrors the mask libgpiod's own multi-line wait requests.
             pollfd[] descriptors =
@@ -239,15 +234,12 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
             {
                 Marshal.FreeHGlobal(eventRecord);
             }
-        },
-        token,
-        TaskCreationOptions.LongRunning | TaskCreationOptions.DenyChildAttach,
-        TaskScheduler.Default);
+        }, token);
     }
 
     /// <summary>
-    /// Pre-1.0.1 libgpiod path, unchanged from before the event descriptor was used. Correct on
-    /// those releases: they predate 64-bit time_t, so the managed struct timespec matches.
+    /// Legacy path for libgpiod builds without gpiod_line_event_get_fd, unchanged from before the
+    /// event descriptor was used and restricted to 64-bit processes where the layouts match.
     /// </summary>
     private Task InitializeLegacyEventDetectionTask(CancellationToken token, LineHandle pinHandle)
     {
