@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Common;
+using UnitsNet;
 using Xunit;
 
 namespace Common.Tests
@@ -22,6 +23,24 @@ namespace Common.Tests
             filter1.Add(2);
             double? result = filter1.CurrentValue();
             Assert.Equal(1.5, result.GetValueOrDefault(), 0.01);
+        }
+
+        [Fact]
+        public void EmptyAverage()
+        {
+            var filter1 = new TimeSliceFilter<double>(TimeSpan.MaxValue, TimeSliceFilter<double>.AverageFilter);
+            double? result = filter1.CurrentValue();
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void WithNonDefaultType()
+        {
+            var filter1 = new TimeSliceFilter<Length>(TimeSpan.MaxValue, TimeSliceFilter<Length>.AverageFilter);
+            filter1.Add(Length.FromMeters(1));
+            filter1.Add(Length.FromMeters(2));
+            Length? result = filter1.CurrentValue();
+            Assert.Equal(Length.FromMeters(1.5).Meters, result.GetValueOrDefault().Meters, 0.01);
         }
 
         [Fact]

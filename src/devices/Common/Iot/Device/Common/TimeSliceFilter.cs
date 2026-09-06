@@ -102,14 +102,16 @@ namespace Iot.Device.Common
         /// <returns>The return value</returns>
         public static T? AverageFilter(List<T> values)
         {
-            T sum = default(T);
             double numElements = 0.0;
             if (values.Count == 0)
             {
                 return null;
             }
 
-            foreach (var value in values)
+            T sum = values[0];
+            numElements = 1;
+
+            foreach (var value in values.Skip(1))
             {
                 sum += value;
                 numElements += 1;
