@@ -38,22 +38,27 @@ namespace Iot.Device.Button
         public event EventHandler<EventArgs>? ButtonDown;
 
         /// <summary>
-        /// Delegate for button pressed event.
+        /// The button was pressed. Consistent with the behaviour of a mouse click,
+        /// this event is raised when the button is released after being pressed. It is not
+        /// raised if the button is held down for a time longer than the configured holding time (and <see cref="IsHoldingEnabled"/> is true).
         /// </summary>
+        /// <remarks>Older versions raised the event even if the button was held.</remarks>
         public event EventHandler<EventArgs>? Press;
 
         /// <summary>
-        /// Delegate for button double pressed event.
+        /// Event for button double pressed event.
         /// </summary>
         public event EventHandler<EventArgs>? DoublePress;
 
         /// <summary>
-        /// Delegate for button holding event.
+        /// Event for button holding event. <see cref="IsHoldingEnabled"/> must be set to true for this event to be raised.
         /// </summary>
         public event EventHandler<ButtonHoldingEventArgs>? Holding;
 
         /// <summary>
-        /// Define if holding event is enabled or disabled on the button.
+        /// Define if holding event is enabled on this button. If so, the <see cref="Holding"/> event will be raised
+        /// when the button is pressed for a time longer than the configured holding time.
+        /// Note that the <see cref="Press" /> event will not be raised in case of a holding event.
         /// </summary>
         public bool IsHoldingEnabled { get; set; } = false;
 
