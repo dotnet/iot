@@ -19,6 +19,8 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__request.html#details"/>
 internal class LineRequest : LibGpiodProxyBase
 {
+    private const int ERROR_CODE_EINTR = 4; // Interrupted system call
+
     private readonly LineRequestSafeHandle _handle;
 
     private readonly object _signalPipeWriteSideLock = new();
@@ -299,10 +301,31 @@ internal class LineRequest : LibGpiodProxyBase
                     }
 
                     using var eventBuffer = new UnmanagedArray<epoll_event>(2);
-                    ret = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 2, (int)timeout.Value.TotalMilliseconds);
-                    if (ret < 0)
+
+                    while (true)
                     {
-                        throw new GpiodException($"Error while waiting for edge events, epoll_wait: {LastErr.GetMsg()}");
+                        ret = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 2, (int)timeout.Value.TotalMilliseconds);
+
+                        if (ret >= 0)
+                        {
+                            break;
+                        }
+
+                        int errorCode = Marshal.GetLastWin32Error();
+
+                        if (errorCode == ERROR_CODE_EINTR)
+                        {
+                            // ignore Interrupted system call error and retry
+                            continue;
+                        }
+
+#if NET7_0_OR_GREATER
+                        string err = Marshal.GetLastPInvokeErrorMessage();
+#else
+                        string err = errorCode.ToString();
+#endif
+                        string errMsg = string.IsNullOrWhiteSpace(err) ? string.Empty : $"Error: '{err}'";
+                        throw new GpiodException($"Error while waiting for edge events, epoll_wait: {errMsg}");
                     }
 
                     bool isTimeout = ret == 0;
