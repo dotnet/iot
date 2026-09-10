@@ -91,6 +91,7 @@ internal static class ExceptionHelper
             ExceptionResource.EventReadError => $"Error while reading pin event result{errorDisplay}",
             ExceptionResource.NotListeningForEventError => $"Attempted to remove a callback for a pin that is not listening for events.",
             ExceptionResource.LibGpiodNotInstalled => $"Libgpiod driver not installed. More information on: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/",
+            ExceptionResource.LibGpiodLineEventDescriptorUnavailable => $"Pin event detection on a 32-bit process requires a libgpiod build that exports gpiod_line_event_get_fd. More information on: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/",
             _ => throw new Exception($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message."),
         };
     }
@@ -112,4 +113,5 @@ internal enum ExceptionResource
     EventReadError,
     NotListeningForEventError,
     LibGpiodNotInstalled,
+    LibGpiodLineEventDescriptorUnavailable,
 }

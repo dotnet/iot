@@ -14,7 +14,26 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
 {
     private const int ERROR_CODE_EINTR = 4; // Interrupted system call
 
+    // struct gpioevent_data from the kernel GPIO uAPI: __u64 timestamp; __u32 id.
+    // This is the kernel ABI, not libgpiod's time64-dependent wrapper, which is why reading it
+    // directly sidesteps the problem. timestamp is always at offset 0 and id at offset 8; only
+    // the trailing alignment differs, so the kernel returns a 12- or 16-byte record depending on
+    // the reading process. Accept either, and parse only the first 12 bytes.
+    private const int EventRecordBufferSize = 16;
+    private const int EventRecordPackedSize = 12;
+    private const int EventRecordAlignedSize = 16;
+    private const int EventIdOffset = 8;
+    private const int GpioEventRisingEdge = 1;
+
+    // Backstop only: cancellation comes from the self-pipe. This bounds disposal if a wake ever
+    // fails to arrive, at one wakeup per second per line instead of the twenty it used to take.
+    private const int PollBackstopMilliseconds = 1000;
+
     private static readonly string s_consumerName = Process.GetCurrentProcess().ProcessName;
+
+    // Cache whether the loaded libgpiod exports gpiod_line_event_get_fd. Builds without that
+    // symbol fall back to gpiod_line_event_wait where its struct layout is known to be safe.
+    private static bool s_lineEventFdUnavailable;
 
     public event PinChangeEventHandler? ValueRising;
     public event PinChangeEventHandler? ValueFalling;
@@ -22,14 +41,72 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
     private readonly int _pinNumber;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly Task _task;
-    private bool _disposing;
+
+    // Self-pipe used to wake the detection thread out of poll() when disposing, so that
+    // Dispose() does not have to wait for an edge. -1 when the legacy path is in use.
+    private readonly int _cancellationReadFd = -1;
+    private readonly int _cancellationWriteFd = -1;
+
+    private volatile bool _disposing;
+
+    // 0 while live, 1 once a caller has taken ownership of disposal. Guarantees exactly one
+    // owner closes the pipe descriptors, so a concurrent second Dispose() cannot close a
+    // descriptor number that the kernel has since handed to something else.
+    private int _disposeOwned;
 
     public LibGpiodDriverEventHandler(int pinNumber, LineHandle safeLineHandle)
     {
         _pinNumber = pinNumber;
         _cancellationTokenSource = new CancellationTokenSource();
         SubscribeForEvent(safeLineHandle);
-        _task = InitializeEventDetectionTask(_cancellationTokenSource.Token, safeLineHandle);
+
+        // Dispose() is never reached for a half-constructed handler, so everything acquired
+        // after the line is requested has to be rolled back by hand.
+        bool pipeCreated = false;
+        try
+        {
+            int lineEventFd = TryGetLineEventFd(safeLineHandle);
+            if (lineEventFd < 0)
+            {
+                // Without an event descriptor, only the legacy wait path remains. That path passes
+                // a managed struct timespec, which is known-correct only where sizeof(long) ==
+                // sizeof(time_t). That holds on 64-bit; on 32-bit a libgpiod build using 64-bit
+                // time_t would be handed undersized structures, so refuse rather than risk the
+                // corruption this change exists to fix.
+                if (IntPtr.Size < sizeof(long))
+                {
+                    throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.LibGpiodLineEventDescriptorUnavailable);
+                }
+
+                _task = InitializeLegacyEventDetectionTask(_cancellationTokenSource.Token, safeLineHandle);
+                return;
+            }
+
+            int[] cancellationPipe = new int[2];
+            if (Interop.pipe2(cancellationPipe, Interop.O_CLOEXEC) < 0)
+            {
+                throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, ExceptionHelper.GetLastErrorMessage(), _pinNumber);
+            }
+
+            _cancellationReadFd = cancellationPipe[0];
+            _cancellationWriteFd = cancellationPipe[1];
+            pipeCreated = true;
+
+            _task = InitializeEventDetectionTask(_cancellationTokenSource.Token, lineEventFd);
+        }
+        catch
+        {
+            if (pipeCreated)
+            {
+                Interop.close(_cancellationReadFd);
+                Interop.close(_cancellationWriteFd);
+            }
+
+            // Undo the event request this constructor made. ReleaseLock does not invalidate the
+            // handle, so the driver keeps ownership of the LineHandle it passed in.
+            safeLineHandle.ReleaseLock();
+            throw;
+        }
     }
 
     public CancellationToken CancellationToken => _cancellationTokenSource.Token;
@@ -44,7 +121,127 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
         }
     }
 
-    private Task InitializeEventDetectionTask(CancellationToken token, LineHandle pinHandle)
+    /// <summary>
+    /// Returns the line event descriptor, or -1 when the loaded libgpiod does not export
+    /// gpiod_line_event_get_fd, in which case the caller uses the legacy wait loop where safe.
+    /// </summary>
+    private int TryGetLineEventFd(LineHandle safeLineHandle)
+    {
+        if (s_lineEventFdUnavailable)
+        {
+            return -1;
+        }
+
+        int lineEventFd;
+        try
+        {
+            lineEventFd = LibgpiodV1.gpiod_line_event_get_fd(safeLineHandle.Handle);
+        }
+        catch (EntryPointNotFoundException)
+        {
+            s_lineEventFdUnavailable = true;
+            return -1;
+        }
+
+        if (lineEventFd < 0)
+        {
+            throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, ExceptionHelper.GetLastErrorMessage(), _pinNumber);
+        }
+
+        return lineEventFd;
+    }
+
+    private Task InitializeEventDetectionTask(CancellationToken token, int lineEventFd)
+    {
+        return Task.Run(() =>
+        {
+            // POLLIN | POLLPRI mirrors the mask libgpiod's own multi-line wait requests.
+            pollfd[] descriptors =
+            {
+                new pollfd { fd = lineEventFd, events = PollFlags.POLLIN | PollFlags.POLLPRI },
+                new pollfd { fd = _cancellationReadFd, events = PollFlags.POLLIN }
+            };
+
+            IntPtr eventRecord = Marshal.AllocHGlobal(EventRecordBufferSize);
+            try
+            {
+                while (!(token.IsCancellationRequested || _disposing))
+                {
+                    descriptors[0].revents = PollFlags.None;
+                    descriptors[1].revents = PollFlags.None;
+
+                    int ready = Interop.poll(descriptors, (nuint)descriptors.Length, PollBackstopMilliseconds);
+                    if (ready < 0)
+                    {
+                        int errorCode = Marshal.GetLastWin32Error();
+                        if (errorCode == ERROR_CODE_EINTR)
+                        {
+                            // ignore Interrupted system call error and retry
+                            continue;
+                        }
+
+                        string errorMessage = Marshal.GetLastPInvokeErrorMessage();
+                        string errorInfo = string.IsNullOrWhiteSpace(errorMessage) ? errorCode.ToString() : $"{errorCode} ({errorMessage})";
+                        throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, errorInfo, _pinNumber);
+                    }
+
+                    if (ready == 0)
+                    {
+                        // Backstop expiry: re-check the loop condition and wait again.
+                        continue;
+                    }
+
+                    if (descriptors[1].revents != PollFlags.None)
+                    {
+                        // Disposing: stop without waiting for an edge.
+                        break;
+                    }
+
+                    if ((descriptors[0].revents & (PollFlags.POLLERR | PollFlags.POLLHUP | PollFlags.POLLNVAL)) != 0)
+                    {
+                        // Not a normal shutdown: the line is requested for the lifetime of this
+                        // handler, so an unusable descriptor is a lifetime error. Report it the
+                        // way a wait failure was reported before, rather than stopping quietly.
+                        throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, descriptors[0].revents.ToString(), _pinNumber);
+                    }
+
+                    if ((descriptors[0].revents & (PollFlags.POLLIN | PollFlags.POLLPRI)) == 0)
+                    {
+                        continue;
+                    }
+
+                    int read = Interop.read(lineEventFd, eventRecord, EventRecordBufferSize);
+                    if (read < 0)
+                    {
+                        int errorCode = Marshal.GetLastWin32Error();
+                        if (errorCode == ERROR_CODE_EINTR)
+                        {
+                            continue;
+                        }
+
+                        throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, ExceptionHelper.GetLastErrorMessage());
+                    }
+
+                    if (!TryClassifyEventRecord(eventRecord, read, out PinEventTypes eventType))
+                    {
+                        throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, read.ToString());
+                    }
+
+                    OnPinValueChanged(new PinValueChangedEventArgs(eventType, _pinNumber), eventType);
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(eventRecord);
+            }
+        }, token);
+    }
+
+    /// <summary>
+    /// Legacy path for libgpiod builds without gpiod_line_event_get_fd, unchanged from before the
+    /// event descriptor was used and restricted to 64-bit processes where the layouts match.
+    /// </summary>
+    private Task InitializeLegacyEventDetectionTask(CancellationToken token, LineHandle pinHandle)
     {
         return Task.Run(() =>
         {
@@ -91,6 +288,30 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
         }, token);
     }
 
+    /// <summary>
+    /// Classifies one kernel gpioevent_data record read from a line event descriptor.
+    /// </summary>
+    /// <param name="record">Buffer holding the record.</param>
+    /// <param name="length">Bytes returned by the read.</param>
+    /// <param name="eventType">The edge the record describes.</param>
+    /// <returns>
+    /// False when <paramref name="length"/> is not one whole record, which libgpiod itself
+    /// treats as EIO. Zero length is included, since continuing on it would spin.
+    /// </returns>
+    internal static bool TryClassifyEventRecord(IntPtr record, int length, out PinEventTypes eventType)
+    {
+        if (length != EventRecordPackedSize && length != EventRecordAlignedSize)
+        {
+            eventType = default;
+            return false;
+        }
+
+        eventType = Marshal.ReadInt32(record, EventIdOffset) == GpioEventRisingEdge
+            ? PinEventTypes.Rising
+            : PinEventTypes.Falling;
+        return true;
+    }
+
     public void OnPinValueChanged(PinValueChangedEventArgs args, PinEventTypes detectionOfEventTypes)
     {
         if (detectionOfEventTypes == PinEventTypes.Rising && args.ChangeType == PinEventTypes.Rising)
@@ -111,8 +332,16 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
 
     public void Dispose()
     {
-        _disposing = true;
-        _cancellationTokenSource.Cancel();
+        // The first caller owns signalling and the descriptors, but every caller waits for the
+        // detection task: returning early would let a containing driver release the line handle
+        // while the task is still polling its descriptor.
+        bool disposeOwner = Interlocked.Exchange(ref _disposeOwned, 1) == 0;
+        if (disposeOwner)
+        {
+            _disposing = true;
+            _cancellationTokenSource.Cancel();
+            WakeDetectionTask();
+        }
 
         try
         {
@@ -122,8 +351,43 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
         {
             // ignore cancellation exception
         }
+        finally
+        {
+            if (disposeOwner && _cancellationReadFd >= 0)
+            {
+                Interop.close(_cancellationReadFd);
+                Interop.close(_cancellationWriteFd);
+            }
+        }
 
         ValueRising = null;
         ValueFalling = null;
+    }
+
+    private void WakeDetectionTask()
+    {
+        if (_cancellationWriteFd < 0)
+        {
+            // Legacy path: the loop notices _disposing at its next 50 ms timeout instead.
+            return;
+        }
+
+        IntPtr wakeByte = Marshal.AllocHGlobal(1);
+        try
+        {
+            Marshal.WriteByte(wakeByte, 0);
+
+            // An interrupted write is retried, because a lost wake would otherwise delay
+            // disposal. Any other write failure is deliberately not fatal: the backstop timeout
+            // bounds disposal to one second, which is preferable to throwing from Dispose().
+            while (Interop.write(_cancellationWriteFd, wakeByte, 1) < 0
+                   && Marshal.GetLastWin32Error() == ERROR_CODE_EINTR)
+            {
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(wakeByte);
+        }
     }
 }
