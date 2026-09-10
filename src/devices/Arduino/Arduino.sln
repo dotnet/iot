@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29905.134
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36804.6 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino", "Arduino.csproj", "{0D3AA0FD-4834-4AB1-AD2A-BB12180B61B4}"
 EndProject
@@ -32,6 +32,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board", "..\Board\Board.csproj", "{0413C8F5-20E0-48B2-8C35-AED67219B7C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button", "..\Button\Button.csproj", "{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "..\Common\tests\Common.Tests.csproj", "{8810B2D1-F55F-4420-A559-387BE41F85C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +93,10 @@ Global
 		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8810B2D1-F55F-4420-A559-387BE41F85C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8810B2D1-F55F-4420-A559-387BE41F85C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8810B2D1-F55F-4420-A559-387BE41F85C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8810B2D1-F55F-4420-A559-387BE41F85C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,6 +105,7 @@ Global
 		{2670F7BF-A7C8-49EB-9A99-1719A90D0C67} = {9E5A25ED-9839-4C1A-9B27-993437D1CB31}
 		{23B4B60C-9594-42BB-9D25-C54983B0F809} = {9E5A25ED-9839-4C1A-9B27-993437D1CB31}
 		{273C9233-8A7D-4A0B-8DB2-FB7F56FA727D} = {CA26B999-4C0E-4E82-A46E-A68AC1B85C10}
+		{8810B2D1-F55F-4420-A559-387BE41F85C9} = {CA26B999-4C0E-4E82-A46E-A68AC1B85C10}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {47BF9684-1876-4AC1-8C87-04B8C7FA6C3A}
