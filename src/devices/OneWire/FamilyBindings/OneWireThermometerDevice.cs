@@ -23,6 +23,19 @@ namespace Iot.Device.OneWire
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="OneWireThermometerDevice"/> class with a custom sysfs devices path.
+        /// This constructor allows overriding the default sysfs path for testing or non-standard environments.
+        /// </summary>
+        /// <param name="busId">The 1-wire bus the device is found on.</param>
+        /// <param name="devId">The id of the device.</param>
+        /// <param name="sysfsDevicesPath">The sysfs path for device access (default: "/sys/devices").</param>
+        /// <exception cref="ArgumentNullException">Thrown when any parameter is null.</exception>
+        public OneWireThermometerDevice(string busId, string devId, string sysfsDevicesPath)
+            : base(busId, devId, sysfsDevicesPath)
+        {
+        }
+
+        /// <summary>
         /// Check if family is compatible with this type of devices.
         /// </summary>
         /// <param name="family">The family to check.</param>
