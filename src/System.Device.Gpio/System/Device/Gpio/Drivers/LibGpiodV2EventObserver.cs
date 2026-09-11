@@ -219,10 +219,15 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
                 int numberOfReadEvents = request.ReadEdgeEvents(edgeEventBuffer);
 
-                for (int i = 0; i < numberOfReadEvents; i++)
+                // Bound iteration by the number of events actually stored in the buffer. The value returned by ReadEdgeEvents can exceed the
+                // number of events retrievable from the buffer, in which case GetEvent would receive a null event from libgpiod.
+                int numberOfBufferedEvents = edgeEventBuffer.GetNumEvents();
+                int numberOfEventsToHandle = Math.Min(numberOfReadEvents, numberOfBufferedEvents);
+
+                for (int i = 0; i < numberOfEventsToHandle; i++)
                 {
-                    EdgeEvent edgeEvent = edgeEventBuffer.GetEvent((ulong)i);
-                    HandleEdgeEvent(edgeEvent);
+using EdgeEvent edgeEvent = edgeEventBuffer.GetEvent((ulong)i);
+HandleEdgeEvent(edgeEvent);
                 }
             }
         }
