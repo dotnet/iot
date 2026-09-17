@@ -20,7 +20,7 @@ namespace Iot.Device.Tca955x
         private readonly int _interrupt;
         private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
         private readonly ConcurrentDictionary<int, PinChangeEventHandler> _eventHandlers = new ConcurrentDictionary<int, PinChangeEventHandler>();
-        private readonly Dictionary<int, PinEventTypes> _interruptPinsSubscribedEvents = new Dictionary<int, PinEventTypes>();
+        private readonly ConcurrentDictionary<int, PinEventTypes> _interruptPinsSubscribedEvents = new ConcurrentDictionary<int, PinEventTypes>();
         private readonly ConcurrentDictionary<int, PinValue> _interruptLastInputValues = new ConcurrentDictionary<int, PinValue>();
 
         private GpioController? _controller;
@@ -29,6 +29,10 @@ namespace Iot.Device.Tca955x
 
         private I2cDevice _busDevice;
 
+        // Lock protects:
+        // 1. I2C bus access - I2C operations must be atomic and sequential
+        // 2. _pinValues dictionary - tightly coupled with I2C read/write operations
+        // 3. Interrupt task coordination - _interruptProcessingTask and _interruptPending state
         private object _interruptHandlerLock = new object();
 
         // This task processes the i2c reading of the io expander in a background task to
@@ -94,7 +98,7 @@ namespace Iot.Device.Tca955x
                 // on the expander as soon as we register the interrupt handler.
                 for (int i = 0; i < PinCount; i++)
                 {
-                    _interruptPinsSubscribedEvents.Add(i, PinEventTypes.None);
+                    _interruptPinsSubscribedEvents.TryAdd(i, PinEventTypes.None);
                     _interruptLastInputValues.TryAdd(i, PinValue.Low);
                 }
 
@@ -187,6 +191,7 @@ namespace Iot.Device.Tca955x
         /// <param name="mode">The mode to be set.</param>
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
+            // Lock required: I2C bus operations must be atomic and sequential
             lock (_interruptHandlerLock)
             {
                 if (mode != PinMode.Input && mode != PinMode.Output && mode != PinMode.InputPullUp)
@@ -255,6 +260,7 @@ namespace Iot.Device.Tca955x
         protected override PinValue Read(int pinNumber)
         {
             PinValue pinValue;
+            // Lock required: I2C bus operations must be atomic, and _pinValues is updated during read
             lock (_interruptHandlerLock)
             {
                 ValidatePin(pinNumber);
@@ -277,6 +283,7 @@ namespace Iot.Device.Tca955x
         /// </summary>
         protected override void Read(Span<PinValuePair> pinValuePairs)
         {
+            // Lock required: I2C bus operations must be atomic, and _pinValues is updated during read
             lock (_interruptHandlerLock)
             {
                 byte? lowReg = null;
@@ -323,6 +330,7 @@ namespace Iot.Device.Tca955x
         /// <param name="value">The value to be written.</param>
         protected override void Write(int pinNumber, PinValue value)
         {
+            // Lock required: I2C bus operations must be atomic, and _pinValues is updated during write
             lock (_interruptHandlerLock)
             {
                 ValidatePin(pinNumber);
@@ -343,6 +351,7 @@ namespace Iot.Device.Tca955x
             bool lowChanged = false;
             bool highChanged = false;
 
+            // Lock required: I2C bus operations must be atomic, and _pinValues is updated during write
             lock (_interruptHandlerLock)
             {
                 (uint mask, uint newBits) = new PinVector32(pinValuePairs);
@@ -452,6 +461,9 @@ namespace Iot.Device.Tca955x
             // to miss edges while we are doing that anyway. Dropping interrupts in this
             // case is the best we can do and prevents flooding the consumer with events
             // that could queue up in the INT gpio pin driver.
+
+            // Lock required for task coordination: atomically check/start _interruptProcessingTask
+            // or set _interruptPending flag to ensure proper interrupt queueing
             lock (_interruptHandlerLock)
             {
                 if (_interruptProcessingTask == null)
@@ -468,7 +480,8 @@ namespace Iot.Device.Tca955x
         private Task ProcessInterruptInTask()
         {
             // Take a snapshot of the current interrupt pin configuration and last known input values
-            // so we can safely process them outside the lock in a background task.
+            // so we can safely process them in a background task. ConcurrentDictionary enumeration
+            // is thread-safe and provides a consistent snapshot.
             var interruptPinsSnapshot = new Dictionary<int, PinEventTypes>(_interruptPinsSubscribedEvents);
             var interruptLastInputValuesSnapshot = new Dictionary<int, PinValue>(_interruptLastInputValues);
 
@@ -516,6 +529,8 @@ namespace Iot.Device.Tca955x
 
             processingTask.ContinueWith(t =>
             {
+                // Lock required for task coordination: atomically check/update _interruptProcessingTask
+                // and _interruptPending to ensure only one processing task runs at a time
                 lock (_interruptHandlerLock)
                 {
                     _interruptProcessingTask = null;
@@ -568,26 +583,29 @@ namespace Iot.Device.Tca955x
                 throw new InvalidOperationException("No interrupt pin configured");
             }
 
+            // Update subscription state using thread-safe ConcurrentDictionary operations
+            _interruptPinsSubscribedEvents[pinNumber] = eventType;
+
+            // Read current value needs lock because it accesses I2C bus
+            PinValue currentValue;
             lock (_interruptHandlerLock)
             {
-                _interruptPinsSubscribedEvents[pinNumber] = eventType;
-                var currentValue = Read(pinNumber);
-                _interruptLastInputValues.TryUpdate(pinNumber, currentValue, !currentValue);
-                if (!_eventHandlers.TryAdd(pinNumber, callback))
-                {
-                    throw new InvalidOperationException($"An event handler is already registered for pin {pinNumber}");
-                }
+                currentValue = Read(pinNumber);
+            }
+
+            _interruptLastInputValues.TryUpdate(pinNumber, currentValue, !currentValue);
+            if (!_eventHandlers.TryAdd(pinNumber, callback))
+            {
+                throw new InvalidOperationException($"An event handler is already registered for pin {pinNumber}");
             }
         }
 
         /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            lock (_interruptHandlerLock)
-            {
-                _eventHandlers.TryRemove(pinNumber, out _);
-                _interruptPinsSubscribedEvents[pinNumber] = PinEventTypes.None;
-            }
+            // Use thread-safe ConcurrentDictionary operations - no lock needed
+            _eventHandlers.TryRemove(pinNumber, out _);
+            _interruptPinsSubscribedEvents[pinNumber] = PinEventTypes.None;
         }
 
         /// <summary>
