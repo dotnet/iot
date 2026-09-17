@@ -47,12 +47,22 @@ namespace Iot.Device.Mcp23xxx.Tests
             public Mcp23xxx Device { get; }
             public Mcp23xxxChipMock ChipMock { get; }
             public GpioController Controller { get; }
+            public GpioDriverMock? ResetDriverMock { get; }
 
             public TestDevice(Mcp23xxx device, Mcp23xxxChipMock chipMock)
             {
                 Device = device;
                 ChipMock = chipMock;
                 Controller = new GpioController(Device);
+                ResetDriverMock = null;
+            }
+
+            public TestDevice(Mcp23xxx device, Mcp23xxxChipMock chipMock, GpioDriverMock resetDriverMock)
+            {
+                Device = device;
+                ChipMock = chipMock;
+                Controller = new GpioController(Device);
+                ResetDriverMock = resetDriverMock;
             }
         }
 
