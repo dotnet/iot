@@ -83,7 +83,7 @@ namespace Iot.Device.Button.Tests
             DateTime now = DateTime.Now;
             button.PressButton();
 
-            Thread.Sleep((int)holdingTime.TotalMilliseconds + 100);
+            await Task.Delay((int)holdingTime.TotalMilliseconds + 100);
 
             button.ReleaseButton();
 
@@ -92,11 +92,11 @@ namespace Iot.Device.Button.Tests
             Assert.True(tcs.Task == firstTask, "holding timeout");
 
             // holdingTime is the DateTime retrieved in the holding timer handler
-            var effectiveHoldingTime = tcs.Task.Result;
+            DateTime effectiveHoldingTime = await tcs.Task;
 
             Assert.True(effectiveHoldingTime - now >= holdingTime, "holding");
             Assert.True(holding, "holding");
-            Assert.True(pressed, "pressed");
+            Assert.False(pressed, "pressed");
             Assert.False(doublePressed, "doublePressed");
         }
 
@@ -329,6 +329,7 @@ namespace Iot.Device.Button.Tests
 
             button.Press += (sender, e) =>
             {
+                // This is not triggered when holding
                 pressedCounter++;
             };
 
@@ -368,7 +369,7 @@ namespace Iot.Device.Button.Tests
 
             Assert.True(buttonDownCounter == 1, "ButtonDown counter is wrong");
             Assert.True(buttonUpCounter == 1, "ButtonUp counter is wrong");
-            Assert.True(pressedCounter == 1, "pressedCounter counter is wrong");
+            Assert.Equal(0, pressedCounter);
             Assert.True(holding, "holding");
             Assert.False(doublePressed, "doublePressed");
         }

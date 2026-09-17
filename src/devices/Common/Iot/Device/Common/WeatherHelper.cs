@@ -183,8 +183,8 @@ namespace Iot.Device.Common
         /// <param name="airTemperatureFromHumiditySensor">Temperature measured by the humidity sensor</param>
         /// <param name="relativeHumidityMeasured">Humidity measured</param>
         /// <param name="airTemperatureFromBetterPlacedSensor">Temperature measured by better placed sensor</param>
-        /// <returns>A corrected humidity. The value will be lower than the input value if the better placed sensor is cooler than
-        /// the "bad" sensor.</returns>
+        /// <returns>A corrected humidity. The value will be higher than the input value if the better placed sensor is cooler than
+        /// the "bad" sensor. With the same absolute humidity, a cooler environment can carry less water per volume of air.</returns>
         public static RelativeHumidity GetRelativeHumidityFromActualAirTemperature(Temperature airTemperatureFromHumiditySensor,
             RelativeHumidity relativeHumidityMeasured, Temperature airTemperatureFromBetterPlacedSensor)
         {

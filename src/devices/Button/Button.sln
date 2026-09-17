@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button", "Button.csproj", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button.samples", "samples\Button.samples.csproj", "{C5DB114F-A8C0-4B9F-9241-298DB20D278A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button.tests", "tests\Button.tests.csproj", "{32AFC763-4F2E-45A9-BF7D-025F001828CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button.Tests", "tests\Button.Tests.csproj", "{32AFC763-4F2E-45A9-BF7D-025F001828CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
