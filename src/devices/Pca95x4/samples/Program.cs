@@ -14,7 +14,7 @@ Console.WriteLine("Hello Pca95x4 Sample!");
 using Pca95x4 pca95x4 = GetPca95x4Device();
 ////CycleOutputBits(pca95x4);
 ////ReadInputPort(pca95x4);
-////UseAsGpioController(pca95x4);
+////UseAsGpioController();
 CheckInputRegisterPolarityInversion(pca95x4);
 
 Pca95x4 GetPca95x4Device()
@@ -44,10 +44,10 @@ void ReadInputPort(Pca95x4 pca95x4)
     Console.WriteLine($"Input Port: 0x{data:X2}");
 }
 
-void UseAsGpioController(Pca95x4 pca95x4)
+void UseAsGpioController()
 {
     // Pca95x4 derives from GpioDriver, so it can be used through a standard GpioController.
-    using GpioController controller = new(pca95x4);
+    using GpioController controller = new(GetPca95x4Device());
 
     controller.OpenPin(0, PinMode.Output);
     controller.OpenPin(1, PinMode.Input);

@@ -213,6 +213,22 @@ namespace Iot.Device.Pca95x4
         }
 
         /// <inheritdoc/>
+        protected override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
+        {
+            if (!IsPinModeSupported(pinNumber, mode))
+            {
+                throw new ArgumentException($"The pin mode {mode} is not supported.", nameof(mode));
+            }
+
+            if (mode == PinMode.Output)
+            {
+                Write(pinNumber, initialValue);
+            }
+
+            SetPinMode(pinNumber, mode);
+        }
+
+        /// <inheritdoc/>
         protected override PinMode GetPinMode(int pinNumber) =>
             ReadBit(Register.Configuration, pinNumber) ? PinMode.Input : PinMode.Output;
 
@@ -227,6 +243,10 @@ namespace Iot.Device.Pca95x4
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value) =>
             WriteBit(Register.OutputPort, pinNumber, value == PinValue.High);
+
+        /// <inheritdoc/>
+        protected override void Toggle(int pinNumber) =>
+            WriteBit(Register.OutputPort, pinNumber, !ReadBit(Register.OutputPort, pinNumber));
 
         /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) =>
