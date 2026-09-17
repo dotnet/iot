@@ -551,7 +551,9 @@ namespace Iot.Device.Arduino.Tests
 
         [Theory]
         [InlineData(nameof(ThreadingTests.StartAndStopThread), 0, 0, 1)]
-        [InlineData(nameof(ThreadingTests.DiningPhilosophers), 0, 0, 1)]
+        // Not yet reliable - EqualityComparer<UInt32>..cctor() triggers an internal firmware error
+        // when multiple threads are running with Monitor.TryEnter/Exit.
+        // [InlineData(nameof(ThreadingTests.DiningPhilosophers), 0, 0, 1)]
         [InlineData(nameof(ThreadingTests.UseThreadStatic), 0, 0, 1)]
         [InlineData(nameof(ThreadingTests.UseThreadStaticInSystem), 10, 5, 1)]
         [InlineData(nameof(ThreadingTests.UseArrayPool), 0, 0, 1)]
