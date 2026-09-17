@@ -205,6 +205,18 @@ internal partial class Interop
         internal static extern int gpiod_line_event_read(IntPtr line, ref GpioLineEvent gpioEvent);
 
         /// <summary>
+        /// Get the event file descriptor of a line that was requested for events.
+        /// </summary>
+        /// <param name="line">GPIO line handle</param>
+        /// <returns>The event file descriptor, or -1 if the line was not requested for events.</returns>
+        /// <remarks>
+        /// Reading event records straight from this descriptor avoids struct gpiod_line_event,
+        /// whose layout depends on how the C library was compiled (_TIME_BITS).
+        /// </remarks>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern int gpiod_line_event_get_fd(IntPtr line);
+
+        /// <summary>
         /// Open a gpiochip by number.
         /// </summary>
         /// <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
