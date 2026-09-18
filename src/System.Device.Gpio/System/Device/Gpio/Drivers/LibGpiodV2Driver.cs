@@ -107,6 +107,14 @@ public sealed class LibGpiodV2Driver : UnixDriver
     protected internal override void OpenPin(int lineOffset)
     {
         Offset offset = lineOffset;
+        lock (_lockObject)
+        {
+            if (_requestedLineByLineOffset.TryGetValue(offset, out _))
+            {
+                return;
+            }
+        }
+
         CreateLineRequestForSingleOffset(offset, LibGpiodProxyFactory.CreateLineSettings);
     }
 
