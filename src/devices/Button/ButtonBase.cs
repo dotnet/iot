@@ -12,19 +12,19 @@ namespace Iot.Device.Button
     /// </summary>
     public class ButtonBase : IDisposable
     {
-        internal const long DefaultDoublePressTicks = 15000000;
-        internal const long DefaultHoldingMilliseconds = 2000;
+        internal static readonly TimeSpan DefaultDoublePressTime = TimeSpan.FromTicks(15000000);
+        internal static readonly TimeSpan DefaultHoldingTime = TimeSpan.FromMilliseconds(2000);
 
         private bool _disposed = false;
 
-        private long _doublePressTicks;
-        private long _holdingMs;
+        private TimeSpan _doublePressTime;
+        private TimeSpan _holdingTime;
         private TimeSpan _debounceTime;
-        private long _debounceStartTicks;
+        private TimeSpan _debounceStartTime;
 
         private ButtonHoldingState _holdingState = ButtonHoldingState.Completed;
 
-        private long _lastPress = DateTime.MinValue.Ticks;
+        private TimeSpan _lastPress;
         private Timer? _holdingTimer;
 
         /// <summary>
@@ -73,10 +73,10 @@ namespace Iot.Device.Button
         public bool IsPressed { get; set; } = false;
 
         /// <summary>
-        /// Initialization of the button.
+        /// Initialization of the button with a default double press time and holding time.
         /// </summary>
         public ButtonBase()
-            : this(TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), default)
+            : this(DefaultDoublePressTime, DefaultHoldingTime, default)
         {
         }
 
@@ -84,18 +84,29 @@ namespace Iot.Device.Button
         /// Initialization of the button.
         /// </summary>
         /// <param name="doublePress">Max ticks between button presses to count as doublePress.</param>
-        /// <param name="holding">Min ms a button is pressed to count as holding.</param>
+        /// <param name="holdingTime">Min ms a button is pressed to count as holding.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public ButtonBase(TimeSpan doublePress, TimeSpan holding, TimeSpan debounceTime)
+        public ButtonBase(TimeSpan doublePress, TimeSpan holdingTime, TimeSpan debounceTime)
         {
             if (debounceTime.TotalMilliseconds * 3 > doublePress.TotalMilliseconds)
             {
                 throw new ArgumentException($"The parameter {nameof(doublePress)} should be at least three times {nameof(debounceTime)}");
             }
 
-            _doublePressTicks = doublePress.Ticks;
-            _holdingMs = (long)holding.TotalMilliseconds;
+            _doublePressTime = doublePress;
+            _holdingTime = holdingTime;
             _debounceTime = debounceTime;
+            TimeSource = () => TimeSpan.FromMilliseconds(Environment.TickCount64);
+        }
+
+        /// <summary>
+        /// This property allows to override the time source used for debouncing.
+        /// The default implementation uses GetTickCount64() to get the current time in milliseconds (that's the reason why it is a TimeSpan)
+        /// </summary>
+        public Func<TimeSpan> TimeSource
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -103,18 +114,18 @@ namespace Iot.Device.Button
         /// </summary>
         protected void HandleButtonPressed()
         {
-            if (DateTime.UtcNow.Ticks - _debounceStartTicks < _debounceTime.Ticks)
+            if (TimeSource() - _debounceStartTime < _debounceTime)
             {
                 return;
             }
 
             IsPressed = true;
 
-            ButtonDown?.Invoke(this, new EventArgs());
+            ButtonDown?.Invoke(this, EventArgs.Empty);
 
             if (IsHoldingEnabled)
             {
-                _holdingTimer = new Timer(StartHoldingHandler, null, (int)_holdingMs, Timeout.Infinite);
+                _holdingTimer = new Timer(StartHoldingHandler, null, _holdingTime, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -128,13 +139,13 @@ namespace Iot.Device.Button
                 return;
             }
 
-            _debounceStartTicks = DateTime.UtcNow.Ticks;
+            _debounceStartTime = TimeSource();
             _holdingTimer?.Dispose();
             _holdingTimer = null;
 
             IsPressed = false;
 
-            ButtonUp?.Invoke(this, new EventArgs());
+            ButtonUp?.Invoke(this, EventArgs.Empty);
 
             if (IsHoldingEnabled && _holdingState == ButtonHoldingState.Started)
             {
@@ -143,23 +154,24 @@ namespace Iot.Device.Button
             }
             else
             {
-                Press?.Invoke(this, new EventArgs());
+                Press?.Invoke(this, EventArgs.Empty);
             }
 
             if (IsDoublePressEnabled)
             {
-                if (_lastPress == DateTime.MinValue.Ticks)
+                var now = TimeSource();
+                if (_lastPress == TimeSpan.Zero)
                 {
-                    _lastPress = DateTime.UtcNow.Ticks;
+                    _lastPress = now;
                 }
                 else
                 {
-                    if (DateTime.UtcNow.Ticks - _lastPress <= _doublePressTicks)
+                    if (now - _lastPress <= _doublePressTime)
                     {
                         DoublePress?.Invoke(this, new EventArgs());
                     }
 
-                    _lastPress = DateTime.MinValue.Ticks;
+                    _lastPress = now;
                 }
             }
         }

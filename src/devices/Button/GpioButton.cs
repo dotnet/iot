@@ -37,7 +37,7 @@ namespace Iot.Device.Button
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
         public GpioButton(int buttonPin, bool isPullUp = true, bool hasExternalResistor = false,
             GpioController? gpio = null, bool shouldDispose = true, TimeSpan debounceTime = default)
-            : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), isPullUp, hasExternalResistor, gpio, shouldDispose, debounceTime)
+            : this(buttonPin, DefaultDoublePressTime, DefaultHoldingTime, isPullUp, hasExternalResistor, gpio, shouldDispose, debounceTime)
         {
         }
 
