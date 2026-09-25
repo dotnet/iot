@@ -10,11 +10,29 @@ namespace Iot.Device.Button.Tests
         public TestButton()
             : base()
         {
+            TimeSource = DummyTime;
         }
 
         public TestButton(TimeSpan debounceTime, TimeSpan holdingTime)
             : base(TimeSpan.FromSeconds(5), holdingTime, debounceTime)
         {
+            TimeSource = DummyTime;
+        }
+
+        public long TimeLapsed
+        {
+            get;
+            private set;
+        }
+
+        public void AddTime(long milliSeconds)
+        {
+            TimeLapsed += milliSeconds;
+        }
+
+        private TimeSpan DummyTime()
+        {
+            return TimeSpan.FromMilliseconds(TimeLapsed);
         }
 
         public void PressButton()
