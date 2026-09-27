@@ -164,6 +164,7 @@ namespace Iot.Device.GrovePiDevice
                 tries++;
                 Thread.Sleep(10);
             }
+
             throw new IOException($"{nameof(ReadCommand)}: Failed to read response for command {command}", innerEx);
         }
 
