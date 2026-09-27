@@ -58,6 +58,7 @@ namespace Iot.Device.Button.Tests
             // we set short times to avoid wasting when executing the tests
             var debounceTime = TimeSpan.FromMilliseconds(200);
             var holdingTime = TimeSpan.FromMilliseconds(400);
+            ManualResetEventSlim mre = new ManualResetEventSlim(false);
             TestButton button = new TestButton(debounceTime, holdingTime);
             button.IsHoldingEnabled = true;
 
@@ -69,6 +70,7 @@ namespace Iot.Device.Button.Tests
             button.Holding += (sender, e) =>
             {
                 holding = true;
+                mre.Set();
                 if (e.HoldingState == ButtonHoldingState.Completed)
                 {
                     released = true;
@@ -84,7 +86,7 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
 
             button.AddTime((int)holdingTime.TotalMilliseconds + 100);
-
+            Assert.True(mre.Wait(TimeSpan.FromMilliseconds(1000)));
             button.ReleaseButton();
             button.AddTime(2 * (int)holdingTime.TotalMilliseconds);
 
@@ -268,7 +270,7 @@ namespace Iot.Device.Button.Tests
 
             var holdingTime = TimeSpan.FromMilliseconds(2000);
             TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
-
+            button.AddTime(200000);
             button.Press += (sender, e) =>
             {
                 pressedCounter++;
@@ -329,6 +331,7 @@ namespace Iot.Device.Button.Tests
             var holdingTime = TimeSpan.FromMilliseconds(2000);
             TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
             button.IsHoldingEnabled = true;
+            ManualResetEventSlim mre = new ManualResetEventSlim(false);
 
             button.Press += (sender, e) =>
             {
@@ -349,6 +352,7 @@ namespace Iot.Device.Button.Tests
             button.Holding += (sender, e) =>
             {
                 holding = true;
+                mre.Set();
             };
 
             button.DoublePress += (sender, e) =>
@@ -361,6 +365,7 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
             button.AddTime(2200);
             // releasing the button. This should trigger the holding and buttonUp event, but not the pressed event
+            Assert.True(mre.Wait(10000));
             button.ReleaseButton();
             button.AddTime(1);
             // now simulating hw bounces which should not be detected
