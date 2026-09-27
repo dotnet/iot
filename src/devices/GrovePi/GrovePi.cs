@@ -72,7 +72,7 @@ namespace Iot.Device.GrovePiDevice
                 return new Version(inArray[1], inArray[2], inArray[3]);
             }
 
-            throw new Exception("Unknown firmware version");
+            throw new IOException("Unknown firmware version");
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Iot.Device.GrovePiDevice
         /// <param name="command">The GrovePi command</param>
         /// <param name="pin">The pin to read</param>
         /// <returns></returns>
-        public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
+        public byte[] ReadCommand(GrovePiCommand command, GrovePort pin)
         {
             const byte dataNotAvailableCommand = 23;
             int numberBytesToRead = command switch
@@ -131,7 +131,7 @@ namespace Iot.Device.GrovePiDevice
 
             if (numberBytesToRead == 0)
             {
-                return null;
+                throw new IOException($"Unknown Grove Pi Command {command}");
             }
 
             byte[] outArray = new byte[numberBytesToRead];
@@ -157,11 +157,13 @@ namespace Iot.Device.GrovePiDevice
 
                 if (outArray[0] != dataNotAvailableCommand && outArray[0] != byte.MaxValue)
                 {
+                    // outArray is always the correct length here (at least 2 for now)
                     return outArray;
                 }
 
                 tries++;
                 Thread.Sleep(10);
+            }
             throw new IOException($"{nameof(ReadCommand)}: Failed to read response for command {command}", innerEx);
         }
 
@@ -174,12 +176,7 @@ namespace Iot.Device.GrovePiDevice
         {
             WriteCommand(GrovePiCommand.DigitalRead, pin, 0, 0);
             var data = ReadCommand(GrovePiCommand.DigitalRead, pin);
-            if (data is null || data.Length < 2)
-            {
-                return (PinValue)(-1);
-            }
-
-            return (PinValue)data[1];
+            return data[1] != 0 ? PinValue.High : PinValue.Low;
         }
 
         /// <summary>
@@ -190,7 +187,7 @@ namespace Iot.Device.GrovePiDevice
         public void DigitalWrite(GrovePort pin, PinValue pinLevel) => WriteCommand(GrovePiCommand.DigitalWrite, pin, (byte)pinLevel, 0);
 
         /// <summary>
-        /// Setup the pin mode, equivalent of pinMod on Arduino
+        /// Setup the pin mode, equivalent of pinMode on Arduino
         /// </summary>
         /// <param name="pin">The GroovePi pin to setup</param>
         /// <param name="mode">THe mode to setup Intput or Output</param>
@@ -200,19 +197,12 @@ namespace Iot.Device.GrovePiDevice
         /// Read an analog value on a pin, equivalent of analogRead on Arduino
         /// </summary>
         /// <param name="pin">The GroovePi pin to read</param>
-        /// <returns></returns>
+        /// <returns>The analog value</returns>
         public int AnalogRead(GrovePort pin)
         {
             WriteCommand(GrovePiCommand.AnalogRead, pin, 0, 0);
-            try
-            {
-                var inArray = ReadCommand(GrovePiCommand.AnalogRead, pin);
-                return BinaryPrimitives.ReadInt16BigEndian(inArray.AsSpan(1, 2));
-            }
-            catch (IOException)
-            {
-                return -1;
-            }
+            var inArray = ReadCommand(GrovePiCommand.AnalogRead, pin);
+            return BinaryPrimitives.ReadInt16BigEndian(inArray.AsSpan(1, 2));
         }
 
         /// <summary>
