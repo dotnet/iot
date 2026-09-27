@@ -708,7 +708,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 }
             }
 
-            IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
+            IntPtr mapPointer = Interop.mmap(IntPtr.Zero, new UIntPtr((uint)Environment.SystemPageSize), (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
             if (mapPointer.ToInt64() == -1)
             {
                 throw new IOException($"Error {ExceptionHelper.GetLastErrorMessage()} initializing the Gpio driver.");
