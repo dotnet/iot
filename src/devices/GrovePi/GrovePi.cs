@@ -119,7 +119,7 @@ namespace Iot.Device.GrovePiDevice
         /// <returns></returns>
         public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
         {
-            const int dataNotAvailableCommand = 23;
+            const byte dataNotAvailableCommand = 23;
             int numberBytesToRead = command switch
             {
                 GrovePiCommand.DigitalRead => 2,
@@ -155,16 +155,14 @@ namespace Iot.Device.GrovePiDevice
                     continue;
                 }
 
-                if (outArray[0] != dataNotAvailableCommand && outArray[0] != 255)
+                if (outArray[0] != dataNotAvailableCommand && outArray[0] != byte.MaxValue)
                 {
                     return outArray;
                 }
 
                 tries++;
                 Thread.Sleep(10);
-            }
-
-            throw new IOException($"{nameof(ReadCommand)}: Failed to write command {command}", innerEx);
+            throw new IOException($"{nameof(ReadCommand)}: Failed to read response for command {command}", innerEx);
         }
 
         /// <summary>
