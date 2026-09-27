@@ -41,7 +41,7 @@ public abstract class GpioDriver : IDisposable
         {
             driver = creationAction();
         }
-        catch (Exception x) when (x is PlatformNotSupportedException || x is DllNotFoundException)
+        catch (Exception x) when (x is PlatformNotSupportedException || x is DllNotFoundException || x is GpiodException)
         {
             driver = null;
             return false;
