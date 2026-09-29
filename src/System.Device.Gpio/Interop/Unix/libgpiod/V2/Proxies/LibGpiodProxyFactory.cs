@@ -47,7 +47,7 @@ internal static class LibGpiodProxyFactory
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static EdgeEventBuffer CreateEdgeEventBuffer(int capacity = 10)
     {
-        var handle = LibGpiodProxyBase.CallLibgpiod(() => LibgpiodV2.gpiod_edge_event_buffer_new(capacity));
+        var handle = LibGpiodProxyBase.CallLibgpiod(() => LibgpiodV2.gpiod_edge_event_buffer_new((nuint)capacity));
 
         if (handle.IsInvalid)
         {

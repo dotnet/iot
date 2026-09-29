@@ -37,7 +37,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase
     /// </summary>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html#gab969a727573749810c16470a163c091b"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public int GetCapacity()
+    public ulong GetCapacity()
     {
         return CallLibgpiod(() => LibgpiodV2.gpiod_edge_event_buffer_get_capacity(Handle));
     }
@@ -65,7 +65,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase
     /// </summary>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html#gaf3bda00286ba4de94a4186c0ad61d255"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public int GetNumEvents()
+    public ulong GetNumEvents()
     {
         return CallLibgpiod(() => LibgpiodV2.gpiod_edge_event_buffer_get_num_events(Handle));
     }
@@ -82,7 +82,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase
     /// <summary>
     /// Contains all readable information that was recorded at one and the same time
     /// </summary>
-    public sealed record Snapshot(int Capacity, int NumEvents)
+    public sealed record Snapshot(ulong Capacity, ulong NumEvents)
     {
         /// <summary>
         /// Converts the whole snapshot to string
