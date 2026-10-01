@@ -113,6 +113,10 @@ Holding Completed
 
 ## Testing
 
+`ButtonBase` accepts a `TimeProvider` through its constructor; existing constructors use `TimeProvider.System`.
+The same provider measures debouncing and double-press intervals and creates the holding timer.
+The unit tests inject `FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing` and advance time explicitly, including holding callbacks, without sleeping or waiting for real timers.
+
 The unit test project can be found in the [tests](./tests/ButtonTests.cs) directory. You can simply run them using Visual Studio built-in test capabilities:
 
 ![unit tests](./unittests.png)
