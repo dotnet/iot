@@ -3,37 +3,29 @@
 
 using System;
 
+using Microsoft.Extensions.Time.Testing;
+
 namespace Iot.Device.Button.Tests
 {
     public class TestButton : ButtonBase
     {
         public TestButton()
-            : base()
+            : this(TimeSpan.FromSeconds(1.5), TimeSpan.FromSeconds(2), TimeSpan.Zero, new FakeTimeProvider())
         {
-            TimeSource = DummyTime;
         }
 
         public TestButton(TimeSpan debounceTime, TimeSpan holdingTime)
-            : base(TimeSpan.FromSeconds(5), holdingTime, debounceTime)
+            : this(TimeSpan.FromSeconds(5), holdingTime, debounceTime, new FakeTimeProvider())
         {
-            TimeSource = DummyTime;
         }
 
-        public long TimeLapsed
+        private TestButton(TimeSpan doublePress, TimeSpan holdingTime, TimeSpan debounceTime, FakeTimeProvider timeProvider)
+            : base(doublePress, holdingTime, debounceTime, timeProvider)
         {
-            get;
-            private set;
+            TimeProvider = timeProvider;
         }
 
-        public void AddTime(long milliSeconds)
-        {
-            TimeLapsed += milliSeconds;
-        }
-
-        private TimeSpan DummyTime()
-        {
-            return TimeSpan.FromMilliseconds(TimeLapsed);
-        }
+        public FakeTimeProvider TimeProvider { get; }
 
         public void PressButton()
         {
