@@ -77,12 +77,14 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
             }
 
+            // The motor disposes the controller (when it owns it), not the software PWM channel that shares it
+            bool ownsController = controller is null;
             controller = controller ?? new GpioController();
             return new DCMotor2PinNoEnable(
-                new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
+                new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                 -1,
                 controller,
-                shouldDispose);
+                shouldDispose || ownsController);
         }
 
         /// <summary>
@@ -155,23 +157,25 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
             }
 
+            // The motor disposes the controller (when it owns it), not the software PWM channel that shares it
+            bool ownsController = controller is null;
             controller = controller ?? new GpioController();
 
             if (singleBiDirectionPin)
             {
                 return new DCMotor2PinWithBiDirectionalPin(
-                    new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
+                    new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                     directionPin,
                     controller,
-                    shouldDispose);
+                    shouldDispose || ownsController);
             }
             else
             {
                 return new DCMotor2PinNoEnable(
-                    new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
+                    new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                     directionPin,
                     controller,
-                    shouldDispose);
+                    shouldDispose || ownsController);
             }
         }
 
@@ -249,13 +253,15 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
             }
 
+            // The motor disposes the controller (when it owns it), not the software PWM channel that shares it
+            bool ownsController = controller is null;
             controller = controller ?? new GpioController();
             return new DCMotor3Pin(
-                new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller),
+                new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                 directionPin,
                 otherDirectionPin,
                 controller,
-                shouldDispose);
+                shouldDispose || ownsController);
         }
 
         /// <summary>
