@@ -85,11 +85,11 @@ namespace Iot.Device.Button
         /// <summary>
         /// Initialization of the button.
         /// </summary>
-        /// <param name="doublePress">Max ticks between button presses to count as doublePress.</param>
-        /// <param name="holding">Min ms a button is pressed to count as holding.</param>
+        /// <param name="doublePress">Max time between button presses to count as doublePress.</param>
+        /// <param name="holdingTime">Min time a button is pressed to count as holding.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public ButtonBase(TimeSpan doublePress, TimeSpan holding, TimeSpan debounceTime)
-            : this(doublePress, holding, debounceTime, TimeProvider.System)
+        public ButtonBase(TimeSpan doublePress, TimeSpan holdingTime, TimeSpan debounceTime)
+            : this(doublePress, holdingTime, debounceTime, TimeProvider.System)
         {
         }
 
@@ -97,10 +97,10 @@ namespace Iot.Device.Button
         /// Initialization of the button with a time provider.
         /// </summary>
         /// <param name="doublePress">The maximum time between button presses to count as a double press.</param>
-        /// <param name="holding">The minimum time a button is pressed to count as holding.</param>
+        /// <param name="holdingTime">The minimum time a button is pressed to count as holding.</param>
         /// <param name="debounceTime">The amount of time during which transitions are ignored, or zero.</param>
         /// <param name="timeProvider">The provider used to measure elapsed time and create holding timers.</param>
-        public ButtonBase(TimeSpan doublePress, TimeSpan holding, TimeSpan debounceTime, TimeProvider timeProvider)
+        public ButtonBase(TimeSpan doublePress, TimeSpan holdingTime, TimeSpan debounceTime, TimeProvider timeProvider)
         {
             ArgumentNullException.ThrowIfNull(timeProvider);
 
@@ -110,7 +110,7 @@ namespace Iot.Device.Button
             }
 
             _doublePressTime = doublePress;
-            _holdingTime = holding;
+            _holdingTime = holdingTime;
             _debounceTime = debounceTime;
             _timeProvider = timeProvider;
         }
