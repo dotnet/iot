@@ -25,6 +25,16 @@ namespace Iot.Device.ExplorerHat
         public Lights Lights { get; private set; }
 
         /// <summary>
+        /// Explorer HAT buffered, 5V tolerant digital inputs. Each pin is opened the first time it is read
+        /// </summary>
+        public Inputs Inputs { get; private set; }
+
+        /// <summary>
+        /// Explorer HAT open collector outputs. Each pin is opened the first time it is switched on or off
+        /// </summary>
+        public Outputs Outputs { get; private set; }
+
+        /// <summary>
         /// Initialize <see cref="ExplorerHat"/> instance
         /// </summary>
         public ExplorerHat(GpioController? controller = null, bool shouldDispose = true)
@@ -35,6 +45,8 @@ namespace Iot.Device.ExplorerHat
             // The controller belongs to this instance: motors and lights must not dispose it
             Motors = new Motors(_controller, shouldDispose: false);
             Lights = new Lights(_controller, shouldDispose: false);
+            Inputs = new Inputs(_controller);
+            Outputs = new Outputs(_controller);
         }
 
         /// <summary>
@@ -44,7 +56,9 @@ namespace Iot.Device.ExplorerHat
         {
             // Motors first: their software PWM threads write to the controller until they are disposed
             Motors.Dispose();
+            Outputs.Dispose();
             Lights.Dispose();
+            Inputs.Dispose();
 
             if (_shouldDispose)
             {
