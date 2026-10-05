@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using Xunit;
 
@@ -12,13 +11,137 @@ namespace Iot.Device.Button.Tests
     public class ButtonTests
     {
         [Fact]
+        public void Null_TimeProvider_Is_Rejected()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+                new ButtonBase(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(2), TimeSpan.Zero, null!));
+        }
+
+        [Theory]
+        [InlineData(999, 1)]
+        [InlineData(1000, 2)]
+        public void Debouncing_Uses_Elapsed_Time_From_First_Release(int elapsedMilliseconds, int expectedPresses)
+        {
+            using TestButton button = new TestButton(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2));
+            int presses = 0;
+            button.Press += (sender, e) => presses++;
+
+            button.PressButton();
+            button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(elapsedMilliseconds));
+            button.PressButton();
+            button.ReleaseButton();
+
+            Assert.Equal(expectedPresses, presses);
+        }
+
+        [Theory]
+        [InlineData(1499, 1)]
+        [InlineData(1500, 1)]
+        [InlineData(1501, 0)]
+        public void DoublePress_Uses_Elapsed_Time_From_First_Release(int elapsedMilliseconds, int expectedDoublePresses)
+        {
+            using TestButton button = new TestButton();
+            button.IsDoublePressEnabled = true;
+            int doublePresses = 0;
+            button.DoublePress += (sender, e) => doublePresses++;
+
+            button.PressButton();
+            button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(elapsedMilliseconds));
+            button.PressButton();
+            button.ReleaseButton();
+
+            Assert.Equal(expectedDoublePresses, doublePresses);
+        }
+
+        [Fact]
+        public void Three_Presses_Only_Fire_One_DoublePress()
+        {
+            using TestButton button = new TestButton();
+            button.IsDoublePressEnabled = true;
+            int doublePresses = 0;
+            button.DoublePress += (sender, e) => doublePresses++;
+
+            for (int i = 0; i < 3; i++)
+            {
+                button.PressButton();
+                button.ReleaseButton();
+                button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
+            }
+
+            Assert.Equal(1, doublePresses);
+        }
+
+        [Fact]
+        public void Releasing_Before_Holding_Threshold_Cancels_Timer()
+        {
+            using TestButton button = new TestButton();
+            button.IsHoldingEnabled = true;
+            bool holding = false;
+            int presses = 0;
+            button.Holding += (sender, e) => holding = true;
+            button.Press += (sender, e) => presses++;
+
+            button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1999));
+            button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromSeconds(10));
+
+            Assert.False(holding);
+            Assert.Equal(1, presses);
+        }
+
+        [Fact]
+        public void Disposing_Button_Cancels_Holding_Timer()
+        {
+            using TestButton button = new TestButton();
+            button.IsHoldingEnabled = true;
+            bool holding = false;
+            button.Holding += (sender, e) => holding = true;
+
+            button.PressButton();
+            button.Dispose();
+            button.TimeProvider.Advance(TimeSpan.FromSeconds(10));
+
+            Assert.False(holding);
+        }
+
+        [Fact]
+        public void Repeated_Holds_Fire_Started_And_Completed_Once_Per_Hold()
+        {
+            using TestButton button = new TestButton();
+            button.IsHoldingEnabled = true;
+            var holdingStates = new List<ButtonHoldingState>();
+            button.Holding += (sender, e) => holdingStates.Add(e.HoldingState);
+
+            for (int i = 0; i < 2; i++)
+            {
+                button.PressButton();
+                button.TimeProvider.Advance(TimeSpan.FromSeconds(2));
+                button.ReleaseButton();
+                button.TimeProvider.Advance(TimeSpan.FromSeconds(10));
+            }
+
+            Assert.Equal(
+                new[]
+                {
+                    ButtonHoldingState.Started,
+                    ButtonHoldingState.Completed,
+                    ButtonHoldingState.Started,
+                    ButtonHoldingState.Completed
+                },
+                holdingStates);
+        }
+
+        [Fact]
         public void If_Button_Is_Once_Pressed_Press_Event_Fires()
         {
             bool pressed = false;
             bool holding = false;
             bool doublePressed = false;
 
-            TestButton button = new TestButton();
+            using TestButton button = new TestButton();
 
             button.Press += (sender, e) =>
             {
@@ -38,7 +161,7 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
 
             // Wait a little bit to mimic actual user behavior.
-            Thread.Sleep(100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
             button.ReleaseButton();
 
@@ -48,18 +171,17 @@ namespace Iot.Device.Button.Tests
         }
 
         [Fact]
-        public async Task If_Button_Is_Held_Holding_Event_Fires()
+        public void If_Button_Is_Held_Holding_Event_Fires()
         {
             bool pressed = false;
             bool holding = false;
             bool doublePressed = false;
+            bool released = false;
 
-            // we set short times to avoid wasting when executing the tests
             var debounceTime = TimeSpan.FromMilliseconds(200);
             var holdingTime = TimeSpan.FromMilliseconds(400);
-            TestButton button = new TestButton(debounceTime, holdingTime);
+            using TestButton button = new TestButton(debounceTime, holdingTime);
             button.IsHoldingEnabled = true;
-            TaskCompletionSource<DateTime> tcs = new TaskCompletionSource<DateTime>();
 
             button.Press += (sender, e) =>
             {
@@ -71,7 +193,7 @@ namespace Iot.Device.Button.Tests
                 holding = true;
                 if (e.HoldingState == ButtonHoldingState.Completed)
                 {
-                    tcs.SetResult(DateTime.Now);
+                    released = true;
                 }
             };
 
@@ -80,22 +202,18 @@ namespace Iot.Device.Button.Tests
                 doublePressed = true;
             };
 
-            DateTime now = DateTime.Now;
             button.PressButton();
 
-            await Task.Delay((int)holdingTime.TotalMilliseconds + 100);
-
+            button.TimeProvider.Advance(holdingTime - TimeSpan.FromMilliseconds(1));
+            Assert.False(holding);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1));
+            Assert.True(holding);
+            Assert.False(released);
             button.ReleaseButton();
+            button.TimeProvider.Advance(holdingTime + holdingTime);
 
-            // this is only needed to avoid to wait indefinitely in case the code gets broken and the test fail
-            var firstTask = await Task.WhenAny(tcs.Task, Task.Delay(2 * (int)holdingTime.TotalMilliseconds));
-            Assert.True(tcs.Task == firstTask, "holding timeout");
-
-            // holdingTime is the DateTime retrieved in the holding timer handler
-            DateTime effectiveHoldingTime = await tcs.Task;
-
-            Assert.True(effectiveHoldingTime - now >= holdingTime, "holding");
             Assert.True(holding, "holding");
+            Assert.True(released, "released");
             Assert.False(pressed, "pressed");
             Assert.False(doublePressed, "doublePressed");
         }
@@ -107,7 +225,7 @@ namespace Iot.Device.Button.Tests
             bool holding = false;
             bool doublePressed = false;
 
-            TestButton button = new TestButton();
+            using TestButton button = new TestButton();
             button.IsHoldingEnabled = false;
 
             button.Press += (sender, e) =>
@@ -128,7 +246,7 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
 
             // Wait longer than default holding threshold milliseconds, for the press to be recognized as a holding event.
-            Thread.Sleep(2100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2100));
 
             button.ReleaseButton();
 
@@ -144,7 +262,7 @@ namespace Iot.Device.Button.Tests
             bool holding = false;
             bool doublePressed = false;
 
-            TestButton button = new TestButton();
+            using TestButton button = new TestButton();
             button.IsDoublePressEnabled = true;
 
             button.Press += (sender, e) =>
@@ -165,17 +283,17 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
 
             // Wait a little bit to mimic actual user behavior.
-            Thread.Sleep(100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
             button.ReleaseButton();
 
             // Wait shorter than default double press threshold milliseconds, for the press to be recognized as a double press event.
-            Thread.Sleep(200);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(200));
 
             button.PressButton();
 
             // Wait a little bit to mimic actual user behavior.
-            Thread.Sleep(100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
             button.ReleaseButton();
 
@@ -191,7 +309,7 @@ namespace Iot.Device.Button.Tests
             bool holding = false;
             bool doublePressed = false;
 
-            TestButton button = new TestButton();
+            using TestButton button = new TestButton();
 
             button.IsDoublePressEnabled = true;
 
@@ -213,17 +331,17 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
 
             // Wait a little bit to mimic actual user behavior.
-            Thread.Sleep(100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
             button.ReleaseButton();
 
             // Wait longer than default double press threshold milliseconds, for the press to be recognized as two separate presses.
-            Thread.Sleep(3000);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(3000));
 
             button.PressButton();
 
             // Wait a little bit to mimic actual user behavior.
-            Thread.Sleep(100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
             button.ReleaseButton();
 
@@ -237,7 +355,7 @@ namespace Iot.Device.Button.Tests
         {
             bool pressed = false;
 
-            TestButton button = new TestButton();
+            using TestButton button = new TestButton();
             button.IsDoublePressEnabled = false;
 
             button.DoublePress += (sender, e) =>
@@ -248,17 +366,17 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
 
             // Wait a little bit to mimic actual user behavior.
-            Thread.Sleep(100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
             button.ReleaseButton();
 
             // Wait shorter than default double press threshold milliseconds, for the press to be recognized as a double press event.
-            Thread.Sleep(200);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(200));
 
             button.PressButton();
 
             // Wait a little bit to mimic actual user behavior.
-            Thread.Sleep(100);
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(100));
 
             button.ReleaseButton();
 
@@ -273,8 +391,7 @@ namespace Iot.Device.Button.Tests
             int pressedCounter = 0;
 
             var holdingTime = TimeSpan.FromMilliseconds(2000);
-            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
-
+            using TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
             button.Press += (sender, e) =>
             {
                 pressedCounter++;
@@ -291,14 +408,23 @@ namespace Iot.Device.Button.Tests
             };
 
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2));
             button.ReleaseButton();
 
             Assert.Equal(1, pressedCounter);
@@ -324,7 +450,7 @@ namespace Iot.Device.Button.Tests
 
             // holding is 2 secs, debounce is 1 sec
             var holdingTime = TimeSpan.FromMilliseconds(2000);
-            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
+            using TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
             button.IsHoldingEnabled = true;
 
             button.Press += (sender, e) =>
@@ -355,16 +481,22 @@ namespace Iot.Device.Button.Tests
 
             // pushing the button. This will trigger the buttonDown event
             button.PressButton();
-            Thread.Sleep(2200);
-            // releasing the button. This will trigger the pressed and buttonUp event
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(2200));
+            // releasing the button. This should trigger the holding and buttonUp event, but not the pressed event
+            Assert.True(holding);
             button.ReleaseButton();
-
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1));
             // now simulating hw bounces which should not be detected
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1));
             button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1));
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1));
             button.ReleaseButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1));
             button.PressButton();
+            button.TimeProvider.Advance(TimeSpan.FromMilliseconds(1));
             button.ReleaseButton();
 
             Assert.True(buttonDownCounter == 1, "ButtonDown counter is wrong");
