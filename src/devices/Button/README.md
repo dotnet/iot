@@ -116,3 +116,8 @@ Holding Completed
 The unit test project can be found in the [tests](./tests/ButtonTests.cs) directory. You can simply run them using Visual Studio built-in test capabilities:
 
 ![unit tests](./unittests.png)
+
+`ButtonBase` uses `TimeProvider.System` by default for debouncing, double-press detection, and holding timers.
+Derived buttons can pass a `TimeProvider` to the four-argument base constructor. The tests use
+`FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing`, so advancing fake time also fires
+holding timers without sleeping or waiting for real time.

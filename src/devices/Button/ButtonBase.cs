@@ -12,20 +12,22 @@ namespace Iot.Device.Button
     /// </summary>
     public class ButtonBase : IDisposable
     {
-        internal const long DefaultDoublePressTicks = 15000000;
-        internal const long DefaultHoldingMilliseconds = 2000;
+        internal static readonly TimeSpan DefaultDoublePressTime = TimeSpan.FromTicks(15000000);
+        internal static readonly TimeSpan DefaultHoldingTime = TimeSpan.FromMilliseconds(2000);
+
+        private readonly TimeProvider _timeProvider;
 
         private bool _disposed = false;
 
-        private long _doublePressTicks;
-        private long _holdingMs;
+        private TimeSpan _doublePressTime;
+        private TimeSpan _holdingTime;
         private TimeSpan _debounceTime;
-        private long _debounceStartTicks;
+        private long? _debounceStartTimestamp;
 
         private ButtonHoldingState _holdingState = ButtonHoldingState.Completed;
 
-        private long _lastPress = DateTime.MinValue.Ticks;
-        private Timer? _holdingTimer;
+        private long? _lastPressTimestamp;
+        private ITimer? _holdingTimer;
 
         /// <summary>
         /// Delegate for button up event.
@@ -73,29 +75,44 @@ namespace Iot.Device.Button
         public bool IsPressed { get; set; } = false;
 
         /// <summary>
-        /// Initialization of the button.
+        /// Initialization of the button with a default double press time and holding time.
         /// </summary>
         public ButtonBase()
-            : this(TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), default)
+            : this(DefaultDoublePressTime, DefaultHoldingTime, default)
         {
         }
 
         /// <summary>
         /// Initialization of the button.
         /// </summary>
-        /// <param name="doublePress">Max ticks between button presses to count as doublePress.</param>
-        /// <param name="holding">Min ms a button is pressed to count as holding.</param>
+        /// <param name="doublePress">Max time between button presses to count as doublePress.</param>
+        /// <param name="holdingTime">Min time a button is pressed to count as holding.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public ButtonBase(TimeSpan doublePress, TimeSpan holding, TimeSpan debounceTime)
+        public ButtonBase(TimeSpan doublePress, TimeSpan holdingTime, TimeSpan debounceTime)
+            : this(doublePress, holdingTime, debounceTime, TimeProvider.System)
         {
+        }
+
+        /// <summary>
+        /// Initialization of the button with a time provider.
+        /// </summary>
+        /// <param name="doublePress">The maximum time between button presses to count as a double press.</param>
+        /// <param name="holdingTime">The minimum time a button is pressed to count as holding.</param>
+        /// <param name="debounceTime">The amount of time during which transitions are ignored, or zero.</param>
+        /// <param name="timeProvider">The provider used to measure elapsed time and create holding timers.</param>
+        public ButtonBase(TimeSpan doublePress, TimeSpan holdingTime, TimeSpan debounceTime, TimeProvider timeProvider)
+        {
+            ArgumentNullException.ThrowIfNull(timeProvider);
+
             if (debounceTime.TotalMilliseconds * 3 > doublePress.TotalMilliseconds)
             {
                 throw new ArgumentException($"The parameter {nameof(doublePress)} should be at least three times {nameof(debounceTime)}");
             }
 
-            _doublePressTicks = doublePress.Ticks;
-            _holdingMs = (long)holding.TotalMilliseconds;
+            _doublePressTime = doublePress;
+            _holdingTime = holdingTime;
             _debounceTime = debounceTime;
+            _timeProvider = timeProvider;
         }
 
         /// <summary>
@@ -103,18 +120,19 @@ namespace Iot.Device.Button
         /// </summary>
         protected void HandleButtonPressed()
         {
-            if (DateTime.UtcNow.Ticks - _debounceStartTicks < _debounceTime.Ticks)
+            if (_debounceStartTimestamp.HasValue &&
+                _timeProvider.GetElapsedTime(_debounceStartTimestamp.Value) < _debounceTime)
             {
                 return;
             }
 
             IsPressed = true;
 
-            ButtonDown?.Invoke(this, new EventArgs());
+            ButtonDown?.Invoke(this, EventArgs.Empty);
 
             if (IsHoldingEnabled)
             {
-                _holdingTimer = new Timer(StartHoldingHandler, null, (int)_holdingMs, Timeout.Infinite);
+                _holdingTimer = _timeProvider.CreateTimer(StartHoldingHandler, null, _holdingTime, Timeout.InfiniteTimeSpan);
             }
         }
 
@@ -128,13 +146,13 @@ namespace Iot.Device.Button
                 return;
             }
 
-            _debounceStartTicks = DateTime.UtcNow.Ticks;
+            _debounceStartTimestamp = _timeProvider.GetTimestamp();
             _holdingTimer?.Dispose();
             _holdingTimer = null;
 
             IsPressed = false;
 
-            ButtonUp?.Invoke(this, new EventArgs());
+            ButtonUp?.Invoke(this, EventArgs.Empty);
 
             if (IsHoldingEnabled && _holdingState == ButtonHoldingState.Started)
             {
@@ -143,23 +161,24 @@ namespace Iot.Device.Button
             }
             else
             {
-                Press?.Invoke(this, new EventArgs());
+                Press?.Invoke(this, EventArgs.Empty);
             }
 
             if (IsDoublePressEnabled)
             {
-                if (_lastPress == DateTime.MinValue.Ticks)
+                long now = _timeProvider.GetTimestamp();
+                if (!_lastPressTimestamp.HasValue)
                 {
-                    _lastPress = DateTime.UtcNow.Ticks;
+                    _lastPressTimestamp = now;
                 }
                 else
                 {
-                    if (DateTime.UtcNow.Ticks - _lastPress <= _doublePressTicks)
+                    if (_timeProvider.GetElapsedTime(_lastPressTimestamp.Value, now) <= _doublePressTime)
                     {
-                        DoublePress?.Invoke(this, new EventArgs());
+                        DoublePress?.Invoke(this, EventArgs.Empty);
                     }
 
-                    _lastPress = DateTime.MinValue.Ticks;
+                    _lastPressTimestamp = null;
                 }
             }
         }
