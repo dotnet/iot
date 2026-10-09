@@ -14,6 +14,7 @@ namespace Iot.Device.DCMotor
     public abstract class DCMotor : IDisposable
     {
         private const int DefaultPwmFrequency = 50;
+        private const string ControllerMustBeDisposedMessage = "shouldDispose must be true when no controller is given: the motor creates its own controller and has to dispose it.";
         private bool _shouldDispose;
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace Iot.Device.DCMotor
         /// </summary>
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
         /// <param name="controller"><see cref="GpioController"/> related to the <paramref name="speedControlPin"/></param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller. Must be true when <paramref name="controller"/> is null.</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// <paramref name="speedControlPin"/> can be connected to either enable pin of the H-bridge.
@@ -77,14 +78,18 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentOutOfRangeException(nameof(speedControlPin));
             }
 
-            // The motor disposes the controller (when it owns it), not the software PWM channel that shares it
-            bool ownsController = controller is null;
+            if (controller is null && !shouldDispose)
+            {
+                throw new ArgumentException(ControllerMustBeDisposedMessage, nameof(shouldDispose));
+            }
+
+            // The motor disposes the controller, not the software PWM channel that shares it
             controller = controller ?? new GpioController();
             return new DCMotor2PinNoEnable(
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                 -1,
                 controller,
-                shouldDispose || ownsController);
+                shouldDispose);
         }
 
         /// <summary>
@@ -133,7 +138,7 @@ namespace Iot.Device.DCMotor
         /// <param name="speedControlPin">Pin used to control the speed of the motor with software PWM (frequency will default to 50Hz)</param>
         /// <param name="directionPin">Pin used to control the direction of the motor</param>
         /// <param name="controller">GPIO controller related to <paramref name="speedControlPin"/> and <paramref name="directionPin"/></param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller. Must be true when <paramref name="controller"/> is null.</param>
         /// <param name="singleBiDirectionPin">True if a controller with one direction input is used,
         /// false if a controller with two direction inputs is used</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
@@ -157,8 +162,12 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentOutOfRangeException(nameof(directionPin));
             }
 
-            // The motor disposes the controller (when it owns it), not the software PWM channel that shares it
-            bool ownsController = controller is null;
+            if (controller is null && !shouldDispose)
+            {
+                throw new ArgumentException(ControllerMustBeDisposedMessage, nameof(shouldDispose));
+            }
+
+            // The motor disposes the controller, not the software PWM channel that shares it
             controller = controller ?? new GpioController();
 
             if (singleBiDirectionPin)
@@ -167,7 +176,7 @@ namespace Iot.Device.DCMotor
                     new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                     directionPin,
                     controller,
-                    shouldDispose || ownsController);
+                    shouldDispose);
             }
             else
             {
@@ -175,7 +184,7 @@ namespace Iot.Device.DCMotor
                     new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                     directionPin,
                     controller,
-                    shouldDispose || ownsController);
+                    shouldDispose);
             }
         }
 
@@ -227,7 +236,7 @@ namespace Iot.Device.DCMotor
         /// <param name="directionPin">First pin used to control the direction of the motor</param>
         /// <param name="otherDirectionPin">Second pin used to control the direction of the motor</param>
         /// <param name="controller"><see cref="GpioController"/> related to <paramref name="speedControlPin"/>, <paramref name="directionPin"/> and <paramref name="otherDirectionPin"/></param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller. Must be true when <paramref name="controller"/> is null.</param>
         /// <returns><see cref="DCMotor"/> instance</returns>
         /// <remarks>
         /// When speed is non-zero the value of <paramref name="otherDirectionPin"/> will always be opposite to that of <paramref name="directionPin"/>
@@ -253,15 +262,19 @@ namespace Iot.Device.DCMotor
                 throw new ArgumentOutOfRangeException(nameof(otherDirectionPin));
             }
 
-            // The motor disposes the controller (when it owns it), not the software PWM channel that shares it
-            bool ownsController = controller is null;
+            if (controller is null && !shouldDispose)
+            {
+                throw new ArgumentException(ControllerMustBeDisposedMessage, nameof(shouldDispose));
+            }
+
+            // The motor disposes the controller, not the software PWM channel that shares it
             controller = controller ?? new GpioController();
             return new DCMotor3Pin(
                 new SoftwarePwmChannel(speedControlPin, DefaultPwmFrequency, 0.0, controller: controller, shouldDispose: false),
                 directionPin,
                 otherDirectionPin,
                 controller,
-                shouldDispose || ownsController);
+                shouldDispose);
         }
 
         /// <summary>
