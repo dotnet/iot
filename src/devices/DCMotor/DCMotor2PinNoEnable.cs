@@ -78,8 +78,18 @@ namespace Iot.Device.DCMotor
 
         public override void Dispose()
         {
+            // Disposing the PWM channel leaves its pin low. If the motor was turning backwards, the direction pin
+            // is high: with these two H-bridge inputs at high and low, the motor would keep running at full speed.
+            // Set the direction pin low first, as the Speed setter does: a PWM channel given by the caller may
+            // dispose a shared controller.
+            if (_pin1 != -1 && Controller != null && Controller.IsPinOpen(_pin1))
+            {
+                Controller.Write(_pin1, PinValue.Low);
+            }
+
             _pwm?.Dispose();
             _pwm = null!;
+            _speed = 0;
             base.Dispose();
         }
     }
