@@ -47,7 +47,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase
     /// </summary>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html#ga3d5e3b2f0ca992e4d39df02202ff9458"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public EdgeEvent GetEvent(ulong index)
+    public EdgeEvent GetEvent(nuint index)
     {
         return CallLibgpiod(() =>
         {
