@@ -53,7 +53,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void AddLineSettings(Offset[] offsets, LineSettings lineSettings)
     {
-        CallLibpiodLocked(() => LibgpiodV2.gpiod_line_config_add_line_settings(Handle, offsets.Convert(), offsets.Length, lineSettings.Handle));
+        CallLibpiodLocked(() => LibgpiodV2.gpiod_line_config_add_line_settings(Handle, offsets.Convert(), (nuint)offsets.Length, lineSettings.Handle));
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ internal class LineConfig : LibGpiodProxyBase
         CallLibpiodLocked(() =>
         {
             var valArr = values.ToArray();
-            int result = LibgpiodV2.gpiod_line_config_set_output_values(Handle, valArr, valArr.Length);
+            int result = LibgpiodV2.gpiod_line_config_set_output_values(Handle, valArr, (nuint)valArr.Length);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set output values: {LastErr.GetMsg()}");
@@ -101,7 +101,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumConfiguredOffsets()
     {
-        return CallLibgpiod(() => LibgpiodV2.gpiod_line_config_get_num_configured_offsets(Handle));
+        return (int)CallLibgpiod(() => LibgpiodV2.gpiod_line_config_get_num_configured_offsets(Handle));
     }
 
     /// <summary>
@@ -115,8 +115,8 @@ internal class LineConfig : LibGpiodProxyBase
         {
             int numConfiguredOffsets = GetNumConfiguredOffsets();
             uint[] configuredOffsets = new uint[numConfiguredOffsets];
-            int nStored = LibgpiodV2.gpiod_line_config_get_configured_offsets(Handle, configuredOffsets, configuredOffsets.Length);
-            Array.Resize(ref configuredOffsets, nStored);
+            nuint nStored = LibgpiodV2.gpiod_line_config_get_configured_offsets(Handle, configuredOffsets, (nuint)configuredOffsets.Length);
+            Array.Resize(ref configuredOffsets, (int)nStored);
             return configuredOffsets.Convert();
         });
     }

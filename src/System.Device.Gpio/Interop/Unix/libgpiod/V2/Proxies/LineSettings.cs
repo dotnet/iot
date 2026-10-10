@@ -171,11 +171,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         CallLibpiodLocked(() =>
         {
-            int result = LibgpiodV2.gpiod_line_settings_set_active_low(Handle, isActiveLow);
-            if (result < 0)
-            {
-                throw new GpiodException($"Could not set line active low: {LastErr.GetMsg()}");
-            }
+            LibgpiodV2.gpiod_line_settings_set_active_low(Handle, isActiveLow);
         });
     }
 
