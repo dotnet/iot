@@ -113,9 +113,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
             {
                 return;
             }
-        }
 
-        CreateLineRequestForSingleOffset(offset, LibGpiodProxyFactory.CreateLineSettings);
+            CreateLineRequestForSingleOffset(offset, LibGpiodProxyFactory.CreateLineSettings);
+        }
     }
 
     /// <inheritdoc/>
