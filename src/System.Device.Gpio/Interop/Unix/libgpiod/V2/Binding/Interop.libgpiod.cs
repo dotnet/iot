@@ -86,7 +86,7 @@ internal partial class Interop
         [DllImport(LibgpiodLibrary)]
         public static extern void gpiod_line_info_free(IntPtr info);
 
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern LineInfoSafeHandle gpiod_line_info_copy(LineInfoSafeHandle info);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
@@ -158,7 +158,7 @@ internal partial class Interop
         [DllImport(LibgpiodLibrary)]
         public static extern void gpiod_line_settings_reset(LineSettingsSafeHandle settings);
 
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern LineSettingsSafeHandle gpiod_line_settings_copy(LineSettingsSafeHandle settings);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
@@ -223,7 +223,7 @@ internal partial class Interop
         [DllImport(LibgpiodLibrary)]
         public static extern void gpiod_line_config_reset(LineConfigSafeHandle config);
 
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern int gpiod_line_config_add_line_settings(LineConfigSafeHandle config, uint[] offsets, UIntPtr num_offsets,
             LineSettingsSafeHandle settings);
 
@@ -348,7 +348,7 @@ internal partial class Interop
         public static extern void gpiod_edge_event_buffer_free(IntPtr buffer);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern EdgeEventNotFreeable gpiod_edge_event_buffer_get_event(EdgeEventBufferSafeHandle buffer, ulong index);
+        public static extern EdgeEventNotFreeable gpiod_edge_event_buffer_get_event(EdgeEventBufferSafeHandle buffer, UIntPtr index);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern UIntPtr gpiod_edge_event_buffer_get_num_events(EdgeEventBufferSafeHandle buffer);
