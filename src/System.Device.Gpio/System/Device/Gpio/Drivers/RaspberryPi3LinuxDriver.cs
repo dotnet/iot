@@ -512,11 +512,15 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             _interruptDriver.OpenPin(pinNumber);
             _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
-            var ret = _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
-
-            _pinModes[pinNumber]!.InUseByInterruptDriver = false;
-            _interruptDriver.ClosePin(pinNumber);
-            return ret;
+            try
+            {
+                return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+            }
+            finally
+            {
+                _pinModes[pinNumber]!.InUseByInterruptDriver = false;
+                _interruptDriver.ClosePin(pinNumber);
+            }
         }
     }
 
