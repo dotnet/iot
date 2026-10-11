@@ -82,7 +82,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
         }
 
         _interruptDriver.OpenPin(pinNumber);
-        _pinModes[pinNumber]!.InUseByInterruptDriver = true;
+        _pinModes[pinNumber]!.AddInterruptDriverUse();
         _interruptDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
     }
 
@@ -165,8 +165,10 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
 
             _interruptDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
 
-            _pinModes[pinNumber]!.InUseByInterruptDriver = false;
-            _interruptDriver.ClosePin(pinNumber);
+            if (_pinModes[pinNumber]!.RemoveInterruptDriverUse())
+            {
+                _interruptDriver.ClosePin(pinNumber);
+            }
         }
         else
         {
@@ -514,7 +516,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 // This is the typical case when this method is used: Wait for a sparse event synchronously.
                 // We open the pin, wait for the event, and close it again.
                 _interruptDriver.OpenPin(pinNumber);
-                _pinModes[pinNumber]!.InUseByInterruptDriver = true;
+                _pinModes[pinNumber]!.AddInterruptDriverUse();
 
                 try
                 {
@@ -522,8 +524,10 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 }
                 finally
                 {
-                    _pinModes[pinNumber]!.InUseByInterruptDriver = false;
-                    _interruptDriver.ClosePin(pinNumber);
+                    if (_pinModes[pinNumber]!.RemoveInterruptDriverUse())
+                    {
+                        _interruptDriver.ClosePin(pinNumber);
+                    }
                 }
             }
         }
@@ -543,12 +547,45 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
     /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
     protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
     {
-        ValidatePinNumber(pinNumber);
+        if (_interruptDriver == null)
+        {
+            throw new PlatformNotSupportedException(
+                "No interrupt driver was found - event callbacks not supported on this platform");
+        }
 
-        _interruptDriver!.OpenPin(pinNumber);
-        _pinModes[pinNumber]!.InUseByInterruptDriver = true;
+        CancellationTokenSource dependentSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-        return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
+        try
+        {
+            if (_pinModes[pinNumber]!.InUseByInterruptDriver)
+            {
+                return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, dependentSource.Token);
+            }
+            else
+            {
+                // This is the typical case when this method is used: Wait for a sparse event synchronously.
+                // We open the pin, wait for the event, and close it again.
+                _interruptDriver.OpenPin(pinNumber);
+                _pinModes[pinNumber]!.AddInterruptDriverUse();
+
+                try
+                {
+                    return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, dependentSource.Token);
+                }
+                finally
+                {
+                    if (_pinModes[pinNumber]!.RemoveInterruptDriverUse())
+                    {
+                        _interruptDriver.ClosePin(pinNumber);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            // Copilot suggests cancelling the token, so that no internal tasks remain active in any case.
+            dependentSource.Cancel();
+        }
     }
 
     /// <summary>
@@ -821,10 +858,11 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
 
     private class PinState
     {
+        private int _interruptDriverUsageCount;
         public PinState(PinMode currentMode)
         {
             CurrentPinMode = currentMode;
-            InUseByInterruptDriver = false;
+            _interruptDriverUsageCount = 0;
         }
 
         public PinMode CurrentPinMode
@@ -835,8 +873,27 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
 
         public bool InUseByInterruptDriver
         {
-            get;
-            set;
+            get
+            {
+                return _interruptDriverUsageCount > 0;
+            }
+        }
+
+        /// <summary>
+        /// Increases the reference count on the interrupt driver
+        /// </summary>
+        public void AddInterruptDriverUse()
+        {
+            Interlocked.Increment(ref _interruptDriverUsageCount);
+        }
+
+        /// <summary>
+        /// Decrements the reference count on the interrupt driver
+        /// </summary>
+        /// <returns>True when the count has reached 0</returns>
+        public bool RemoveInterruptDriverUse()
+        {
+            return Interlocked.Decrement(ref _interruptDriverUsageCount) == 0;
         }
     }
 }
