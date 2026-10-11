@@ -501,26 +501,36 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 "No interrupt driver was found - event callbacks not supported on this platform");
         }
 
-        if (_pinModes[pinNumber]!.InUseByInterruptDriver)
-        {
-            return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
-        }
-        else
-        {
-            // This is the typical case when this method is used: Wait for a sparse event synchronously.
-            // We open the pin, wait for the event, and close it again.
-            _interruptDriver.OpenPin(pinNumber);
-            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
+        CancellationTokenSource dependentSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            try
+        try
+        {
+            if (_pinModes[pinNumber]!.InUseByInterruptDriver)
             {
-                return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+                return _interruptDriver.WaitForEvent(pinNumber, eventTypes, dependentSource.Token);
             }
-            finally
+            else
             {
-                _pinModes[pinNumber]!.InUseByInterruptDriver = false;
-                _interruptDriver.ClosePin(pinNumber);
+                // This is the typical case when this method is used: Wait for a sparse event synchronously.
+                // We open the pin, wait for the event, and close it again.
+                _interruptDriver.OpenPin(pinNumber);
+                _pinModes[pinNumber]!.InUseByInterruptDriver = true;
+
+                try
+                {
+                    return _interruptDriver.WaitForEvent(pinNumber, eventTypes, dependentSource.Token);
+                }
+                finally
+                {
+                    _pinModes[pinNumber]!.InUseByInterruptDriver = false;
+                    _interruptDriver.ClosePin(pinNumber);
+                }
             }
+        }
+        finally
+        {
+            // Copilot suggests cancelling the token, so that no internal tasks remain active in any case.
+            dependentSource.Cancel();
         }
     }
 
