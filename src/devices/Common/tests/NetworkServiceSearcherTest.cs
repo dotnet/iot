@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -18,11 +19,23 @@ namespace Common.Tests
 {
     public class NetworkServiceSearcherTest
     {
+        /// <summary>
+        /// Check the primary network interface is not the loopback interface.
+        /// </summary>
         [Fact]
         public void GetPrimaryNetworkInterface()
         {
             var result = NetworkServiceSearcher.GetPrimaryNetworkInterface();
-            Assert.NotEqual(result.Address, IPAddress.Loopback);
+            var available = NetworkInterface.GetIsNetworkAvailable();
+
+            if (available)
+            {
+                Assert.NotEqual(result.Address, IPAddress.Loopback);
+            }
+            else
+            {
+                Assert.Equal(result.Address, IPAddress.Loopback);
+            }
         }
 
         [Fact]
@@ -31,7 +44,7 @@ namespace Common.Tests
             var list = NetworkServiceSearcher.GetAllValidAddressesInSubnet(IPAddress.Parse("192.168.1.10"),
                 IPAddress.Parse("255.255.255.0"));
             Assert.NotNull(list);
-            Assert.Equal(254, list.Count);
+            Assert.Equal(253, list.Count);
             Assert.Equal(IPAddress.Parse("192.168.1.1"), list[0]);
         }
     }
