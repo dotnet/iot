@@ -145,6 +145,26 @@ namespace Iot.Device.Nmea0183.Sentences
         public string CommandedRudderDirection { get; private set; }
 
         /// <summary>
+        /// Interpretation of <see cref="CommandedRudderDirection"/>
+        /// </summary>
+        public TurnDirection CommandedTurnDirection
+        {
+            get
+            {
+                if (CommandedRudderDirection == "L")
+                {
+                    return TurnDirection.TurnToPort;
+                }
+                else if (CommandedRudderDirection == "R")
+                {
+                    return TurnDirection.TurnToStarboard;
+                }
+
+                return TurnDirection.NoCommand;
+            }
+        }
+
+        /// <summary>
         /// Turn mode (probably only valid for very expensive autopilots)
         /// Known values:
         /// R = Radius controlled

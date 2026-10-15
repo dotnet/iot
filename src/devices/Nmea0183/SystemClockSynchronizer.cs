@@ -20,7 +20,6 @@ namespace Iot.Device.Nmea0183
     public class SystemClockSynchronizer : NmeaSinkAndSource
     {
         private int _numberOfValidMessagesSeen;
-        private ILogger _logger;
 
         static SystemClockSynchronizer()
         {
@@ -34,7 +33,6 @@ namespace Iot.Device.Nmea0183
             : base("System Clock Synchronizer")
         {
             _numberOfValidMessagesSeen = 0;
-            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -78,16 +76,16 @@ namespace Iot.Device.Nmea0183
         {
             try
             {
-                _logger.LogInformation($"About to synchronize clock from {DateTime.UtcNow} to {dt}");
+                Logger.LogInformation($"About to synchronize clock from {DateTime.UtcNow} to {dt}");
                 SystemClock.SetSystemTimeUtc(dt);
             }
             catch (Exception e) when (e is UnauthorizedAccessException || e is IOException)
             {
-                _logger.LogError(e, "Unable to set system time");
+                Logger.LogError(e, $"Unable to set system time: {e.Message}");
                 return;
             }
 
-            _logger.LogInformation($"Successfully set time. System time is now {DateTime.UtcNow}");
+            Logger.LogInformation($"Successfully set time. System time is now {DateTime.UtcNow}");
         }
 
         /// <inheritdoc />

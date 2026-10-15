@@ -16,7 +16,7 @@ namespace Iot.Device.Nmea0183.Sentences
     /// An extended engine data message, using a PCDIN sequence (supported by some NMEA0183 to NMEA2000 bridges)
     /// PCDIN message 01F201 Engine status data (temperatures, oil pressure, operating time)
     /// </summary>
-    public class SeaSmartEngineDetail : ProprietaryMessage
+    public class SeaSmartEngineDetail : Nmea2000PackedMessage
     {
         /// <summary>
         /// Hexadecimal identifier for this message
@@ -71,30 +71,16 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             IEnumerator<string> field = fields.GetEnumerator();
 
-            string subMessage = ReadString(field);
-            if (!int.TryParse(subMessage, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int result) || result != Identifier)
-            {
-                Valid = false;
-                return;
-            }
-
-            string timeStamp = ReadString(field);
-
-            if (Int32.TryParse(timeStamp, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int time1))
-            {
-                MessageTimeStamp = time1;
-            }
-
-            ReadString(field); // Ignore next field
+            ParseCommonFields(field);
 
             string data = ReadString(field);
 
-            if (ReadFromHexString(data, 0, 2, false, out int engineNo))
+            if (ReadByteFromHexString(data, 0, out byte engineNo))
             {
                 EngineNumber = engineNo;
             }
 
-            if (ReadFromHexString(data, 10, 4, true, out int temp))
+            if (ReadUshortFromHexString(data, 10, out ushort temp))
             {
                 if (temp > 0 && temp < 0xFFFF)
                 {
@@ -106,14 +92,15 @@ namespace Iot.Device.Nmea0183.Sentences
                 }
             }
 
-            if (ReadFromHexString(data, 22, 8, true, out int operatingTime))
+            if (ReadUintFromHexString(data, 22, out uint operatingTime))
             {
                 OperatingTime = TimeSpan.FromSeconds(operatingTime);
             }
 
-            if (ReadFromHexString(data, 40, 4, false, out int status))
+            Status = 0;
+            if (ReadUnsignedFromHexString(data, 40, 4, false, out uint status1))
             {
-                Status = (EngineStatus)status;
+                Status = (EngineStatus)status1;
             }
 
             Valid = true;
@@ -122,16 +109,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// The NMEA2000 Sentence identifier for this message
         /// </summary>
-        public override int Identifier => HexId;
-
-        /// <summary>
-        /// The timestamp for the NMEA 2000 message
-        /// </summary>
-        public int MessageTimeStamp
-        {
-            get;
-            private set;
-        }
+        public override uint Identifier => HexId;
 
         /// <summary>
         /// Engine status: True for running, false for not running/error.
@@ -169,10 +147,8 @@ namespace Iot.Device.Nmea0183.Sentences
             private set;
         }
 
-        /// <summary>
-        /// Returns false for this message (because PCDIN messages are identified based on their inner message)
-        /// </summary>
-        public override bool ReplacesOlderInstance => false;
+        /// <inheritdoc/>
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override string ToNmeaParameterList()
@@ -223,7 +199,7 @@ namespace Iot.Device.Nmea0183.Sentences
                 string engineTempString = engineTempKelvin.ToString("X4", CultureInfo.InvariantCulture);
                 // Seems to require a little endian conversion as well
                 engineTempString = engineTempString.Substring(2, 2) + engineTempString.Substring(0, 2);
-                return "01F201," + timeStampText + ",02," + engineNoText + "0000FFFF" + engineTempString + "00050000" + swappedString + "FFFF000000" + status1String + status2String + "7F7F";
+                return base.ToNmeaParameterList() + engineNoText + "0000FFFF" + engineTempString + "00050000" + swappedString + "FFFF000000" + status1String + status2String + "7F7F";
 
             }
 

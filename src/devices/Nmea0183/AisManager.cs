@@ -554,7 +554,7 @@ namespace Iot.Device.Nmea0183
                     {
                         ExtendedClassBCsPositionReportMessage msgPos = (ExtendedClassBCsPositionReportMessage)msg;
                         ship = GetOrCreateShip(msgPos.Mmsi, msg.TransceiverType, sentence.DateTime);
-                        ship.Position = new GeographicPosition(msgPos.Latitude, msgPos.Longitude, 0);
+                        ship.Position = ValidatePosition(() => new GeographicPosition(msgPos.Latitude, msgPos.Longitude, 0));
                         ship.RateOfTurn = null;
                         if (msgPos.TrueHeading.HasValue)
                         {

@@ -64,7 +64,7 @@ namespace Iot.Device.Nmea0183.Tests
             {
                 TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"),
                 TestDataHelper.GetResourceStream("Nmea-2023-10-22-13-39.txt")
-            });
+            }, new Nmea0183ParserFactory());
             DateTimeOffset latestPacketDate = default;
             HashSet<SentenceId> unknownSentenceTypes = new HashSet<SentenceId>();
             reader.OnNewSequence += (source, msg) =>

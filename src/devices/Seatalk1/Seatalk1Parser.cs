@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -68,6 +69,7 @@ namespace Iot.Device.Seatalk1
                 new TargetWaypointName(),
                 new AutopilotWindStatus(),
                 new SpeedTroughWater(),
+                new DeviceIdentification(),
             };
 
             MaxMessageLength = _messageFactories.Select(x => x.ExpectedLength).Max();
@@ -153,6 +155,7 @@ namespace Iot.Device.Seatalk1
             }
 
             _parserThread?.Join();
+            _buffer.Clear(); // Because clients could wait for an empty buffer
         }
 
         private void Parser()
@@ -184,9 +187,14 @@ namespace Iot.Device.Seatalk1
                                 msg = GetTypeOfNextMessage(_buffer.GetRange(0, len), out messageLength);
                                 if (msg != null)
                                 {
+                                    _buffer.RemoveRange(0, len);
                                     break;
                                 }
                             }
+                        }
+                        else if (msg != null)
+                        {
+                            _buffer.RemoveRange(0, messageLength);
                         }
 
                         if (msg == null)
@@ -211,8 +219,13 @@ namespace Iot.Device.Seatalk1
                             }
                         }
 
+                        Stopwatch sw = Stopwatch.StartNew();
                         NewMessageDecoded?.Invoke(msg);
-                        _buffer.RemoveRange(0, messageLength);
+                        if (sw.ElapsedMilliseconds > 20)
+                        {
+                            _logger.LogWarning($"Seatalk parser: decode took {sw.ElapsedMilliseconds} ms to complete on '{msg.GetType()}'");
+                        }
+
                         if (_buffer.Count == 0)
                         {
                             isInSync = true;

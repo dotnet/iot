@@ -17,7 +17,7 @@ namespace Iot.Device.Nmea0183.Sentences
     /// SeaSmart message for fluid levels of a tank (Wrapped NMEA2000 message)
     /// For format, see also https://github.com/ttlappalainen/NMEA2000
     /// </summary>
-    public class SeaSmartFluidLevel : ProprietaryMessage
+    public class SeaSmartFluidLevel : Nmea2000PackedMessage
     {
         /// <summary>
         /// Hexadecimal identifier for this message
@@ -57,44 +57,23 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             IEnumerator<string> field = fields.GetEnumerator();
 
-            string subMessage = ReadString(field);
-            if (!int.TryParse(subMessage, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int result) || result != Identifier)
-            {
-                Valid = false;
-                return;
-            }
-
-            string timeStamp = ReadString(field);
-
-            if (Int32.TryParse(timeStamp, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int time1))
-            {
-                MessageTimeStamp = time1;
-            }
-
-            ReadString(field); // Ignore next field
+            ParseCommonFields(field);
 
             string data = ReadString(field);
 
-            if (ReadFromHexString(data, 0, 2, false, out int combined))
+            if (ReadByteFromHexString(data, 0, out byte combined))
             {
                 TankNumber = combined & 0x0f;
                 Type = (FluidType)((combined >> 4) & 0x0f);
             }
 
-            if (ReadFromHexString(data, 2, 4, false, out int level))
+            if (ReadShortFromHexString(data, 2, out short s))
             {
-                Level = Ratio.FromPercent(level);
+                Level = Ratio.FromPercent(s * 0.004);
             }
 
-            if (ReadFromHexString(data, 6, 8, false, out int volume))
+            if (ReadUintFromHexString(data, 6, out uint volume))
             {
-                volume = BinaryPrimitives.ReadInt32BigEndian(new byte[]
-                {
-                    (byte)(volume & 0xff),
-                    (byte)(volume >> 8),
-                    (byte)(volume >> 16),
-                    (byte)(volume >> 24),
-                });
                 TankVolume = Volume.FromLiters(volume / 10.0d);
             }
 
@@ -104,16 +83,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// The NMEA2000 Sentence identifier for this message
         /// </summary>
-        public override int Identifier => HexId;
-
-        /// <summary>
-        /// The timestamp for the NMEA 2000 message
-        /// </summary>
-        public int MessageTimeStamp
-        {
-            get;
-            private set;
-        }
+        public override uint Identifier => HexId;
 
         /// <summary>
         /// Tank level in percent (100% = Full, 0% = empty)
@@ -151,10 +121,8 @@ namespace Iot.Device.Nmea0183.Sentences
             private set;
         }
 
-        /// <summary>
-        /// Returns false for this message (because PCDIN messages are identified based on their inner message)
-        /// </summary>
-        public override bool ReplacesOlderInstance => false;
+        /// <inheritdoc/>
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override string ToNmeaParameterList()
@@ -170,8 +138,8 @@ namespace Iot.Device.Nmea0183.Sentences
                 // 4) Reserved
                 int combination = (((int)Type << 4) & 0xF0) | ((int)TankNumber & 0x0F);
                 string ftypeString = combination.ToString("X2", CultureInfo.InvariantCulture);
-                int l = (int)Math.Round(Level.HasValue ? Level.Value.Percent : 0);
-                string level = l.ToString("X4", CultureInfo.InvariantCulture);
+                short l = (short)Math.Round(Level.HasValue ? Level.Value.Percent / 0.004 : 0);
+                string level = WriteShortToHex(l);
                 int vol = (int)Math.Round(TankVolume.HasValue ? TankVolume.Value.Liters * 10 : 0);
                 string capacity = vol.ToString("X8", CultureInfo.InvariantCulture);
                 string capacitySwapped = capacity.Substring(6, 2) + capacity.Substring(4, 2) +
@@ -192,6 +160,15 @@ namespace Iot.Device.Nmea0183.Sentences
             }
 
             return "No valid data";
+        }
+
+        /// <summary>
+        /// Returns this message as a <see cref="FluidData"/> instance
+        /// </summary>
+        public FluidData AsFluidData()
+        {
+            return new FluidData(Type, Level.GetValueOrDefault(), TankVolume.GetValueOrDefault(), TankNumber,
+                Type is FluidType.Fuel or FluidType.FuelGasoline or FluidType.Oil or FluidType.Water);
         }
     }
 }
