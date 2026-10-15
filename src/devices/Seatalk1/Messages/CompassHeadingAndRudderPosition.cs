@@ -17,6 +17,16 @@ namespace Iot.Device.Seatalk1.Messages
     /// </summary>
     public record CompassHeadingAndRudderPosition : SeatalkMessage
     {
+        /// <summary>
+        /// Standard constructor
+        /// </summary>
+        public CompassHeadingAndRudderPosition()
+        {
+            CompassHeading = Angle.FromDegrees(0);
+            RudderPosition = Angle.FromDegrees(0);
+            TurnDirection = TurnDirection.TurnToPort;
+        }
+
         /// <inheritdoc />
         public override byte CommandByte => 0x9c;
 

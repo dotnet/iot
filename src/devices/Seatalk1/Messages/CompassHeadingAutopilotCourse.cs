@@ -18,6 +18,14 @@ namespace Iot.Device.Seatalk1.Messages
     /// </summary>
     public record CompassHeadingAutopilotCourse : SeatalkMessage
     {
+        /// <summary>
+        /// Standard constructor
+        /// </summary>
+        public CompassHeadingAutopilotCourse()
+        {
+            TurnDirection = TurnDirection.TurnToPort;
+        }
+
         /// <inheritdoc />
         public override byte CommandByte => 0x84;
 

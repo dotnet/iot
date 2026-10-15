@@ -99,7 +99,8 @@ namespace Iot.Device.Tests.Seatalk1
             SetToStandby();
             Assert.Equal(AutopilotStatus.Standby, _testee.Status);
             // Also: Shouldn't block, despite no Cancellation given
-            Assert.False(_testee.TurnTo(Angle.FromDegrees(100), TurnDirection.TurnToStarboard));
+            _testee.TurnTo(Angle.FromDegrees(100), TurnDirection.TurnToStarboard);
+            Assert.False(_testee.IsTurning);
         }
 
         [Fact]
@@ -129,13 +130,27 @@ namespace Iot.Device.Tests.Seatalk1
             _interface.Object.OnNewMessage(msg);
 
             Keystroke ks = new Keystroke(AutopilotButtons.PlusTen, 1);
-            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            bool called = false;
+            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(m =>
             {
-                Assert.True(ks.Equals(i));
+                Assert.True(ks.Equals(m));
+                called = true;
             }).Returns(true);
             _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
-            Assert.False(_testee.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToStarboard, _tokenSource.Token));
+            _testee.TurnBy(Angle.FromDegrees(20), TurnDirection.TurnToStarboard, _tokenSource.Token);
+            int i = 100;
+            while (i-- > 0)
+            {
+                if (_testee.IsTurning == false)
+                {
+                    break;
+                }
 
+                Thread.Sleep(100);
+            }
+
+            Assert.NotEqual(0, i);
+            Assert.True(called);
             _interface.Verify(x => x.SendMessage(ks));
         }
 
@@ -158,7 +173,15 @@ namespace Iot.Device.Tests.Seatalk1
                 Assert.Equal(ks, i);
             }).Returns(true);
             _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
-            Assert.False(_testee.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort, _tokenSource.Token));
+            _testee.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort, _tokenSource.Token);
+            int i = 100;
+            while (i-- > 0)
+            {
+                if (_testee.IsTurning == false)
+                {
+                    break;
+                }
+            }
 
             _interface.Verify(x => x.SendMessage(ks));
         }
@@ -213,7 +236,17 @@ namespace Iot.Device.Tests.Seatalk1
                 indexOfCommand++;
             }).Returns(true);
 
-            Assert.True(_testee.TurnBy(Angle.FromDegrees(12), TurnDirection.TurnToPort, _tokenSource.Token));
+            _testee.TurnBy(Angle.FromDegrees(12), TurnDirection.TurnToPort, _tokenSource.Token);
+            int i = 100;
+            while (i-- > 0)
+            {
+                if (_testee.IsTurning == false)
+                {
+                    break;
+                }
+            }
+
+            Assert.NotEqual(0, i);
         }
 
         [Fact]
@@ -229,13 +262,26 @@ namespace Iot.Device.Tests.Seatalk1
 
             _interface.Object.OnNewMessage(msg);
 
+            bool called = false;
             Keystroke ks = new Keystroke(AutopilotButtons.PlusTen, 1); // We expect that it's automatically guessing the "nearer" direction right
             _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
             {
                 Assert.Equal(ks, i);
+                called = true;
             }).Returns(true);
             _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
-            Assert.False(_testee.TurnTo(Angle.FromDegrees(100), null, _tokenSource.Token));
+            _testee.TurnTo(Angle.FromDegrees(100), null, _tokenSource.Token);
+
+            int i = 100;
+            while (i-- > 0)
+            {
+                if (_testee.IsTurning == false || called)
+                {
+                    break;
+                }
+
+                Thread.Sleep(100);
+            }
 
             _interface.Verify(x => x.SendMessage(ks));
         }
@@ -284,10 +330,10 @@ namespace Iot.Device.Tests.Seatalk1
         [Fact]
         public void AnglesAreClose()
         {
-            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(359), Angle.FromDegrees(0.1)));
-            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(360), Angle.FromDegrees(359)));
-            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(0), Angle.FromDegrees(359)));
-            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(181), Angle.FromDegrees(180)));
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(359), Angle.FromDegrees(0.1), Angle.FromDegrees(2)));
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(360), Angle.FromDegrees(359), Angle.FromDegrees(2)));
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(0), Angle.FromDegrees(359), Angle.FromDegrees(1.1)));
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(181), Angle.FromDegrees(180), Angle.FromDegrees(1.1)));
         }
 
         [Fact]

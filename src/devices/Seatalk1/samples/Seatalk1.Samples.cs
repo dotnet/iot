@@ -110,14 +110,14 @@ namespace Seatalk1Sample
 
                         case ConsoleKey.U:
                         {
-                            await ctrl.TurnByAsync(Angle.FromDegrees(90), TurnDirection.TurnToStarboard, CancellationToken.None);
+                            ctrl.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToStarboard, CancellationToken.None);
 
                             break;
                         }
 
                         case ConsoleKey.Z:
                         {
-                            await ctrl.TurnByAsync(Angle.FromDegrees(90), TurnDirection.TurnToPort, CancellationToken.None);
+                            ctrl.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort, CancellationToken.None);
 
                             break;
                         }

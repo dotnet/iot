@@ -136,6 +136,18 @@ namespace Iot.Device.Seatalk1
         public CourseComputerWarnings CourseComputerStatus { get; private set; }
 
         /// <summary>
+        /// This returns true if the autopilot is currently turning to a desired heading.
+        /// This is true when the <see cref="TurnTo(Angle, TurnDirection?, CancellationToken)"/> method was called and the desired heading has not yet been reached.
+        /// </summary>
+        public bool IsTurning
+        {
+            get
+            {
+                return _ourDesiredAngle.HasValue;
+            }
+        }
+
+        /// <summary>
         /// This event is fired when keys on the controller are pressed.
         /// </summary>
         public event Action<Keystroke>? AutopilotKeysPressed;
@@ -383,35 +395,9 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         /// <param name="degrees">New desired heading</param>
         /// <param name="direction">Desired turn direction. Pass null for taking the default (shorter) turn.</param>
-        /// <returns>True on success, false otherwise</returns>
-        /// <remarks>This operation can take a significant time</remarks>
-        public bool TurnTo(Angle degrees, TurnDirection? direction)
+        public void TurnTo(Angle degrees, TurnDirection? direction)
         {
-            return TurnTo(degrees, direction, CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Same as <see cref="TurnTo(UnitsNet.Angle,System.Nullable{Nmea0183.Sentences.TurnDirection})"/>, except in async mode
-        /// </summary>
-        /// <param name="degrees">New desired heading</param>
-        /// <param name="direction">Desired turn direction</param>
-        /// <param name="token">Cancellation token</param>
-        /// <returns>True on success, false otherwise</returns>
-        public Task<bool> TurnToAsync(Angle degrees, TurnDirection? direction, CancellationToken token)
-        {
-            return Task.Factory.StartNew(() => TurnTo(degrees, direction, token));
-        }
-
-        /// <summary>
-        /// Turn by a certain value
-        /// </summary>
-        /// <param name="degrees">Degrees to turn, unsigned</param>
-        /// <param name="direction">Direction to turn</param>
-        /// <param name="token">Cancellation token</param>
-        /// <returns>True on success, false otherwise</returns>
-        public Task<bool> TurnByAsync(Angle degrees, TurnDirection direction, CancellationToken token)
-        {
-            return Task.Factory.StartNew(() => TurnBy(degrees, direction, token));
+            TurnTo(degrees, direction, CancellationToken.None);
         }
 
         /// <summary>
@@ -420,9 +406,7 @@ namespace Iot.Device.Seatalk1
         /// <param name="degrees">New desired heading</param>
         /// <param name="direction">Desired turn direction. Pass null for taking the default (shorter) turn.</param>
         /// <param name="token">Cancellation token</param>
-        /// <returns>True on success, false otherwise</returns>
-        /// <remarks>This operation can take a significant time</remarks>
-        public bool TurnTo(Angle degrees, TurnDirection? direction, CancellationToken token)
+        public void TurnTo(Angle degrees, TurnDirection? direction, CancellationToken token)
         {
             lock (_lock)
             {
@@ -440,6 +424,10 @@ namespace Iot.Device.Seatalk1
                             _ourDesiredDirection = TurnDirection.TurnToPort;
                         }
                     }
+                    else
+                    {
+                        _ourDesiredDirection = direction.Value;
+                    }
 
                     _ourDesiredAngle = degrees;
                 }
@@ -453,8 +441,6 @@ namespace Iot.Device.Seatalk1
                     _desiredAngleUpdater.Start();
                 }
             }
-
-            return true;
         }
 
         private void DesiredAngleUpdater()
@@ -493,7 +479,7 @@ namespace Iot.Device.Seatalk1
                 _logger.LogInformation($"New desired heading: {newDesiredHeading}. Current desired heading {currentDesiredHeading}");
 
                 int maxNo = 5; // Update the desired value every few ticks
-                while (!AnglesAreClose(currentDesiredHeading, newDesiredHeading) && maxNo-- > 0)
+                while (!AnglesAreClose(currentDesiredHeading, newDesiredHeading, Angle.FromDegrees(0.1)) && maxNo-- > 0)
                 {
                     // Should also work if diff is small, but we intend to go the other way (make a full 360)
                     Angle diff = AngleExtensions.Difference(currentDesiredHeading, newDesiredHeading);
@@ -534,7 +520,7 @@ namespace Iot.Device.Seatalk1
                 bool ret;
                 lock (_lock)
                 {
-                    ret = _ourDesiredAngle.HasValue && AnglesAreClose(_ourDesiredAngle.Value, currentDesiredHeading);
+                    ret = _ourDesiredAngle.HasValue && AnglesAreClose(_ourDesiredAngle.Value, currentDesiredHeading, Angle.FromDegrees(0.1));
                     if (ret)
                     {
                         _logger.LogInformation($"Reached new desired course {_ourDesiredAngle.GetValueOrDefault()}. (Actually set is {currentDesiredHeading})");
@@ -552,9 +538,9 @@ namespace Iot.Device.Seatalk1
             }
         }
 
-        internal bool AnglesAreClose(Angle angle1, Angle angle2)
+        internal bool AnglesAreClose(Angle angle1, Angle angle2, Angle allowedDiff)
         {
-            return UnitMath.Abs(AngleExtensions.Difference(angle1, angle2)) < Angle.FromDegrees(0.1);
+            return UnitMath.Abs(AngleExtensions.Difference(angle1, angle2)) < allowedDiff;
         }
 
         /// <summary>
@@ -582,8 +568,7 @@ namespace Iot.Device.Seatalk1
         /// <param name="degrees">Degrees to turn, unsigned</param>
         /// <param name="direction">Direction to turn</param>
         /// <param name="token">Cancellation token</param>
-        /// <returns>True on success, false otherwise</returns>
-        public bool TurnBy(Angle degrees, TurnDirection direction, CancellationToken token)
+        public void TurnBy(Angle degrees, TurnDirection direction, CancellationToken token)
         {
             if (degrees < Angle.Zero)
             {
@@ -593,12 +578,12 @@ namespace Iot.Device.Seatalk1
             var currentHeading1 = AutopilotDesiredHeading;
             if (!IsOperating || !currentHeading1.HasValue)
             {
-                return false;
+                return;
             }
 
             Angle target = direction == TurnDirection.TurnToStarboard ? currentHeading1.Value + degrees : currentHeading1.Value - degrees;
             target = target.Normalize(true);
-            return TurnTo(target, direction, token);
+            TurnTo(target, direction, token);
         }
 
         private bool SendMessage(SeatalkMessage message)
@@ -659,59 +644,6 @@ namespace Iot.Device.Seatalk1
                 }
             }
         }
-
-        /* Unfortunately, the exact sequence to remotely enter calibration mode appears to be different for each type of remote control and autopilot
-            I have not found out how it works for the ST2000+. I also have not found out how to read out parameter values without entering calibration mode
-        public bool ReadCalibrationValues()
-        {
-            if (Status != AutopilotStatus.Standby)
-            {
-                return false;
-            }
-
-            _calibrationParameters.Clear();
-
-            Keystroke ks;
-
-            Thread.Sleep(100);
-            ks = new Keystroke(0x42);
-            SendMessage(ks);
-            Thread.Sleep(200);
-            ks = new Keystroke(0x68);
-            SendMessage(ks);
-            Thread.Sleep(500);
-            ks = new Keystroke(0x84);
-            SendMessage(ks);
-            Thread.Sleep(500);
-
-            ks = new Keystroke(0x04);
-            SendMessage(ks);
-
-            ks = new Keystroke(AutopilotButtons.MinusOne | AutopilotButtons.PlusOne);
-            SendMessage(ks);
-
-            Stopwatch sw = Stopwatch.StartNew();
-            int currentEntries = _calibrationParameters.Count;
-            while (sw.ElapsedMilliseconds < 3500)
-            {
-                ks = new Keystroke(AutopilotButtons.Auto);
-                SendMessage(ks);
-                _parentInterface.SendDatagram(new byte[]
-                {
-                    0x92, 1, 1
-                });
-                Thread.Sleep(1500);
-                if (currentEntries != _calibrationParameters.Count)
-                {
-                    currentEntries = _calibrationParameters.Count;
-                    sw.Restart();
-                }
-            }
-
-            ks = new Keystroke(AutopilotButtons.StandBy);
-            SendMessage(ks);
-            return true;
-        }*/
 
         /// <summary>
         /// Returns a textual representation of the current AP status
