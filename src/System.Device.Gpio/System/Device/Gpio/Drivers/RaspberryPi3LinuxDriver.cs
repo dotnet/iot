@@ -503,7 +503,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 "No interrupt driver was found - event callbacks not supported on this platform");
         }
 
-        CancellationTokenSource dependentSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using CancellationTokenSource dependentSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         try
         {
