@@ -42,12 +42,20 @@ namespace Iot.Device.Cap1xxx
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
-            byte productId = ReadRegister(Register.ProductId);
-            byte manufacturerId = ReadRegister(Register.ManufacturerId);
-            if (productId != Cap1208ProductId || manufacturerId != MicrochipManufacturerId)
+            try
             {
-                throw new IOException($"The device is not a CAP1208: product ID 0x{productId:X2} (expected 0x{Cap1208ProductId:X2}), " +
-                    $"manufacturer ID 0x{manufacturerId:X2} (expected 0x{MicrochipManufacturerId:X2}).");
+                byte productId = ReadRegister(Register.ProductId);
+                byte manufacturerId = ReadRegister(Register.ManufacturerId);
+                if (productId != Cap1208ProductId || manufacturerId != MicrochipManufacturerId)
+                {
+                    throw new IOException($"The device is not a CAP1208: product ID 0x{productId:X2} (expected 0x{Cap1208ProductId:X2}), " +
+                        $"manufacturer ID 0x{manufacturerId:X2} (expected 0x{MicrochipManufacturerId:X2}).");
+                }
+            }
+            catch
+            {
+                _i2cDevice.Dispose();
+                throw;
             }
         }
 
