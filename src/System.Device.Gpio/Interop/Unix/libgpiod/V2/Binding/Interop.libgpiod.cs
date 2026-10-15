@@ -76,7 +76,7 @@ internal partial class Interop
         public static extern IntPtr gpiod_chip_info_get_label(ChipInfoSafeHandle info);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_chip_info_get_num_lines(ChipInfoSafeHandle info);
+        public static extern UIntPtr gpiod_chip_info_get_num_lines(ChipInfoSafeHandle info);
 
         #endregion
 
@@ -86,7 +86,7 @@ internal partial class Interop
         [DllImport(LibgpiodLibrary)]
         public static extern void gpiod_line_info_free(IntPtr info);
 
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern LineInfoSafeHandle gpiod_line_info_copy(LineInfoSafeHandle info);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
@@ -158,7 +158,7 @@ internal partial class Interop
         [DllImport(LibgpiodLibrary)]
         public static extern void gpiod_line_settings_reset(LineSettingsSafeHandle settings);
 
-        [DllImport(LibgpiodLibrary)]
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern LineSettingsSafeHandle gpiod_line_settings_copy(LineSettingsSafeHandle settings);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
@@ -186,7 +186,7 @@ internal partial class Interop
         public static extern GpiodLineDrive gpiod_line_settings_get_drive(LineSettingsSafeHandle settings);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_settings_set_active_low(LineSettingsSafeHandle settings, bool active_low);
+        public static extern void gpiod_line_settings_set_active_low(LineSettingsSafeHandle settings, bool active_low);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern bool gpiod_line_settings_get_active_low(LineSettingsSafeHandle settings);
@@ -223,21 +223,21 @@ internal partial class Interop
         [DllImport(LibgpiodLibrary)]
         public static extern void gpiod_line_config_reset(LineConfigSafeHandle config);
 
-        [DllImport(LibgpiodLibrary)]
-        public static extern void gpiod_line_config_add_line_settings(LineConfigSafeHandle config, uint[] offsets, int num_offsets,
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        public static extern int gpiod_line_config_add_line_settings(LineConfigSafeHandle config, uint[] offsets, UIntPtr num_offsets,
             LineSettingsSafeHandle settings);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern LineSettingsSafeHandle gpiod_line_config_get_line_settings(LineConfigSafeHandle config, uint offset);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_config_set_output_values(LineConfigSafeHandle config, GpiodLineValue[] values, int num_values);
+        public static extern int gpiod_line_config_set_output_values(LineConfigSafeHandle config, GpiodLineValue[] values, UIntPtr num_values);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_config_get_num_configured_offsets(LineConfigSafeHandle config);
+        public static extern UIntPtr gpiod_line_config_get_num_configured_offsets(LineConfigSafeHandle config);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_config_get_configured_offsets(LineConfigSafeHandle config, uint[] offsets, int max_offsets);
+        public static extern UIntPtr gpiod_line_config_get_configured_offsets(LineConfigSafeHandle config, uint[] offsets, UIntPtr max_offsets);
 
         #endregion
 
@@ -257,10 +257,10 @@ internal partial class Interop
         public static extern IntPtr gpiod_request_config_get_consumer(RequestConfigSafeHandle config);
 
         [DllImport(LibgpiodLibrary)]
-        public static extern void gpiod_request_config_set_event_buffer_size(RequestConfigSafeHandle config, int event_buffer_size);
+        public static extern void gpiod_request_config_set_event_buffer_size(RequestConfigSafeHandle config, UIntPtr event_buffer_size);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_request_config_get_event_buffer_size(RequestConfigSafeHandle config);
+        public static extern UIntPtr gpiod_request_config_get_event_buffer_size(RequestConfigSafeHandle config);
 
         #endregion
 
@@ -271,16 +271,19 @@ internal partial class Interop
         public static extern void gpiod_line_request_release(IntPtr request);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_request_get_num_requested_lines(LineRequestSafeHandle request);
+        public static extern IntPtr gpiod_line_request_get_chip_name(IntPtr request);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_request_get_requested_offsets(LineRequestSafeHandle request, uint[] offsets, int max_offsets);
+        public static extern UIntPtr gpiod_line_request_get_num_requested_lines(LineRequestSafeHandle request);
+
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        public static extern UIntPtr gpiod_line_request_get_requested_offsets(LineRequestSafeHandle request, uint[] offsets, UIntPtr max_offsets);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern GpiodLineValue gpiod_line_request_get_value(LineRequestSafeHandle request, uint offset);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_request_get_values_subset(LineRequestSafeHandle request, int num_values, uint[] offsets,
+        public static extern int gpiod_line_request_get_values_subset(LineRequestSafeHandle request, UIntPtr num_values, uint[] offsets,
             GpiodLineValue[] values);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
@@ -290,7 +293,7 @@ internal partial class Interop
         public static extern int gpiod_line_request_set_value(LineRequestSafeHandle request, uint offset, GpiodLineValue value);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_request_set_values_subset(LineRequestSafeHandle request, int num_values, uint[] offsets,
+        public static extern int gpiod_line_request_set_values_subset(LineRequestSafeHandle request, UIntPtr num_values, uint[] offsets,
             GpiodLineValue[] values);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
@@ -306,7 +309,7 @@ internal partial class Interop
         public static extern int gpiod_line_request_wait_edge_events(LineRequestSafeHandle request, long timeout_ns);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_request_read_edge_events(LineRequestSafeHandle request, EdgeEventBufferSafeHandle buffer, int max_events);
+        public static extern int gpiod_line_request_read_edge_events(LineRequestSafeHandle request, EdgeEventBufferSafeHandle buffer, UIntPtr max_events);
 
         #endregion
 
@@ -335,20 +338,20 @@ internal partial class Interop
         public static extern ulong gpiod_edge_event_get_line_seqno(EdgeEventSafeHandle @event);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern EdgeEventBufferSafeHandle gpiod_edge_event_buffer_new(int capacity);
+        public static extern EdgeEventBufferSafeHandle gpiod_edge_event_buffer_new(UIntPtr capacity);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_edge_event_buffer_get_capacity(EdgeEventBufferSafeHandle buffer);
+        public static extern UIntPtr gpiod_edge_event_buffer_get_capacity(EdgeEventBufferSafeHandle buffer);
 
         /// <remarks>IntPtr is used to avoid ObjectDisposed exceptions.</remarks>
         [DllImport(LibgpiodLibrary)]
         public static extern void gpiod_edge_event_buffer_free(IntPtr buffer);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern EdgeEventNotFreeable gpiod_edge_event_buffer_get_event(EdgeEventBufferSafeHandle buffer, ulong index);
+        public static extern EdgeEventNotFreeable gpiod_edge_event_buffer_get_event(EdgeEventBufferSafeHandle buffer, UIntPtr index);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_edge_event_buffer_get_num_events(EdgeEventBufferSafeHandle buffer);
+        public static extern UIntPtr gpiod_edge_event_buffer_get_num_events(EdgeEventBufferSafeHandle buffer);
 
         #endregion
 

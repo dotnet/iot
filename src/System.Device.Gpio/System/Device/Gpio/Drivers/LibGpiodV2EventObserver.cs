@@ -219,9 +219,9 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
                 int numberOfReadEvents = request.ReadEdgeEvents(edgeEventBuffer);
 
-                for (int i = 0; i < numberOfReadEvents; i++)
+                for (uint i = 0; i < numberOfReadEvents; i++)
                 {
-                    EdgeEvent edgeEvent = edgeEventBuffer.GetEvent((ulong)i);
+                    EdgeEvent edgeEvent = edgeEventBuffer.GetEvent(i);
                     HandleEdgeEvent(edgeEvent);
                 }
             }
