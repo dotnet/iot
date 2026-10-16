@@ -57,6 +57,27 @@ foreach (var led in hat.Lights)
     Console.WriteLine($"Led #{i} is {(led.IsOn ? "ON" : "OFF")}");
 }
 
+// Inputs: read each input five times, once per second
+for (int reading = 1; reading <= 5; reading++)
+{
+    foreach (var input in hat.Inputs)
+    {
+        Console.Write($"GPIO {input.Pin}: {input.Read()}  ");
+    }
+
+    Console.WriteLine();
+    Thread.Sleep(1000);
+}
+
+// Outputs: switch on each output for one second
+foreach (var output in hat.Outputs)
+{
+    output.On();
+    Console.WriteLine($"Output on GPIO {output.Pin} is {(output.IsOn ? "ON" : "OFF")}");
+    Thread.Sleep(1000);
+    output.Off();
+}
+
 // Motors
 // Forwards full speed
 hat.Motors.Forwards(1);
