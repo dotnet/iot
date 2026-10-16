@@ -36,6 +36,9 @@ namespace Iot.Device.Cap1xxx.Tests
         {
             using var otherDevice = new SimulatedCap1208(productId, manufacturerId);
             Assert.Throws<IOException>(() => new Cap1208(otherDevice));
+
+            // The caller gets no Cap1208 to dispose, so the constructor disposes the I2C device
+            Assert.Throws<ObjectDisposedException>(() => otherDevice.ReadByte());
         }
 
         [Fact]
@@ -80,6 +83,7 @@ namespace Iot.Device.Cap1xxx.Tests
 
             _simulatedCap1208.Release(SensorInputs.Input3);
             Assert.Equal(SensorInputs.Input3, _cap1208.ReadTouchedInputs());
+            Assert.Equal(SensorInputs.None, _cap1208.ReadTouchedInputs());
         }
 
         [Fact]

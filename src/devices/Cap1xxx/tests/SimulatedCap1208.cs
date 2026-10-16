@@ -43,11 +43,13 @@ namespace Iot.Device.Cap1xxx.Tests
         }
 
         /// <summary>
-        /// A touch ends: the status bit stays set until the INT bit is cleared.
+        /// A touch ends: the status bit stays set until the INT bit is cleared, and the INT bit is set
+        /// (with INT_REL_n = 0, the power-on value, the device also signals a release).
         /// </summary>
         public void Release(SensorInputs inputs)
         {
             _held &= (byte)~inputs;
+            _mainControl |= 0x01;
         }
 
         public override void WriteRead(byte[] inputBuffer, byte[] outputBuffer)
