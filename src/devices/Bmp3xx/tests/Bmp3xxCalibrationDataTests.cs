@@ -10,11 +10,13 @@ namespace Iot.Device.Bmp3xx.Tests
     {
         // Calibration sets used by the reference vectors (21 bytes from register 0x31, hex).
         // A and B: coefficients reported for two real BMP388 sensors. C: set A with the signed fields' signs flipped.
+        // E1: read from a real BMP390 (Adafruit board); its vectors V1..V5 use raw readings taken from that chip.
         private const string SetA = "3f6b3849f6ca0092f623007e62e575f3f6c54213c4";
         private const string SetB = "0a6bb449f60cff4af323001765f57af3f6d63f1dc4";
         private const string SetC = "3f6b38490a36ff6e09ddfb7e62e5750d0a3bbded3c";
+        private const string SetE1 = "4b6b034cf9151e6817060121480d5a03fa531008f5";
 
-        // Expected values come from the manufacturer's open-source reference driver (vectors V6..V15), which computes
+        // Expected values come from the manufacturer's open-source reference driver (vectors V1..V15), which computes
         // in single precision. They differ from this binding's double-precision results by up to 5e-10 °C and 8e-5 Pa;
         // the tolerances sit well above that and well below the sensor's resolution (0.00015 °C, 0.016 Pa).
         private const double TemperatureTolerance = 1e-6; // °C
@@ -57,6 +59,9 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Theory]
+        [InlineData("V1", SetE1, 8201728u, 21.172585163)]
+        [InlineData("V2", SetE1, 8201472u, 21.167960675)]
+        [InlineData("V3", SetE1, 8201984u, 21.177209649)]
         [InlineData("V6", SetA, 7028480u, 0.000000000)]
         [InlineData("V7", SetA, 8464793u, 25.000007690)]
         [InlineData("V8", SetA, 10489938u, 59.999994463)]
@@ -75,6 +80,11 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Theory]
+        [InlineData("V1", SetE1, 6258176u, 21.172585163, 101499.057700099)]
+        [InlineData("V2", SetE1, 6257920u, 21.167960675, 101500.127897664)]
+        [InlineData("V3", SetE1, 6257664u, 21.177209649, 101504.539749819)]
+        [InlineData("V4", SetE1, 6258176u, 21.177209649, 101500.171557017)]
+        [InlineData("V5", SetE1, 6257408u, 21.172585163, 101505.609924687)]
         [InlineData("V6", SetA, 6737211u, 0.000000000, 100000.000532955)]
         [InlineData("V7", SetA, 7033326u, 25.000007690, 101324.996390588)]
         [InlineData("V8", SetA, 8181227u, 59.999994463, 90000.006120835)]
