@@ -90,16 +90,17 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Fact]
-        public void Read_OutOfRangeTemperature_ReturnsNullTemperature()
+        public void Read_OutOfRangeTemperature_ReturnsNullTemperatureAndPressure()
         {
-            // V9: -45 °C, below the sensor's -40 °C limit. The pressure (about 1000 hPa) is range-checked on its own.
+            // V9: -45 °C, below the sensor's -40 °C limit. The pressure (about 1000 hPa) would be in range, but it is
+            // computed from that temperature, so it isn't reported either.
             using var chip = CreateChip(5932470, 4464058);
             using var sensor = new Bmp390(chip);
 
             var result = sensor.Read();
 
             Assert.Null(result.Temperature);
-            AssertPressure(99999.998837815, result.Pressure);
+            Assert.Null(result.Pressure);
         }
 
         [Fact]
@@ -181,6 +182,17 @@ namespace Iot.Device.Bmp3xx.Tests
         public void TryReadPressure_OutOfRange_ReturnsFalse()
         {
             using var chip = CreateChip(5463084, V7RawTemperature);
+            using var sensor = new Bmp390(chip);
+            sensor.Read();
+
+            Assert.False(sensor.TryReadPressure(out _));
+        }
+
+        [Fact]
+        public void TryReadPressure_TemperatureOutOfRange_ReturnsFalse()
+        {
+            // V9: the pressure is in range, the temperature it is computed from isn't.
+            using var chip = CreateChip(5932470, 4464058);
             using var sensor = new Bmp390(chip);
             sensor.Read();
 

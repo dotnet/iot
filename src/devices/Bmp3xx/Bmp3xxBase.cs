@@ -287,7 +287,8 @@ namespace Iot.Device.Bmp3xx
         /// </summary>
         /// <returns>
         /// The measured temperature and pressure. A value is null if it is outside the sensor's operating range
-        /// (-40 to 85 °C, 300 to 1250 hPa), or both are null if the measurement didn't finish in time.
+        /// (-40 to 85 °C, 300 to 1250 hPa). The pressure is also null if the temperature is out of range, because it is
+        /// computed from the temperature. Both are null if the measurement didn't finish in time.
         /// </returns>
         public Bmp3xxReadResult Read()
         {
@@ -361,7 +362,7 @@ namespace Iot.Device.Bmp3xx
         /// <param name="pressure">The pressure, or the default value if the method returns false.</param>
         /// <returns>
         /// True if a valid value was read; false if no measurement has been made since the last reset, or the value is
-        /// outside the sensor's operating range of 300 to 1250 hPa.
+        /// outside the sensor's operating range of 300 to 1250 hPa, or the temperature is outside its range.
         /// </returns>
         [Telemetry("Pressure")]
         public bool TryReadPressure(out Pressure pressure)
@@ -544,10 +545,12 @@ namespace Iot.Device.Bmp3xx
             double celsius = CalibrationData.CompensateTemperature(rawTemperature);
             double pascals = CalibrationData.CompensatePressure(rawPressure, celsius);
 
-            Temperature? temperature = celsius >= MinimumTemperatureCelsius && celsius <= MaximumTemperatureCelsius
+            // The pressure is computed from the temperature, so an out-of-range temperature invalidates both.
+            bool temperatureInRange = celsius >= MinimumTemperatureCelsius && celsius <= MaximumTemperatureCelsius;
+            Temperature? temperature = temperatureInRange
                 ? Temperature.FromDegreesCelsius(celsius)
                 : null;
-            Pressure? pressure = pascals >= MinimumPressurePascals && pascals <= MaximumPressurePascals
+            Pressure? pressure = temperatureInRange && pascals >= MinimumPressurePascals && pascals <= MaximumPressurePascals
                 ? Pressure.FromPascals(pascals)
                 : null;
 
