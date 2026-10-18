@@ -64,3 +64,4 @@ Behavior to be aware of:
 - Values outside the sensor's operating range (-40 to 85 °C, 300 to 1250 hPa) are not reported: `Read` returns `null` for that value and the `TryRead` methods return `false`. The pressure is computed from the temperature, so an out-of-range temperature makes the pressure unavailable too.
 - If a measurement doesn't finish in time, `Read` returns `null` for both values instead of throwing.
 - `SetPowerMode(Bmp3xxPowerMode.Normal)` throws an `InvalidOperationException` if the output data rate is too fast for the oversampling settings; the sensor stays in sleep mode. `GetMeasurementDuration` tells how long one measurement takes.
+- Leaving normal or forced mode with `SetPowerMode` waits for the running measurement to finish (about 6 ms with the default settings, up to about 145 ms with x32 oversampling for both), because the sensor ignores a new mode until then.
