@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Rtc\Rtc.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
   </ItemGroup>
   <!-- Make the internal classes visible to the unit test assembly -->
   <ItemGroup>

@@ -3,26 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using Iot.Device.Common;
-using Microsoft.Extensions.Logging;
+using Iot.Device.Nmea0183;
+using Iot.Device.Nmea0183.Sentences;
 
 namespace Iot.Device.Seatalk1.Messages
 {
     /// <summary>
     /// Base class for seatalk messages
     /// </summary>
-    public abstract record SeatalkMessage
+    public abstract class SeatalkMessage : NmeaSentence
     {
         /// <summary>
-        /// Default constructor
+        /// Construct a new instance of a seatalk message
         /// </summary>
-        protected SeatalkMessage()
+        /// <param name="now">The timestamp for the message</param>
+        protected SeatalkMessage(DateTimeOffset now)
+        : base(TalkerId.Seatalk, new SentenceId("ALK"), now)
         {
-            Logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -40,24 +37,6 @@ namespace Iot.Device.Seatalk1.Messages
         {
             get;
         }
-
-        /// <summary>
-        /// Logger instance, to report possible issues
-        /// </summary>
-        [IgnoreDataMember]
-        protected ILogger Logger { get; }
-
-        /// <summary>
-        /// Creates a new message from this template.
-        /// This function creates a new instance of the current type with the data fields updated according to the data parameter.
-        /// </summary>
-        /// <param name="data">The sliced input data</param>
-        /// <returns>A typed <see cref="SeatalkMessage"/> instance</returns>
-        /// <exception cref="InvalidOperationException">The datagram does not match this type</exception>
-        /// <remarks>
-        /// Before calling this method, <see cref="MatchesMessageType"/> should be used to verify the types match without creating an exception.
-        /// </remarks>
-        public abstract SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data);
 
         /// <summary>
         /// Creates a datagram (byte array) from a message
@@ -98,31 +77,6 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 throw new InvalidOperationException($"A custom package verification failed");
             }
-        }
-
-        /// <summary>
-        /// Compares this instance against another one
-        /// </summary>
-        /// <param name="other">Other instance</param>
-        /// <returns>True or false</returns>
-        public virtual bool Equals(SeatalkMessage? other)
-        {
-            // This method is overriden, because we don't want to compare the logger
-            if (ReferenceEquals(other, null))
-            {
-                return false;
-            }
-
-            return ExpectedLength == other.ExpectedLength && CommandByte == other.CommandByte;
-        }
-
-        /// <summary>
-        /// Standard hash code implementation
-        /// </summary>
-        /// <returns>A hash code</returns>
-        public override int GetHashCode()
-        {
-            return CommandByte << 8 | ExpectedLength;
         }
 
         /// <summary>

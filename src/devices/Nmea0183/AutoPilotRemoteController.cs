@@ -27,9 +27,9 @@ namespace Iot.Device.Seatalk1
     {
         private const double AngleEpsilon = 0.9; // The protocol can only give angles in whole degrees
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(6);
-        private readonly SeatalkInterface _parentInterface;
+
+        private readonly string? _seatalkInterfaceName;
         private readonly object _lock = new object();
-        private readonly ILogger _logger;
         private readonly AutoResetEvent _dataUpdated;
         private ConcurrentDictionary<AutopilotCalibrationParameter, AutopilotCalibrationParameterMessage> _calibrationParameters;
 
@@ -50,15 +50,13 @@ namespace Iot.Device.Seatalk1
         /// Internal constructor, used by the owning instance of <see cref="SeatalkInterface"/>
         /// </summary>
         /// <param name="interfaceName">The name of the interface</param>
-        /// <param name="parentInterface">The owner</param>
-        public AutoPilotRemoteController(string interfaceName, SeatalkInterface parentInterface)
+        /// <param name="seatalkInterfaceName">The interface name that provides Seatalk1 connectivity</param>
+        public AutoPilotRemoteController(string interfaceName, string? seatalkInterfaceName)
             : base(interfaceName)
         {
-            _logger = this.GetCurrentClassLogger();
+            _seatalkInterfaceName = seatalkInterfaceName;
             _dataUpdated = new AutoResetEvent(false);
             _calibrationParameters = new();
-            _parentInterface = parentInterface ?? throw new ArgumentNullException(nameof(parentInterface));
-            _parentInterface.MessageReceived += AutopilotMessageInterpretation;
             RudderAngleAvailable = false;
             Status = AutopilotStatus.Offline;
             Alarms = AutopilotAlarms.None;
@@ -155,6 +153,22 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         public event Action<Keystroke>? AutopilotKeysPressed;
 
+        /// <summary>
+        /// Receives a sentence and converts it to/from Seatalk1 messages.
+        /// </summary>
+        /// <param name="source">The source of the NMEA sentence</param>
+        /// <param name="sentence">The received message</param>
+        public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
+        {
+            if (_seatalkInterfaceName == null || source.InterfaceName == _seatalkInterfaceName)
+            {
+                if (sentence is SeatalkMessage msg)
+                {
+                    AutopilotMessageInterpretation(msg);
+                }
+            }
+        }
+
         private void AutopilotMessageInterpretation(SeatalkMessage obj)
         {
             lock (_lock)
@@ -219,12 +233,12 @@ namespace Iot.Device.Seatalk1
                 }
                 else if (obj is AutopilotCalibrationParameterMessage calibParam)
                 {
-                    _logger.LogInformation($"Received calibration value for {calibParam.Parameter}. Current {calibParam.CurrentSetting} Min {calibParam.MinValue} Max {calibParam.MaxValue}");
+                    Logger.LogInformation($"Received calibration value for {calibParam.Parameter}. Current {calibParam.CurrentSetting} Min {calibParam.MinValue} Max {calibParam.MaxValue}");
                     _calibrationParameters.AddOrUpdate(calibParam.Parameter, x => calibParam, (a, b) => calibParam);
                 }
                 else if (obj is CourseComputerStatus status)
                 {
-                    _logger.LogWarning($"Course computer has warnings: {status.Warnings}");
+                    Logger.LogWarning($"Course computer has warnings: {status.Warnings}");
                     CourseComputerStatus = status.Warnings;
                 }
 
@@ -278,7 +292,7 @@ namespace Iot.Device.Seatalk1
         {
             if (Status == newStatus && CourseComputerStatus == 0)
             {
-                _logger.LogInformation("Not setting status {NewStatus} because already set.", newStatus);
+                Logger.LogInformation("Not setting status {NewStatus} because already set.", newStatus);
                 return true; // nothing to do
             }
 
@@ -296,7 +310,7 @@ namespace Iot.Device.Seatalk1
                 _ => throw new ArgumentException($"Status {newStatus} is not valid", nameof(newStatus)),
             };
 
-            _logger.LogInformation("Setting status {Status} by pressing button(s) {Button}", newStatus, buttonToPress);
+            Logger.LogInformation("Setting status {Status} by pressing button(s) {Button}", newStatus, buttonToPress);
 
             // For setting wind or track modes, we need to first set auto mode.
             // Setting wind mode without auto works (and is returned as status 0x4), but has no visible effect.
@@ -304,7 +318,7 @@ namespace Iot.Device.Seatalk1
             {
                 if (!SendMessageAndVerifyStatus(new Keystroke(AutopilotButtons.Auto, 1), timeout, () => Status is AutopilotStatus.Auto or AutopilotStatus.Wind or AutopilotStatus.Track))
                 {
-                    _logger.LogInformation($"Could not transition from Auto to {newStatus} mode");
+                    Logger.LogInformation($"Could not transition from Auto to {newStatus} mode");
                     return false;
                 }
             }
@@ -345,11 +359,11 @@ namespace Iot.Device.Seatalk1
 
             if (ret)
             {
-                _logger.LogInformation($"Status {Status} set successfully");
+                Logger.LogInformation($"Status {Status} set successfully");
             }
             else
             {
-                _logger.LogError("Status was not set correctly");
+                Logger.LogError("Status was not set correctly");
             }
 
             return ret;
@@ -489,7 +503,7 @@ namespace Iot.Device.Seatalk1
 
                 var currentDesiredHeading = currentHeading1.Value;
 
-                _logger.LogInformation($"New desired heading: {newDesiredHeading}. Current desired heading {currentDesiredHeading}");
+                Logger.LogInformation($"New desired heading: {newDesiredHeading}. Current desired heading {currentDesiredHeading}");
 
                 int maxNo = 5; // Update the desired value every few ticks
                 while (!AnglesAreClose(currentDesiredHeading, newDesiredHeading, Angle.FromDegrees(0.1)) && maxNo-- > 0)
@@ -514,7 +528,7 @@ namespace Iot.Device.Seatalk1
 
                     if (!IsOperating)
                     {
-                        _logger.LogWarning(
+                        Logger.LogWarning(
                             $"Turning cancelled because Autopilot is no longer in the correct state. Current State {Status}");
                         break;
                     }
@@ -536,17 +550,18 @@ namespace Iot.Device.Seatalk1
                     ret = _ourDesiredAngle.HasValue && AnglesAreClose(_ourDesiredAngle.Value, currentDesiredHeading, Angle.FromDegrees(0.1));
                     if (ret)
                     {
-                        _logger.LogInformation($"Reached new desired course {_ourDesiredAngle.GetValueOrDefault()}. (Actually set is {currentDesiredHeading})");
+                        Logger.LogInformation($"Reached new desired course {_ourDesiredAngle.GetValueOrDefault()}. (Actually set is {currentDesiredHeading})");
                         _ourDesiredAngle = null; // Done
                     }
                     else if (_ourDesiredAngle.HasValue && sw.Elapsed > TimeSpan.FromSeconds(15))
                     {
-                        _logger.LogWarning($"Aborting course change to {_ourDesiredAngle.GetValueOrDefault()} as it took to long. Current Value is {currentDesiredHeading}.");
+                        Logger.LogWarning($"Aborting course change to {_ourDesiredAngle.GetValueOrDefault()} as it took to long. Current Value is {currentDesiredHeading}.");
                         _ourDesiredAngle = null;
                     }
                 }
 
                 wait:
+                UpdateStatus();
                 _cancellationTokenSource.Token.WaitHandle.WaitOne(1000);
             }
         }
@@ -595,10 +610,10 @@ namespace Iot.Device.Seatalk1
             TurnTo(target, direction, token);
         }
 
-        private bool SendMessage(SeatalkMessage message)
+        private void SendMessage(SeatalkMessage message)
         {
-            _logger.LogInformation($"Remote controller: Sending {message.GetType().Name}: {message}");
-            return _parentInterface.SendMessage(message);
+            Logger.LogInformation($"Remote controller: Sending {message.GetType().Name}: {message}");
+            DispatchSentenceEvents(message);
         }
 
         private bool SendMessageAndVerifyStatus(SeatalkMessage message, TimeSpan timeout, Func<bool> successCondition)
@@ -630,7 +645,7 @@ namespace Iot.Device.Seatalk1
             return successCondition();
         }
 
-        internal void UpdateStatus()
+        private void UpdateStatus()
         {
             lock (_lock)
             {
@@ -641,7 +656,7 @@ namespace Iot.Device.Seatalk1
                     // The autopilot hasn't sent anything for several seconds. Assume it's offline
                     if (Status != AutopilotStatus.Offline) // don't repeat message
                     {
-                        _logger.LogWarning("Autopilot connection timed out. Assuming it's offline");
+                        Logger.LogWarning("Autopilot connection timed out. Assuming it's offline");
                     }
 
                     Status = AutopilotStatus.Offline;
