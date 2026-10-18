@@ -2,23 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
 using UnitsNet;
 using Xunit;
 
-namespace Iot.Device.Tests.Seatalk1
+namespace Iot.Device.Nmea0183.Tests
 {
-    public class MessageTests
+    public class Seatalk1MessageTests
     {
         private Seatalk1Parser _parser;
-        public MessageTests()
+        public Seatalk1MessageTests()
         {
             _parser = new Seatalk1Parser(new MemoryStream());
         }

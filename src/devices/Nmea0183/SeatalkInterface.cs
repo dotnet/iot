@@ -16,8 +16,8 @@ namespace Iot.Device.Seatalk1
     /// <summary>
     /// Seatalk interface handler.
     /// This class is the main handler for talking over a seatalk network.
-    /// Only when also working with NMEA-0183, the <see cref="SeatalkToNmeaConverter"/> should be used instead.
     /// </summary>
+    [Obsolete("I think this class is obsolete")]
     public class SeatalkInterface : MarshalByRefObject, IDisposable
     {
         private const Parity DefaultParity = Parity.Even;
@@ -25,7 +25,6 @@ namespace Iot.Device.Seatalk1
         private readonly Seatalk1Parser _parser;
         private readonly Thread _watchDog;
         private readonly CancellationTokenSource _cancellation;
-        private readonly AutoPilotRemoteController _autopilotController;
         private readonly object _lock;
         private bool _disposed;
 
@@ -72,7 +71,6 @@ namespace Iot.Device.Seatalk1
             _lock = new object();
             _port = null!;
             _parser = null!;
-            _autopilotController = new AutoPilotRemoteController(this);
             _cancellation = new CancellationTokenSource();
             _watchDog = new Thread(WatchDogStarter);
             _disposed = false;
@@ -173,10 +171,6 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         protected virtual void WatchDog()
         {
-            _autopilotController.UpdateStatus();
-            // For testing purposes
-            ////var test = new DeviceIdentification();
-            ////SendMessage(test);
         }
 
         internal void OnNewMessage(SeatalkMessage obj)
@@ -256,12 +250,6 @@ namespace Iot.Device.Seatalk1
         {
             return Task.Factory.StartNew(() => SendMessage(message));
         }
-
-        /// <summary>
-        /// Get an interface to the Autopilot remote controller.
-        /// </summary>
-        /// <returns>An interface to monitor and control an Autopilot connected via Seatalk1</returns>
-        public AutoPilotRemoteController GetAutopilotRemoteController() => _autopilotController;
 
         /// <summary>
         /// Configures the display backlight of all devices connected to the bus, as far as this is supported

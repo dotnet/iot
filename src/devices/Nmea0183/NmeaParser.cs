@@ -148,15 +148,27 @@ namespace Iot.Device.Nmea0183
             }
         }
 
+        /// <summary>
+        /// Reads a line from the input stream. Override this method to implement a different reading strategy
+        /// (for example, if the input is actually a binary stream)
+        /// This is expected to be a blocking call, so that the parser thread does not busy-wait when no data is available.
+        /// </summary>
+        /// <returns>A string</returns>
+        protected virtual string? ReadNextLine()
+        {
+            return _reader.ReadLine();
+        }
+
         private void Parser()
         {
+            // TODO: Should probably add some safeguards to prevent a busy loop when the input stream is non-blocking
             Stopwatch sw = Stopwatch.StartNew();
             while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 string? currentLine;
                 try
                 {
-                    currentLine = _reader.ReadLine();
+                    currentLine = ReadNextLine();
                     sw.Restart();
                 }
                 catch (IOException x)

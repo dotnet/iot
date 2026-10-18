@@ -14,6 +14,11 @@ namespace Iot.Device.Seatalk1.Messages
     public abstract class SeatalkMessage : NmeaSentence
     {
         /// <summary>
+        /// Seatalk messages use $STALK as the sentence identifier.
+        /// </summary>
+        public static readonly SentenceId Id = new SentenceId("ALK");
+
+        /// <summary>
         /// Construct a new instance of a seatalk message
         /// </summary>
         /// <param name="now">The timestamp for the message</param>

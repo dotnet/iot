@@ -8,11 +8,13 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183;
 using Iot.Device.Seatalk1.Messages;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
@@ -20,39 +22,55 @@ using UnitsNet;
 namespace Iot.Device.Seatalk1
 {
     /// <summary>
-    /// Decodes a Seatalk1 Message stream
+    /// Decodes a Seatalk1 Message stream into Nmea0183 sentences.
     /// </summary>
-    public sealed class Seatalk1Parser : IDisposable
+    public sealed class Seatalk1Parser : NmeaParser
     {
+        private const Parity DefaultParity = Parity.Even;
+        private readonly string _portName;
         private readonly Stream _inputStream;
         private readonly BinaryReader _reader;
         private readonly object _lock;
         private readonly List<byte> _buffer;
-        private readonly ILogger _logger;
-
-        private Thread? _parserThread;
-        private CancellationTokenSource? _cancellationTokenSource;
-        private bool _disposed;
 
         private List<SeatalkMessage> _messageFactories;
+        private SerialPort _port;
+        private bool _bufferIsInSync;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Seatalk1Parser"/> class.
         /// </summary>
-        /// <param name="inputStream">The input stream. Must be non-null and readable</param>
-        public Seatalk1Parser(Stream inputStream)
+        /// <param name="interfaceName">The name of this interface.</param>
+        /// <param name="portName">The name of the serial port to use. E.g. "COM5" or "/dev/ttyAMA2"</param>
+        public Seatalk1Parser(string interfaceName, string portName)
+        : base(interfaceName, new MemoryStream(), null, new Raw8BitEncoding())
         {
+            _portName = portName;
             _lock = new object();
             _buffer = new List<byte>(20);
-            _disposed = false;
-            _logger = this.GetCurrentClassLogger();
-            _inputStream = inputStream ?? throw new ArgumentNullException(nameof(inputStream));
-            if (!inputStream.CanRead)
+
+            _port = new SerialPort(portName);
+            _port.BaudRate = 4800;
+            _port.Parity = DefaultParity; // Can be anything but none, but "Mark" or "Space" won't have the desired effect on linux, causing garbage to be sent
+            _port.StopBits = StopBits.One;
+            _port.DataBits = 8;
+            _port.Open();
+            _bufferIsInSync = true;
+
+            try
             {
-                throw new ArgumentException("Input stream is not readable");
+                _inputStream = _port.BaseStream;
+                if (!_inputStream.CanRead)
+                {
+                    throw new ArgumentException("Cannot read from the input port");
+                }
+            }
+            finally
+            {
+                _port.Close();
             }
 
-            _reader = new BinaryReader(inputStream, Encoding.UTF8);
+            _reader = new BinaryReader(_inputStream, Encoding.UTF8);
             _messageFactories = new List<SeatalkMessage>()
             {
                 new CompassHeadingAndRudderPosition(),
@@ -90,11 +108,6 @@ namespace Iot.Device.Seatalk1
         public bool IsBufferEmpty => _buffer.Count == 0;
 
         /// <summary>
-        /// This event is fired when a new message was decoded
-        /// </summary>
-        public event Action<SeatalkMessage>? NewMessageDecoded;
-
-        /// <summary>
         /// List of known messages
         /// </summary>
         internal List<SeatalkMessage> MessageTypes => _messageFactories;
@@ -116,130 +129,95 @@ namespace Iot.Device.Seatalk1
         }
 
         /// <summary>
-        /// Starts the thread to decode packets
-        /// </summary>
-        /// <exception cref="InvalidOperationException">The parser is already running</exception>
-        /// <exception cref="ObjectDisposedException">The parser has already been disposed. The parser cannot currently be restarted.</exception>
-        public void StartDecode()
-        {
-            lock (_lock)
-            {
-                if (_parserThread != null && _parserThread.IsAlive)
-                {
-                    throw new InvalidOperationException("Parser thread already started");
-                }
-
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(Seatalk1Parser), "The parser has already been disposed, please reopen the source stream");
-                }
-
-                _cancellationTokenSource = new CancellationTokenSource();
-                _parserThread = new Thread(Parser);
-                _parserThread.Name = $"Seatalk1 Parser";
-                _parserThread.Start();
-            }
-        }
-
-        /// <summary>
         /// Terminates the decoding thread.
         /// </summary>
-        public void StopDecode()
+        public override void StopDecode()
         {
-            _cancellationTokenSource?.Cancel();
-
             lock (_lock)
             {
                 _reader.Close();
                 _inputStream.Close();
             }
 
-            _parserThread?.Join();
             _buffer.Clear(); // Because clients could wait for an empty buffer
+
+            base.StopDecode();
         }
 
-        private void Parser()
+        protected override string? ReadNextLine()
         {
-            _logger.LogInformation("Seatalk1 decoder started");
-            if (_cancellationTokenSource == null)
-            {
-                return;
-            }
+            // I think we would just need to return either null or something else. The
+            // parser will then call GetTypeOfNextMessage to see if a message can be decoded from the buffer.
+            byte nextByte = _reader.ReadByte();
+            _buffer.Add(nextByte);
+            return _buffer.Count > 0 ? BitConverter.ToString(_buffer.ToArray()) : null;
+        }
 
-            bool isInSync = true;
-            while (!_cancellationTokenSource.IsCancellationRequested)
+        protected internal override TalkerSentence? ParseSentence(string currentLine, out NmeaError error)
+        {
+            SeatalkMessage? msg = null;
+            while (true)
             {
-                try
+                msg = GetTypeOfNextMessage(_buffer, out int messageLength);
+                if (msg == null && !_bufferIsInSync)
                 {
-                    while (true)
+                    // In this case, we also need to check whether a substring of _buffer is a valid message (but still starting at index 0)
+                    // This is because we have only chopped the first byte from an invalid message, but the remaining (up to 17) bytes may now
+                    // form a valid message, but with a different length
+                    for (int len = 3; len < _buffer.Count; len++)
                     {
-                        byte nextByte = _reader.ReadByte();
-                        _buffer.Add(nextByte);
-                        tryAgainWithoutFirstByte:
-                        var msg = GetTypeOfNextMessage(_buffer, out int messageLength);
-                        if (msg == null && !isInSync)
+                        msg = GetTypeOfNextMessage(_buffer.GetRange(0, len), out messageLength);
+                        if (msg != null)
                         {
-                            // In this case, we also need to check whether a substring of _buffer is a valid message (but still starting at index 0)
-                            // This is because we have only chopped the first byte from an invalid message, but the remaining (up to 17) bytes may now
-                            // form a valid message, but with a different length
-                            for (int len = 3; len < _buffer.Count; len++)
-                            {
-                                msg = GetTypeOfNextMessage(_buffer.GetRange(0, len), out messageLength);
-                                if (msg != null)
-                                {
-                                    _buffer.RemoveRange(0, len);
-                                    break;
-                                }
-                            }
-                        }
-                        else if (msg != null)
-                        {
-                            _buffer.RemoveRange(0, messageLength);
-                        }
-
-                        if (msg == null)
-                        {
-                            if (messageLength == 0)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                if (isInSync)
-                                {
-                                    var bytesFound = BitConverter.ToString(_buffer.ToArray());
-                                    _logger.LogWarning(
-                                        $"Seatalk parser sync lost. Buffer contents: {bytesFound}, trying to resync");
-                                }
-
-                                _buffer.RemoveAt(0);
-                                // We removed the first byte from the sequence, we need to try again before we add the next byte
-                                isInSync = false;
-                                goto tryAgainWithoutFirstByte;
-                            }
-                        }
-
-                        Stopwatch sw = Stopwatch.StartNew();
-                        NewMessageDecoded?.Invoke(msg);
-                        if (sw.ElapsedMilliseconds > 20)
-                        {
-                            _logger.LogWarning($"Seatalk parser: decode took {sw.ElapsedMilliseconds} ms to complete on '{msg.GetType()}'");
-                        }
-
-                        if (_buffer.Count == 0)
-                        {
-                            isInSync = true;
+                            _buffer.RemoveRange(0, len);
+                            break;
                         }
                     }
                 }
-                catch (Exception x) when (x is EndOfStreamException || x is IOException || x is ObjectDisposedException)
+                else if (msg != null)
                 {
-                    // Ignore
-                    _logger.LogError(x, $"Seatalk Parser error: {x.Message}");
+                    _buffer.RemoveRange(0, messageLength);
                 }
 
-                Thread.Sleep(50);
+                if (msg == null)
+                {
+                    if (messageLength == 0)
+                    {
+                        error = NmeaError.NoSyncByte;
+                        break;
+                    }
+                    else
+                    {
+                        if (_bufferIsInSync)
+                        {
+                            var bytesFound = BitConverter.ToString(_buffer.ToArray());
+                            Logger.LogWarning(
+                                $"Seatalk parser sync lost. Buffer contents: {bytesFound}, trying to resync");
+                        }
+
+                        _buffer.RemoveAt(0);
+                        // We removed the first byte from the sequence, we need to try again before we add the next byte
+                        _bufferIsInSync = false;
+                        continue;
+                    }
+                }
+
+                if (_buffer.Count == 0)
+                {
+                    _bufferIsInSync = true;
+                }
+
+                break;
             }
+
+            if (msg != null)
+            {
+                error = NmeaError.None;
+                TalkerSentence ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data);
+            }
+
+            error = NmeaError.MessageDropped;
+            return null;
         }
 
         /// <summary>

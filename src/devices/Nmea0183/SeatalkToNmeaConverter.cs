@@ -23,10 +23,9 @@ namespace Iot.Device.Seatalk1
     /// </summary>
     public class SeatalkToNmeaConverter : NmeaSinkAndSource
     {
+        private readonly AutoPilotRemoteController? _autoPilotRemoteController;
         private readonly List<SentenceId> _sentencesToTranslate;
-        private SeatalkInterface _seatalkInterface;
         private bool _isDisposed;
-        private ILogger _logger;
         private BlockingCollection<Action> _sendQueue;
         private Thread? _sendThread;
         private CancellationTokenSource _terminatingCancellationTokenSource;
@@ -35,19 +34,26 @@ namespace Iot.Device.Seatalk1
         /// Construct an instance of this class.
         /// </summary>
         /// <param name="interfaceName">Interface name, for message routing. Can be an arbitrary string.</param>
-        /// <param name="portName">Interface to connect to. e.g. "/dev/ttyAMA2"</param>
-        public SeatalkToNmeaConverter(string interfaceName, string portName)
+        /// <param name="seatalkInterfaceName">The name of the interface that provides Seatalk1 messages. Can be null if filtering is not required</param>
+        /// <param name="autoPilotRemoteController">The autopilot remote controller instance. Can be null if no autopilot is connected to
+        /// the Seatalk interface. Should be started before this instance's <see cref="StartDecode"/> is called</param>
+        public SeatalkToNmeaConverter(string interfaceName, string? seatalkInterfaceName, AutoPilotRemoteController? autoPilotRemoteController)
             : base(interfaceName)
         {
+            _autoPilotRemoteController = autoPilotRemoteController;
+            SeatalkInterfaceName = seatalkInterfaceName;
             _terminatingCancellationTokenSource = new CancellationTokenSource();
             _sendQueue = new BlockingCollection<Action>();
             _sentencesToTranslate = new();
-            _logger = this.GetCurrentClassLogger();
-            _seatalkInterface = new SeatalkInterface(portName);
-            _seatalkInterface.MessageReceived += SeatalkMessageReceived;
+            SeatalkInterfaceName = seatalkInterfaceName;
             _isDisposed = false;
             UseRudderAngle = true;
         }
+
+        /// <summary>
+        /// Name of the interface that is being observed.
+        /// </summary>
+        public string? SeatalkInterfaceName { get; }
 
         /// <summary>
         /// List of sentences to translate between Seatalk and NMEA.
@@ -75,7 +81,7 @@ namespace Iot.Device.Seatalk1
         private void SeatalkMessageReceived(SeatalkMessage stalk)
         {
             var nmeaMsg = new SeatalkNmeaMessageWithDecoding(stalk.CreateDatagram(), stalk, DateTimeOffset.UtcNow);
-            _logger.LogDebug($"Received Seatalk message: {stalk}");
+            Logger.LogDebug($"Received Seatalk message: {stalk}");
             DispatchSentenceEvents(nmeaMsg);
 
             // Translations Seatalk->Nmea
@@ -121,7 +127,6 @@ namespace Iot.Device.Seatalk1
 
             _sendThread = new Thread(ProcessSendQueue);
             _sendThread.Start();
-            _seatalkInterface.StartDecode();
         }
 
         private void ProcessSendQueue()
@@ -138,7 +143,7 @@ namespace Iot.Device.Seatalk1
             }
             catch (OperationCanceledException x)
             {
-                _logger.LogDebug(x, "Send task terminating, caught OperationCancelledException");
+                Logger.LogDebug(x, "Send task terminating, caught OperationCancelledException");
             }
         }
 
@@ -160,11 +165,16 @@ namespace Iot.Device.Seatalk1
 
             if (sentence.SentenceId == SeatalkNmeaMessage.Id)
             {
-                // Since we get all commands we send out back on this interface, we must make sure we're not bouncing those again
-                if (sentence is SeatalkNmeaMessage msg && source != this)
+                if (SeatalkInterfaceName != null && source.InterfaceName != SeatalkInterfaceName)
                 {
-                    var data = msg.Datagram;
-                    _seatalkInterface.SendDatagram(data);
+                    // This is not the interface we are observing, so ignore it
+                    return;
+                }
+
+                // Since we get all commands we send out back on a Seatalk interface, we must make sure we're not bouncing those again
+                if (source == this)
+                {
+                    return;
                 }
             }
 
@@ -175,23 +185,25 @@ namespace Iot.Device.Seatalk1
                     {
                         ApparentAngle = mwv.Angle
                     };
-                _seatalkInterface.SendMessage(awa);
+                DispatchSentenceEvents(awa);
 
                 ApparentWindSpeed aws = new ApparentWindSpeed()
                 {
                     ApparentSpeed = mwv.Speed,
                 };
-                _seatalkInterface.SendMessage(aws);
+                DispatchSentenceEvents(aws);
             }
 
             if (DoTranslate(sentence, out RecommendedMinimumNavToDestination? rmb) && rmb != null)
             {
                 // RMB should always report true bearing.
                 NavigationToWaypoint nwp = new NavigationToWaypoint(rmb.CrossTrackError, rmb.BearingToWayPoint, true, rmb.DistanceToWayPoint);
-                _seatalkInterface.SendMessage(nwp);
+                DispatchSentenceEvents(nwp);
             }
 
-            if (DoTranslate(sentence, out HeadingAndTrackControl? htc) && htc != null)
+            var ap = _autoPilotRemoteController;
+
+            if (DoTranslate(sentence, out HeadingAndTrackControl? htc) && htc != null && ap != null)
             {
                 // Empty the queue when this (rare) message arrives, so we can directly issue its commands
                 while (_sendQueue.TryTake(out var dispose))
@@ -199,7 +211,6 @@ namespace Iot.Device.Seatalk1
                     // Wait
                 }
 
-                var ap = _seatalkInterface.GetAutopilotRemoteController();
                 Logger.LogInformation($"Received HTC message from {source.InterfaceName}: {htc.ToNmeaMessage()}");
 
                 AutopilotStatus desiredStatus = htc.Status switch
@@ -281,7 +292,6 @@ namespace Iot.Device.Seatalk1
                 }
 
                 _sendQueue.Dispose();
-                _seatalkInterface.Dispose();
             }
 
             _isDisposed = true;
