@@ -185,6 +185,38 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Fact]
+        public void SetPowerMode_FromNormalToForced_StartsAMeasurement()
+        {
+            // The forced-mode write must wait until the measurement running in normal mode has finished.
+            using var chip = new SimulatedBmp3xx(Bmp390ChipId, Calibration);
+            using var sensor = new Bmp390(chip);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+            chip.RawPressure = 7033326;
+            chip.RawTemperature = 8464793;
+
+            var result = sensor.Read(); // in normal mode: no measurement is started
+            sensor.SetPowerMode(Bmp3xxPowerMode.Forced);
+
+            Assert.NotNull(result.Pressure);
+            Assert.Contains((PowerControl, (byte)0x13), chip.WriteLog);
+            Assert.Equal(0x03, chip.GetRegister(PowerControl)); // the forced measurement ran and the sensor is back asleep
+            Assert.Equal(0x70, chip.GetRegister(0x03) & 0x70); // and its data is ready
+        }
+
+        [Fact]
+        public void SetPowerMode_NormalSleepNormal_EndsInNormalMode()
+        {
+            using var chip = new SimulatedBmp3xx(Bmp390ChipId, Calibration);
+            using var sensor = new Bmp390(chip);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+
+            sensor.SetPowerMode(Bmp3xxPowerMode.Sleep);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+
+            Assert.Equal(Bmp3xxPowerMode.Normal, sensor.ReadPowerMode());
+        }
+
+        [Fact]
         public void SetPowerMode_Normal_WithConfigurationError_Throws_AndReturnsToSleep()
         {
             using var chip = new SimulatedBmp3xx(Bmp390ChipId, Calibration) { ConfigurationErrorOnNormalMode = true };

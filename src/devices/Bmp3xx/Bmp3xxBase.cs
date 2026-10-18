@@ -104,6 +104,9 @@ namespace Iot.Device.Bmp3xx
         private Bmp3xxFilterCoefficient _filterCoefficient = Bmp3xxFilterCoefficient.Off;
         private Bmp3xxOutputDataRate _outputDataRate = Bmp3xxOutputDataRate.Period5Milliseconds;
 
+        // The measurement time of the settings when normal or forced mode was last entered, in case they changed since.
+        private int _modeEnteredMeasurementMilliseconds;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmp3xxBase"/> class.
         /// Checks the chip ID, resets the sensor, reads its calibration data, and configures it with
@@ -230,6 +233,8 @@ namespace Iot.Device.Bmp3xx
 
         /// <summary>
         /// Sets the power mode. <see cref="Bmp3xxPowerMode.Forced"/> starts a single measurement.
+        /// Leaving <see cref="Bmp3xxPowerMode.Normal"/> or <see cref="Bmp3xxPowerMode.Forced"/> mode waits for a running
+        /// measurement to finish, which takes up to <see cref="GetMeasurementDuration"/> plus a margin.
         /// </summary>
         /// <param name="powerMode">The power mode to set.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="powerMode"/> is not a defined <see cref="Bmp3xxPowerMode"/>.</exception>
@@ -247,12 +252,27 @@ namespace Iot.Device.Bmp3xx
 
             // The sensor ignores mode changes it considers illegal (section 3.3.4). Going through sleep when switching
             // between forced and normal mode is always allowed.
-            if (currentMode != Bmp3xxPowerMode.Sleep && powerMode != Bmp3xxPowerMode.Sleep && currentMode != powerMode)
+            bool leavingMode = currentMode != Bmp3xxPowerMode.Sleep && currentMode != powerMode;
+            if (leavingMode)
             {
                 WritePowerMode(powerControl, Bmp3xxPowerMode.Sleep);
+
+                // A measurement that is running finishes first, and the sensor ignores a new mode until then, although
+                // the power control register already reads sleep (observed on a BMP390). Waiting here also protects the
+                // next call. The datasheet times are typical, hence the margin.
+                int duration = Math.Max(GetMeasurementDuration(), _modeEnteredMeasurementMilliseconds);
+                Thread.Sleep(duration + (duration / 10) + 1);
             }
 
-            WritePowerMode(powerControl, powerMode);
+            if (powerMode != Bmp3xxPowerMode.Sleep)
+            {
+                _modeEnteredMeasurementMilliseconds = GetMeasurementDuration();
+                WritePowerMode(powerControl, powerMode);
+            }
+            else if (!leavingMode)
+            {
+                WritePowerMode(powerControl, powerMode);
+            }
 
             // A configuration error is only detected in normal mode (section 4.3.3, table 28).
             if (powerMode == Bmp3xxPowerMode.Normal && (ReadErrors() & Bmp3xxErrors.Configuration) != 0)

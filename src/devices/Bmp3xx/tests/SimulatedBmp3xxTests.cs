@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Threading;
 using Xunit;
 
 namespace Iot.Device.Bmp3xx.Tests
@@ -70,6 +71,43 @@ namespace Iot.Device.Bmp3xx.Tests
             chip.WriteRead(new byte[] { 0x04 }, data);
             Assert.Equal(new byte[] { 0x3B, 0xCD, 0x6A, 0x12, 0x4A, 0x7F }, data);
             Assert.Equal(0x10, chip.GetRegister(0x03)); // reading the data cleared both data-ready flags
+        }
+
+        [Fact]
+        public void ModeWrite_RightAfterLeavingNormalMode_IsIgnored()
+        {
+            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal mode
+
+            chip.Write(new byte[] { 0x1B, 0x03 }); // sleep: the running measurement still has to finish
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal again, too early
+
+            Assert.Equal(0x03, chip.GetRegister(0x1B));
+            Assert.Equal(0x00, chip.GetRegister(0x02)); // no error is reported
+        }
+
+        [Fact]
+        public void ModeWrite_AfterTheRunningMeasurement_IsAccepted()
+        {
+            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            chip.Write(new byte[] { 0x1B, 0x33 });
+            chip.Write(new byte[] { 0x1B, 0x03 });
+
+            Thread.Sleep(20); // x1/x1 with the reset value of OSR (x4 pressure) takes 10.9 ms
+
+            chip.Write(new byte[] { 0x1B, 0x33 });
+            Assert.Equal(0x33, chip.GetRegister(0x1B));
+        }
+
+        [Fact]
+        public void NormalMode_WithConfigurationError_ReturnsToSleep()
+        {
+            using var chip = new SimulatedBmp3xx(0x60, Calibration) { ConfigurationErrorOnNormalMode = true };
+
+            chip.Write(new byte[] { 0x1B, 0x33 });
+
+            Assert.Equal(0x03, chip.GetRegister(0x1B));
+            Assert.Equal(0x04, chip.GetRegister(0x02));
         }
 
         [Fact]

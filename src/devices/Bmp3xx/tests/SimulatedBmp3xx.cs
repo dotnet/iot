@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
+using System.Diagnostics;
 
 namespace Iot.Device.Bmp3xx.Tests
 {
@@ -37,6 +38,7 @@ namespace Iot.Device.Bmp3xx.Tests
         private readonly byte[] _calibration;
         private uint _rawPressure;
         private uint _rawTemperature;
+        private long _modeChangesIgnoredUntil;
 
         public SimulatedBmp3xx(byte chipId, byte[] calibration)
             : base(new I2cConnectionSettings(1, Bmp3xxBase.DefaultI2cAddress))
@@ -178,8 +180,7 @@ namespace Iot.Device.Bmp3xx.Tests
                     ExecuteCommand(value);
                     break;
                 case PowerControlAddress:
-                    SetByte(PowerControlAddress, value);
-                    OnPowerControlWritten();
+                    OnPowerControlWritten(value);
                     break;
                 case OversamplingAddress:
                 case OutputDataRateAddress:
@@ -213,10 +214,26 @@ namespace Iot.Device.Bmp3xx.Tests
             ResetCount++;
         }
 
-        private void OnPowerControlWritten()
+        private void OnPowerControlWritten(byte value)
         {
-            byte powerControl = GetRegister(PowerControlAddress);
-            int mode = (powerControl >> 4) & 0b11;
+            int previousMode = (GetRegister(PowerControlAddress) >> 4) & 0b11;
+            int mode = (value >> 4) & 0b11;
+
+            // Verified on a BMP390: when normal mode is left, the running measurement finishes first, and a new mode
+            // written before then is ignored, although PWR_CTRL already reads sleep. The simulation assumes the worst
+            // case: a measurement had just started.
+            if (mode == 0b00 && previousMode == 0b11)
+            {
+                _modeChangesIgnoredUntil = Stopwatch.GetTimestamp() + (MeasurementMicroseconds() * Stopwatch.Frequency / 1_000_000);
+            }
+            else if (mode != 0b00 && Stopwatch.GetTimestamp() < _modeChangesIgnoredUntil)
+            {
+                SetByte(PowerControlAddress, (byte)(value & ~0b0011_0000));
+                return;
+            }
+
+            SetByte(PowerControlAddress, value);
+            byte powerControl = value;
             if (mode == 0b01 || mode == 0b10)
             {
                 // Forced mode: one measurement, then back to sleep by itself (section 3.3.2).
@@ -230,10 +247,12 @@ namespace Iot.Device.Bmp3xx.Tests
             }
             else if (mode == 0b11)
             {
-                // Normal mode. conf_err is only evaluated in normal mode (table 28).
+                // Normal mode. conf_err is only evaluated in normal mode (table 28). Verified on a BMP390: the sensor
+                // also goes back to sleep at once.
                 if (ConfigurationErrorOnNormalMode)
                 {
                     SetByte(ErrorAddress, (byte)(GetRegister(ErrorAddress) | ConfigurationError));
+                    SetByte(PowerControlAddress, (byte)(powerControl & ~0b0011_0000));
                     return;
                 }
 
@@ -269,6 +288,13 @@ namespace Iot.Device.Bmp3xx.Tests
             }
 
             SetByte(StatusAddress, status);
+        }
+
+        private long MeasurementMicroseconds()
+        {
+            // BMP390 typical measurement time (datasheet section 3.9.2).
+            byte oversampling = GetRegister(OversamplingAddress);
+            return 234 + 392 + ((1 << (oversampling & 0b111)) * 2020) + 163 + ((1 << ((oversampling >> 3) & 0b111)) * 2020);
         }
 
         private void LoadResetValues()
