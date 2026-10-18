@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Globalization;
 using UnitsNet;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Nmea0183.Sentences
 {
     /// <summary>
@@ -15,7 +14,9 @@ namespace Iot.Device.Nmea0183.Sentences
     /// </summary>
     public class CogSogRapidUpdate : Nmea2000PackedMessage
     {
-        // PGN 129026 == 0x1F802
+        /// <summary>
+        /// PGN 129026 == 0x1F802
+        /// </summary>
         public const int HexId = 0x1F802;
 
         /// <summary>
@@ -44,14 +45,23 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public Speed? SpeedOverGround { get; set; }
 
+        /// <inheritdoc/>
         public override bool ReplacesOlderInstance => true;
 
+        /// <summary>
+        /// Initializes a new instance of the CogSogRapidUpdate class.
+        /// </summary>
         public CogSogRapidUpdate()
             : base()
         {
             Valid = true;
         }
 
+        /// <summary>
+        /// Initializes a new instance of this class, with the specified course over ground and speed over ground.
+        /// </summary>
+        /// <param name="courseOverGround">Course over ground</param>
+        /// <param name="sog">Speed over ground</param>
         public CogSogRapidUpdate(Angle? courseOverGround, Speed? sog)
             : base()
         {
@@ -61,11 +71,22 @@ namespace Iot.Device.Nmea0183.Sentences
             Valid = true;
         }
 
+        /// <summary>
+        /// Internal constructor to create a message object from a sentence
+        /// </summary>
+        /// <param name="sentence">The sentence</param>
+        /// <param name="time">The current time</param>
         public CogSogRapidUpdate(TalkerSentence sentence, DateTimeOffset time)
             : this(sentence.TalkerId, sentence.Fields, time)
         {
         }
 
+        /// <summary>
+        /// Decodes a message of this type from a decoded sentence
+        /// </summary>
+        /// <param name="talkerId">TalkerId (here always PRDID)</param>
+        /// <param name="fields">The fields of the sentence</param>
+        /// <param name="time">The current time</param>
         public CogSogRapidUpdate(TalkerId talkerId, IEnumerable<string> fields, DateTimeOffset time)
             : base(talkerId, Id, time)
         {
@@ -173,6 +194,7 @@ namespace Iot.Device.Nmea0183.Sentences
             return $"{header}{sidHex}{cogReference}{cogHex}{sogHex}FFFF";
         }
 
+        /// <inheritdoc/>
         public override string ToReadableContent()
         {
             string sid = SequenceId.ToString(CultureInfo.InvariantCulture);

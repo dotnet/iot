@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Iot.Device.Nmea0183.Sentences;
 using Microsoft.Extensions.Logging;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Nmea0183
 {
     /// <summary>
@@ -18,8 +17,8 @@ namespace Iot.Device.Nmea0183
     /// from a NMEA2000-capable modern plotter. It tries to emulate a Yacht-Devices YDCC-04,
     /// therefore you can download the corresponding UI from the Yacht-Devices website and use it with this class,
     /// see https://www.yachtd.com/products/ds/?czone. Choose "Circuit control", and enter a virtual
-    /// serial number (you can use the default of 260001). After importing the zip file, you get
-    /// another page in the "Data" menu of your plotter with 4 buttons named according to your input.
+    /// serial number (you can use the default of 260001). After importing the zip file on the plotter, you get
+    /// another page in the "Data" menu with 4 buttons named according to your input.
     /// If the page shows a configuration error, run the "Init" command, then reboot the plotter.
     /// </summary>
     public class Nmea2000VirtualButtons : NmeaSinkAndSource
@@ -38,8 +37,15 @@ namespace Iot.Device.Nmea0183
             get;
         }
 
+        /// <summary>
+        /// The dipswitch of the module. This is used to identify the module in the NMEA2000 network. Try the value 2.
+        /// </summary>
         public byte DipSwitch { get; }
 
+        /// <summary>
+        /// This event is triggered when the status of a switch changes.
+        /// The first parameter is the channel (0-3), the second parameter is the new status (on or off).
+        /// </summary>
         public event Action<int, SwitchStatus>? SwitchStatusChanged;
 
         /// <summary>
@@ -74,6 +80,12 @@ namespace Iot.Device.Nmea0183
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
+        /// <summary>
+        /// Gets the current status of the given switch.
+        /// </summary>
+        /// <param name="channel">Channel number</param>
+        /// <returns>The current status of the switch (on or off)</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Not a valid switch number</exception>
         public SwitchStatus GetSwitchStatus(int channel)
         {
             if (_switches.TryGetValue(channel, out var status))
@@ -86,7 +98,7 @@ namespace Iot.Device.Nmea0183
 
         /// <summary>
         /// Externally change the staus of the given switch.
-        /// This will trigger a status change event, but only if the state actually changed8 (to prevent an event loop)
+        /// This will trigger a status change event, but only if the state actually changed (to prevent an event loop)
         /// </summary>
         /// <param name="channel">Channel to update (0-3)</param>
         /// <param name="newStatus">The new status of the switch (on or off)</param>
@@ -121,6 +133,12 @@ namespace Iot.Device.Nmea0183
             DispatchSentenceEvents(announce);
         }
 
+        /// <summary>
+        /// Receive a sentence from the NMEA2000 network.
+        /// If it is a CzoneCircuitControl message, we check if it is for us and update the switch status accordingly.
+        /// </summary>
+        /// <param name="source">The source of this message</param>
+        /// <param name="sentence">The new message</param>
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             // We received a sentence, check if we can handle it
@@ -139,12 +157,14 @@ namespace Iot.Device.Nmea0183
             }
         }
 
+        /// <inheritdoc/>
         public override void StartDecode()
         {
             _updateThread = new Thread(Updater);
             _updateThread.Start();
         }
 
+        /// <inheritdoc/>
         public override void StopDecode()
         {
             _cancellationTokenSource.Cancel();

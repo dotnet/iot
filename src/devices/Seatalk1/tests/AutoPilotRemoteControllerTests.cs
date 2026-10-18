@@ -181,6 +181,8 @@ namespace Iot.Device.Tests.Seatalk1
                 {
                     break;
                 }
+
+                Thread.Sleep(100);
             }
 
             _interface.Verify(x => x.SendMessage(ks));

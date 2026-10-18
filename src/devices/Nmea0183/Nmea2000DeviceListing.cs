@@ -9,9 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Nmea0183.Sentences;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Nmea0183
 {
+    /// <summary>
+    /// Helps generate a list of devices on the NMEA 2000 bus.
+    /// It will send out an address claim request and then a product information request to all devices on the bus, and then collect the responses.
+    /// </summary>
     public class Nmea2000DeviceListing : NmeaSinkAndSource
     {
         private enum ComponentState
@@ -27,6 +30,10 @@ namespace Iot.Device.Nmea0183
         private ConcurrentDictionary<uint, ProductInformation> _deviceProductInformation;
         private ComponentState _state;
 
+        /// <summary>
+        /// Initializes a new instance of the Nmea2000DeviceListing class.
+        /// </summary>
+        /// <param name="interfaceName">The name of the interface for filtering.</param>
         public Nmea2000DeviceListing(string interfaceName)
             : base(interfaceName)
         {
@@ -37,16 +44,22 @@ namespace Iot.Device.Nmea0183
             UpdateInterval = TimeSpan.FromMinutes(10);
         }
 
+        /// <summary>
+        /// Gets or sets the interval at which the device list is updated.
+        /// The default is 10 minutes. Set to TimeSpan.Zero to disable automatic updates.
+        /// </summary>
         public TimeSpan UpdateInterval
         {
             get;
             set;
         }
 
+        /// <inheritdoc/>
         public override void StartDecode()
         {
         }
 
+        /// <inheritdoc/>
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             // Received a sentence (from the component's point of view)
@@ -75,6 +88,10 @@ namespace Iot.Device.Nmea0183
             }
         }
 
+        /// <summary>
+        /// Receives the device list, if available
+        /// </summary>
+        /// <returns>A list of devices</returns>
         public List<Nmea2000DeviceInformation> GetDeviceList()
         {
             var ret = _devices.Select(x =>
@@ -87,6 +104,7 @@ namespace Iot.Device.Nmea0183
             return ret;
         }
 
+        /// <inheritdoc/>
         public override void StopDecode()
         {
         }

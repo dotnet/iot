@@ -8,25 +8,46 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-#pragma warning disable 1591
 namespace Iot.Device.Common
 {
+    /// <summary>
+    /// A logger factory that can log to multiple targets. This is useful for logging to both console and file, for example.
+    /// </summary>
     public class MultiTargetLoggerFactory : ILoggerFactory
     {
         private List<ILoggerFactory> _factories = new List<ILoggerFactory>();
+
+        /// <summary>
+        /// Creates an empty MultiTargetLoggerFactory. You can add ILoggerFactory instances to it using the AddProvider method.
+        /// Without any further configuration, this logger factory will not log anything.
+        /// You can also use the constructor that takes an array of ILoggerFactory instances to create a MultiTargetLoggerFactory that logs to multiple targets.
+        /// </summary>
         public MultiTargetLoggerFactory()
         {
         }
 
+        /// <summary>
+        /// Crates a MultiTargetLoggerFactory that logs to multiple targets. You can add ILoggerFactory instances to it using the AddProvider method.
+        /// </summary>
+        /// <param name="factories">A list of factories to use</param>
         public MultiTargetLoggerFactory(params ILoggerFactory[] factories)
         {
             _factories = factories.ToList();
         }
 
+        /// <summary>
+        /// Add a new loger factory to this MultiTargetLoggerFactory. This will allow logging to multiple targets.
+        /// </summary>
+        /// <param name="provider">The logger provider to add</param>
         public void AddProvider(ILoggerProvider provider)
         {
         }
 
+        /// <summary>
+        /// Creates a new logger.
+        /// </summary>
+        /// <param name="categoryName">The name of the category to create a logger for</param>
+        /// <returns></returns>
         public ILogger CreateLogger(string categoryName)
         {
             return new MultiTargetLogger(categoryName, _factories);
@@ -99,6 +120,7 @@ namespace Iot.Device.Common
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             foreach (var d in _factories)

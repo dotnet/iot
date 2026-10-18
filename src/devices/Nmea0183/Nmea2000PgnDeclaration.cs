@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Nmea0183.Sentences;
 
-#pragma warning disable CS9113
 namespace Iot.Device.Nmea0183
 {
     /// <summary>

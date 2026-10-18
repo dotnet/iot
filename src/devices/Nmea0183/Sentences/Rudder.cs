@@ -10,28 +10,44 @@ using System.Text;
 using System.Threading.Tasks;
 using UnitsNet;
 
-#pragma warning disable CS1591
-
 namespace Iot.Device.Nmea0183.Sentences
 {
+    /// <summary>
+    /// Represents a rudder position message in the NMEA 2000 protocol.
+    /// </summary>
     public class Rudder : Nmea2000PackedMessage
     {
         private byte _directionOrder;
+
+        /// <summary>
+        /// The message id
+        /// </summary>
         public const int HexId = 0x1F10D;
+
+        /// <inheritdoc/>
         public override bool ReplacesOlderInstance => true;
 
+        /// <summary>
+        /// The current rudder angle
+        /// </summary>
         public Angle? ActualAngle
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// The desired rudder angle (e.g. from autopilot)
+        /// </summary>
         public Angle? DesiredAngle
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Instance number (few ships will have more than one rudder controller)
+        /// </summary>
         public byte Instance
         {
             get;
@@ -68,6 +84,16 @@ namespace Iot.Device.Nmea0183.Sentences
             }
         }
 
+        /// <inheritdoc/>
+        public override uint Identifier => HexId;
+
+        /// <summary>
+        /// Create a new instance of the Rudder message
+        /// </summary>
+        /// <param name="actualAngle">The current rudder angle</param>
+        /// <param name="desiredAngle">The desired rudder angle (e.g. from autopilot)</param>
+        /// <param name="directionOrder">The current direction the rudder shall move</param>
+        /// <param name="instance">Instance number (few ships will have more than one rudder controller)</param>
         public Rudder(Angle? actualAngle, Angle? desiredAngle, TurnDirection directionOrder, byte instance)
         {
             Instance = instance;
@@ -129,6 +155,7 @@ namespace Iot.Device.Nmea0183.Sentences
             Valid = true;
         }
 
+        /// <inheritdoc/>
         public override string ToNmeaParameterList()
         {
             StringBuilder sb = new StringBuilder();
@@ -154,11 +181,10 @@ namespace Iot.Device.Nmea0183.Sentences
             return base.ToNmeaParameterList() + sb.ToString();
         }
 
+        /// <inheritdoc/>
         public override string ToReadableContent()
         {
             return $"Rudder Angle: {ActualAngle}, Desired Angle {DesiredAngle}";
         }
-
-        public override uint Identifier => HexId;
     }
 }

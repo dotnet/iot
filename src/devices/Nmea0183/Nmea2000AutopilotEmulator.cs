@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection.Metadata;
 using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using UnitsNet;
 using UnitsNet.Units;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Nmea0183
 {
     /// <summary>
@@ -33,8 +31,16 @@ namespace Iot.Device.Nmea0183
         private Angle? _currentDesiredAwa;
         private Angle _currentHeading;
 
+        /// <summary>
+        /// Name of the source interface providing the NMEA2000 communication, can be null if filtering is provided externally
+        /// </summary>
         public string? Nmea2000Source { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the Nmea2000AutopilotEmulator class.
+        /// </summary>
+        /// <param name="interfaceName">The name of the interface for filtering.</param>
+        /// <param name="nmea2000Source">The source identifier for NMEA 2000 data, or null if not specified.</param>
         public Nmea2000AutopilotEmulator(string interfaceName, string? nmea2000Source)
             : base(interfaceName)
         {
@@ -45,12 +51,14 @@ namespace Iot.Device.Nmea0183
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
+        /// <inheritdoc/>
         public override void StartDecode()
         {
             _updateThread = new Thread(Updater);
             _updateThread.Start();
         }
 
+        /// <inheritdoc/>
         public override void StopDecode()
         {
             _cancellationTokenSource.Cancel();
@@ -58,6 +66,7 @@ namespace Iot.Device.Nmea0183
             _updateThread = null;
         }
 
+        /// <inheritdoc/>
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             // We received a sentence, check if we can handle it

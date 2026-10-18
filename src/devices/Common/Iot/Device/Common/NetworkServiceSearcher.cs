@@ -14,9 +14,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Common
 {
+    /// <summary>
+    /// This is a helper class to search for network services on the local network.
+    /// It can be used to find devices that respond to a specific HTTP request, for example.
+    /// It is useful when a device does not properly implement mDNS or other discovery protocols and has a dynamic IP,
+    /// but can be identified by a specific HTTP header or response.
+    /// </summary>
     public class NetworkServiceSearcher
     {
         /// <summary>
@@ -37,6 +42,12 @@ namespace Iot.Device.Common
             return IPAddress.Loopback;
         }
 
+        /// <summary>
+        /// Get all valid IP addresses in a subnet
+        /// </summary>
+        /// <param name="addressInSubnet">An IP address in the subnet (typically our own)</param>
+        /// <param name="subnetMask">The subnet mask</param>
+        /// <returns>A list of valid IP addresses in the subnet, excluding our own, the broadcast address, and the network address</returns>
         public static List<IPAddress> GetAllValidAddressesInSubnet(IPAddress addressInSubnet, IPAddress subnetMask)
         {
             byte[] ipAddressBytes = addressInSubnet.GetAddressBytes().Reverse().ToArray();
@@ -80,6 +91,10 @@ namespace Iot.Device.Common
             return reply;
         }
 
+        /// <summary>
+        /// Returns the first operational network interface that is not a loopback, along with its IP address and subnet mask.
+        /// </summary>
+        /// <returns>A tuple containing the IP address and subnet mask of the primary network interface</returns>
         public static (IPAddress Address, IPAddress Mask) GetPrimaryNetworkInterface()
         {
             var adapters = NetworkInterface.GetAllNetworkInterfaces();
@@ -108,6 +123,14 @@ namespace Iot.Device.Common
             return (IPAddress.Loopback, IPAddress.Parse("255.255.255.0"));
         }
 
+        /// <summary>
+        /// Returns true if the candidate IP address responds to an HTTP request with a specific header value, indicating it is a Yacht Devices interface.
+        /// </summary>
+        /// <param name="client">The HttpClient to use for the request</param>
+        /// <param name="candidate">The candidate IP address to check</param>
+        /// <param name="logger">An optional logger for logging information</param>
+        /// <param name="expectedIdentifier">The expected identifier value in the HTTP header</param>
+        /// <returns>True if the candidate IP address is a Yacht Devices interface, false otherwise</returns>
         public static async Task<bool> IsYachtDevicesInterface(HttpClient client, IPAddress candidate, ILogger? logger, string expectedIdentifier)
         {
             try
