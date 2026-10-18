@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1.Messages;
 using Microsoft.Extensions.Logging;
@@ -18,12 +19,11 @@ using UnitsNet;
 namespace Iot.Device.Seatalk1
 {
     /// <summary>
-    /// Remote controller for an autopilot connected via Seatalk1. To get an instance of this class, call <see cref="SeatalkInterface.GetAutopilotRemoteController"/>.
+    /// Remote controller for an autopilot connected via Seatalk1.
+    /// Besides offering direct control commands, it also keeps track of the current status of the autopilot, including rudder angle and heading
+    /// and converts Nmea0183 messages to Seatalk1 messages and vice versa.
     /// </summary>
-    /// <remarks>
-    /// Type is not disposable, to prevent accidental disposal by clients. They don't get ownership of the instance.
-    /// </remarks>
-    public class AutoPilotRemoteController : MarshalByRefObject, IDisposable
+    public class AutoPilotRemoteController : NmeaSinkAndSource, IDisposable
     {
         private const double AngleEpsilon = 0.9; // The protocol can only give angles in whole degrees
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(6);
@@ -37,7 +37,7 @@ namespace Iot.Device.Seatalk1
         private bool _buttonOnApPressed = false;
 
         private Thread? _desiredAngleUpdater;
-        private CancellationTokenSource? _cancellationTokenSource;
+        private CancellationTokenSource _cancellationTokenSource;
 
         /// <summary>
         /// This is the desired angle of this component. It may be different from the one configured on the AP.
@@ -49,8 +49,10 @@ namespace Iot.Device.Seatalk1
         /// <summary>
         /// Internal constructor, used by the owning instance of <see cref="SeatalkInterface"/>
         /// </summary>
+        /// <param name="interfaceName">The name of the interface</param>
         /// <param name="parentInterface">The owner</param>
-        internal AutoPilotRemoteController(SeatalkInterface parentInterface)
+        public AutoPilotRemoteController(string interfaceName, SeatalkInterface parentInterface)
+            : base(interfaceName)
         {
             _logger = this.GetCurrentClassLogger();
             _dataUpdated = new AutoResetEvent(false);
@@ -63,6 +65,7 @@ namespace Iot.Device.Seatalk1
             DeadbandMode = DeadbandMode.Automatic;
             DefaultTimeout = TimeSpan.FromSeconds(3);
             _ourDesiredAngle = null;
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -352,6 +355,25 @@ namespace Iot.Device.Seatalk1
             return ret;
         }
 
+        /// <inheritdoc/>
+        public override void StartDecode()
+        {
+            if (_desiredAngleUpdater == null || !_desiredAngleUpdater.IsAlive)
+            {
+                _desiredAngleUpdater = new Thread(DesiredAngleUpdater);
+                _desiredAngleUpdater.IsBackground = true;
+                _desiredAngleUpdater.Name = "Autopilot desired angle updater";
+                _desiredAngleUpdater.Start();
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void StopDecode()
+        {
+            _cancellationTokenSource.Cancel();
+            _desiredAngleUpdater?.Join();
+        }
+
         /// <summary>
         /// Change deadband mode
         /// </summary>
@@ -431,22 +453,13 @@ namespace Iot.Device.Seatalk1
 
                     _ourDesiredAngle = degrees;
                 }
-
-                if (_desiredAngleUpdater == null || !_desiredAngleUpdater.IsAlive)
-                {
-                    _cancellationTokenSource = new CancellationTokenSource();
-                    _desiredAngleUpdater = new Thread(DesiredAngleUpdater);
-                    _desiredAngleUpdater.IsBackground = true;
-                    _desiredAngleUpdater.Name = "Autopilot desired angle updater";
-                    _desiredAngleUpdater.Start();
-                }
             }
         }
 
         private void DesiredAngleUpdater()
         {
             Stopwatch sw = new Stopwatch();
-            while (_cancellationTokenSource is { IsCancellationRequested: false })
+            while (_cancellationTokenSource.IsCancellationRequested == false)
             {
                 Angle newDesiredHeading;
                 TurnDirection direction;
@@ -547,19 +560,15 @@ namespace Iot.Device.Seatalk1
         /// Disposes this component
         /// </summary>
         /// <param name="disposing">Usually true</param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource.Cancel();
                 _desiredAngleUpdater?.Join();
             }
-        }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
+            base.Dispose(disposing);
         }
 
         /// <summary>

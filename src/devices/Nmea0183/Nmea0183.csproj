@@ -26,4 +26,28 @@
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Sentences\Seatalk1\ApparentWindAngle.cs" />
+    <Compile Include="Sentences\Seatalk1\ApparentWindSpeed.cs" />
+    <Compile Include="Sentences\Seatalk1\AutopilotAlarms.cs" />
+    <Compile Include="Sentences\Seatalk1\AutopilotButtons.cs" />
+    <Compile Include="Sentences\Seatalk1\AutopilotCalibrationParameter.cs" />
+    <Compile Include="Sentences\Seatalk1\AutopilotCalibrationParameterMessage.cs" />
+    <Compile Include="Sentences\Seatalk1\AutopilotWindStatus.cs" />
+    <Compile Include="Sentences\Seatalk1\CompassHeadingAndRudderPosition.cs" />
+    <Compile Include="Sentences\Seatalk1\CompassHeadingAutopilotCourse.cs" />
+    <Compile Include="Sentences\Seatalk1\CompassHeadingAutopilotCourseAlt.cs" />
+    <Compile Include="Sentences\Seatalk1\CourseComputerStatus.cs" />
+    <Compile Include="Sentences\Seatalk1\CourseComputerWarnings.cs" />
+    <Compile Include="Sentences\Seatalk1\DeadbandMode.cs" />
+    <Compile Include="Sentences\Seatalk1\DeadbandSetting.cs" />
+    <Compile Include="Sentences\Seatalk1\DeviceIdentification.cs" />
+    <Compile Include="Sentences\Seatalk1\DisplayBacklightLevel.cs" />
+    <Compile Include="Sentences\Seatalk1\Keystroke.cs" />
+    <Compile Include="Sentences\Seatalk1\NavigationToWaypoint.cs" />
+    <Compile Include="Sentences\Seatalk1\SeatalkMessage.cs" />
+    <Compile Include="Sentences\Seatalk1\SetLampIntensity.cs" />
+    <Compile Include="Sentences\Seatalk1\SpeedTroughWater.cs" />
+    <Compile Include="Sentences\Seatalk1\TargetWaypointName.cs" />
+  </ItemGroup>
 </Project>
