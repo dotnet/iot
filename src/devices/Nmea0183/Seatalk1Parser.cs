@@ -214,6 +214,7 @@ namespace Iot.Device.Seatalk1
             {
                 error = NmeaError.None;
                 TalkerSentence ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data);
+                return ts;
             }
 
             error = NmeaError.MessageDropped;
