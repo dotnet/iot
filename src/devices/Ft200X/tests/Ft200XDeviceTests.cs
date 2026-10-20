@@ -30,7 +30,7 @@ namespace Iot.Device.Ft200X.Tests
         [Fact]
         public void RejectsNullDescriptorBeforeAccessingNativeLibrary()
         {
-            Assert.Throws<ArgumentNullException>(() => new Ft200XDevice(null!));
+            Assert.Throws<ArgumentNullException>(() => new Ft200XDevice(deviceInformation: null!));
         }
 
         [Theory]
