@@ -536,6 +536,13 @@ namespace Iot.Device.Bmp3xx
                 return false;
             }
 
+            // The data-ready flags are only cleared by reading the data (table 29). Data from an earlier measurement
+            // that was never read would otherwise look like the result of this one. Sleep first, so a measurement
+            // that is still running can't set them again.
+            SetPowerMode(Bmp3xxPowerMode.Sleep);
+            Span<byte> staleData = stackalloc byte[DataLength];
+            ReadRegisters(Bmp3xxRegister.Data, staleData);
+
             SetPowerMode(Bmp3xxPowerMode.Forced);
             durationMilliseconds = GetMeasurementDuration();
             return true;

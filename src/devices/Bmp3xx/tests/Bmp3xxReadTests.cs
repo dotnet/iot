@@ -90,6 +90,38 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Fact]
+        public void Read_AfterUnreadMeasurement_DoesNotReturnStaleData()
+        {
+            // A measurement whose data was never read leaves both data-ready flags set (table 29). If the next forced
+            // measurement doesn't finish, Read must time out instead of returning the old sample.
+            using var chip = CreateChip(V7RawPressure, V7RawTemperature);
+            using var sensor = new Bmp390(chip);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Forced);
+            chip.RawPressure = 5463084;
+            chip.NeverBecomesReady = true;
+
+            var result = sensor.Read();
+
+            Assert.Null(result.Temperature);
+            Assert.Null(result.Pressure);
+        }
+
+        [Fact]
+        public async Task ReadAsync_AfterUnreadMeasurement_DoesNotReturnStaleData()
+        {
+            using var chip = CreateChip(V7RawPressure, V7RawTemperature);
+            using var sensor = new Bmp390(chip);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Forced);
+            chip.RawPressure = 5463084;
+            chip.NeverBecomesReady = true;
+
+            var result = await sensor.ReadAsync();
+
+            Assert.Null(result.Temperature);
+            Assert.Null(result.Pressure);
+        }
+
+        [Fact]
         public void Read_OutOfRangeTemperature_ReturnsNullTemperatureAndPressure()
         {
             // V9: -45 °C, below the sensor's -40 °C limit. The pressure (about 1000 hPa) would be in range, but it is
