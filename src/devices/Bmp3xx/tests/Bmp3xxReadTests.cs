@@ -122,6 +122,22 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Fact]
+        public void Read_AfterPressureSamplingRaisedAndLoweredInNormalMode_StartsAMeasurement() =>
+            AssertReadStartsMeasurementAfterOversamplingChange(sensor =>
+            {
+                sensor.PressureSampling = Bmp3xxOversampling.X32;
+                sensor.PressureSampling = Bmp3xxOversampling.X1;
+            });
+
+        [Fact]
+        public void Read_AfterTemperatureSamplingRaisedAndLoweredInNormalMode_StartsAMeasurement() =>
+            AssertReadStartsMeasurementAfterOversamplingChange(sensor =>
+            {
+                sensor.TemperatureSampling = Bmp3xxOversampling.X32;
+                sensor.TemperatureSampling = Bmp3xxOversampling.X1;
+            });
+
+        [Fact]
         public void Read_OutOfRangeTemperature_ReturnsNullTemperatureAndPressure()
         {
             // V9: -45 °C, below the sensor's -40 °C limit. The pressure (about 1000 hPa) would be in range, but it is
@@ -266,6 +282,23 @@ namespace Iot.Device.Bmp3xx.Tests
             using var sensor = new Bmp390(chip);
 
             Assert.False(sensor.TryReadAltitude(out _));
+        }
+
+        private static void AssertReadStartsMeasurementAfterOversamplingChange(Action<Bmp390> changeOversampling)
+        {
+            // A measurement started with the higher oversampling may still be running when normal mode is left, and the
+            // sensor ignores a new mode until it ends. If the forced measurement of Read is lost, Read times out.
+            using var chip = CreateChip(V7RawPressure, V7RawTemperature);
+            using var sensor = new Bmp390(chip);
+            sensor.OutputDataRate = Bmp3xxOutputDataRate.Period160Milliseconds;
+            sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+            changeOversampling(sensor);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Sleep);
+            chip.RawTemperature = 0x800000;
+
+            var result = sensor.Read();
+
+            AssertTemperature(23.677637157, result.Temperature);
         }
 
         private static SimulatedBmp3xx CreateChip(uint rawPressure, uint rawTemperature) =>

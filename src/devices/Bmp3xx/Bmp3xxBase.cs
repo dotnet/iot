@@ -104,8 +104,9 @@ namespace Iot.Device.Bmp3xx
         private Bmp3xxFilterCoefficient _filterCoefficient = Bmp3xxFilterCoefficient.Off;
         private Bmp3xxOutputDataRate _outputDataRate = Bmp3xxOutputDataRate.Period5Milliseconds;
 
-        // The measurement time of the settings when normal or forced mode was last entered, in case they changed since.
-        private int _modeEnteredMeasurementMilliseconds;
+        // The longest measurement time of the settings since normal or forced mode was last entered: a measurement
+        // started before an oversampling change may still be running when the mode is left.
+        private int _longestPendingMeasurementMilliseconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmp3xxBase"/> class.
@@ -155,6 +156,7 @@ namespace Iot.Device.Bmp3xx
                 ThrowIfUndefined(value);
                 UpdateRegister(Bmp3xxRegister.Oversampling, PressureOversamplingMask, (byte)((byte)value << PressureOversamplingShift));
                 _pressureSampling = value;
+                _longestPendingMeasurementMilliseconds = Math.Max(_longestPendingMeasurementMilliseconds, GetMeasurementDuration());
             }
         }
 
@@ -175,6 +177,7 @@ namespace Iot.Device.Bmp3xx
                 ThrowIfUndefined(value);
                 UpdateRegister(Bmp3xxRegister.Oversampling, TemperatureOversamplingMask, (byte)((byte)value << TemperatureOversamplingShift));
                 _temperatureSampling = value;
+                _longestPendingMeasurementMilliseconds = Math.Max(_longestPendingMeasurementMilliseconds, GetMeasurementDuration());
             }
         }
 
@@ -260,13 +263,13 @@ namespace Iot.Device.Bmp3xx
                 // A measurement that is running finishes first, and the sensor ignores a new mode until then, although
                 // the power control register already reads sleep (observed on a BMP390). Waiting here also protects the
                 // next call. The datasheet times are typical, hence the margin.
-                int duration = Math.Max(GetMeasurementDuration(), _modeEnteredMeasurementMilliseconds);
+                int duration = Math.Max(GetMeasurementDuration(), _longestPendingMeasurementMilliseconds);
                 Thread.Sleep(duration + (duration / 10) + 1);
             }
 
             if (powerMode != Bmp3xxPowerMode.Sleep)
             {
-                _modeEnteredMeasurementMilliseconds = GetMeasurementDuration();
+                _longestPendingMeasurementMilliseconds = GetMeasurementDuration();
                 WritePowerMode(powerControl, powerMode);
             }
             else if (!leavingMode)

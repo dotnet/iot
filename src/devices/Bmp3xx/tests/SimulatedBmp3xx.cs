@@ -39,6 +39,7 @@ namespace Iot.Device.Bmp3xx.Tests
         private uint _rawPressure;
         private uint _rawTemperature;
         private long _modeChangesIgnoredUntil;
+        private long _longestNormalModeMeasurementMicroseconds;
 
         public SimulatedBmp3xx(byte chipId, byte[] calibration)
             : base(new I2cConnectionSettings(1, Bmp3xxBase.DefaultI2cAddress))
@@ -183,6 +184,16 @@ namespace Iot.Device.Bmp3xx.Tests
                     OnPowerControlWritten(value);
                     break;
                 case OversamplingAddress:
+                    SetByte(address, value);
+
+                    // Which settings a running measurement uses after a change in normal mode is unverified; the
+                    // simulation assumes the slowest settings since normal mode was entered are still running.
+                    if (((GetRegister(PowerControlAddress) >> 4) & 0b11) == 0b11)
+                    {
+                        _longestNormalModeMeasurementMicroseconds = Math.Max(_longestNormalModeMeasurementMicroseconds, MeasurementMicroseconds());
+                    }
+
+                    break;
                 case OutputDataRateAddress:
                 case ConfigurationAddress:
                     SetByte(address, value);
@@ -221,10 +232,10 @@ namespace Iot.Device.Bmp3xx.Tests
 
             // Verified on a BMP390: when normal mode is left, the running measurement finishes first, and a new mode
             // written before then is ignored, although PWR_CTRL already reads sleep. The simulation assumes the worst
-            // case: a measurement had just started.
+            // case: the longest measurement since normal mode was entered had just started.
             if (mode == 0b00 && previousMode == 0b11)
             {
-                _modeChangesIgnoredUntil = Stopwatch.GetTimestamp() + (MeasurementMicroseconds() * Stopwatch.Frequency / 1_000_000);
+                _modeChangesIgnoredUntil = Stopwatch.GetTimestamp() + (_longestNormalModeMeasurementMicroseconds * Stopwatch.Frequency / 1_000_000);
             }
             else if (mode != 0b00 && Stopwatch.GetTimestamp() < _modeChangesIgnoredUntil)
             {
@@ -247,6 +258,8 @@ namespace Iot.Device.Bmp3xx.Tests
             }
             else if (mode == 0b11)
             {
+                _longestNormalModeMeasurementMicroseconds = MeasurementMicroseconds();
+
                 // Normal mode. conf_err is only evaluated in normal mode (table 28). Verified on a BMP390: the sensor
                 // also goes back to sleep at once.
                 if (ConfigurationErrorOnNormalMode)
