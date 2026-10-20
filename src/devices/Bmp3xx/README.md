@@ -60,7 +60,7 @@ Not implemented: SPI, FIFO, interrupt pin (data-ready, FIFO watermark and FIFO f
 
 Behavior to be aware of:
 
-- `Read` and `ReadAsync` start a measurement unless the sensor is in normal mode. `TryReadTemperature`, `TryReadPressure` and `TryReadAltitude` never start one: they return the latest values, or `false` if nothing has been measured since the last reset.
+- `Read` and `ReadAsync` start a measurement unless the sensor is in normal mode, and return only that measurement: data left from an earlier measurement that wasn't read is discarded. Calling `SetPowerMode(Bmp3xxPowerMode.Forced)` first isn't needed, and makes `Read` wait for that measurement to finish before starting its own. `TryReadTemperature`, `TryReadPressure` and `TryReadAltitude` never start one: they return the latest values, or `false` if nothing has been measured since the last reset.
 - Values outside the sensor's operating range (-40 to 85 °C, 300 to 1250 hPa) are not reported: `Read` returns `null` for that value and the `TryRead` methods return `false`. The pressure is computed from the temperature, so an out-of-range temperature makes the pressure unavailable too.
 - If a measurement doesn't finish in time, `Read` returns `null` for both values instead of throwing.
 - `SetPowerMode(Bmp3xxPowerMode.Normal)` throws an `InvalidOperationException` if the output data rate is too fast for the oversampling settings; the sensor stays in sleep mode. `GetMeasurementDuration` tells how long one measurement takes.
