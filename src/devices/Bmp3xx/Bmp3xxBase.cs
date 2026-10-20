@@ -85,9 +85,6 @@ namespace Iot.Device.Bmp3xx
         // Data registers (section 4.3.5 and 4.3.6): 3 bytes of pressure, then 3 bytes of temperature, least significant byte first.
         private const int DataLength = 6;
 
-        // Value of both 24-bit data fields after a reset, before the first measurement (section 4.2, table 25).
-        private const uint DataResetValue = 0x80_0000;
-
         // Operating range (section 1, table 2). Values outside it are reported as invalid.
         private const double MinimumTemperatureCelsius = -40;
         private const double MaximumTemperatureCelsius = 85;
@@ -107,6 +104,11 @@ namespace Iot.Device.Bmp3xx
         // The longest measurement time of the settings since normal or forced mode was last entered: a measurement
         // started before an oversampling change may still be running when the mode is left.
         private int _longestPendingMeasurementMilliseconds;
+
+        // Whether the data registers hold a measurement made since the last reset. The data itself can't tell: after a
+        // reset it reads 0x800000 (table 25), which can also be a genuine measurement. Only measurements this instance
+        // observes count, so one made and read out through another connection to the sensor isn't seen.
+        private bool _measurementAvailable;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Bmp3xxBase"/> class.
@@ -317,7 +319,7 @@ namespace Iot.Device.Bmp3xx
         {
             if (!StartForcedMeasurementIfNeeded(out int durationMilliseconds))
             {
-                return ReadResult(rejectResetValue: true);
+                return ReadLatestResult();
             }
 
             Thread.Sleep(durationMilliseconds);
@@ -332,7 +334,8 @@ namespace Iot.Device.Bmp3xx
                 Thread.Sleep(PollIntervalMilliseconds);
             }
 
-            return ReadResult(rejectResetValue: false);
+            _measurementAvailable = true;
+            return ReadResult();
         }
 
         /// <summary>
@@ -343,7 +346,7 @@ namespace Iot.Device.Bmp3xx
         {
             if (!StartForcedMeasurementIfNeeded(out int durationMilliseconds))
             {
-                return ReadResult(rejectResetValue: true);
+                return ReadLatestResult();
             }
 
             await Task.Delay(durationMilliseconds).ConfigureAwait(false);
@@ -358,7 +361,8 @@ namespace Iot.Device.Bmp3xx
                 await Task.Delay(PollIntervalMilliseconds).ConfigureAwait(false);
             }
 
-            return ReadResult(rejectResetValue: false);
+            _measurementAvailable = true;
+            return ReadResult();
         }
 
         /// <summary>
@@ -374,7 +378,7 @@ namespace Iot.Device.Bmp3xx
         [Telemetry("Temperature")]
         public bool TryReadTemperature(out Temperature temperature)
         {
-            Temperature? value = ReadResult(rejectResetValue: true).Temperature;
+            Temperature? value = ReadLatestResult().Temperature;
             temperature = value.GetValueOrDefault();
             return value.HasValue;
         }
@@ -390,7 +394,7 @@ namespace Iot.Device.Bmp3xx
         [Telemetry("Pressure")]
         public bool TryReadPressure(out Pressure pressure)
         {
-            Pressure? value = ReadResult(rejectResetValue: true).Pressure;
+            Pressure? value = ReadLatestResult().Pressure;
             pressure = value.GetValueOrDefault();
             return value.HasValue;
         }
@@ -404,7 +408,7 @@ namespace Iot.Device.Bmp3xx
         public bool TryReadAltitude(Pressure seaLevelPressure, out Length altitude)
         {
             // Pressure and temperature come from the same burst read, so they belong to the same measurement.
-            Bmp3xxReadResult result = ReadResult(rejectResetValue: true);
+            Bmp3xxReadResult result = ReadLatestResult();
             if (result.Pressure is not Pressure pressure || result.Temperature is not Temperature temperature)
             {
                 altitude = default;
@@ -459,6 +463,7 @@ namespace Iot.Device.Bmp3xx
             // Clear a stale "reset detected" flag (it is cleared on read) so the next one belongs to this reset.
             ReadRegister(Bmp3xxRegister.Event);
             WriteRegister(Bmp3xxRegister.Command, SoftResetCommand);
+            _measurementAvailable = false;
             Thread.Sleep(StartupTimeMilliseconds);
 
             if ((ReadErrors() & Bmp3xxErrors.Command) != 0)
@@ -543,6 +548,9 @@ namespace Iot.Device.Bmp3xx
             // that was never read would otherwise look like the result of this one. Sleep first, so a measurement
             // that is still running can't set them again.
             SetPowerMode(Bmp3xxPowerMode.Sleep);
+
+            // The flags still show an unread measurement; note it before clearing them.
+            IsMeasurementAvailable();
             Span<byte> staleData = stackalloc byte[DataLength];
             ReadRegisters(Bmp3xxRegister.Data, staleData);
 
@@ -557,20 +565,28 @@ namespace Iot.Device.Bmp3xx
             return (ReadStatus() & dataReady) == dataReady;
         }
 
-        private Bmp3xxReadResult ReadResult(bool rejectResetValue)
+        private bool IsMeasurementAvailable()
+        {
+            // A measurement whose data hasn't been read yet, for example one started with SetPowerMode, shows in the
+            // data-ready flags (table 29). Once its data is read, only the field remembers it.
+            if (!_measurementAvailable)
+            {
+                const Bmp3xxStatus dataReady = Bmp3xxStatus.PressureDataReady | Bmp3xxStatus.TemperatureDataReady;
+                _measurementAvailable = (ReadStatus() & dataReady) != 0;
+            }
+
+            return _measurementAvailable;
+        }
+
+        private Bmp3xxReadResult ReadLatestResult() => IsMeasurementAvailable() ? ReadResult() : new Bmp3xxReadResult(null, null);
+
+        private Bmp3xxReadResult ReadResult()
         {
             // One burst read, so pressure and temperature belong to the same measurement (section 3.10.1).
             Span<byte> data = stackalloc byte[DataLength];
             ReadRegisters(Bmp3xxRegister.Data, data);
             uint rawPressure = (uint)(data[0] | (data[1] << 8) | (data[2] << 16));
             uint rawTemperature = (uint)(data[3] | (data[4] << 8) | (data[5] << 16));
-
-            // Both fields still at their reset value: no measurement since the reset. A single field at that value can be
-            // a genuine reading (for a typical sensor, a raw temperature of 0x800000 is about 24 °C).
-            if (rejectResetValue && rawPressure == DataResetValue && rawTemperature == DataResetValue)
-            {
-                return new Bmp3xxReadResult(null, null);
-            }
 
             double celsius = CalibrationData.CompensateTemperature(rawTemperature);
             double pascals = CalibrationData.CompensatePressure(rawPressure, celsius);

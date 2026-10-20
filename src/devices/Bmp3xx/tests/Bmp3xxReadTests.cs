@@ -28,6 +28,12 @@ namespace Iot.Device.Bmp3xx.Tests
         private const double V7Celsius = 25.000007690;
         private const double V7Pascals = 101324.996390588;
 
+        // Vector V15: both raw values at the data registers' reset value 0x800000 (table 25). With calibration set A
+        // this is a genuine, in-range measurement.
+        private const uint ResetValue = 0x800000;
+        private const double V15Celsius = 23.677637157;
+        private const double V15Pascals = 79898.812328695;
+
         private static readonly byte[] Calibration = Convert.FromHexString("3f6b3849f6ca0092f623007e62e575f3f6c54213c4");
 
         [Fact]
@@ -180,7 +186,7 @@ namespace Iot.Device.Bmp3xx.Tests
         [Fact]
         public void TryReadTemperature_AfterReset_ReturnsFalse()
         {
-            // The data registers still hold their reset value 0x800000 (BMP390 datasheet, table 25).
+            // No measurement has been made since the reset in the constructor.
             using var chip = CreateChip(V7RawPressure, V7RawTemperature);
             using var sensor = new Bmp390(chip);
 
@@ -191,14 +197,85 @@ namespace Iot.Device.Bmp3xx.Tests
         [Fact]
         public void TryReadTemperature_OnlyTemperatureAtResetValue_ReturnsTrue()
         {
-            // With this calibration a raw temperature of 0x800000 is a normal 23.68 °C. Only both raw values at
-            // their reset value mean "no measurement yet".
-            using var chip = CreateChip(V7RawPressure, 0x800000);
+            // With this calibration a raw temperature at the reset value is a normal 23.68 °C.
+            using var chip = CreateChip(V7RawPressure, ResetValue);
             using var sensor = new Bmp390(chip);
             sensor.Read();
 
             Assert.True(sensor.TryReadTemperature(out var temperature));
-            Assert.Equal(23.677637157, temperature.DegreesCelsius, TemperatureTolerance);
+            Assert.Equal(V15Celsius, temperature.DegreesCelsius, TemperatureTolerance);
+        }
+
+        [Fact]
+        public void TryRead_AfterMeasurementAndReset_ReturnsFalse()
+        {
+            using var chip = CreateChip(V7RawPressure, V7RawTemperature);
+            using var sensor = new Bmp390(chip);
+            sensor.Read();
+
+            sensor.Reset();
+
+            Assert.False(sensor.TryReadTemperature(out _));
+            Assert.False(sensor.TryReadPressure(out _));
+            Assert.False(sensor.TryReadAltitude(out _));
+        }
+
+        [Fact]
+        public void Read_MeasurementAtResetValue_ReturnsIt()
+        {
+            using var chip = CreateChip(ResetValue, ResetValue);
+            using var sensor = new Bmp390(chip);
+
+            var result = sensor.Read();
+
+            AssertTemperature(V15Celsius, result.Temperature);
+            AssertPressure(V15Pascals, result.Pressure);
+        }
+
+        [Fact]
+        public void TryRead_AfterReadingMeasurementAtResetValue_ReturnsIt()
+        {
+            // Reading the data clears the data-ready flags, so they can't tell later calls that a measurement exists.
+            using var chip = CreateChip(ResetValue, ResetValue);
+            using var sensor = new Bmp390(chip);
+            sensor.Read();
+
+            for (int i = 0; i < 2; i++)
+            {
+                Assert.True(sensor.TryReadTemperature(out var temperature));
+                Assert.Equal(V15Celsius, temperature.DegreesCelsius, TemperatureTolerance);
+                Assert.True(sensor.TryReadPressure(out var pressure));
+                Assert.Equal(V15Pascals, pressure.Pascals, PressureTolerance);
+                Assert.True(sensor.TryReadAltitude(out _));
+            }
+        }
+
+        [Fact]
+        public void TryRead_AfterForcedModeWithoutRead_ReturnsMeasurementAtResetValue()
+        {
+            using var chip = CreateChip(ResetValue, ResetValue);
+            using var sensor = new Bmp390(chip);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Forced);
+
+            Assert.True(sensor.TryReadTemperature(out var temperature));
+            Assert.Equal(V15Celsius, temperature.DegreesCelsius, TemperatureTolerance);
+            Assert.True(sensor.TryReadPressure(out _));
+        }
+
+        [Fact]
+        public async Task Read_InNormalMode_MeasurementAtResetValue_ReturnsIt()
+        {
+            using var chip = CreateChip(ResetValue, ResetValue);
+            using var sensor = new Bmp390(chip);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+
+            var result = sensor.Read();
+            var asyncResult = await sensor.ReadAsync();
+
+            AssertTemperature(V15Celsius, result.Temperature);
+            AssertPressure(V15Pascals, result.Pressure);
+            AssertTemperature(V15Celsius, asyncResult.Temperature);
+            AssertPressure(V15Pascals, asyncResult.Pressure);
         }
 
         [Fact]
@@ -294,11 +371,11 @@ namespace Iot.Device.Bmp3xx.Tests
             sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
             changeOversampling(sensor);
             sensor.SetPowerMode(Bmp3xxPowerMode.Sleep);
-            chip.RawTemperature = 0x800000;
+            chip.RawTemperature = ResetValue;
 
             var result = sensor.Read();
 
-            AssertTemperature(23.677637157, result.Temperature);
+            AssertTemperature(V15Celsius, result.Temperature);
         }
 
         private static SimulatedBmp3xx CreateChip(uint rawPressure, uint rawTemperature) =>
