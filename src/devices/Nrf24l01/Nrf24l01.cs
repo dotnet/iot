@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Threading;
@@ -180,18 +181,22 @@ namespace Iot.Device.Nrf24l01
         {
             // Details in the Datasheet P65
             SetWorkingMode(WorkingMode.Transmit);
-            // wait for some time so that it doesn't go too fast
-            Thread.Sleep(1);
+            // Wait for the device to settle into transmit standby mode (Tstby2a = 130us).
+            DelayHelper.DelayMicroseconds(130, allowThreadYield: false);
 
             Write(Command.NRF_W_TX_PAYLOAD, Register.NRF_NOOP, data);
 
+            // A high pulse on CE of at least 10us (Thce) starts the transmission.
+            // 15us is used to keep some margin above the 10us minimum.
             _gpio.Write(_ce, PinValue.High);
-            Thread.Sleep(1);
+            DelayHelper.DelayMicroseconds(15, allowThreadYield: false);
             _gpio.Write(_ce, PinValue.Low);
-            Thread.Sleep(1);
+            // Wait for the device to settle before switching mode (Tstby2a = 130us).
+            DelayHelper.DelayMicroseconds(130, allowThreadYield: false);
 
             SetWorkingMode(WorkingMode.Receive);
-            Thread.Sleep(1);
+            // Wait for the device to settle back into receive mode (Tstby2a = 130us).
+            DelayHelper.DelayMicroseconds(130, allowThreadYield: false);
         }
 
         /// <summary>
