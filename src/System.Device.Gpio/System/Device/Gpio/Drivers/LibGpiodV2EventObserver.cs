@@ -245,23 +245,21 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
     private void HandleEdgeEvent(EdgeEvent edgeEvent)
     {
+        HandleEdgeEvent(edgeEvent.GetLineOffset(), edgeEvent.GetEventType());
+    }
+
+    private void HandleEdgeEvent(Offset offset, GpiodEdgeEventType eventType)
+    {
+        PinChangeEventHandler[] eventHandlers;
         lock (_handlersBySubscription)
         {
-            Offset offset = edgeEvent.GetLineOffset();
-            GpiodEdgeEventType eventType = edgeEvent.GetEventType();
-
-            var relevantSubscriptions = _handlersBySubscription.Keys.Where(eventSubscription => eventSubscription.IsFor(offset, eventType));
-
-            // Should an event handler re enter this class and modify the collection, it will throw, so ToArray the collection first
-            foreach (var eventSubscription in relevantSubscriptions.ToArray())
-            {
-                if (_handlersBySubscription.TryGetValue(eventSubscription, out var eventHandlers))
-                {
-                    // Should an event handler re enter this class and modify the collection, it will throw, so ToArray the collection first
-                    CallEventHandlers(offset, eventType, eventHandlers.ToArray());
-                }
-            }
+            eventHandlers = _handlersBySubscription
+                .Where(subscription => subscription.Key.IsFor(offset, eventType))
+                .SelectMany(subscription => subscription.Value)
+                .ToArray();
         }
+
+        CallEventHandlers(offset, eventType, eventHandlers);
     }
 
     private void CallEventHandlers(Offset offset, GpiodEdgeEventType edgeEventType, IEnumerable<PinChangeEventHandler> eventHandlers)
@@ -295,6 +293,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     {
         private readonly ManualResetEventSlim _resultSet = new();
         private WaitForEventResult _result;
+        private bool _disposed;
 
         public WaitForEventResult WaitForEventResult(CancellationToken cancellationToken)
         {
@@ -312,11 +311,26 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
         public void SetEventResult(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
-            _result = new WaitForEventResult { EventTypes = pinValueChangedEventArgs.ChangeType, TimedOut = false };
-            _resultSet.Set();
+            lock (_resultSet)
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _result = new WaitForEventResult { EventTypes = pinValueChangedEventArgs.ChangeType, TimedOut = false };
+                _resultSet.Set();
+            }
         }
 
-        public void Dispose() => _resultSet.Dispose();
+        public void Dispose()
+        {
+            lock (_resultSet)
+            {
+                _disposed = true;
+                _resultSet.Dispose();
+            }
+        }
     }
 
     internal sealed record EventSubscription(Offset Offset, GpiodLineEdge Edge)

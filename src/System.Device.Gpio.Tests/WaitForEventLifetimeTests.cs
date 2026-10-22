@@ -75,6 +75,95 @@ public class WaitForEventLifetimeTests
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CallbackDispatchCanJoinCancelledWaitAndFinishAfterCleanup(bool cancelInCallback)
+    {
+        Type observerType = GetDriverType("Drivers.LibGpiodV2EventObserver");
+        using var observer = (IDisposable)Activator.CreateInstance(observerType)!;
+        object offset = Activator.CreateInstance(GetDriverType("Libgpiod.V2.Offset"))!;
+        object edge = Enum.Parse(GetDriverType("Libgpiod.V2.GpiodLineEdge"), "Rising");
+        object eventType = Enum.Parse(GetDriverType("Libgpiod.V2.GpiodEdgeEventType"), "RisingEdge");
+        object subscription = Activator.CreateInstance(observerType.GetNestedType("EventSubscription", BindingFlags.NonPublic)!, offset, edge)!;
+        object request = RuntimeHelpers.GetUninitializedObject(GetDriverType("Libgpiod.V2.LineRequest"));
+        object observedRequests = GetField<object>(observer, "_observedRequests");
+        observedRequests.GetType().GetMethod("Add")!.Invoke(observedRequests, new[] { request });
+        IDictionary handlers = GetField<IDictionary>(observer, "_handlersBySubscription");
+        MethodInfo observe = observerType.GetMethod("ObserveSingleEvent", NonPublicInstance)!;
+        MethodInfo register = observerType.GetMethod("Observe", NonPublicInstance)!;
+        MethodInfo dispatch = observerType.GetMethod("HandleEdgeEvent", NonPublicInstance, null, new[] { offset.GetType(), eventType.GetType() }, null)!;
+        MethodInfo remove = observerType.GetMethod("RemoveCallback", NonPublicInstance)!;
+
+        for (int i = 0; i < 5; i++)
+        {
+            using var cancellation = new CancellationTokenSource(s_testTimeout);
+            using var callbackStarted = new ManualResetEventSlim();
+            using var releaseCallback = new ManualResetEventSlim();
+            Task<WaitForEventResult>? wait = null;
+            PinChangeEventHandler callback = (sender, args) =>
+            {
+                callbackStarted.Set();
+                if (cancelInCallback)
+                {
+                    cancellation.Cancel();
+#pragma warning disable xUnit1031 // Synchronously joining from the callback is the deadlock regression.
+                    Assert.True(wait!.WaitAsync(s_testTimeout).GetAwaiter().GetResult().TimedOut);
+#pragma warning restore xUnit1031
+                }
+                else
+                {
+                    Assert.True(releaseCallback.Wait(s_testTimeout));
+                }
+            };
+            register.Invoke(observer, new[] { request, subscription, callback });
+            wait = Task.Run(() => (WaitForEventResult)observe.Invoke(observer, new[] { request, subscription, cancellation.Token })!);
+            Task? dispatchTask = null;
+
+            try
+            {
+                Assert.True(SpinWait.SpinUntil(() =>
+                {
+                    lock (handlers)
+                    {
+                        return ((IList)handlers[subscription]!).Count == 2;
+                    }
+                }, s_testTimeout));
+
+                dispatchTask = Task.Run(() => dispatch.Invoke(observer, new[] { offset, eventType }));
+                Assert.True(callbackStarted.Wait(s_testTimeout));
+                if (!cancelInCallback)
+                {
+                    cancellation.Cancel();
+                }
+
+                WaitForEventResult result = await wait.WaitAsync(s_testTimeout);
+                Assert.True(result.TimedOut);
+                Assert.Equal(PinEventTypes.None, result.EventTypes);
+                lock (handlers)
+                {
+                    Assert.Single((IList)handlers[subscription]!);
+                }
+
+                // Resume a dispatch snapshot that still contains the removed, disposed wait callback.
+                releaseCallback.Set();
+                await dispatchTask.WaitAsync(s_testTimeout);
+            }
+            finally
+            {
+                cancellation.Cancel();
+                releaseCallback.Set();
+                if (dispatchTask != null)
+                {
+                    await dispatchTask.WaitAsync(s_testTimeout);
+                }
+
+                await wait.WaitAsync(s_testTimeout);
+                remove.Invoke(observer, new[] { offset, callback });
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]
