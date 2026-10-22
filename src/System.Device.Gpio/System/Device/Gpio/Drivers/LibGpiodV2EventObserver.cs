@@ -6,7 +6,6 @@ using System.Device.Gpio.Libgpiod.V2;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers;
 
@@ -19,6 +18,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
     private readonly List<Thread> _requestObserverThreads = new();
     private readonly HashSet<LineRequest> _observedRequests = new();
+    private readonly HashSet<LineRequest> _stoppingRequests = new();
 
     private bool _shouldExit;
 
@@ -28,27 +28,56 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     public TimeSpan WaitEdgeEventsTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
     /// <summary>
-    /// Registers an event subscription and returns a handle that can be waited on for the event.
-    /// When the event appears, the subscription will get removed again
+    /// Waits for a single event and removes the subscription before returning.
     /// </summary>
     /// <param name="request">The line request to observe</param>
     /// <param name="eventSubscription">The subscription for events</param>
-    /// <returns>A handle to wait on</returns>
-    internal EventWaitHandle ObserveSingleEvent(LineRequest request, EventSubscription eventSubscription)
+    /// <param name="cancellationToken">The token used to stop waiting</param>
+    /// <returns>The result of waiting for the event</returns>
+    internal WaitForEventResult ObserveSingleEvent(LineRequest request, EventSubscription eventSubscription, CancellationToken cancellationToken)
     {
-        lock (_handlersBySubscription)
+        using CancellationTokenSource stopObserving = new();
+        using EventWaitHandle eventWaitHandle = new();
+        Thread? observerThread = Observe(request, eventSubscription, eventWaitHandle.SetEventResult, stopObserving.Token);
+
+        try
         {
-            EventWaitHandle eventWaitHandle = new();
-
-            Observe(request, eventSubscription, eventWaitHandle.SetEventResult);
-
-            Task.Run(() =>
+            return eventWaitHandle.WaitForEventResult(cancellationToken);
+        }
+        finally
+        {
+            bool stopObserver;
+            lock (_handlersBySubscription)
             {
-                eventWaitHandle.WaitForEventResult(CancellationToken.None);
-                RemoveCallback(eventSubscription.Offset, eventWaitHandle.SetEventResult);
-            });
+                if (_handlersBySubscription.TryGetValue(eventSubscription, out var callbacks))
+                {
+                    callbacks.Remove(eventWaitHandle.SetEventResult);
+                    if (callbacks.Count == 0)
+                    {
+                        _handlersBySubscription.Remove(eventSubscription);
+                    }
+                }
 
-            return eventWaitHandle;
+                stopObserver = observerThread != null && !HasSubscriptionsFor(eventSubscription.Offset);
+                if (stopObserver)
+                {
+                    if (_observedRequests.Contains(request))
+                    {
+                        _stoppingRequests.Add(request);
+                    }
+
+                    stopObserving.Cancel();
+                }
+            }
+
+            if (stopObserver)
+            {
+                observerThread!.Join();
+                lock (_handlersBySubscription)
+                {
+                    _requestObserverThreads.Remove(observerThread);
+                }
+            }
         }
     }
 
@@ -60,8 +89,18 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     /// <param name="callback">Method to call when event arrives</param>
     internal void Observe(LineRequest request, EventSubscription eventSubscription, PinChangeEventHandler callback)
     {
+        Observe(request, eventSubscription, callback, CancellationToken.None);
+    }
+
+    private Thread? Observe(LineRequest request, EventSubscription eventSubscription, PinChangeEventHandler callback, CancellationToken cancellationToken)
+    {
         lock (_handlersBySubscription)
         {
+            while (_stoppingRequests.Contains(request))
+            {
+                Monitor.Wait(_handlersBySubscription);
+            }
+
             if (_handlersBySubscription.TryGetValue(eventSubscription, out var eventHandlers))
             {
                 eventHandlers.Add(callback);
@@ -74,10 +113,13 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
             // observe request in only 1 task
             if (_observedRequests.Add(request))
             {
-                var thread = new Thread(() => HandleEdgeEventsOfRequestInLoop(request));
+                var thread = new Thread(() => HandleEdgeEventsOfRequestInLoop(request, cancellationToken));
                 thread.Start();
                 _requestObserverThreads.Add(thread);
+                return thread;
             }
+
+            return null;
         }
     }
 
@@ -192,7 +234,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
         }
     }
 
-    private void HandleEdgeEventsOfRequestInLoop(LineRequest request)
+    private void HandleEdgeEventsOfRequestInLoop(LineRequest request, CancellationToken cancellationToken)
     {
         List<Offset> requestedOffsets = new();
 
@@ -202,7 +244,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
             using EdgeEventBuffer edgeEventBuffer = LibGpiodProxyFactory.CreateEdgeEventBuffer();
 
-            while (request.IsAlive && !_shouldExit)
+            while (request.IsAlive && !_shouldExit && !cancellationToken.IsCancellationRequested)
             {
                 int waitResult = request.WaitEdgeEventsRespectfully(WaitEdgeEventsTimeout);
                 bool isGpiodTimeout = waitResult == 0;
@@ -232,8 +274,13 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
         }
         finally
         {
-            RemoveSubscriptions(requestedOffsets);
-            _observedRequests.Remove(request);
+            lock (_handlersBySubscription)
+            {
+                RemoveSubscriptions(requestedOffsets);
+                _observedRequests.Remove(request);
+                _stoppingRequests.Remove(request);
+                Monitor.PulseAll(_handlersBySubscription);
+            }
         }
     }
 
@@ -285,7 +332,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
     #endregion
 
-    internal sealed class EventWaitHandle
+    internal sealed class EventWaitHandle : IDisposable
     {
         private readonly ManualResetEventSlim _resultSet = new();
         private WaitForEventResult _result;
@@ -309,6 +356,8 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
             _result = new WaitForEventResult { EventTypes = pinValueChangedEventArgs.ChangeType, TimedOut = false };
             _resultSet.Set();
         }
+
+        public void Dispose() => _resultSet.Dispose();
     }
 
     internal sealed record EventSubscription(Offset Offset, GpiodLineEdge Edge)
