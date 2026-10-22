@@ -21,6 +21,11 @@ namespace Iot.Device.DCMotor.Tests
 
         public PinValue GetValue(int pinNumber) => _values.TryGetValue(pinNumber, out PinValue value) ? value : PinValue.Low;
 
+        /// <summary>
+        /// Sets the value that the next reads of an input pin return, as if a device drove it
+        /// </summary>
+        public void SetInputValue(int pinNumber, PinValue value) => _values[pinNumber] = value;
+
         protected override int PinCount => 28;
 
         protected override void OpenPin(int pinNumber)
