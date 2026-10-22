@@ -319,12 +319,17 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     public void Dispose()
     {
         _shouldExit = true;
+        Thread[] observerThreads;
+        lock (_handlersBySubscription)
+        {
+            observerThreads = _requestObserverThreads.ToArray();
+        }
 
         // wait for all observer tasks to complete
         // as long as they are not complete, they might still wait on edge events, and until that returns the request is still open,
         // which means the lines are still reserved
         // this should only return after all requests have been released
-        foreach (var t in _requestObserverThreads)
+        foreach (var t in observerThreads)
         {
             t.Join();
         }
