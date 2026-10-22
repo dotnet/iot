@@ -74,61 +74,6 @@ public class WaitForEventLifetimeTests
         }
     }
 
-    [Fact]
-    public async Task SingleEventObservationWaitsForStoppingObserver()
-    {
-        Type observerType = GetDriverType("Drivers.LibGpiodV2EventObserver");
-        using var observer = (IDisposable)Activator.CreateInstance(observerType)!;
-        object offset = Activator.CreateInstance(GetDriverType("Libgpiod.V2.Offset"))!;
-        object edge = Enum.Parse(GetDriverType("Libgpiod.V2.GpiodLineEdge"), "Rising");
-        object subscription = Activator.CreateInstance(observerType.GetNestedType("EventSubscription", BindingFlags.NonPublic)!, offset, edge)!;
-        object request = RuntimeHelpers.GetUninitializedObject(GetDriverType("Libgpiod.V2.LineRequest"));
-        object observedRequests = GetField<object>(observer, "_observedRequests");
-        observedRequests.GetType().GetMethod("Add")!.Invoke(observedRequests, new[] { request });
-        object stoppingRequests = GetField<object>(observer, "_stoppingRequests");
-        stoppingRequests.GetType().GetMethod("Add")!.Invoke(stoppingRequests, new[] { request });
-        IDictionary handlers = GetField<IDictionary>(observer, "_handlersBySubscription");
-        MethodInfo observe = observerType.GetMethod("ObserveSingleEvent", NonPublicInstance)!;
-        MethodInfo hasSubscriptions = observerType.GetMethod("HasSubscriptionsFor")!;
-        using var cancellation = new CancellationTokenSource(s_testTimeout);
-        using var started = new ManualResetEventSlim();
-        Thread? worker = null;
-        Task<WaitForEventResult> wait = Task.Run(() =>
-        {
-            worker = Thread.CurrentThread;
-            started.Set();
-            return (WaitForEventResult)observe.Invoke(observer, new[] { request, subscription, cancellation.Token })!;
-        });
-
-        try
-        {
-            Assert.True(started.Wait(s_testTimeout));
-            Assert.True(SpinWait.SpinUntil(() => (worker!.ThreadState & ThreadState.WaitSleepJoin) != 0, s_testTimeout));
-            lock (handlers)
-            {
-                Assert.Empty(handlers);
-                stoppingRequests.GetType().GetMethod("Remove")!.Invoke(stoppingRequests, new[] { request });
-                Monitor.PulseAll(handlers);
-            }
-
-            Assert.True(SpinWait.SpinUntil(() => (bool)hasSubscriptions.Invoke(observer, new[] { offset })!, s_testTimeout));
-            cancellation.Cancel();
-            Assert.True((await wait.WaitAsync(s_testTimeout)).TimedOut);
-            Assert.Empty(handlers);
-        }
-        finally
-        {
-            lock (handlers)
-            {
-                stoppingRequests.GetType().GetMethod("Remove")!.Invoke(stoppingRequests, new[] { request });
-                Monitor.PulseAll(handlers);
-            }
-
-            cancellation.Cancel();
-            await wait.WaitAsync(s_testTimeout);
-        }
-    }
-
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
