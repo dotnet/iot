@@ -177,7 +177,7 @@ namespace Iot.Device.Tests.Seatalk1
         [InlineData("9c 01 12 00")]
         [InlineData("84 06 12 00 00 00 00 00 08")]
         [InlineData("86 01 02 fd")]
-        [InlineData("95 86 26 97 02 00 00 00 08")]
+        [InlineData("95 86 26 96 02 00 00 00 08")]
         [InlineData("87 00 01")]
         [InlineData("87 00 02")]
         [InlineData("10 01 00 01")]

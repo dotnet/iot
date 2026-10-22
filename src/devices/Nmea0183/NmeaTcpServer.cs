@@ -26,6 +26,7 @@ namespace Iot.Device.Nmea0183
     {
         private readonly IPAddress _bindTo;
         private readonly int _port;
+        private readonly INmeaParserFactory _parserFactory;
         private readonly List<NmeaSinkAndSource> _activeParsers;
         private readonly object _lock;
         private TcpListener? _server;
@@ -52,10 +53,24 @@ namespace Iot.Device.Nmea0183
         /// <param name="bindTo">Network interface to bind to (Use <see cref="IPAddress.Any"/> to bind to all available interfaces</param>
         /// <param name="port">The network port to use</param>
         public NmeaTcpServer(string name, IPAddress bindTo, int port)
-        : base(name)
+        : this(name, bindTo, port, new Nmea0183ParserFactory())
+        {
+        }
+
+        /// <summary>
+        /// Creates a server with the given source name bound to the given local IP and port.
+        /// This will not open the server yet. Use <see cref="StartDecode"/> to open the network port.
+        /// </summary>
+        /// <param name="name">Source name</param>
+        /// <param name="bindTo">Network interface to bind to (Use <see cref="IPAddress.Any"/> to bind to all available interfaces</param>
+        /// <param name="port">The network port to use</param>
+        /// <param name="parserFactory">The parser factory to use for this server</param>
+        public NmeaTcpServer(string name, IPAddress bindTo, int port, INmeaParserFactory parserFactory)
+            : base(name)
         {
             _bindTo = bindTo;
             _port = port;
+            _parserFactory = parserFactory;
             _activeParsers = new List<NmeaSinkAndSource>();
             _lock = new object();
             _serverControlEvent = new AutoResetEvent(false);
@@ -95,7 +110,7 @@ namespace Iot.Device.Nmea0183
                     var client = _server.AcceptTcpClient();
                     lock (_lock)
                     {
-                        NmeaParser parser = new NmeaParser($"{InterfaceName}: {_activeParsers.Count}", client.GetStream(), client.GetStream());
+                        NmeaParser parser = _parserFactory.CreateParser($"{InterfaceName}: {_activeParsers.Count}", client.GetStream(), client.GetStream());
                         parser.OnNewSequence += OnSentenceReceivedFromClient;
                         parser.OnParserError += ParserOnParserError;
                         parser.StartDecode();

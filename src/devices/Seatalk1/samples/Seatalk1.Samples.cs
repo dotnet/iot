@@ -110,14 +110,14 @@ namespace Seatalk1Sample
 
                         case ConsoleKey.U:
                         {
-                            await ctrl.TurnByAsync(Angle.FromDegrees(90), TurnDirection.Starboard, CancellationToken.None);
+                            ctrl.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToStarboard, CancellationToken.None);
 
                             break;
                         }
 
                         case ConsoleKey.Z:
                         {
-                            await ctrl.TurnByAsync(Angle.FromDegrees(90), TurnDirection.Port, CancellationToken.None);
+                            ctrl.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort, CancellationToken.None);
 
                             break;
                         }
@@ -145,7 +145,7 @@ namespace Seatalk1Sample
                             else
                             {
                                 Console.WriteLine("Setting TRACK mode incomplete!");
-                                if (directionConfirmation == TurnDirection.Port)
+                                if (directionConfirmation == TurnDirection.TurnToPort)
                                 {
                                     Console.WriteLine("Press T again to confirm a turn to Port");
                                 }

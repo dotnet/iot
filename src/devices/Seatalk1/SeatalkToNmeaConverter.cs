@@ -46,6 +46,7 @@ namespace Iot.Device.Seatalk1
             _seatalkInterface = new SeatalkInterface(portName);
             _seatalkInterface.MessageReceived += SeatalkMessageReceived;
             _isDisposed = false;
+            UseRudderAngle = true;
         }
 
         /// <summary>
@@ -60,6 +61,16 @@ namespace Iot.Device.Seatalk1
         /// HTC (Nmea->Seatalk, translated into commands)
         /// </remarks>
         public List<SentenceId> SentencesToTranslate => _sentencesToTranslate;
+
+        /// <summary>
+        /// True if the rudder angle should be sent as a NMEA sentence (RudderSensorAngle) when a Seatalk autopilot status message is received.
+        /// Default is true. This should be set to false if another source is already providing the rudder angle, to avoid duplicates.
+        /// </summary>
+        public bool UseRudderAngle
+        {
+            get;
+            set;
+        }
 
         private void SeatalkMessageReceived(SeatalkMessage stalk)
         {
@@ -80,7 +91,7 @@ namespace Iot.Device.Seatalk1
                         AutopilotStatus.Wind => "W", // This one is just guess
                         _ => "M",
                     };
-                    var htd = new HeadingAndTrackControlStatus(status, apStatus.RudderPosition.Abs(), apStatus.RudderPosition > Angle.Zero ? "R" : "L", "N",
+                    var htd = new HeadingAndTrackControlStatus(status, null, string.Empty, "N",
                         null, null, null, null, apStatus.AutoPilotCourse, null, apStatus.AutoPilotCourse, false, false, false, apStatus.Alarms != 0, apStatus.CompassHeading);
                     DispatchSentenceEvents(htd);
                 }
@@ -88,8 +99,11 @@ namespace Iot.Device.Seatalk1
                 if (SentencesToTranslate.Contains(RudderSensorAngle.Id) || SentencesToTranslate.Contains(SentenceId.Any))
                 {
                     var angle = apStatus.RudderPosition;
-                    var rsa = new RudderSensorAngle(angle, null);
-                    DispatchSentenceEvents(rsa);
+                    if (UseRudderAngle)
+                    {
+                        var rsa = new RudderSensorAngle(angle, null);
+                        DispatchSentenceEvents(rsa);
+                    }
                 }
             }
         }
@@ -180,12 +194,13 @@ namespace Iot.Device.Seatalk1
             if (DoTranslate(sentence, out HeadingAndTrackControl? htc) && htc != null)
             {
                 // Empty the queue when this (rare) message arrives, so we can directly issue its commands
-                while (_sendQueue.TryTake(out var dispose, TimeSpan.FromSeconds(0.5)))
+                while (_sendQueue.TryTake(out var dispose))
                 {
                     // Wait
                 }
 
                 var ap = _seatalkInterface.GetAutopilotRemoteController();
+                Logger.LogInformation($"Received HTC message from {source.InterfaceName}: {htc.ToNmeaMessage()}");
 
                 AutopilotStatus desiredStatus = htc.Status switch
                 {
@@ -193,7 +208,7 @@ namespace Iot.Device.Seatalk1
                     "S" => AutopilotStatus.Auto,
                     "W" => AutopilotStatus.Wind,
                     "T" => AutopilotStatus.Track,
-
+                    "" => AutopilotStatus.Undefined,
                     _ => AutopilotStatus.Undefined,
                 };
 
@@ -208,14 +223,15 @@ namespace Iot.Device.Seatalk1
                             ap.SetStatus(desiredStatus, ref confirm);
                         }
                     }
-                    else
+                    else if (desiredStatus != AutopilotStatus.Undefined)
                     {
+                        // Don't touch the status if the command has the status parameter unset, meaning "don't touch"
                         ap.SetStatus(desiredStatus, ref confirm);
                     }
 
                     if (ap.IsOperating && htc.DesiredHeading.HasValue)
                     {
-                        ap.TurnTo(htc.DesiredHeading.Value, null);
+                        ap.TurnTo(htc.DesiredHeading.Value, htc.CommandedTurnDirection);
                     }
                 });
 

@@ -15,7 +15,7 @@ namespace Iot.Device.Nmea0183.Sentences
     /// An extended engine data message, using a PCDIN sequence (supported by some NMEA0183 to NMEA2000 bridges)
     /// This message mostly provides the RPM value and can be sent with a high frequency.
     /// </summary>
-    public class SeaSmartEngineFast : ProprietaryMessage
+    public class SeaSmartEngineFast : Nmea2000PackedMessage
     {
         /// <summary>
         /// Hexadecimal identifier for this message
@@ -68,35 +68,21 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             IEnumerator<string> field = fields.GetEnumerator();
 
-            string subMessage = ReadString(field);
-            if (!int.TryParse(subMessage, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int result) || result != Identifier)
-            {
-                Valid = false;
-                return;
-            }
-
-            string timeStamp = ReadString(field);
-
-            if (Int32.TryParse(timeStamp, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int time1))
-            {
-                MessageTimeStamp = time1;
-            }
-
-            ReadString(field); // Ignore next field
+            ParseCommonFields(field);
 
             string data = ReadString(field);
 
-            if (ReadFromHexString(data, 0, 2, false, out int engineNo))
+            if (ReadByteFromHexString(data, 0, out byte engineNo))
             {
                 EngineNumber = engineNo;
             }
 
-            if (ReadFromHexString(data, 2, 4, false, out int rpm))
+            if (ReadUnsignedFromHexString(data, 2, 4, false, out uint rpm))
             {
                 RotationalSpeed = RotationalSpeed.FromRevolutionsPerSecond(rpm);
             }
 
-            if (ReadFromHexString(data, 10, 2, false, out int pitch))
+            if (ReadSbyteFromHexString(data, 10, out sbyte pitch))
             {
                 PropellerPitch = Ratio.FromPercent(pitch);
             }
@@ -107,16 +93,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// The NMEA2000 Sentence identifier for this message
         /// </summary>
-        public override int Identifier => HexId;
-
-        /// <summary>
-        /// The timestamp for the NMEA 2000 message
-        /// </summary>
-        public int MessageTimeStamp
-        {
-            get;
-            private set;
-        }
+        public override uint Identifier => HexId;
 
         /// <summary>
         /// Engine revolutions per time, typically RPM (revolutions per minute) is used
@@ -147,10 +124,8 @@ namespace Iot.Device.Nmea0183.Sentences
             private set;
         }
 
-        /// <summary>
-        /// Returns false for this message, as PCDIN messages can mean different things
-        /// </summary>
-        public override bool ReplacesOlderInstance => false;
+        /// <inheritdoc/>
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override string ToNmeaParameterList()
@@ -165,9 +140,8 @@ namespace Iot.Device.Nmea0183.Sentences
                 string rpmText = rpm.ToString("X4", CultureInfo.InvariantCulture);
                 int pitchPercent = (int)PropellerPitch.Percent;
                 string pitchText = pitchPercent.ToString("X2", CultureInfo.InvariantCulture);
-                string timeStampText = MessageTimeStamp.ToString("X8", CultureInfo.InvariantCulture);
 
-                return "01F200," + timeStampText + ",02," + engineNoText + rpmText + "FFFF" + pitchText + "FFFF";
+                return base.ToNmeaParameterList() + engineNoText + rpmText + "FFFF" + pitchText + "FFFF";
             }
 
             return string.Empty;

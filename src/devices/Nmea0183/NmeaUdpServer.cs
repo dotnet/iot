@@ -26,6 +26,7 @@ namespace Iot.Device.Nmea0183
         private readonly int _localPort;
         private readonly int _remotePort;
         private readonly string _broadcastAddress;
+        private readonly INmeaParserFactory _parserFactory;
 
         private UdpClient? _server;
         private NmeaParser? _parser;
@@ -36,7 +37,7 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         /// <param name="name">The network source name</param>
         public NmeaUdpServer(string name)
-        : this(name, 10110, 10110)
+        : this(name, 10110, 10110, new Nmea0183ParserFactory())
         {
         }
 
@@ -46,7 +47,7 @@ namespace Iot.Device.Nmea0183
         /// <param name="name">The network source name</param>
         /// <param name="port">The network port to use. The default is 10110</param>
         public NmeaUdpServer(string name, int port)
-        : this(name, port, port)
+        : this(name, port, port, new Nmea0183ParserFactory())
         {
         }
 
@@ -57,8 +58,9 @@ namespace Iot.Device.Nmea0183
         /// <param name="name">The network source name</param>
         /// <param name="localPort">The port to receive data on</param>
         /// <param name="remotePort">The network port to send data to (must be different than local port when communicating to a local process)</param>
-        public NmeaUdpServer(string name, int localPort, int remotePort)
-            : this(name, localPort, remotePort, "255.255.255.255")
+        /// <param name="parserFactory">The parser factory to use (try <see cref="Nmea0183ParserFactory"/> as default)</param>
+        public NmeaUdpServer(string name, int localPort, int remotePort, INmeaParserFactory parserFactory)
+            : this(name, localPort, remotePort, "255.255.255.255", parserFactory)
         {
         }
 
@@ -72,30 +74,14 @@ namespace Iot.Device.Nmea0183
         /// <param name="broadcastAddress">Broadcast address of the network interface to use. This is the IP-Address of that interfaces with all
         /// bits set to 1 that are NOT set in the subnetmask. For a default subnet mask of 255.255.255.0 and a local ip of 192.168.1.45 this is therefore
         /// 192.168.1.255.</param>
-        public NmeaUdpServer(string name, int localPort, int remotePort, string broadcastAddress)
+        /// <param name="parserFactory">The parser factory to use (try <see cref="Nmea0183ParserFactory"/> as default)</param>
+        public NmeaUdpServer(string name, int localPort, int remotePort, string broadcastAddress, INmeaParserFactory parserFactory)
             : base(name)
         {
             _localPort = localPort;
             _remotePort = remotePort;
             _broadcastAddress = broadcastAddress;
-        }
-
-        /// <summary>
-        /// Get the default IP address to bind to
-        /// </summary>
-        /// <returns></returns>
-        public static IPAddress GetLocalIPAddress()
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip;
-                }
-            }
-
-            return IPAddress.Loopback;
+            _parserFactory = parserFactory;
         }
 
         /// <inheritdoc />
@@ -131,7 +117,7 @@ namespace Iot.Device.Nmea0183
             }
 
             _clientStream = new UdpClientStream(_server, _localPort, _remotePort, this, _broadcastAddress);
-            _parser = new NmeaParser($"{InterfaceName} (Port {_localPort})", _clientStream, _clientStream);
+            _parser = _parserFactory.CreateParser($"{InterfaceName} (Port {_localPort})", _clientStream, _clientStream);
             _parser.OnNewSequence += OnSentenceReceivedFromClient;
             _parser.OnParserError += ParserOnParserError;
             _parser.StartDecode();
