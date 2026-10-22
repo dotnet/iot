@@ -61,7 +61,8 @@ internal class LibGpiodChipInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumLines()
     {
-        return CallLibgpiod(() => LibgpiodV2.gpiod_chip_info_get_num_lines(_handle));
+        // This method returns nuint, but this is never even close to 32 bit.
+        return (int)CallLibgpiod(() => LibgpiodV2.gpiod_chip_info_get_num_lines(_handle));
     }
 
     /// <summary>
