@@ -58,15 +58,10 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__request__config.html#ga75f4f38735d08ebd7f07fa57c19442f6"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     /// <exception cref="ArgumentOutOfRangeException">Event buffer size is negative</exception>
-    public void SetEventBufferSize(int eventBufferSize)
+    public void SetEventBufferSize(nuint eventBufferSize)
     {
         CallLibpiodLocked(() =>
         {
-            if (eventBufferSize < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(eventBufferSize), "Event buffer size must be 0 or greater");
-            }
-
             LibgpiodV2.gpiod_request_config_set_event_buffer_size(Handle, eventBufferSize);
         });
     }
@@ -76,7 +71,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// </summary>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__request__config.html#ga1424773ef1ca72a0f622d20e701eafb7"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public int GetEventBufferSize()
+    public nuint GetEventBufferSize()
     {
         return CallLibgpiod(() => LibgpiodV2.gpiod_request_config_get_event_buffer_size(Handle));
     }
@@ -93,7 +88,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <summary>
     /// Contains all readable information that was recorded at one and the same time
     /// </summary>
-    public sealed record Snapshot(string Consumer, int EventBufferSize)
+    public sealed record Snapshot(string Consumer, nuint EventBufferSize)
     {
         public override string ToString()
         {
