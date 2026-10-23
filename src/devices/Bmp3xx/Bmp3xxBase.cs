@@ -101,8 +101,8 @@ namespace Iot.Device.Bmp3xx
         private Bmp3xxFilterCoefficient _filterCoefficient = Bmp3xxFilterCoefficient.Off;
         private Bmp3xxOutputDataRate _outputDataRate = Bmp3xxOutputDataRate.Period5Milliseconds;
 
-        // The longest measurement time of the settings since normal or forced mode was last entered: a measurement
-        // started before an oversampling change may still be running when the mode is left.
+        // The longest measurement time of the settings since normal or forced mode was last entered from sleep: a
+        // measurement started before an oversampling change may still be running when the mode is left.
         private int _longestPendingMeasurementMilliseconds;
 
         // Whether the data registers hold a measurement made since the last reset. The data itself can't tell: after a
@@ -271,7 +271,17 @@ namespace Iot.Device.Bmp3xx
 
             if (powerMode != Bmp3xxPowerMode.Sleep)
             {
-                _longestPendingMeasurementMilliseconds = GetMeasurementDuration();
+                if (powerMode == Bmp3xxPowerMode.Normal)
+                {
+                    // A configuration error stays set until the error register is read (table 28). Clear one left by an
+                    // earlier request or settings change, so the check below only sees errors caused by this request.
+                    ReadErrors();
+                }
+
+                // Requesting the mode that is already active doesn't end a running measurement, so the longest is kept.
+                _longestPendingMeasurementMilliseconds = currentMode == powerMode
+                    ? Math.Max(_longestPendingMeasurementMilliseconds, GetMeasurementDuration())
+                    : GetMeasurementDuration();
                 WritePowerMode(powerControl, powerMode);
             }
             else if (!leavingMode)

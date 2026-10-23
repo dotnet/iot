@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Threading;
 using Xunit;
 
 namespace Iot.Device.Bmp3xx.Tests
@@ -76,7 +75,7 @@ namespace Iot.Device.Bmp3xx.Tests
         [Fact]
         public void ModeWrite_RightAfterLeavingNormalMode_IsIgnored()
         {
-            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            using var chip = new SimulatedBmp3xx(0x60, Calibration) { TimeProvider = new ManualTimeProvider() };
             chip.Write(new byte[] { 0x1B, 0x33 }); // normal mode
 
             chip.Write(new byte[] { 0x1B, 0x03 }); // sleep: the running measurement still has to finish
@@ -89,11 +88,12 @@ namespace Iot.Device.Bmp3xx.Tests
         [Fact]
         public void ModeWrite_AfterTheRunningMeasurement_IsAccepted()
         {
-            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            var clock = new ManualTimeProvider();
+            using var chip = new SimulatedBmp3xx(0x60, Calibration) { TimeProvider = clock };
             chip.Write(new byte[] { 0x1B, 0x33 });
             chip.Write(new byte[] { 0x1B, 0x03 });
 
-            Thread.Sleep(20); // x1/x1 with the reset value of OSR (x4 pressure) takes 10.9 ms
+            clock.Advance(TimeSpan.FromMilliseconds(20)); // x1/x1 with the reset value of OSR (x4 pressure) takes 10.9 ms
 
             chip.Write(new byte[] { 0x1B, 0x33 });
             Assert.Equal(0x33, chip.GetRegister(0x1B));
@@ -102,14 +102,33 @@ namespace Iot.Device.Bmp3xx.Tests
         [Fact]
         public void ModeWrite_AfterOversamplingWasRaisedAndLowered_WaitsForTheLongerMeasurement()
         {
-            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            var clock = new ManualTimeProvider();
+            using var chip = new SimulatedBmp3xx(0x60, Calibration) { TimeProvider = clock };
             chip.Write(new byte[] { 0x1C, 0x00 }); // x1/x1
             chip.Write(new byte[] { 0x1B, 0x33 }); // normal mode
             chip.Write(new byte[] { 0x1C, 0x05 }); // x32 pressure: about 67 ms per measurement
             chip.Write(new byte[] { 0x1C, 0x00 }); // back to x1/x1 while that measurement may still run
             chip.Write(new byte[] { 0x1B, 0x03 }); // sleep
 
-            Thread.Sleep(20); // longer than an x1/x1 measurement (4.8 ms), shorter than the x32 one
+            clock.Advance(TimeSpan.FromMilliseconds(20)); // longer than an x1/x1 measurement (4.8 ms), shorter than the x32 one
+
+            chip.Write(new byte[] { 0x1B, 0x33 });
+            Assert.Equal(0x03, chip.GetRegister(0x1B));
+        }
+
+        [Fact]
+        public void ModeWrite_AfterRepeatedNormalModeWrite_StillWaitsForTheLongerMeasurement()
+        {
+            var clock = new ManualTimeProvider();
+            using var chip = new SimulatedBmp3xx(0x60, Calibration) { TimeProvider = clock };
+            chip.Write(new byte[] { 0x1C, 0x00 }); // x1/x1
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal mode
+            chip.Write(new byte[] { 0x1C, 0x05 }); // x32 pressure: about 67 ms per measurement
+            chip.Write(new byte[] { 0x1C, 0x00 }); // back to x1/x1 while that measurement may still run
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal again: doesn't end the running measurement
+            chip.Write(new byte[] { 0x1B, 0x03 }); // sleep
+
+            clock.Advance(TimeSpan.FromMilliseconds(20)); // longer than an x1/x1 measurement (4.8 ms), shorter than the x32 one
 
             chip.Write(new byte[] { 0x1B, 0x33 });
             Assert.Equal(0x03, chip.GetRegister(0x1B));
@@ -121,6 +140,21 @@ namespace Iot.Device.Bmp3xx.Tests
             using var chip = new SimulatedBmp3xx(0x60, Calibration) { ConfigurationErrorOnNormalMode = true };
 
             chip.Write(new byte[] { 0x1B, 0x33 });
+
+            Assert.Equal(0x03, chip.GetRegister(0x1B));
+            Assert.Equal(0x04, chip.GetRegister(0x02));
+        }
+
+        [Theory]
+        [InlineData(0x1C, 0x05)] // x32 pressure
+        [InlineData(0x1D, 0x00)] // 5 ms output data rate
+        public void SettingsChangeInNormalMode_WithConfigurationError_ReturnsToSleep(byte register, byte value)
+        {
+            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal mode, valid settings
+            chip.ConfigurationErrorOnNormalMode = true;
+
+            chip.Write(new byte[] { register, value });
 
             Assert.Equal(0x03, chip.GetRegister(0x1B));
             Assert.Equal(0x04, chip.GetRegister(0x02));
@@ -139,6 +173,16 @@ namespace Iot.Device.Bmp3xx.Tests
             Assert.Equal(0x06, error[0]);
             Assert.Equal(0x00, chip.GetRegister(0x02));
             Assert.Equal(0, chip.ResetCount);
+        }
+
+        /// <summary>A clock that only moves when the test advances it, so a slow machine can't end a simulated measurement early.</summary>
+        private sealed class ManualTimeProvider : TimeProvider
+        {
+            private long _timestamp;
+
+            public override long GetTimestamp() => _timestamp;
+
+            public void Advance(TimeSpan time) => _timestamp += time.Ticks * TimestampFrequency / TimeSpan.TicksPerSecond;
         }
     }
 }

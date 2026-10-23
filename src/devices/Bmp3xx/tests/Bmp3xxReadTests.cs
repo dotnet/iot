@@ -144,6 +144,24 @@ namespace Iot.Device.Bmp3xx.Tests
             });
 
         [Fact]
+        public void Read_AfterPressureSamplingRaisedAndLoweredAndNormalModeRequestedAgain_StartsAMeasurement() =>
+            AssertReadStartsMeasurementAfterOversamplingChange(sensor =>
+            {
+                sensor.PressureSampling = Bmp3xxOversampling.X32;
+                sensor.PressureSampling = Bmp3xxOversampling.X1;
+                sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+            });
+
+        [Fact]
+        public void Read_AfterTemperatureSamplingRaisedAndLoweredAndNormalModeRequestedAgain_StartsAMeasurement() =>
+            AssertReadStartsMeasurementAfterOversamplingChange(sensor =>
+            {
+                sensor.TemperatureSampling = Bmp3xxOversampling.X32;
+                sensor.TemperatureSampling = Bmp3xxOversampling.X1;
+                sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+            });
+
+        [Fact]
         public void Read_OutOfRangeTemperature_ReturnsNullTemperatureAndPressure()
         {
             // V9: -45 °C, below the sensor's -40 °C limit. The pressure (about 1000 hPa) would be in range, but it is
