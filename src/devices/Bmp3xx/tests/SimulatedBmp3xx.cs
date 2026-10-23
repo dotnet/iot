@@ -283,8 +283,9 @@ namespace Iot.Device.Bmp3xx.Tests
 
         private void ReportConfigurationErrorIfNormalMode()
         {
-            // Verified on a BMP390: a settings change in normal mode is checked like entering normal mode, and a
-            // configuration error puts the sensor back to sleep at once.
+            // Verified on a BMP390 for an oversampling change: in normal mode it is checked like entering normal mode,
+            // and a configuration error puts the sensor back to sleep at once. That an output data rate change is
+            // checked the same way is unverified.
             if (((GetRegister(PowerControlAddress) >> 4) & 0b11) == 0b11 && ConfigurationErrorOnNormalMode)
             {
                 SetByte(ErrorAddress, (byte)(GetRegister(ErrorAddress) | ConfigurationError));
