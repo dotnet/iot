@@ -28,6 +28,10 @@ namespace Iot.Device.FtCommon
             // Check device
             uint numOfDevices;
             ftStatus = FtFunction.FT_CreateDeviceInfoList(out numOfDevices);
+            if (ftStatus != FtStatus.Ok)
+            {
+                throw new IOException($"Can't enumerate FTDI devices, error {ftStatus}");
+            }
 
             Debug.WriteLine($"Number of devices: {numOfDevices}");
             if (numOfDevices == 0)
