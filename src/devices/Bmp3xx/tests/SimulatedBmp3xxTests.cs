@@ -116,6 +116,23 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Fact]
+        public void ModeWrite_AfterRepeatedNormalModeWrite_StillWaitsForTheLongerMeasurement()
+        {
+            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            chip.Write(new byte[] { 0x1C, 0x00 }); // x1/x1
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal mode
+            chip.Write(new byte[] { 0x1C, 0x05 }); // x32 pressure: about 67 ms per measurement
+            chip.Write(new byte[] { 0x1C, 0x00 }); // back to x1/x1 while that measurement may still run
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal again: doesn't end the running measurement
+            chip.Write(new byte[] { 0x1B, 0x03 }); // sleep
+
+            Thread.Sleep(20); // longer than an x1/x1 measurement (4.8 ms), shorter than the x32 one
+
+            chip.Write(new byte[] { 0x1B, 0x33 });
+            Assert.Equal(0x03, chip.GetRegister(0x1B));
+        }
+
+        [Fact]
         public void NormalMode_WithConfigurationError_ReturnsToSleep()
         {
             using var chip = new SimulatedBmp3xx(0x60, Calibration) { ConfigurationErrorOnNormalMode = true };

@@ -258,7 +258,11 @@ namespace Iot.Device.Bmp3xx.Tests
             }
             else if (mode == 0b11)
             {
-                _longestNormalModeMeasurementMicroseconds = MeasurementMicroseconds();
+                // A repeated normal-mode write doesn't end a running measurement, so it keeps the longest one.
+                if (previousMode != 0b11)
+                {
+                    _longestNormalModeMeasurementMicroseconds = MeasurementMicroseconds();
+                }
 
                 // Normal mode. conf_err is only evaluated in normal mode (table 28). Verified on a BMP390: the sensor
                 // also goes back to sleep at once.
