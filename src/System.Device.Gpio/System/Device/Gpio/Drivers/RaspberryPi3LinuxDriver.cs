@@ -533,7 +533,6 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
         }
         finally
         {
-            // Copilot suggests cancelling the token, so that no internal tasks remain active in any case.
             dependentSource.Cancel();
         }
     }
@@ -553,39 +552,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 "No interrupt driver was found - event callbacks not supported on this platform");
         }
 
-        CancellationTokenSource dependentSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-        try
-        {
-            if (_pinModes[pinNumber]!.InUseByInterruptDriver)
-            {
-                return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, dependentSource.Token);
-            }
-            else
-            {
-                // This is the typical case when this method is used: Wait for a sparse event synchronously.
-                // We open the pin, wait for the event, and close it again.
-                _interruptDriver.OpenPin(pinNumber);
-                _pinModes[pinNumber]!.AddInterruptDriverUse();
-
-                try
-                {
-                    return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, dependentSource.Token);
-                }
-                finally
-                {
-                    if (_pinModes[pinNumber]!.RemoveInterruptDriverUse())
-                    {
-                        _interruptDriver.ClosePin(pinNumber);
-                    }
-                }
-            }
-        }
-        finally
-        {
-            // Copilot suggests cancelling the token, so that no internal tasks remain active in any case.
-            dependentSource.Cancel();
-        }
+        return base.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
     }
 
     /// <summary>
