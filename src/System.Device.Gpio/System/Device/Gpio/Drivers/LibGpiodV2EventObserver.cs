@@ -6,7 +6,6 @@ using System.Device.Gpio.Libgpiod.V2;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers;
 
@@ -28,27 +27,34 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     public TimeSpan WaitEdgeEventsTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
     /// <summary>
-    /// Registers an event subscription and returns a handle that can be waited on for the event.
-    /// When the event appears, the subscription will get removed again
+    /// Waits for a single event and removes the subscription before returning.
     /// </summary>
     /// <param name="request">The line request to observe</param>
     /// <param name="eventSubscription">The subscription for events</param>
-    /// <returns>A handle to wait on</returns>
-    internal EventWaitHandle ObserveSingleEvent(LineRequest request, EventSubscription eventSubscription)
+    /// <param name="cancellationToken">The token used to stop waiting</param>
+    /// <returns>The result of waiting for the event</returns>
+    internal WaitForEventResult ObserveSingleEvent(LineRequest request, EventSubscription eventSubscription, CancellationToken cancellationToken)
     {
-        lock (_handlersBySubscription)
+        using EventWaitHandle eventWaitHandle = new();
+
+        try
         {
-            EventWaitHandle eventWaitHandle = new();
-
             Observe(request, eventSubscription, eventWaitHandle.SetEventResult);
-
-            Task.Run(() =>
+            return eventWaitHandle.WaitForEventResult(cancellationToken);
+        }
+        finally
+        {
+            lock (_handlersBySubscription)
             {
-                eventWaitHandle.WaitForEventResult(CancellationToken.None);
-                RemoveCallback(eventSubscription.Offset, eventWaitHandle.SetEventResult);
-            });
-
-            return eventWaitHandle;
+                if (_handlersBySubscription.TryGetValue(eventSubscription, out var callbacks))
+                {
+                    callbacks.Remove(eventWaitHandle.SetEventResult);
+                    if (callbacks.Count == 0)
+                    {
+                        _handlersBySubscription.Remove(eventSubscription);
+                    }
+                }
+            }
         }
     }
 
@@ -239,23 +245,21 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
     private void HandleEdgeEvent(EdgeEvent edgeEvent)
     {
+        HandleEdgeEvent(edgeEvent.GetLineOffset(), edgeEvent.GetEventType());
+    }
+
+    private void HandleEdgeEvent(Offset offset, GpiodEdgeEventType eventType)
+    {
+        PinChangeEventHandler[] eventHandlers;
         lock (_handlersBySubscription)
         {
-            Offset offset = edgeEvent.GetLineOffset();
-            GpiodEdgeEventType eventType = edgeEvent.GetEventType();
-
-            var relevantSubscriptions = _handlersBySubscription.Keys.Where(eventSubscription => eventSubscription.IsFor(offset, eventType));
-
-            // Should an event handler re enter this class and modify the collection, it will throw, so ToArray the collection first
-            foreach (var eventSubscription in relevantSubscriptions.ToArray())
-            {
-                if (_handlersBySubscription.TryGetValue(eventSubscription, out var eventHandlers))
-                {
-                    // Should an event handler re enter this class and modify the collection, it will throw, so ToArray the collection first
-                    CallEventHandlers(offset, eventType, eventHandlers.ToArray());
-                }
-            }
+            eventHandlers = _handlersBySubscription
+                .Where(subscription => subscription.Key.IsFor(offset, eventType))
+                .SelectMany(subscription => subscription.Value)
+                .ToArray();
         }
+
+        CallEventHandlers(offset, eventType, eventHandlers);
     }
 
     private void CallEventHandlers(Offset offset, GpiodEdgeEventType edgeEventType, IEnumerable<PinChangeEventHandler> eventHandlers)
@@ -285,10 +289,11 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
     #endregion
 
-    internal sealed class EventWaitHandle
+    internal sealed class EventWaitHandle : IDisposable
     {
         private readonly ManualResetEventSlim _resultSet = new();
         private WaitForEventResult _result;
+        private bool _disposed;
 
         public WaitForEventResult WaitForEventResult(CancellationToken cancellationToken)
         {
@@ -306,8 +311,25 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
         public void SetEventResult(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
-            _result = new WaitForEventResult { EventTypes = pinValueChangedEventArgs.ChangeType, TimedOut = false };
-            _resultSet.Set();
+            lock (_resultSet)
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _result = new WaitForEventResult { EventTypes = pinValueChangedEventArgs.ChangeType, TimedOut = false };
+                _resultSet.Set();
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (_resultSet)
+            {
+                _disposed = true;
+                _resultSet.Dispose();
+            }
         }
     }
 
