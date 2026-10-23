@@ -193,8 +193,12 @@ namespace Iot.Device.Bmp3xx.Tests
                         _longestNormalModeMeasurementMicroseconds = Math.Max(_longestNormalModeMeasurementMicroseconds, MeasurementMicroseconds());
                     }
 
+                    ReportConfigurationErrorIfNormalMode();
                     break;
                 case OutputDataRateAddress:
+                    SetByte(address, value);
+                    ReportConfigurationErrorIfNormalMode();
+                    break;
                 case ConfigurationAddress:
                     SetByte(address, value);
                     break;
@@ -274,6 +278,17 @@ namespace Iot.Device.Bmp3xx.Tests
                 }
 
                 Measure();
+            }
+        }
+
+        private void ReportConfigurationErrorIfNormalMode()
+        {
+            // Verified on a BMP390 when normal mode is entered (see OnPowerControlWritten). That a settings change in
+            // normal mode is checked the same way is unverified.
+            if (((GetRegister(PowerControlAddress) >> 4) & 0b11) == 0b11 && ConfigurationErrorOnNormalMode)
+            {
+                SetByte(ErrorAddress, (byte)(GetRegister(ErrorAddress) | ConfigurationError));
+                SetByte(PowerControlAddress, (byte)(GetRegister(PowerControlAddress) & ~0b0011_0000));
             }
         }
 

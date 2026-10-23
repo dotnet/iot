@@ -271,6 +271,13 @@ namespace Iot.Device.Bmp3xx
 
             if (powerMode != Bmp3xxPowerMode.Sleep)
             {
+                if (powerMode == Bmp3xxPowerMode.Normal)
+                {
+                    // A configuration error stays set until the error register is read (table 28). Clear one left by an
+                    // earlier request or settings change, so the check below only sees errors caused by this request.
+                    ReadErrors();
+                }
+
                 // Requesting the mode that is already active doesn't end a running measurement, so the longest is kept.
                 _longestPendingMeasurementMilliseconds = currentMode == powerMode
                     ? Math.Max(_longestPendingMeasurementMilliseconds, GetMeasurementDuration())

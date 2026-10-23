@@ -143,6 +143,21 @@ namespace Iot.Device.Bmp3xx.Tests
             Assert.Equal(0x04, chip.GetRegister(0x02));
         }
 
+        [Theory]
+        [InlineData(0x1C, 0x05)] // x32 pressure
+        [InlineData(0x1D, 0x00)] // 5 ms output data rate
+        public void SettingsChangeInNormalMode_WithConfigurationError_ReturnsToSleep(byte register, byte value)
+        {
+            using var chip = new SimulatedBmp3xx(0x60, Calibration);
+            chip.Write(new byte[] { 0x1B, 0x33 }); // normal mode, valid settings
+            chip.ConfigurationErrorOnNormalMode = true;
+
+            chip.Write(new byte[] { register, value });
+
+            Assert.Equal(0x03, chip.GetRegister(0x1B));
+            Assert.Equal(0x04, chip.GetRegister(0x02));
+        }
+
         [Fact]
         public void ReadingErrorRegister_ClearsCommandAndConfigurationErrors()
         {
