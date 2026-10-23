@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
-using System.Diagnostics;
 
 namespace Iot.Device.Bmp3xx.Tests
 {
@@ -87,6 +86,9 @@ namespace Iot.Device.Bmp3xx.Tests
 
         /// <summary>When true, the soft reset command fails: the command error flag is set and nothing is reset.</summary>
         public bool SoftResetFails { get; set; }
+
+        /// <summary>The clock that times running measurements. Tests that expect the chip to still be busy use a manual clock.</summary>
+        public TimeProvider TimeProvider { get; init; } = TimeProvider.System;
 
         /// <summary>Number of successful soft resets.</summary>
         public int ResetCount { get; private set; }
@@ -239,9 +241,9 @@ namespace Iot.Device.Bmp3xx.Tests
             // case: the longest measurement since normal mode was entered had just started.
             if (mode == 0b00 && previousMode == 0b11)
             {
-                _modeChangesIgnoredUntil = Stopwatch.GetTimestamp() + (_longestNormalModeMeasurementMicroseconds * Stopwatch.Frequency / 1_000_000);
+                _modeChangesIgnoredUntil = TimeProvider.GetTimestamp() + (_longestNormalModeMeasurementMicroseconds * TimeProvider.TimestampFrequency / 1_000_000);
             }
-            else if (mode != 0b00 && Stopwatch.GetTimestamp() < _modeChangesIgnoredUntil)
+            else if (mode != 0b00 && TimeProvider.GetTimestamp() < _modeChangesIgnoredUntil)
             {
                 SetByte(PowerControlAddress, (byte)(value & ~0b0011_0000));
                 return;
