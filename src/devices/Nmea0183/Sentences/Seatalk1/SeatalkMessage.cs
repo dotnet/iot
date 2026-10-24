@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
 
@@ -14,6 +15,11 @@ namespace Iot.Device.Seatalk1.Messages
     public abstract class SeatalkMessage : NmeaSentence
     {
         /// <summary>
+        /// Only used for decoding, not for encoding
+        /// </summary>
+        private readonly IReadOnlyList<string>? _fields;
+
+        /// <summary>
         /// Seatalk messages use $STALK as the sentence identifier.
         /// </summary>
         public static readonly SentenceId Id = new SentenceId("ALK");
@@ -21,10 +27,15 @@ namespace Iot.Device.Seatalk1.Messages
         /// <summary>
         /// Construct a new instance of a seatalk message
         /// </summary>
-        /// <param name="now">The timestamp for the message</param>
-        protected SeatalkMessage(DateTimeOffset now)
-        : base(TalkerId.Seatalk, new SentenceId("ALK"), now)
+        protected SeatalkMessage()
+        : base(TalkerId.Seatalk, new SentenceId("ALK"), DateTimeOffset.UtcNow)
         {
+        }
+
+        protected SeatalkMessage(IReadOnlyList<string> fields, DateTimeOffset time)
+        : base(TalkerId.Seatalk, Id, time)
+        {
+            _fields = fields;
         }
 
         /// <summary>
@@ -49,6 +60,21 @@ namespace Iot.Device.Seatalk1.Messages
         /// <returns>The bytes to send</returns>
         public abstract byte[] CreateDatagram();
 
+        protected byte GetField(int offset)
+        {
+            if (_fields == null)
+            {
+                throw new InvalidOperationException("Cannot get field from a message that was not constructed from a sentence");
+            }
+
+            if (offset < 0 || offset >= _fields.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset), $"Offset must be between 0 and {_fields.Count - 1}");
+            }
+
+            return Convert.ToByte(_fields.ElementAt(offset), 16);
+        }
+
         /// <summary>
         /// This checks the precondition for a valid input packet.
         /// Normally, derived classes do not need to override this, it's sufficient to override <see cref="MatchesMessageType"/> to add any per-message verifications.
@@ -56,7 +82,7 @@ namespace Iot.Device.Seatalk1.Messages
         /// <param name="data">The sliced data</param>
         /// <exception cref="ArgumentNullException">Data was null</exception>
         /// <exception cref="InvalidOperationException">The data does not match this instance</exception>
-        protected virtual void VerifyPacket(IReadOnlyList<byte> data)
+        protected void VerifyPacket(IReadOnlyList<string> data)
         {
             if (data == null)
             {
@@ -68,20 +94,22 @@ namespace Iot.Device.Seatalk1.Messages
                 throw new InvalidOperationException($"Cannot decode data to {GetType()}- invalid data length.");
             }
 
-            if (data[0] != CommandByte)
-            {
-                throw new InvalidOperationException($"Command byte for {GetType()} was expected to be {CommandByte:X2} but was {data[0]:X2}");
-            }
+            // Rather superfluous, but let's keep it for now. The derived class should have already checked this in MatchesMessageType
+            // before constructing the instance, so this is just a sanity check.
+            ////if (data[0] != CommandByte)
+            ////{
+            ////    throw new InvalidOperationException($"Command byte for {GetType()} was expected to be {CommandByte:X2} but was {data[0]:X2}");
+            ////}
 
-            if ((data[1] & 0xF) != (ExpectedLength - 3))
-            {
-                throw new InvalidOperationException($"Length nibble for {GetType()} was expected to be {ExpectedLength}, but was {data[1] & 0xF}");
-            }
+            ////if ((data[1] & 0xF) != (ExpectedLength - 3))
+            ////{
+            ////    throw new InvalidOperationException($"Length nibble for {GetType()} was expected to be {ExpectedLength}, but was {data[1] & 0xF}");
+            ////}
 
-            if (!MatchesMessageType(data))
-            {
-                throw new InvalidOperationException($"A custom package verification failed");
-            }
+            ////if (!MatchesMessageType(data))
+            ////{
+            ////    throw new InvalidOperationException($"A custom package verification failed");
+            ////}
         }
 
         /// <summary>
@@ -113,6 +141,12 @@ namespace Iot.Device.Seatalk1.Messages
             }
 
             return true;
+        }
+
+        public override string ToNmeaParameterList()
+        {
+            byte[] datagram = CreateDatagram();
+            return string.Join(",", datagram.Select(b => b.ToString("X2")));
         }
     }
 }

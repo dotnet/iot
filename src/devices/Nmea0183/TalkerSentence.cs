@@ -183,7 +183,7 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// Fields of the NMEA0183 sentence
         /// </summary>
-        public IEnumerable<string> Fields => _fields;
+        public IReadOnlyList<string> Fields => _fields;
 
         /// <summary>
         /// Converts the current message to NMEA format

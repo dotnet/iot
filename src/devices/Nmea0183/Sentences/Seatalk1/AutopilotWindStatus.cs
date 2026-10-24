@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Nmea0183;
 
 namespace Iot.Device.Seatalk1.Messages
 {
@@ -15,7 +16,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// Format:
     /// 11-80-0X, where X is a number between 0 and 4, note that the <see cref="ApparentWindSpeed"/> encodes as 11-01-XX-0Y
     /// </summary>
-    public record AutopilotWindStatus : SeatalkMessage
+    public class AutopilotWindStatus : SeatalkMessage
     {
         /// <summary>
         /// Constructs a new instance of this class
@@ -34,6 +35,15 @@ namespace Iot.Device.Seatalk1.Messages
             Status = status;
         }
 
+        public AutopilotWindStatus(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            Status = GetField(2);
+            Valid = true;
+        }
+
+        public override bool ReplacesOlderInstance => true;
+
         /// <summary>
         /// The status byte (meaning unknown)
         /// </summary>
@@ -49,17 +59,16 @@ namespace Iot.Device.Seatalk1.Messages
         public override byte ExpectedLength => 0x03;
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            int status = data[2];
-            return new AutopilotWindStatus(status);
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             int status = Status & 0xFF;
             return new byte[] { CommandByte, 0, (byte)status, };
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Autopilot status: {Status}";
         }
     }
 }

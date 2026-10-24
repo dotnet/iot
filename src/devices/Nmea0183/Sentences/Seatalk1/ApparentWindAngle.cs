@@ -14,7 +14,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// <summary>
     /// Apparent wind angle, as provided by the wind instrument in the masthead of a sailboat.
     /// </summary>
-    public record ApparentWindAngle : SeatalkMessage
+    public class ApparentWindAngle : SeatalkMessage
     {
         private readonly Angle _apparentAngle;
 
@@ -40,6 +40,9 @@ namespace Iot.Device.Seatalk1.Messages
 
         /// <inheritdoc />
         public override byte ExpectedLength => 0x4;
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <summary>
         /// Apparent wind angle, relative to bow. 0 means wind comes directly from ahead.

@@ -14,7 +14,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// <summary>
     /// Keypress messages from/to the autopilot
     /// </summary>
-    public record Keystroke : SeatalkMessage
+    public class Keystroke : SeatalkMessage
     {
         private static readonly Dictionary<int, AutopilotButtons> s_codeToButtonMap;
         private static readonly Dictionary<AutopilotButtons, int> s_buttonToCodeMap;
@@ -69,6 +69,8 @@ namespace Iot.Device.Seatalk1.Messages
             KeyCode = 0;
             Source = 0;
         }
+
+        public override bool ReplacesOlderInstance => false;
 
         /// <summary>
         /// Create a button command
@@ -150,19 +152,16 @@ namespace Iot.Device.Seatalk1.Messages
         /// </summary>
         /// <param name="data">The input data</param>
         /// <returns>A message</returns>
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
+        public Keystroke(IReadOnlyList<string> data, DateTimeOffset time)
+            : base(data, time)
         {
             VerifyPacket(data);
 
-            int source = data[1] >> 4;
-
+            int source = GetField(1) >> 4;
+            Source = source;
             // Just as a verification step
-            GetButtons(data[2]);
-
-            return new Keystroke()
-            {
-                Source = source, KeyCode = data[2]
-            };
+            KeyCode = GetField(2);
+            Valid = true;
         }
 
         /// <inheritdoc />
@@ -183,7 +182,6 @@ namespace Iot.Device.Seatalk1.Messages
                 return result;
             }
 
-            Logger.LogWarning($"Unknown keycode 0x{keyCode:X2} in command");
             return AutopilotButtons.None;
         }
 
@@ -207,11 +205,9 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <inheritdoc />
-        protected override bool PrintMembers(StringBuilder stringBuilder)
+        public override string ToReadableContent()
         {
-            base.PrintMembers(stringBuilder);
-            stringBuilder.Append($", Source = {Source}, KeyCode = 0x{KeyCode:X2}, Buttons = {GetButtons(KeyCode)}");
-            return true;
+            return $"KeyCode: Source = {Source}, KeyCode = 0x{KeyCode:X2}, Buttons = {GetButtons(KeyCode)}";
         }
     }
 }
