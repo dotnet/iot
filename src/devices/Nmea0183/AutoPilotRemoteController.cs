@@ -29,11 +29,12 @@ namespace Iot.Device.Seatalk1
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(6);
 
         private readonly string? _seatalkInterfaceName;
+        private readonly TimeProvider _timeProvider;
         private readonly object _lock = new object();
         private readonly AutoResetEvent _dataUpdated;
         private ConcurrentDictionary<AutopilotCalibrationParameter, AutopilotCalibrationParameterMessage> _calibrationParameters;
 
-        private DateTime _lastUpdateTime = new DateTime(0);
+        private DateTimeOffset _lastUpdateTime = new DateTimeOffset();
         private bool _buttonOnApPressed = false;
 
         private Thread? _desiredAngleUpdater;
@@ -53,9 +54,22 @@ namespace Iot.Device.Seatalk1
         /// <param name="interfaceName">The name of the interface</param>
         /// <param name="seatalkInterfaceName">The interface name that provides Seatalk1 connectivity</param>
         public AutoPilotRemoteController(string interfaceName, string? seatalkInterfaceName)
+            : this(interfaceName, seatalkInterfaceName, TimeProvider.System)
+        {
+        }
+
+        /// <summary>
+        /// Class to control an autopilot via Seatalk1.
+        /// It can also be used to monitor the current status of the autopilot, including rudder angle and heading.
+        /// </summary>
+        /// <param name="interfaceName">The name of the interface</param>
+        /// <param name="seatalkInterfaceName">The interface name that provides Seatalk1 connectivity</param>
+        /// <param name="timeProvider">Time provider for testing</param>
+        public AutoPilotRemoteController(string interfaceName, string? seatalkInterfaceName, TimeProvider timeProvider)
             : base(interfaceName)
         {
             _seatalkInterfaceName = seatalkInterfaceName;
+            _timeProvider = timeProvider;
             _dataUpdated = new AutoResetEvent(false);
             _calibrationParameters = new();
             RudderAngleAvailable = false;
@@ -139,7 +153,7 @@ namespace Iot.Device.Seatalk1
 
         /// <summary>
         /// This returns true if the autopilot is currently turning to a desired heading.
-        /// This is true when the <see cref="TurnTo(Angle, TurnDirection?, CancellationToken)"/> method was called and the desired heading has not yet been reached.
+        /// This is true when the <see cref="TurnTo(Angle, TurnDirection?)"/> method was called and the desired heading has not yet been reached.
         /// </summary>
         public bool IsTurning
         {
@@ -178,7 +192,7 @@ namespace Iot.Device.Seatalk1
                 {
                     // Only update this when we see an autopilot message, otherwise we declare the autopilot as online
                     // if all we see is the echo of some of the repeating messages we send out.
-                    _lastUpdateTime = DateTime.UtcNow;
+                    _lastUpdateTime = _timeProvider.GetUtcNow();
                     Status = ch.AutopilotStatus;
                     AutopilotHeading = ch.CompassHeading;
                     AutopilotDesiredHeading = !IsStandby ? ch.AutoPilotCourse : null;
@@ -434,17 +448,11 @@ namespace Iot.Device.Seatalk1
         /// <param name="direction">Desired turn direction. Pass null for taking the default (shorter) turn.</param>
         public void TurnTo(Angle degrees, TurnDirection? direction)
         {
-            TurnTo(degrees, direction, CancellationToken.None);
-        }
+            if (_desiredAngleUpdater == null)
+            {
+                throw new InvalidOperationException("Please call StartDecode first");
+            }
 
-        /// <summary>
-        /// Turns to the desired heading
-        /// </summary>
-        /// <param name="degrees">New desired heading</param>
-        /// <param name="direction">Desired turn direction. Pass null for taking the default (shorter) turn.</param>
-        /// <param name="token">Cancellation token</param>
-        public void TurnTo(Angle degrees, TurnDirection? direction, CancellationToken token)
-        {
             lock (_lock)
             {
                 if (AutopilotDesiredHeading.HasValue)
@@ -563,6 +571,7 @@ namespace Iot.Device.Seatalk1
 
                 wait:
                 UpdateStatus();
+                // Updates slowly, because we can't send too many messages to the autopilot, otherwise the behavior is undefined.
                 _cancellationTokenSource.Token.WaitHandle.WaitOne(1000);
             }
         }
@@ -592,8 +601,7 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         /// <param name="degrees">Degrees to turn, unsigned</param>
         /// <param name="direction">Direction to turn</param>
-        /// <param name="token">Cancellation token</param>
-        public void TurnBy(Angle degrees, TurnDirection direction, CancellationToken token)
+        public void TurnBy(Angle degrees, TurnDirection direction)
         {
             if (degrees < Angle.Zero)
             {
@@ -608,7 +616,7 @@ namespace Iot.Device.Seatalk1
 
             Angle target = direction == TurnDirection.TurnToStarboard ? currentHeading1.Value + degrees : currentHeading1.Value - degrees;
             target = target.Normalize(true);
-            TurnTo(target, direction, token);
+            TurnTo(target, direction);
         }
 
         private void SendMessage(SeatalkMessage message)
@@ -652,7 +660,7 @@ namespace Iot.Device.Seatalk1
             {
                 // Netstandard 2.0 doesn't support the multiply operator on timespan
                 TimeSpan twice = new TimeSpan(DefaultTimeout.Ticks * 2);
-                if (_lastUpdateTime + twice < DateTime.UtcNow)
+                if (_lastUpdateTime + twice < _timeProvider.GetUtcNow())
                 {
                     // The autopilot hasn't sent anything for several seconds. Assume it's offline
                     if (Status != AutopilotStatus.Offline) // don't repeat message

@@ -7,6 +7,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -29,8 +30,6 @@ namespace Iot.Device.Seatalk1
     {
         private const Parity DefaultParity = Parity.Even;
         private readonly string _portName;
-        private readonly Stream _inputStream;
-        private readonly BinaryReader _reader;
         private readonly object _lock;
         private readonly List<byte> _buffer;
 
@@ -68,20 +67,6 @@ namespace Iot.Device.Seatalk1
             _port.Open();
             _bufferIsInSync = true;
 
-            try
-            {
-                _inputStream = _port.BaseStream;
-                if (!_inputStream.CanRead)
-                {
-                    throw new ArgumentException("Cannot read from the input port");
-                }
-            }
-            finally
-            {
-                _port.Close();
-            }
-
-            _reader = new BinaryReader(_inputStream, Encoding.UTF8);
             _messageFactories = new List<SeatalkMessage>()
             {
                 new CompassHeadingAndRudderPosition(),
@@ -146,8 +131,7 @@ namespace Iot.Device.Seatalk1
         {
             lock (_lock)
             {
-                _reader.Close();
-                _inputStream.Close();
+                _port.Close();
             }
 
             _buffer.Clear(); // Because clients could wait for an empty buffer
@@ -165,10 +149,15 @@ namespace Iot.Device.Seatalk1
         {
             // I think we would just need to return either null or something else. The
             // parser will then call GetTypeOfNextMessage to see if a message can be decoded from the buffer.
-            byte nextByte = _reader.ReadByte();
-            _buffer.Add(nextByte);
+            int nextByte = _port.ReadByte();
+            if (nextByte == -1)
+            {
+                return null;
+            }
+
+            _buffer.Add((byte)nextByte);
             var contents = _buffer.Take(18).ToArray();
-            return contents.Length > 0 ? Convert.ToHexString(contents) : null;
+            return contents.Length > 0 ? String.Join(',', contents.Select(x => x.ToString("X2", CultureInfo.InvariantCulture))) : null;
         }
 
         /// <summary>
@@ -183,7 +172,7 @@ namespace Iot.Device.Seatalk1
             IEnumerable<byte>? msg = null;
             while (true)
             {
-                byte[] toTest = Convert.FromHexString(currentLine);
+                byte[] toTest = Convert.FromHexString(currentLine.Replace(",", string.Empty));
                 msg = GetDataForNextMessage(toTest, out int messageLength);
                 if (msg == null && !_bufferIsInSync)
                 {
@@ -422,8 +411,6 @@ namespace Iot.Device.Seatalk1
         {
             if (disposing)
             {
-                _reader?.Dispose();
-                _inputStream?.Dispose();
                 _port?.Dispose();
             }
 

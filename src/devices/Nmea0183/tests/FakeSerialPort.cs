@@ -95,6 +95,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void SimulateReceive(byte[] buffer)
         {
             _inputStream.Write(buffer, 0, buffer.Length);
+            _inputStream.Position -= buffer.Length;
         }
 
         public int ReadByte()

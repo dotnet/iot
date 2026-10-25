@@ -18,7 +18,7 @@ namespace Iot.Device.Nmea0183.Sentences
     /// If sending out messages, you might want to use the third constructor, it is usually the one with most arguments and not taking a talker sentence, as this
     /// is added automatically from the static field <see cref="OwnTalkerId"/>.
     /// </summary>
-    public abstract class NmeaSentence
+    public abstract class NmeaSentence : IEquatable<NmeaSentence>
     {
         /// <summary>
         /// The default talker id of ourselves (applied when we send out messages)
@@ -294,6 +294,53 @@ namespace Iot.Device.Nmea0183.Sentences
             string msg = $"{start}{TalkerId}{SentenceId},{ToNmeaParameterList()}";
             byte checksum = TalkerSentence.CalculateChecksum(msg);
             return msg + "*" + checksum.ToString("X2");
+        }
+
+        /// <summary>
+        /// Returns true when the NMEA message of this instance is equal to the NMEA message of the other instance.
+        /// </summary>
+        /// <param name="other">The other NMEA sentence to compare with</param>
+        /// <returns>True if the NMEA messages are equal, otherwise false</returns>
+        public virtual bool Equals(NmeaSentence? other)
+        {
+            if (ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return ToNmeaMessage() == other.ToNmeaMessage();
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals(obj as NmeaSentence);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return ToNmeaMessage().GetHashCode();
         }
 
         /// <summary>

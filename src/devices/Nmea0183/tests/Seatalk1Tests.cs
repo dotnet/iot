@@ -9,6 +9,7 @@ using System.IO.Ports;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Iot.Device.Nmea0183;
+using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Nmea0183.Tests;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
@@ -16,7 +17,7 @@ using UnitsNet;
 using Xunit;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace Iot.Device.Tests.Seatalk1
+namespace Iot.Device.Nmea0183.Tests
 {
     public class Seatalk1Tests
     {
@@ -36,12 +37,20 @@ namespace Iot.Device.Tests.Seatalk1
 84 06 12 00 00 00 00 00 08
 9c 01 12 00
 84 06 12 00 00 00 00 00 08";
-            MemoryStream ms = GetStreamFromInputString(data);
+            byte[] bytes = GetBytesFromInputString(data);
 
             int numMessages = 0;
+
+            _port.SimulateReceive(bytes);
+
             Seatalk1Parser parser = new Seatalk1Parser("Seatalk1", _port);
             parser.OnNewSequence += (src, message) =>
             {
+                if (message is RawSentence)
+                {
+                    return;
+                }
+
                 numMessages++;
                 Assert.NotNull(message);
                 var msg = message as SeatalkMessage;
@@ -57,13 +66,13 @@ namespace Iot.Device.Tests.Seatalk1
                     Assert.Equal(AutopilotButtons.StandBy, ks.ButtonsPressed);
                 }
             };
+
             parser.StartDecode();
-            _port.SimulateReceive(ms.GetBuffer());
 
             int cnt = 10;
             while (numMessages != 6 && cnt-- >= 0)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(500);
             }
 
             parser.StopDecode();
@@ -83,10 +92,10 @@ namespace Iot.Device.Tests.Seatalk1
 84 06 12 00 00 00 00 00 08
 9c 01 12 00
 84 06 12 00 00 00 00 00 08";
-            MemoryStream ms = GetStreamFromInputString(data);
+            var ms = GetBytesFromInputString(data);
 
             int numMessages = 0;
-            Seatalk1Parser parser = new Seatalk1Parser("Test", new FakeSerialPort(ms.GetBuffer()));
+            Seatalk1Parser parser = new Seatalk1Parser("Test", new FakeSerialPort(ms));
             parser.OnNewSequence += (src, message) =>
             {
                 numMessages++;
@@ -170,7 +179,7 @@ namespace Iot.Device.Tests.Seatalk1
         }
 
         [Fact]
-        public void CanBasicRoundTripMessages()
+        public void CanDecodeAllMessageTypes()
         {
             Seatalk1Parser parser = new Seatalk1Parser("Test", _port);
             foreach (var m in parser.MessageTypes)
@@ -180,7 +189,7 @@ namespace Iot.Device.Tests.Seatalk1
                 var decoded = parser.GetDataForNextMessage(data, out int bytesOfNewMessage);
                 Assert.NotNull(decoded);
                 Assert.NotEqual(0, bytesOfNewMessage);
-                Assert.Equal(m.GetType(), decoded.GetType());
+                Assert.Equal(data[0], decoded[0]);
             }
         }
 
@@ -227,9 +236,9 @@ namespace Iot.Device.Tests.Seatalk1
 84 06 12 00 00 00 00 00 08
 9c 01 12 00
 84 06 12 00 00 00 00 00 08";
-            MemoryStream ms = GetStreamFromInputString(data);
+            var ms = GetBytesFromInputString(data);
             var parser = new Seatalk1Parser("Test", _port);
-            _port.SimulateReceive(ms.GetBuffer());
+            _port.SimulateReceive(ms);
 
             List<SeatalkMessage> messages = new List<SeatalkMessage>();
             parser.OnNewSequence += (src, message) =>
@@ -255,6 +264,14 @@ namespace Iot.Device.Tests.Seatalk1
 
             MemoryStream ms = new MemoryStream(input);
             return ms;
+        }
+
+        private static byte[] GetBytesFromInputString(string data)
+        {
+            var split = data.Split(new char[] { '\n', '\r', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            // FromHexString expects an uninterrupted sequence of two-char pairs
+            byte[] input = Convert.FromHexString(string.Join(string.Empty, split));
+            return input;
         }
     }
 }

@@ -8,27 +8,32 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Nmea0183.Sentences;
-using Iot.Device.Nmea0183.Tests;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 using UnitsNet;
 using Xunit;
 
-namespace Iot.Device.Tests.Seatalk1
+namespace Iot.Device.Nmea0183.Tests
 {
-    public sealed class AutoPilotRemoteControllerTests
+    public sealed class AutoPilotRemoteControllerTests : IDisposable
     {
         private readonly AutoPilotRemoteController _testee;
-        private readonly CancellationTokenSource _tokenSource;
         private readonly TestSource _testSource;
+        private readonly FakeTimeProvider _timeProvider;
 
         public AutoPilotRemoteControllerTests()
         {
             _testSource = new TestSource();
-            _testee = new AutoPilotRemoteController("Test", _testSource.InterfaceName);
+            _timeProvider = new FakeTimeProvider();
+            _testee = new AutoPilotRemoteController("Test", _testSource.InterfaceName, _timeProvider);
             _testSource.OnNewSequence += (x, y) => _testee.SendSentence(x, y);
-            _tokenSource = new CancellationTokenSource();
+        }
+
+        public void Dispose()
+        {
+            _testee.Dispose();
         }
 
         [Fact]
@@ -48,6 +53,9 @@ namespace Iot.Device.Tests.Seatalk1
             {
                 AutopilotStatus = AutopilotStatus.Standby, AutoPilotCourse = Angle.FromDegrees(100), CompassHeading = Angle.FromDegrees(95)
             };
+
+            _testee.StartDecode();
+            _testee.SendSentence(_testSource, msg);
 
             Assert.Equal(AutopilotStatus.Standby, _testee.Status);
             Assert.Null(_testee.AutopilotDesiredHeading);
@@ -109,9 +117,10 @@ namespace Iot.Device.Tests.Seatalk1
         {
             SetToStandby();
             Assert.Equal(AutopilotStatus.Standby, _testee.Status);
-            Assert.Equal(AutopilotStatus.Standby, _testee.Status);
-            _testee.DefaultTimeout = TimeSpan.FromSeconds(0);
-            Thread.Sleep(100);
+            _timeProvider.Advance(TimeSpan.FromSeconds(10));
+            // We still need to wait, because the timeout is checked in a background thread with
+            // a slow update rate, so we need to wait for the background thread to run and update the status.
+            Thread.Sleep(3000);
             Assert.Equal(AutopilotStatus.Offline, _testee.Status);
         }
 
@@ -130,14 +139,15 @@ namespace Iot.Device.Tests.Seatalk1
 
             Keystroke ks = new Keystroke(AutopilotButtons.PlusTen, 1);
             bool called = false;
-            _testSource.MessageReceived += (s, i) =>
+            _testee.OnNewSequence += (s, i) =>
             {
                 Assert.True(ks.Equals(i));
                 called = true;
             };
 
-            _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
-            _testee.TurnBy(Angle.FromDegrees(20), TurnDirection.TurnToStarboard, _tokenSource.Token);
+            _testee.StartDecode();
+
+            _testee.TurnBy(Angle.FromDegrees(20), TurnDirection.TurnToStarboard);
             int i = 100;
             while (i-- > 0)
             {
@@ -166,23 +176,28 @@ namespace Iot.Device.Tests.Seatalk1
             _testSource.SendSentenceToTestClass(msg);
 
             Keystroke ks = new Keystroke(AutopilotButtons.MinusTen, 1);
-            _testSource.MessageReceived += (s, i) =>
+            bool called = false;
+            _testee.OnNewSequence += (s, i) =>
             {
                 Assert.Equal(ks, i);
+                called = true;
             };
 
-            _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
-            _testee.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort, _tokenSource.Token);
+            _testee.StartDecode();
+
+            _testee.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort);
             int i = 100;
             while (i-- > 0)
             {
-                if (_testee.IsTurning == false)
+                if (_testee.IsTurning == false || called)
                 {
                     break;
                 }
 
                 Thread.Sleep(100);
             }
+
+            Assert.True(called);
         }
 
         [Fact]
@@ -198,8 +213,10 @@ namespace Iot.Device.Tests.Seatalk1
 
             _testSource.SendSentenceToTestClass(msg);
 
+            _testee.StartDecode();
+
             int indexOfCommand = 0;
-            _testSource.MessageReceived += (s, i) =>
+            _testee.OnNewSequence += (s, i) =>
             {
                 var ks = (Keystroke)i;
                 if (indexOfCommand == 0)
@@ -241,7 +258,7 @@ namespace Iot.Device.Tests.Seatalk1
                 indexOfCommand++;
             };
 
-            _testee.TurnBy(Angle.FromDegrees(12), TurnDirection.TurnToPort, _tokenSource.Token);
+            _testee.TurnBy(Angle.FromDegrees(12), TurnDirection.TurnToPort);
             int i = 100;
             while (i-- > 0)
             {
@@ -255,41 +272,6 @@ namespace Iot.Device.Tests.Seatalk1
         }
 
         [Fact]
-        public void TurnTo()
-        {
-            // Ap is in auto mode
-            var msg = new CompassHeadingAutopilotCourse()
-            {
-                AutopilotStatus = AutopilotStatus.Auto,
-                AutoPilotCourse = Angle.FromDegrees(10),
-                CompassHeading = Angle.FromDegrees(9),
-            };
-
-            _testSource.SendSentenceToTestClass(msg);
-
-            bool called = false;
-            Keystroke ks = new Keystroke(AutopilotButtons.PlusTen, 1); // We expect that it's automatically guessing the "nearer" direction right
-            _testSource.MessageReceived += (s, i) =>
-            {
-                Assert.Equal(ks, i);
-                called = true;
-            };
-            _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
-            _testee.TurnTo(Angle.FromDegrees(100), null, _tokenSource.Token);
-
-            int i = 100;
-            while (i-- > 0)
-            {
-                if (_testee.IsTurning == false || called)
-                {
-                    break;
-                }
-
-                Thread.Sleep(100);
-            }
-        }
-
-        [Fact]
         public void SetAndResetDeadbandMode()
         {
             SetToStandby();
@@ -299,7 +281,7 @@ namespace Iot.Device.Tests.Seatalk1
 
             int num = 0;
             Keystroke ks = new Keystroke(0x0a); // We expect that it's automatically guessing the "nearer" direction right
-            _testSource.MessageReceived += (s, i) =>
+            _testee.OnNewSequence += (s, i) =>
             {
                 if (num == 0)
                 {
@@ -350,7 +332,7 @@ namespace Iot.Device.Tests.Seatalk1
         {
             SetToStandby();
             Keystroke ks = new Keystroke(AutopilotButtons.Auto, 1); // We expect that it's automatically guessing the "nearer" direction right
-            _testSource.MessageReceived += (s, i) =>
+            _testee.OnNewSequence += (s, i) =>
             {
                 Assert.Equal(ks, i);
                 var msg = new CompassHeadingAutopilotCourse()
@@ -360,7 +342,7 @@ namespace Iot.Device.Tests.Seatalk1
                     CompassHeading = Angle.FromDegrees(9),
                 };
 
-                _testSource.SendSentenceToTestClass(msg);
+                _testee.SendSentence(_testSource, msg);
             };
 
             TurnDirection? ignore = TurnDirection.TurnToStarboard;
