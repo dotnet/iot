@@ -35,7 +35,7 @@ namespace Iot.Device.Seatalk1
         private readonly List<byte> _buffer;
 
         private List<SeatalkMessage> _messageFactories;
-        private SerialPort _port;
+        private ISerialPort _port;
         private bool _bufferIsInSync;
 
         /// <summary>
@@ -44,13 +44,23 @@ namespace Iot.Device.Seatalk1
         /// <param name="interfaceName">The name of this interface.</param>
         /// <param name="portName">The name of the serial port to use. E.g. "COM5" or "/dev/ttyAMA2"</param>
         public Seatalk1Parser(string interfaceName, string portName)
+            : this(interfaceName, new SerialPortAdapter(portName))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Seatalk1Parser"/> class.
+        /// </summary>
+        /// <param name="interfaceName">The name of this interface.</param>
+        /// <param name="port">Serial transport abstraction for production or tests.</param>
+        public Seatalk1Parser(string interfaceName, ISerialPort port)
         : base(interfaceName, new MemoryStream(), null, new Raw8BitEncoding())
         {
-            _portName = portName;
+            _port = port ?? throw new ArgumentNullException(nameof(port));
+            _portName = _port.PortName;
             _lock = new object();
             _buffer = new List<byte>(20);
 
-            _port = new SerialPort(portName);
             _port.BaudRate = 4800;
             _port.Parity = DefaultParity; // Can be anything but none, but "Mark" or "Space" won't have the desired effect on linux, causing garbage to be sent
             _port.StopBits = StopBits.One;
@@ -151,7 +161,7 @@ namespace Iot.Device.Seatalk1
         /// The parser will call GetTypeOfNextMessage to see if a message can be decoded from the buffer.
         /// </summary>
         /// <returns>The next line as a string, or null if the end of the stream is reached or no data is available.</returns>
-        protected override string? ReadNextLine()
+        protected internal override string? ReadNextLine()
         {
             // I think we would just need to return either null or something else. The
             // parser will then call GetTypeOfNextMessage to see if a message can be decoded from the buffer.

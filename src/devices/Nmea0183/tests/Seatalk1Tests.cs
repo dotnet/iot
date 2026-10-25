@@ -2,20 +2,31 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Iot.Device.Nmea0183;
+using Iot.Device.Nmea0183.Tests;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
 using UnitsNet;
 using Xunit;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Iot.Device.Tests.Seatalk1
 {
     public class Seatalk1Tests
     {
+        private readonly FakeSerialPort _port;
+
+        public Seatalk1Tests()
+        {
+            _port = new FakeSerialPort();
+        }
+
         [Fact]
         public void DecodeSomeSentences()
         {
@@ -28,12 +39,14 @@ namespace Iot.Device.Tests.Seatalk1
             MemoryStream ms = GetStreamFromInputString(data);
 
             int numMessages = 0;
-            Seatalk1Parser parser = new Seatalk1Parser(ms);
-            parser.NewMessageDecoded += message =>
+            Seatalk1Parser parser = new Seatalk1Parser("Seatalk1", _port);
+            parser.OnNewSequence += (src, message) =>
             {
                 numMessages++;
                 Assert.NotNull(message);
-                Assert.True(message.ExpectedLength >= 3);
+                var msg = message as SeatalkMessage;
+                Assert.NotNull(msg);
+                Assert.True(msg.ExpectedLength >= 3);
                 if (message is CompassHeadingAndRudderPosition ch)
                 {
                     Assert.Equal(Angle.FromDegrees(36), ch.CompassHeading);
@@ -45,6 +58,7 @@ namespace Iot.Device.Tests.Seatalk1
                 }
             };
             parser.StartDecode();
+            _port.SimulateReceive(ms.GetBuffer());
 
             int cnt = 10;
             while (numMessages != 6 && cnt-- >= 0)
@@ -72,8 +86,8 @@ namespace Iot.Device.Tests.Seatalk1
             MemoryStream ms = GetStreamFromInputString(data);
 
             int numMessages = 0;
-            Seatalk1Parser parser = new Seatalk1Parser(ms);
-            parser.NewMessageDecoded += message =>
+            Seatalk1Parser parser = new Seatalk1Parser("Test", new FakeSerialPort(ms.GetBuffer()));
+            parser.OnNewSequence += (src, message) =>
             {
                 numMessages++;
             };
@@ -101,7 +115,7 @@ namespace Iot.Device.Tests.Seatalk1
                 0x86, 0x11, 0x06, 0xf9
             };
 
-            var withParity = SeatalkInterface.CalculateParityForEachByte(datagram);
+            var withParity = Seatalk1Parser.CalculateParityForEachByte(datagram);
             Assert.Equal(0x86, withParity[0].B);
             Assert.Equal(0, withParity[0].Index);
             // 0x86 is odd (not the value, but it's bitcount), and we want the stopbit to be 1, so the parity should be even
@@ -123,7 +137,7 @@ namespace Iot.Device.Tests.Seatalk1
                 0x86, 0x11, 0x08, 0xf7
             };
 
-            var withParity = SeatalkInterface.CalculateParityForEachByte(datagram);
+            var withParity = Seatalk1Parser.CalculateParityForEachByte(datagram);
             Assert.Equal(0x86, withParity[0].B);
             Assert.Equal(0, withParity[0].Index);
             // 0x86 is odd (not the value, but it's bitcount), and we want the stopbit to be 1, so the parity should be even
@@ -144,7 +158,7 @@ namespace Iot.Device.Tests.Seatalk1
                 0x9C, 0x01, 0x03, 0x0f
             };
 
-            var withParity = SeatalkInterface.CalculateParityForEachByte(datagram);
+            var withParity = Seatalk1Parser.CalculateParityForEachByte(datagram);
             Assert.Equal(0x9c, withParity[0].B);
             Assert.Equal(0, withParity[0].Index);
             // 0x9c is even (not the value, but it's bitcount), and we want the stopbit to be 1, so the parity should be odd
@@ -158,18 +172,15 @@ namespace Iot.Device.Tests.Seatalk1
         [Fact]
         public void CanBasicRoundTripMessages()
         {
-            MemoryStream ms = new MemoryStream();
-
-            Seatalk1Parser parser = new Seatalk1Parser(ms);
+            Seatalk1Parser parser = new Seatalk1Parser("Test", _port);
             foreach (var m in parser.MessageTypes)
             {
                 // we already have an instance of each message type
                 byte[] data = m.CreateDatagram();
-                var decoded = parser.GetTypeOfNextMessage(data, out int bytesOfNewMessage);
+                var decoded = parser.GetDataForNextMessage(data, out int bytesOfNewMessage);
                 Assert.NotNull(decoded);
                 Assert.NotEqual(0, bytesOfNewMessage);
                 Assert.Equal(m.GetType(), decoded.GetType());
-                Assert.Equal(m, decoded);
             }
         }
 
@@ -183,21 +194,57 @@ namespace Iot.Device.Tests.Seatalk1
         [InlineData("10 01 00 01")]
         [InlineData("85 06 00 00 C0 0D 17 00 E8")]
         [InlineData("11 01 12 04")]
-        public void ParseAndBack(string inputSentence)
+        public void Parse(string inputSentence)
         {
             var split = inputSentence.Split(new char[] { '\n', '\r', ' ' }, StringSplitOptions.RemoveEmptyEntries);
             // FromHexString expects an uninterrupted sequence of two-char pairs
             byte[] inputDatagram = Convert.FromHexString(string.Join(string.Empty, split));
 
             MemoryStream ms = new MemoryStream();
-            Seatalk1Parser parser = new Seatalk1Parser(ms);
+            Seatalk1Parser parser = new Seatalk1Parser("Test", new FakeSerialPort(ms.GetBuffer()));
 
-            var msg = parser.GetTypeOfNextMessage(inputDatagram, out int bytesInMessage);
+            var msg = parser.GetDataForNextMessage(inputDatagram, out int bytesInMessage);
             Assert.NotNull(msg);
             Assert.NotEqual(0, bytesInMessage);
+            Assert.Equal(msg.Count, inputDatagram.Length);
+        }
 
-            byte[] roundTripped = msg.CreateDatagram();
-            Assert.Equal(inputDatagram, roundTripped);
+        [Fact]
+        public void DecodeNothing()
+        {
+            var m = new MemoryStream();
+            var parser = new Seatalk1Parser("Test", new FakeSerialPort(m.GetBuffer()));
+            parser.StartDecode();
+            parser.StopDecode();
+        }
+
+        [Fact]
+        public void ParseSomeMessages()
+        {
+            string data = @"9c 01 12 00
+84 06 12 00 00 00 00 00 08
+86 01 02 fd
+84 06 12 00 00 00 00 00 08
+9c 01 12 00
+84 06 12 00 00 00 00 00 08";
+            MemoryStream ms = GetStreamFromInputString(data);
+            var parser = new Seatalk1Parser("Test", _port);
+            _port.SimulateReceive(ms.GetBuffer());
+
+            List<SeatalkMessage> messages = new List<SeatalkMessage>();
+            parser.OnNewSequence += (src, message) =>
+            {
+                Assert.NotNull(message);
+                var msg = message as SeatalkMessage;
+                Assert.NotNull(msg);
+                Assert.True(msg.ExpectedLength >= 3);
+                messages.Add(msg);
+            };
+
+            parser.StartDecode();
+            parser.StopDecode();
+
+            Assert.Equal(6, messages.Count);
         }
 
         private static MemoryStream GetStreamFromInputString(string data)

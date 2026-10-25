@@ -154,7 +154,7 @@ namespace Iot.Device.Nmea0183
         /// This is expected to be a blocking call, so that the parser thread does not busy-wait when no data is available.
         /// </summary>
         /// <returns>A string</returns>
-        protected virtual string? ReadNextLine()
+        protected internal virtual string? ReadNextLine()
         {
             return _reader.ReadLine();
         }

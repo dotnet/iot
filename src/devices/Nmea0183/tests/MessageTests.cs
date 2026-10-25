@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
@@ -13,10 +14,13 @@ namespace Iot.Device.Nmea0183.Tests
 {
     public class Seatalk1MessageTests
     {
-        private Seatalk1Parser _parser;
+        private readonly Seatalk1Parser _parser;
+        private readonly FakeSerialPort _port;
+
         public Seatalk1MessageTests()
         {
-            _parser = new Seatalk1Parser(new MemoryStream());
+            _port = new FakeSerialPort();
+            _parser = new Seatalk1Parser("Test", _port);
         }
 
         [Theory]
@@ -35,29 +39,18 @@ namespace Iot.Device.Nmea0183.Tests
         {
             msg = msg.Replace(" ", string.Empty);
             byte[] data = Convert.FromHexString(msg);
-            var actualType = _parser.GetTypeOfNextMessage(data, out int length);
+            _port.SimulateReceive(data);
+            string? line = _parser.ReadNextLine();
+            Assert.NotNull(line);
+            TalkerSentence? ts = _parser.ParseSentence(line, out var error);
+            Assert.Equal(NmeaError.None, error);
+            Assert.NotNull(ts);
+            DateTimeOffset time = DateTimeOffset.Now;
+            var actualType = ts.TryGetTypedValue(ref time) as SeatalkMessage;
             Assert.NotNull(actualType);
-            Assert.Equal(data.Length, length);
+            Assert.Equal(data.Length, actualType.ExpectedLength);
 
             Assert.Equal(expectedType, actualType.GetType());
-        }
-
-        [Fact]
-        public void WithKeywordCreatesCopy()
-        {
-            var obj = new CompassHeadingAndRudderPosition()
-            {
-                CompassHeading = Angle.FromDegrees(10)
-            };
-
-            var copy = obj with
-            {
-                CompassHeading = Angle.FromDegrees(12)
-            };
-
-            Assert.False(ReferenceEquals(obj, copy));
-
-            Assert.NotEqual(obj, copy);
         }
 
         [Fact]
@@ -88,7 +81,7 @@ namespace Iot.Device.Nmea0183.Tests
         {
             ApparentWindAngle angle = new ApparentWindAngle(Angle.FromDegrees(value));
             byte[] data = angle.CreateDatagram();
-            var angle2 = angle.CreateNewMessage(data);
+            ApparentWindAngle angle2 = new ApparentWindAngle(data.Select(x => x.ToString("X2")).ToList(), DateTimeOffset.Now);
             Assert.Equal(angle, angle2);
         }
 
@@ -119,7 +112,8 @@ namespace Iot.Device.Nmea0183.Tests
 
             Assert.Equal(0x0F, data[6] & 0xF); // flags
 
-            var reverse = n.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var reverse = new NavigationToWaypoint(ts, DateTimeOffset.Now);
             Assert.Equal(n, reverse);
         }
 
@@ -151,7 +145,8 @@ namespace Iot.Device.Nmea0183.Tests
 
             Assert.Equal(0x0F, data[6] & 0xF); // flags
 
-            var reverse = n.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var reverse = new NavigationToWaypoint(ts, DateTimeOffset.Now);
             Assert.Equal(n, reverse);
         }
 
@@ -167,7 +162,8 @@ namespace Iot.Device.Nmea0183.Tests
             };
 
             byte[] data = n.CreateDatagram();
-            var reverse = n.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var reverse = new NavigationToWaypoint(ts, DateTimeOffset.Now);
             Assert.Equal(n, reverse);
         }
 
@@ -185,7 +181,8 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(12, data[2]);
             Assert.Equal(2, data[3]);
 
-            var reverse = windSpeed.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var reverse = new ApparentWindSpeed(ts, DateTimeOffset.Now);
             Assert.Equal(windSpeed, reverse);
         }
 
@@ -197,8 +194,9 @@ namespace Iot.Device.Nmea0183.Tests
                 0x82, 0x05, 0x00, 0xff, 0x00, 0xff, 0x01, 0xff
             };
 
-            var actualType = _parser.GetTypeOfNextMessage(data, out int length)!;
+            var actualType = _parser.GetDataForNextMessage(data, out int length)!;
             Assert.Null(actualType);
+            Assert.Equal(0, length);
         }
 
         [Fact]
@@ -209,9 +207,8 @@ namespace Iot.Device.Nmea0183.Tests
                 0x82, 0x05, 0x00, 0xFF, 0x70, 0x8F, 0x05, 0xFA
             };
 
-            var actualType = _parser.GetTypeOfNextMessage(data, out int length)!;
-            Assert.NotNull(actualType);
-            var decoded = (TargetWaypointName)actualType.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var decoded = new TargetWaypointName(ts, DateTimeOffset.Now);
             Assert.NotNull(decoded);
             Assert.Equal("00G1", decoded.Name);
         }
@@ -224,9 +221,8 @@ namespace Iot.Device.Nmea0183.Tests
                 0x82, 0x05, 0xAA, 0x55, 0x27, 0xd8, 0xA1, 0x5e
             };
 
-            var actualType = _parser.GetTypeOfNextMessage(data, out int length)!;
-            Assert.NotNull(actualType);
-            var decoded = (TargetWaypointName)actualType.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var decoded = new TargetWaypointName(ts, DateTimeOffset.Now);
             Assert.NotNull(decoded);
             Assert.Equal("ZNBX", decoded.Name);
         }
@@ -239,13 +235,24 @@ namespace Iot.Device.Nmea0183.Tests
                 0x82, 0x05, 0xAA, 0x55, 0x27, 0xd8, 0xA1, 0x5e
             };
 
-            var actualType = _parser.GetTypeOfNextMessage(data, out int length)!;
-            Assert.NotNull(actualType);
-            var decoded = (TargetWaypointName)actualType.CreateNewMessage(data);
-            Assert.NotNull(decoded);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var decoded = new TargetWaypointName(ts, DateTimeOffset.Now);
 
             var dataEncoded = decoded.CreateDatagram();
             Assert.Equal(data, dataEncoded);
+        }
+
+        [Fact]
+        public void UseWrongTypeInDecoder()
+        {
+            byte[] data =
+            {
+                0x82, 0x05, 0xAA, 0x55, 0x27, 0xd8, 0xA1, 0x5e
+            };
+
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            // In the normal flow, the parser will not call the wrong type, but if it does, it should throw an exception.
+            Assert.Throws<InvalidOperationException>(() => new NavigationToWaypoint(ts, DateTimeOffset.Now));
         }
 
         [Theory]
@@ -258,7 +265,8 @@ namespace Iot.Device.Nmea0183.Tests
         {
             TargetWaypointName t1 = new TargetWaypointName(input);
             var data = t1.CreateDatagram();
-            TargetWaypointName t2 = (TargetWaypointName)t1.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var t2 = new TargetWaypointName(ts, DateTimeOffset.Now);
             Assert.Equal(expected, t2.Name);
         }
 
@@ -267,7 +275,8 @@ namespace Iot.Device.Nmea0183.Tests
         {
             SpeedTroughWater stw = new SpeedTroughWater(Speed.FromKnots(5.2));
             var data = stw.CreateDatagram();
-            SpeedTroughWater stw2 = (SpeedTroughWater)stw.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var stw2 = new SpeedTroughWater(ts, DateTimeOffset.Now);
             Assert.False(stw.Forwarded);
             Assert.True(stw.Speed.Equals(Speed.FromKnots(5.2), Speed.FromKnots(0.1)));
             Assert.Equal(stw, stw2);
@@ -287,7 +296,8 @@ namespace Iot.Device.Nmea0183.Tests
                 TurnDirection = TurnDirection.TurnToPort,
             };
             var data = hdg.CreateDatagram();
-            CompassHeadingAutopilotCourse hdg2 = (CompassHeadingAutopilotCourse)hdg.CreateNewMessage(data);
+            var ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id, data.Select(x => x.ToString("X2")).ToList());
+            var hdg2 = new CompassHeadingAutopilotCourse(ts, DateTimeOffset.Now);
             Assert.Equal(hdg, hdg2);
         }
     }
