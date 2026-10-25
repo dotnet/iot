@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Iot.Device.Nmea0183;
 
 namespace Iot.Device.Seatalk1.Messages
 {
@@ -19,8 +17,35 @@ namespace Iot.Device.Seatalk1.Messages
     /// <remarks>
     /// To change the setting, send the respective keycodes (0x09 or 0x0a) instead of a message with the desired new value.
     /// </remarks>
-    public record DeadbandSetting : SeatalkMessage
+    public class DeadbandSetting : SeatalkMessage
     {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public DeadbandSetting()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance from sentence data.
+        /// </summary>
+        public DeadbandSetting(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+
+            Mode = GetField(2) switch
+            {
+                1 => DeadbandMode.Automatic,
+                2 => DeadbandMode.Minimal,
+                _ => DeadbandMode.None,
+            };
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
+
         /// <inheritdoc />
         public override byte CommandByte => 0x87;
 
@@ -31,26 +56,6 @@ namespace Iot.Device.Seatalk1.Messages
         /// The new mode
         /// </summary>
         public DeadbandMode Mode { get; init; }
-
-        /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            VerifyPacket(data);
-            DeadbandMode mode = DeadbandMode.None;
-            if (data[2] == 1)
-            {
-                mode = DeadbandMode.Automatic;
-            }
-            else if (data[2] == 2)
-            {
-                mode = DeadbandMode.Minimal;
-            }
-
-            return new DeadbandSetting()
-            {
-                Mode = mode,
-            };
-        }
 
         /// <summary>
         /// Creates a Deadband status change message.
@@ -75,6 +80,12 @@ namespace Iot.Device.Seatalk1.Messages
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[1] == 0x0;
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Deadband mode: {Mode}";
         }
     }
 }

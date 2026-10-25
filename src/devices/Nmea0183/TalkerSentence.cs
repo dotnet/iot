@@ -93,19 +93,43 @@ namespace Iot.Device.Nmea0183
             switch (commandByte)
             {
                 case ApparentWindAngle.HexId:
-                    seatalkMessage = new ApparentWindAngle(sentence, time);
+                    seatalkMessage = new ApparentWindAngle(sentence.Fields, time);
                     return true;
                 case 0x11:
                     seatalkMessage = new AutopilotWindStatus(sentence, time);
                     return true;
                 case 0x20:
-                    seatalkMessage = new RudderSensorAngle(sentence, time);
+                    seatalkMessage = new SpeedTroughWater(sentence, time);
                     return true;
-                case 0x21:
-                    seatalkMessage = new HeadingAndTrackControl(sentence, time);
+                case 0x82:
+                    seatalkMessage = new TargetWaypointName(sentence, time);
                     return true;
-                case 0x22:
-                    seatalkMessage = new HeadingAndTrackControlStatus(sentence, time);
+                case 0x83:
+                    seatalkMessage = new CourseComputerStatus(sentence, time);
+                    return true;
+                case 0x84:
+                    seatalkMessage = new CompassHeadingAutopilotCourse(sentence, time);
+                    return true;
+                case 0x85:
+                    seatalkMessage = new NavigationToWaypoint(sentence, time);
+                    return true;
+                case 0x86:
+                    seatalkMessage = new Keystroke(sentence.Fields, time);
+                    return true;
+                case 0x87:
+                    seatalkMessage = new DeadbandSetting(sentence, time);
+                    return true;
+                case 0x88:
+                    seatalkMessage = new AutopilotCalibrationParameterMessage(sentence, time);
+                    return true;
+                case 0x95:
+                    seatalkMessage = new CompassHeadingAutopilotCourseAlt(sentence, time);
+                    return true;
+                case 0x9C:
+                    seatalkMessage = new CompassHeadingAndRudderPosition(sentence, time);
+                    return true;
+                case 0xA4:
+                    seatalkMessage = new DeviceIdentification(sentence, time);
                     return true;
                 default:
                     seatalkMessage = null!;

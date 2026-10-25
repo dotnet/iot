@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Iot.Device.Nmea0183;
 
 namespace Iot.Device.Seatalk1.Messages
 {
@@ -13,7 +11,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// Set lamp intensity message. This message can be used to instruct all devices on the bus to adjust their background light.
     /// This message is only sent once from a controlling device.
     /// </summary>
-    public record SetLampIntensity : SeatalkMessage
+    public class SetLampIntensity : SeatalkMessage
     {
         private readonly DisplayBacklightLevel _intensity;
 
@@ -33,6 +31,20 @@ namespace Iot.Device.Seatalk1.Messages
         {
             Intensity = intensity;
         }
+
+        /// <summary>
+        /// Constructs a new instance from sentence data.
+        /// </summary>
+        public SetLampIntensity(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+            Intensity = (DisplayBacklightLevel)(GetField(2) & 0xF);
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override byte CommandByte => 0x30;
@@ -61,17 +73,6 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            int newIntensity = data[2] & 0xF;
-
-            return new SetLampIntensity()
-            {
-                Intensity = (DisplayBacklightLevel)newIntensity,
-            };
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             return new byte[]
@@ -84,6 +85,12 @@ namespace Iot.Device.Seatalk1.Messages
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[2] is 0 or 0x4 or 0x8 or 0xC;
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Lamp intensity: {Intensity}";
         }
     }
 }

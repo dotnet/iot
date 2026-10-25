@@ -33,6 +33,7 @@ namespace Nmea.Simulator
         private NmeaUdpServer? _udpServer;
         private SeatalkToNmeaConverter? _seatalkInterface;
         private Random _random;
+        private AutoPilotRemoteController? _seatalkAutopilot;
 
         public Simulator(SimulatorArguments arguments)
         {
@@ -166,7 +167,8 @@ namespace Nmea.Simulator
                 // For simplicity, this example is not using a MessageRouter.
                 if (!string.IsNullOrWhiteSpace(_arguments.SeatalkInterface))
                 {
-                    _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", _arguments.SeatalkInterface);
+                    _seatalkAutopilot = new AutoPilotRemoteController("SeatalkAp", null);
+                    _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", _arguments.SeatalkInterface, _seatalkAutopilot);
                     _seatalkInterface.OnNewSequence += SeatalkNewSequence;
                     _seatalkInterface.SentencesToTranslate.Add(SentenceId.Any);
                     _seatalkInterface.StartDecode();
@@ -195,6 +197,7 @@ namespace Nmea.Simulator
             {
                 _seatalkInterface?.StopDecode();
                 _seatalkInterface?.Dispose();
+                _seatalkAutopilot?.Dispose();
                 _tcpServer?.StopDecode();
                 _udpServer?.StopDecode();
                 if (_simulatorThread != null)

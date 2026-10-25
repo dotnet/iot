@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
 using UnitsNet;
 
@@ -15,7 +12,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// <summary>
     /// Compass heading and rudder position message from autopilot
     /// </summary>
-    public record CompassHeadingAndRudderPosition : SeatalkMessage
+    public class CompassHeadingAndRudderPosition : SeatalkMessage
     {
         /// <summary>
         /// Standard constructor
@@ -26,6 +23,27 @@ namespace Iot.Device.Seatalk1.Messages
             RudderPosition = Angle.FromDegrees(0);
             TurnDirection = TurnDirection.TurnToPort;
         }
+
+        /// <summary>
+        /// Constructs an instance from sentence data.
+        /// </summary>
+        public CompassHeadingAndRudderPosition(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+
+            uint u = (uint)(GetField(1) >> 4);
+            uint vw = GetField(2);
+            long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + ((u & 0x4) == 0x4 ? 1 : 0);
+            CompassHeading = Angle.FromDegrees(heading);
+            TurnDirection = (u & 0x8) == 0x8 ? TurnDirection.TurnToStarboard : TurnDirection.TurnToPort;
+            sbyte rudder = unchecked((sbyte)GetField(3));
+            RudderPosition = Angle.FromDegrees(rudder);
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override byte CommandByte => 0x9c;
@@ -58,31 +76,6 @@ namespace Iot.Device.Seatalk1.Messages
         {
             get;
             init;
-        }
-
-        /// <summary>
-        /// 84  U6  VW  XY 0Z 0M RR SS TT  Compass heading  Autopilot course
-        /// </summary>
-        /// <param name="data">Input data</param>
-        /// <returns>A message of this type</returns>
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            VerifyPacket(data);
-
-            uint u = ((uint)data[1]) >> 4;
-            uint vw = data[2];
-            long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + ((u & 0x4) == 0x4 ? 1 : 0);
-            Angle headingA = Angle.FromDegrees(heading);
-
-            TurnDirection td = (u & 0x8) == 0x8 ? TurnDirection.TurnToStarboard : TurnDirection.TurnToPort;
-            sbyte rudder = (sbyte)data[3];
-
-            return new CompassHeadingAndRudderPosition()
-            {
-                CompassHeading = headingA,
-                RudderPosition = Angle.FromDegrees(rudder),
-                TurnDirection = td,
-            };
         }
 
         /// <inheritdoc />
@@ -125,6 +118,12 @@ namespace Iot.Device.Seatalk1.Messages
             data[3] = (byte)rudder;
 
             return data;
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Heading: {CompassHeading.Degrees:F0}°, Rudder: {RudderPosition.Degrees:F0}°, Turn: {TurnDirection}";
         }
     }
 }

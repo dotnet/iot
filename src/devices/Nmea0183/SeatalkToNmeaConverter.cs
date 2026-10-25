@@ -15,11 +15,9 @@ using UnitsNet;
 namespace Iot.Device.Seatalk1
 {
     /// <summary>
-    /// Seatalk to NMEA-0183 converter.
-    /// This subclasses <see cref="NmeaSinkAndSource"/> and hence can be included in a <see cref="MessageRouter"/>, which will make
-    /// the Seatalk interface look very similar to an NMEA-0183 interface.
-    /// This class embeds the <see cref="SeatalkInterface"/>, so no extra instance is required if this class is used. The class supports translation
-    /// of directly wrapped seatalk messages (that start with $STALK) as well as a set of navigation messages (see <see cref="SentencesToTranslate"/>)
+    /// Seatalk to NMEA-0183 converter for autopilot and wind messages.
+    /// This class can be used to translate between Seatalk and NMEA-0183 sentences, and to control an autopilot through a NMEA0183 interface.
+    /// Together with <see cref="Nmea2000AutopilotEmulator"/> this class can be used to connect a Seatalk autopilot to a NMEA2000 interface.
     /// </summary>
     public class SeatalkToNmeaConverter : NmeaSinkAndSource
     {

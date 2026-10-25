@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Iot.Device.Common;
+using Iot.Device.Nmea0183;
 using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
@@ -14,7 +10,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// <summary>
     /// This message provides the apparent wind speed as measured by the wind instrument on the masthead of a sailboat.
     /// </summary>
-    public record ApparentWindSpeed : SeatalkMessage
+    public class ApparentWindSpeed : SeatalkMessage
     {
         private readonly Speed _apparentSpeed;
 
@@ -34,6 +30,33 @@ namespace Iot.Device.Seatalk1.Messages
         {
             ApparentSpeed = apparentSpeed;
         }
+
+        /// <summary>
+        /// Construct from a Seatalk sentence.
+        /// </summary>
+        public ApparentWindSpeed(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+
+            Speed spd;
+            byte b2 = GetField(2);
+            byte b3 = GetField(3);
+            if ((b2 & 0x80) == 0x80)
+            {
+                spd = Speed.FromMetersPerSecond((b2 & 0x7F) + (b3 / 10.0));
+            }
+            else
+            {
+                spd = Speed.FromKnots((b2 & 0x7F) + (b3 / 10.0));
+            }
+
+            ApparentSpeed = spd;
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override byte CommandByte => 0x11;
@@ -63,25 +86,6 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            Speed spd = Speed.Zero;
-            if ((data[2] & 0x80) == 0x80) // Speed is given in m/s
-            {
-                spd = Speed.FromMetersPerSecond((data[2] & 0x7F) + (data[3] / 10.0));
-            }
-            else // Speed is in knots
-            {
-                spd = Speed.FromKnots((data[2] & 0x7F) + (data[3] / 10.0));
-            }
-
-            return this with
-            {
-                ApparentSpeed = spd
-            };
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             double rounded = Math.Round(ApparentSpeed.Knots, 1);
@@ -92,6 +96,12 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 CommandByte, (byte)(ExpectedLength - 3), byte1, byte2
             };
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Apparent wind speed: {ApparentSpeed.Knots:F1} kn";
         }
     }
 }

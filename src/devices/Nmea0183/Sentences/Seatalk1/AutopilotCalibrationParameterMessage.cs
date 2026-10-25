@@ -6,14 +6,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Nmea0183;
 
 namespace Iot.Device.Seatalk1.Messages
 {
     /// <summary>
     /// Message generated when autopilot is in calibration mode.
     /// </summary>
-    public record AutopilotCalibrationParameterMessage : SeatalkMessage
+    public class AutopilotCalibrationParameterMessage : SeatalkMessage
     {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public AutopilotCalibrationParameterMessage()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance from sentence data.
+        /// </summary>
+        public AutopilotCalibrationParameterMessage(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+            Parameter = (AutopilotCalibrationParameter)GetField(2);
+            CurrentSetting = GetField(3);
+            MaxValue = GetField(4);
+            MinValue = GetField(5);
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => false;
+
         /// <inheritdoc />
         public override byte CommandByte => 0x88;
 
@@ -57,22 +82,6 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            int param = data[2];
-            int value = Convert.ToInt32(data[3]);
-            int max = Convert.ToInt32(data[4]);
-            int min = Convert.ToInt32(data[5]);
-            return new AutopilotCalibrationParameterMessage()
-            {
-                Parameter = (AutopilotCalibrationParameter)param,
-                CurrentSetting = value,
-                MinValue = min,
-                MaxValue = max,
-            };
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             byte[] data = new byte[ExpectedLength];
@@ -83,6 +92,12 @@ namespace Iot.Device.Seatalk1.Messages
             data[4] = (byte)MaxValue;
             data[5] = (byte)MinValue;
             return data;
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Calibration parameter {Parameter}: {CurrentSetting} (min {MinValue}, max {MaxValue})";
         }
     }
 }

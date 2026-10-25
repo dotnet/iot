@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Nmea0183.Sentences;
+using Iot.Device.Nmea0183.Tests;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
 using Moq;
@@ -18,14 +19,15 @@ namespace Iot.Device.Tests.Seatalk1
 {
     public sealed class AutoPilotRemoteControllerTests
     {
-        private readonly Mock<SeatalkInterface> _interface;
         private readonly AutoPilotRemoteController _testee;
         private readonly CancellationTokenSource _tokenSource;
+        private readonly TestSource _testSource;
 
         public AutoPilotRemoteControllerTests()
         {
-            _interface = new Mock<SeatalkInterface>(MockBehavior.Strict);
-            _testee = new AutoPilotRemoteController(_interface.Object);
+            _testSource = new TestSource();
+            _testee = new AutoPilotRemoteController("Test", _testSource.InterfaceName);
+            _testSource.OnNewSequence += (x, y) => _testee.SendSentence(x, y);
             _tokenSource = new CancellationTokenSource();
         }
 
@@ -47,7 +49,6 @@ namespace Iot.Device.Tests.Seatalk1
                 AutopilotStatus = AutopilotStatus.Standby, AutoPilotCourse = Angle.FromDegrees(100), CompassHeading = Angle.FromDegrees(95)
             };
 
-            _interface.Object.OnNewMessage(msg);
             Assert.Equal(AutopilotStatus.Standby, _testee.Status);
             Assert.Null(_testee.AutopilotDesiredHeading);
             Assert.Equal(Angle.FromDegrees(95), _testee.AutopilotHeading);
@@ -68,7 +69,7 @@ namespace Iot.Device.Tests.Seatalk1
                 RudderPosition = Angle.FromDegrees(-10)
             };
 
-            _interface.Object.OnNewMessage(msg);
+            _testSource.SendSentenceToTestClass(msg);
             Assert.Equal(AutopilotStatus.Auto, _testee.Status);
             Assert.Equal(Angle.FromDegrees(100), _testee.AutopilotDesiredHeading);
             Assert.Equal(Angle.FromDegrees(95), _testee.AutopilotHeading);
@@ -86,7 +87,7 @@ namespace Iot.Device.Tests.Seatalk1
                 RudderPosition = Angle.Zero,
             };
 
-            _interface.Object.OnNewMessage(msg);
+            _testSource.SendSentenceToTestClass(msg);
             Assert.Null(_testee.AutopilotDesiredHeading);
             Assert.Equal(Angle.FromDegrees(90), _testee.AutopilotHeading);
             Assert.Equal(AutopilotAlarms.None, _testee.Alarms);
@@ -108,11 +109,9 @@ namespace Iot.Device.Tests.Seatalk1
         {
             SetToStandby();
             Assert.Equal(AutopilotStatus.Standby, _testee.Status);
-            _testee.UpdateStatus();
             Assert.Equal(AutopilotStatus.Standby, _testee.Status);
             _testee.DefaultTimeout = TimeSpan.FromSeconds(0);
             Thread.Sleep(100);
-            _testee.UpdateStatus();
             Assert.Equal(AutopilotStatus.Offline, _testee.Status);
         }
 
@@ -127,15 +126,16 @@ namespace Iot.Device.Tests.Seatalk1
                 CompassHeading = Angle.FromDegrees(9),
             };
 
-            _interface.Object.OnNewMessage(msg);
+            _testSource.SendSentenceToTestClass(msg);
 
             Keystroke ks = new Keystroke(AutopilotButtons.PlusTen, 1);
             bool called = false;
-            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(m =>
+            _testSource.MessageReceived += (s, i) =>
             {
-                Assert.True(ks.Equals(m));
+                Assert.True(ks.Equals(i));
                 called = true;
-            }).Returns(true);
+            };
+
             _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
             _testee.TurnBy(Angle.FromDegrees(20), TurnDirection.TurnToStarboard, _tokenSource.Token);
             int i = 100;
@@ -150,7 +150,6 @@ namespace Iot.Device.Tests.Seatalk1
             }
 
             Assert.True(called);
-            _interface.Verify(x => x.SendMessage(ks));
         }
 
         [Fact]
@@ -164,13 +163,14 @@ namespace Iot.Device.Tests.Seatalk1
                 CompassHeading = Angle.FromDegrees(9),
             };
 
-            _interface.Object.OnNewMessage(msg);
+            _testSource.SendSentenceToTestClass(msg);
 
             Keystroke ks = new Keystroke(AutopilotButtons.MinusTen, 1);
-            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            _testSource.MessageReceived += (s, i) =>
             {
                 Assert.Equal(ks, i);
-            }).Returns(true);
+            };
+
             _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
             _testee.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort, _tokenSource.Token);
             int i = 100;
@@ -183,8 +183,6 @@ namespace Iot.Device.Tests.Seatalk1
 
                 Thread.Sleep(100);
             }
-
-            _interface.Verify(x => x.SendMessage(ks));
         }
 
         [Fact]
@@ -198,34 +196,40 @@ namespace Iot.Device.Tests.Seatalk1
                 CompassHeading = Angle.FromDegrees(9),
             };
 
-            _interface.Object.OnNewMessage(msg);
+            _testSource.SendSentenceToTestClass(msg);
 
             int indexOfCommand = 0;
-            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            _testSource.MessageReceived += (s, i) =>
             {
                 var ks = (Keystroke)i;
                 if (indexOfCommand == 0)
                 {
                     Assert.True(ks.ButtonsPressed == AutopilotButtons.MinusTen);
-                    msg = msg with
+                    msg = new CompassHeadingAutopilotCourse()
                     {
+                        AutopilotStatus = AutopilotStatus.Auto,
+                        CompassHeading = Angle.FromDegrees(9),
                         AutoPilotCourse = Angle.Zero
                     };
                 }
                 else if (indexOfCommand == 1)
                 {
                     Assert.True(ks.ButtonsPressed == AutopilotButtons.MinusOne);
-                    msg = msg with
+                    msg = msg = new CompassHeadingAutopilotCourse()
                     {
-                        AutoPilotCourse = Angle.FromDegrees(359)
+                        AutopilotStatus = AutopilotStatus.Auto,
+                        AutoPilotCourse = Angle.FromDegrees(359),
+                        CompassHeading = Angle.FromDegrees(9),
                     };
                 }
                 else if (indexOfCommand == 2)
                 {
                     Assert.True(ks.ButtonsPressed == AutopilotButtons.MinusOne);
-                    msg = msg with
+                    msg = msg = new CompassHeadingAutopilotCourse()
                     {
-                        AutoPilotCourse = Angle.FromDegrees(358)
+                        AutopilotStatus = AutopilotStatus.Auto,
+                        AutoPilotCourse = Angle.FromDegrees(358),
+                        CompassHeading = Angle.FromDegrees(9),
                     };
                 }
                 else
@@ -233,9 +237,9 @@ namespace Iot.Device.Tests.Seatalk1
                     Assert.Fail("More commands sent than necessary");
                 }
 
-                _interface.Object.OnNewMessage(msg);
+                _testSource.SendSentenceToTestClass(msg);
                 indexOfCommand++;
-            }).Returns(true);
+            };
 
             _testee.TurnBy(Angle.FromDegrees(12), TurnDirection.TurnToPort, _tokenSource.Token);
             int i = 100;
@@ -261,15 +265,15 @@ namespace Iot.Device.Tests.Seatalk1
                 CompassHeading = Angle.FromDegrees(9),
             };
 
-            _interface.Object.OnNewMessage(msg);
+            _testSource.SendSentenceToTestClass(msg);
 
             bool called = false;
             Keystroke ks = new Keystroke(AutopilotButtons.PlusTen, 1); // We expect that it's automatically guessing the "nearer" direction right
-            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            _testSource.MessageReceived += (s, i) =>
             {
                 Assert.Equal(ks, i);
                 called = true;
-            }).Returns(true);
+            };
             _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
             _testee.TurnTo(Angle.FromDegrees(100), null, _tokenSource.Token);
 
@@ -283,8 +287,6 @@ namespace Iot.Device.Tests.Seatalk1
 
                 Thread.Sleep(100);
             }
-
-            _interface.Verify(x => x.SendMessage(ks));
         }
 
         [Fact]
@@ -297,7 +299,7 @@ namespace Iot.Device.Tests.Seatalk1
 
             int num = 0;
             Keystroke ks = new Keystroke(0x0a); // We expect that it's automatically guessing the "nearer" direction right
-            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            _testSource.MessageReceived += (s, i) =>
             {
                 if (num == 0)
                 {
@@ -307,7 +309,7 @@ namespace Iot.Device.Tests.Seatalk1
                         Mode = DeadbandMode.Minimal,
                     };
 
-                    _interface.Object.OnNewMessage(msg);
+                    _testSource.SendSentenceToTestClass(msg);
                 }
                 else
                 {
@@ -318,11 +320,11 @@ namespace Iot.Device.Tests.Seatalk1
                         Mode = DeadbandMode.Automatic,
                     };
 
-                    _interface.Object.OnNewMessage(msg);
+                    _testSource.SendSentenceToTestClass(msg);
                 }
 
                 num++;
-            }).Returns(true);
+            };
 
             Assert.True(_testee.SetDeadbandMode(DeadbandMode.Minimal));
             Assert.True(_testee.SetDeadbandMode(DeadbandMode.Automatic));
@@ -348,7 +350,7 @@ namespace Iot.Device.Tests.Seatalk1
         {
             SetToStandby();
             Keystroke ks = new Keystroke(AutopilotButtons.Auto, 1); // We expect that it's automatically guessing the "nearer" direction right
-            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            _testSource.MessageReceived += (s, i) =>
             {
                 Assert.Equal(ks, i);
                 var msg = new CompassHeadingAutopilotCourse()
@@ -358,9 +360,8 @@ namespace Iot.Device.Tests.Seatalk1
                     CompassHeading = Angle.FromDegrees(9),
                 };
 
-                _interface.Object.OnNewMessage(msg);
-
-            }).Returns(true);
+                _testSource.SendSentenceToTestClass(msg);
+            };
 
             TurnDirection? ignore = TurnDirection.TurnToStarboard;
             Assert.True(_testee.SetStatus(AutopilotStatus.Auto, ref ignore));

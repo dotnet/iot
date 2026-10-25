@@ -62,12 +62,21 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <summary>
+        /// Create a default instance.
+        /// </summary>
+        public Keystroke()
+        {
+            Source = 1;
+            KeyCode = 0;
+        }
+
+        /// <summary>
         /// The format of the message is
         /// 86  X1  YY  yy, where X is the sender (1 = Remote control, 0 = Autopilot unit)
         /// and YY is the keycode. yy is the binary inverse of YY.
         /// </summary>
         /// <param name="data">The input data</param>
-        /// <returns>A message</returns>
+        /// <param name="time">Timestamp of the sentence.</param>
         public Keystroke(IReadOnlyList<string> data, DateTimeOffset time)
             : base(data, time)
         {

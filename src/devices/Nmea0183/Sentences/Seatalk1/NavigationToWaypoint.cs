@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Iot.Device.Nmea0183;
 using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
@@ -13,7 +11,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// <summary>
     /// Navigation-to-waypoint message from a navigation computer
     /// </summary>
-    public record NavigationToWaypoint : SeatalkMessage
+    public class NavigationToWaypoint : SeatalkMessage
     {
         /// <summary>
         /// Default constructor
@@ -36,6 +34,67 @@ namespace Iot.Device.Seatalk1.Messages
             BearingIsTrue = bearingIsTrue;
             DistanceToDestination = distanceToDestination;
         }
+
+        /// <summary>
+        /// Construct from sentence data.
+        /// </summary>
+        public NavigationToWaypoint(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+
+            byte flags = GetField(6);
+            int vvv = ((GetField(1) & 0xF0) >> 4) | (GetField(2) << 4);
+            Length? crossTrackDistance = Length.FromNauticalMiles(vvv / 100.0);
+            if ((GetField(6) & 0x40) == 0x40)
+            {
+                crossTrackDistance = -crossTrackDistance;
+            }
+
+            if ((flags & 1) == 0)
+            {
+                crossTrackDistance = null;
+            }
+
+            bool bearingIsTrue = (GetField(3) & 0x8) == 0x8;
+            int u = GetField(3) & 0x3;
+
+            int remainder = (GetField(4) & 0xF) << 4;
+            remainder |= (GetField(3) & 0xF0) >> 4;
+
+            Angle? bearingToDestination = Angle.FromDegrees((u * 90) + (remainder / 2.0));
+
+            if ((flags & 2) == 0)
+            {
+                bearingToDestination = null;
+            }
+
+            int dist = GetField(5) << 4;
+            dist |= (GetField(4) >> 4);
+
+            Length? distance;
+            if ((flags & 4) == 0)
+            {
+                distance = null;
+            }
+            else if ((GetField(6) & 0x10) == 0x10)
+            {
+                distance = Length.FromNauticalMiles(dist / 100.0);
+            }
+            else
+            {
+                distance = Length.FromNauticalMiles(dist / 10.0);
+            }
+
+            BearingIsTrue = bearingIsTrue;
+            BearingToDestination = bearingToDestination;
+            CrossTrackError = crossTrackDistance;
+            DistanceToDestination = distance;
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override byte CommandByte => 0x85;
@@ -77,61 +136,6 @@ namespace Iot.Device.Seatalk1.Messages
         {
             get;
             init;
-        }
-
-        /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            byte flags = data[6];
-            int vvv = ((data[1] & 0xF0) >> 4) | (data[2] << 4);
-            Length? crossTrackDistance = Length.FromNauticalMiles(vvv / 100.0);
-            if ((data[6] & 0x40) == 0x40)
-            {
-                crossTrackDistance = -crossTrackDistance;
-            }
-
-            if ((flags & 1) == 0)
-            {
-                crossTrackDistance = null;
-            }
-
-            bool bearingIsTrue = (data[3] & 0x8) == 0x8;
-            int u = data[3] & 0x3;
-
-            int remainder = (data[4] & 0xF) << 4;
-            remainder |= (data[3] & 0xF0) >> 4;
-
-            Angle? bearingToDestination = Angle.FromDegrees((u * 90) + (remainder / 2.0));
-
-            if ((flags & 2) == 0)
-            {
-                bearingToDestination = null;
-            }
-
-            int dist = data[5] << 4;
-            dist |= (data[4] >> 4);
-
-            Length? distance;
-            if ((flags & 4) == 0)
-            {
-                distance = null;
-            }
-            else if ((data[6] & 0x10) == 0x10)
-            {
-                distance = Length.FromNauticalMiles(dist / 100.0);
-            }
-            else
-            {
-                distance = Length.FromNauticalMiles(dist / 10.0);
-            }
-
-            return new NavigationToWaypoint()
-            {
-                BearingIsTrue = bearingIsTrue,
-                BearingToDestination = bearingToDestination,
-                CrossTrackError = crossTrackDistance,
-                DistanceToDestination = distance,
-            };
         }
 
         /// <inheritdoc />
@@ -230,6 +234,12 @@ namespace Iot.Device.Seatalk1.Messages
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[6] == (byte)(~data[8]);
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"XTE: {CrossTrackError?.NauticalMiles:F2} nm, Bearing: {BearingToDestination?.Degrees:F1}° {(BearingIsTrue ? "T" : "M")}, Distance: {DistanceToDestination?.NauticalMiles:F2} nm";
         }
     }
 }

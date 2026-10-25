@@ -1,7 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
+using System;
+using Iot.Device.Nmea0183;
 using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
@@ -9,7 +10,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// <summary>
     /// Speed trough water (data from log instrument)
     /// </summary>
-    public record SpeedTroughWater : SeatalkMessage
+    public class SpeedTroughWater : SeatalkMessage
     {
         internal SpeedTroughWater()
         {
@@ -25,6 +26,23 @@ namespace Iot.Device.Seatalk1.Messages
             Speed = speed;
             Forwarded = false;
         }
+
+        /// <summary>
+        /// Constructs a new instance from sentence data.
+        /// </summary>
+        public SpeedTroughWater(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+            double speedvalue = (GetField(2) << 8) | GetField(3);
+            speedvalue /= 10.0;
+            Speed = Speed.FromKnots(speedvalue);
+            Forwarded = (GetField(1) & 0x80) != 0;
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <summary>
         /// The current speed trough water
@@ -50,17 +68,6 @@ namespace Iot.Device.Seatalk1.Messages
         public override byte ExpectedLength => 0x4;
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            double speedvalue = data[2] << 8 | data[3];
-            speedvalue /= 10.0;
-            return new SpeedTroughWater(Speed.FromKnots(speedvalue))
-            {
-                Forwarded = (data[1] & 0x80) != 0
-            };
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             double v = Speed.Knots * 10.0;
@@ -68,6 +75,12 @@ namespace Iot.Device.Seatalk1.Messages
             byte b1 = (byte)(v1 >> 8);
             byte b2 = (byte)(v1 & 0xff);
             return new byte[] { CommandByte, (byte)(Forwarded ? 0x81 : 0x1), b1, b2 };
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Speed through water: {Speed.Knots:F1} kn (Forwarded: {Forwarded})";
         }
     }
 }

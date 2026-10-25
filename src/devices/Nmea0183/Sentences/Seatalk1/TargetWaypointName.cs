@@ -4,16 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Iot.Device.Nmea0183;
 
 namespace Iot.Device.Seatalk1.Messages
 {
     /// <summary>
     /// This message reports the last 4 characters of the next waypoint
     /// </summary>
-    public record TargetWaypointName : SeatalkMessage
+    public class TargetWaypointName : SeatalkMessage
     {
         internal TargetWaypointName()
         {
@@ -28,6 +26,29 @@ namespace Iot.Device.Seatalk1.Messages
         {
             Name = name;
         }
+
+        /// <summary>
+        /// Initializes a new instance from sentence data.
+        /// </summary>
+        public TargetWaypointName(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+
+            int c1 = GetField(2) & 0x3F;
+            int c2 = ((GetField(4) & 0xF) * 4) + ((GetField(2) & 0xC0) / 64);
+            int c3 = ((GetField(6) & 0x3) * 16) + ((GetField(4) & 0xF0) / 16);
+            int c4 = (GetField(6) & 0xFC) / 4;
+            c1 += 0x30;
+            c2 += 0x30;
+            c3 += 0x30;
+            c4 += 0x30;
+            Name = $"{(char)c1}{(char)c2}{(char)c3}{(char)c4}";
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override byte CommandByte => 0x82;
@@ -45,23 +66,6 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            // 82  05  XX  xx YY yy ZZ zz   Target waypoint name, with XX+yy == 0xff etc.
-            int c1, c2, c3, c4;
-            c1 = data[2] & 0x3F;
-            c2 = ((data[4] & 0xF) * 4) + ((data[2] & 0xC0) / 64);
-            c3 = ((data[6] & 0x3) * 16) + ((data[4] & 0xF0) / 16);
-            c4 = (data[6] & 0xFC) / 4;
-            c1 += 0x30;
-            c2 += 0x30;
-            c3 += 0x30;
-            c4 += 0x30;
-            string name = $"{(char)c1}{(char)c2}{(char)c3}{(char)c4}";
-            return new TargetWaypointName(name);
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             string chars;
@@ -72,7 +76,7 @@ namespace Iot.Device.Seatalk1.Messages
             else
             {
                 chars = Name.Substring(0, Name.Length);
-                chars = chars + new String('0', 4 - Name.Length);
+                chars = chars + new string('0', 4 - Name.Length);
             }
 
             var result = new byte[]
@@ -98,7 +102,7 @@ namespace Iot.Device.Seatalk1.Messages
 
         private int ConvertLetter(char c)
         {
-            c = Char.ToUpper(c, CultureInfo.InvariantCulture);
+            c = char.ToUpper(c, CultureInfo.InvariantCulture);
             // We have 6 bit per char, and the ascii table is offset by 0x30 (which is the digit "0")
             // The last letter that could be represented is the small "o", but I'm not sure anything above "Z" (0x5a) is valid.
             if (c < 0x30 || (c - 0x30) > 0x3F)
@@ -114,6 +118,12 @@ namespace Iot.Device.Seatalk1.Messages
         {
             // The data bytes 2-7 must pairwise sum to 0xff, otherwise the message is corrupted.
             return base.MatchesMessageType(data) && (data[2] + data[3]) == 0xFF && (data[4] + data[5]) == 0xFF && (data[6] + data[7]) == 0xFF;
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Target waypoint: {Name}";
         }
     }
 }

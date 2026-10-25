@@ -47,7 +47,8 @@ namespace Iot.Device.Seatalk1
         private TurnDirection _ourDesiredDirection;
 
         /// <summary>
-        /// Internal constructor, used by the owning instance of <see cref="SeatalkInterface"/>
+        /// Class to control an autopilot via Seatalk1.
+        /// It can also be used to monitor the current status of the autopilot, including rudder angle and heading.
         /// </summary>
         /// <param name="interfaceName">The name of the interface</param>
         /// <param name="seatalkInterfaceName">The interface name that provides Seatalk1 connectivity</param>

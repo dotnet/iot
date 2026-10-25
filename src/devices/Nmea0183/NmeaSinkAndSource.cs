@@ -13,7 +13,7 @@ namespace Iot.Device.Nmea0183
 {
     /// <summary>
     /// This abstract class describes an NMEA data source or data sink.
-    /// It can be a connection, a data processor or an output device.
+    /// It can be a connection, a data processor (message converter) or an output device.
     /// </summary>
     public abstract class NmeaSinkAndSource : IDisposable
     {

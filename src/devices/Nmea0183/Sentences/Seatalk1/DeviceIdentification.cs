@@ -2,19 +2,36 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Iot.Device.Nmea0183;
 
 namespace Iot.Device.Seatalk1.Messages
 {
     /// <summary>
     /// Query/Reply to device identification broadcast
     /// </summary>
-    public record class DeviceIdentification : SeatalkMessage
+    public class DeviceIdentification : SeatalkMessage
     {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public DeviceIdentification()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance from sentence data.
+        /// </summary>
+        public DeviceIdentification(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+            DeviceType = GetField(2);
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => false;
+
         /// <inheritdoc />
         public override byte CommandByte => 0xA4;
 
@@ -36,19 +53,16 @@ namespace Iot.Device.Seatalk1.Messages
         public bool IsReply => DeviceType != 0;
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            return new DeviceIdentification()
-            {
-                DeviceType = data[2]
-            };
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             // This is the query command
             return new byte[] { CommandByte, 2, (byte)DeviceType, 0, 0 };
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return IsReply ? $"Device identification reply: type 0x{DeviceType:X2}" : "Device identification query";
         }
     }
 }

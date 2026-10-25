@@ -35,6 +35,11 @@ namespace Iot.Device.Seatalk1.Messages
             Status = status;
         }
 
+        /// <summary>
+        /// Initializes a new instance from sentence data.
+        /// </summary>
+        /// <param name="sentence">Input sentence.</param>
+        /// <param name="time">Timestamp of the sentence.</param>
         public AutopilotWindStatus(TalkerSentence sentence, DateTimeOffset time)
             : base(sentence.Fields, time)
         {
@@ -42,6 +47,7 @@ namespace Iot.Device.Seatalk1.Messages
             Valid = true;
         }
 
+        /// <inheritdoc />
         public override bool ReplacesOlderInstance => true;
 
         /// <summary>

@@ -32,6 +32,11 @@ namespace Iot.Device.Seatalk1.Messages
         {
         }
 
+        /// <summary>
+        /// Construct a new instance from sentence fields.
+        /// </summary>
+        /// <param name="fields">Seatalk sentence fields encoded as hex bytes.</param>
+        /// <param name="time">Timestamp of the source sentence.</param>
         protected SeatalkMessage(IReadOnlyList<string> fields, DateTimeOffset time)
         : base(TalkerId.Seatalk, Id, time)
         {
@@ -60,6 +65,11 @@ namespace Iot.Device.Seatalk1.Messages
         /// <returns>The bytes to send</returns>
         public abstract byte[] CreateDatagram();
 
+        /// <summary>
+        /// Gets one field as byte value.
+        /// </summary>
+        /// <param name="offset">Zero-based field offset.</param>
+        /// <returns>Field value decoded from hexadecimal.</returns>
         protected byte GetField(int offset)
         {
             if (_fields == null)
@@ -143,6 +153,7 @@ namespace Iot.Device.Seatalk1.Messages
             return true;
         }
 
+        /// <inheritdoc />
         public override string ToNmeaParameterList()
         {
             byte[] datagram = CreateDatagram();

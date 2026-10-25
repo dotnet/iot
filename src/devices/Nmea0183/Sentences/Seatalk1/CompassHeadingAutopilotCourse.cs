@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
-using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
@@ -16,7 +13,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// <summary>
     /// Compass heading and current autopilot course and parameters.
     /// </summary>
-    public record CompassHeadingAutopilotCourse : SeatalkMessage
+    public class CompassHeadingAutopilotCourse : SeatalkMessage
     {
         /// <summary>
         /// Standard constructor
@@ -25,6 +22,63 @@ namespace Iot.Device.Seatalk1.Messages
         {
             TurnDirection = TurnDirection.TurnToPort;
         }
+
+        /// <summary>
+        /// Constructs a new instance from sentence data.
+        /// </summary>
+        public CompassHeadingAutopilotCourse(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+
+            uint u = (uint)(GetField(1) >> 4);
+            uint vw = GetField(2);
+            uint lastBits = u switch
+            {
+                0xC => 2,
+                0x4 => 1,
+                _ => 0,
+            };
+
+            long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + lastBits;
+            CompassHeading = Angle.FromDegrees(heading);
+            TurnDirection = (u & 0x8) == 0x8 ? TurnDirection.TurnToStarboard : TurnDirection.TurnToPort;
+
+            long desiredCourse = ((vw >> 6) * 90) + (GetField(3) / 2);
+            AutoPilotCourse = Angle.FromDegrees(desiredCourse);
+
+            AutopilotStatus status = GetAutopilotStatus(GetField(4));
+            AutopilotStatus = status;
+
+            sbyte rudder = unchecked((sbyte)GetField(6));
+            RudderPosition = Angle.FromDegrees(rudder);
+
+            AutopilotAlarms alarms = AutopilotAlarms.None;
+            byte almByte = GetField(5);
+            if ((almByte & 0x4) == 0x4)
+            {
+                alarms |= AutopilotAlarms.OffCourse;
+            }
+
+            if ((almByte & 0x8) == 0x8)
+            {
+                alarms |= AutopilotAlarms.WindShift;
+            }
+
+            Alarms = alarms;
+            AutoPilotType = GetField(8);
+            if (status == AutopilotStatus.Undefined)
+            {
+                Valid = false;
+            }
+            else
+            {
+                Valid = true;
+            }
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
         public override byte CommandByte => 0x84;
@@ -66,62 +120,6 @@ namespace Iot.Device.Seatalk1.Messages
         /// Turn direction. Not really reliable when no Rudder sensor is fitted.
         /// </summary>
         public TurnDirection TurnDirection { get; init; }
-
-        /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            VerifyPacket(data);
-
-            uint u = ((uint)data[1]) >> 4;
-            uint vw = data[2];
-            uint lastBits = u switch
-            {
-                0xC => 2,
-                0x4 => 1,
-                _ => 0,
-            };
-
-            long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + lastBits;
-            Angle headingA = Angle.FromDegrees(heading);
-
-            TurnDirection td = (u & 0x8) == 0x8 ? TurnDirection.TurnToStarboard : TurnDirection.TurnToPort;
-
-            long desiredCourse = ((vw >> 6) * 90) + (data[3] / 2);
-
-            AutopilotStatus status = GetAutopilotStatus(data[4]);
-
-            sbyte rudder = (sbyte)data[6];
-
-            AutopilotAlarms alarms = AutopilotAlarms.None;
-            byte almByte = data[5];
-            if ((almByte & 0x4) == 0x4)
-            {
-                alarms |= AutopilotAlarms.OffCourse;
-            }
-
-            if ((almByte & 0x8) == 0x8)
-            {
-                alarms |= AutopilotAlarms.WindShift;
-            }
-
-            var ret = this with
-            {
-                CompassHeading = headingA,
-                AutoPilotType = data[8],
-                AutoPilotCourse = Angle.FromDegrees(desiredCourse),
-                AutopilotStatus = status,
-                RudderPosition = Angle.FromDegrees(rudder),
-                Alarms = alarms,
-                TurnDirection = td,
-            };
-
-            if (status == AutopilotStatus.Undefined)
-            {
-                Logger.LogWarning($"Unknown autopilot status byte {data[4]}");
-            }
-
-            return ret;
-        }
 
         /// <inheritdoc />
         public override byte[] CreateDatagram()
@@ -211,7 +209,7 @@ namespace Iot.Device.Seatalk1.Messages
                     return AutopilotStatus.Standby;
                 case 2:
                     return AutopilotStatus.Auto;
-                case 4: // Wind mode may be on its own and together with the auto flag
+                case 4:
                     return AutopilotStatus.InactiveWind;
                 case 6:
                     return AutopilotStatus.Wind;
@@ -228,7 +226,7 @@ namespace Iot.Device.Seatalk1.Messages
 
         private byte GetAutopilotStatusByte(AutopilotStatus status)
         {
-            return AutopilotStatus switch
+            return status switch
             {
                 AutopilotStatus.Standby => 0,
                 AutopilotStatus.Auto => 2,
@@ -244,8 +242,13 @@ namespace Iot.Device.Seatalk1.Messages
         /// <inheritdoc />
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
-            // Add some additional tests to make sure the message is not messed up
             return base.MatchesMessageType(data) && GetAutopilotStatus(data[4]) != AutopilotStatus.Undefined && (data[5] & 0xF0) == 0 && (data[8] & 0xF0) == 0;
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Heading: {CompassHeading.Degrees:F0}°, AP course: {AutoPilotCourse.Degrees:F0}°, Status: {AutopilotStatus}, Alarms: {Alarms}";
         }
     }
 }

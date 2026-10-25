@@ -3,18 +3,36 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Iot.Device.Nmea0183;
 
 namespace Iot.Device.Seatalk1.Messages
 {
     /// <summary>
     /// Course computer status. Various autopilots may use this message for different purposes.
     /// </summary>
-    public record CourseComputerStatus : SeatalkMessage
+    public class CourseComputerStatus : SeatalkMessage
     {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public CourseComputerStatus()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance from sentence data.
+        /// </summary>
+        public CourseComputerStatus(TalkerSentence sentence, DateTimeOffset time)
+            : base(sentence.Fields, time)
+        {
+            VerifyPacket(sentence.Fields);
+            Warnings = (CourseComputerWarnings)GetField(2);
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
+
         /// <inheritdoc />
         public override byte CommandByte => 0x83;
 
@@ -31,16 +49,6 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            Logger.LogInformation($"Course computer warning msg: {string.Join("-", data.Select(x => x.ToString("X2")))}");
-            return this with
-            {
-                Warnings = (CourseComputerWarnings)data[2],
-            };
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             return new byte[]
@@ -53,6 +61,12 @@ namespace Iot.Device.Seatalk1.Messages
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[3] == 0;
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Course computer warnings: {Warnings}";
         }
     }
 }
