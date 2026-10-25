@@ -6,9 +6,6 @@
   <ItemGroup>
     <ProjectReference Include="../DCMotor/DCMotor.csproj" />
     <Compile Include="*.cs" />
-    <Compile Include="Gpio/*.cs" />
-    <Compile Include="Lighting/*.cs" />
-    <Compile Include="Motorization/*.cs" />
     <None Include="README.md" />
   </ItemGroup>
 </Project>
