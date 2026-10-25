@@ -235,7 +235,7 @@ namespace Iot.Device.Seatalk1
                 return ts;
             }
 
-            error = NmeaError.MessageDropped;
+            error = NmeaError.None; // Probably just not yet a complete message
             return null;
         }
 

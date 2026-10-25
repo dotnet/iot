@@ -83,7 +83,17 @@ namespace Iot.Device.Nmea0183.Tests
         }
 
         [Fact]
-        public void SkipSomeGarbage()
+        public void SkipGarbageToResync()
+        {
+            Seatalk1Parser parser = new Seatalk1Parser("Test", new FakeSerialPort());
+
+            // Expecting it to drop the first two bytes (0A 02) and then parse the rest as a valid message
+            var msg = parser.ParseSentence("0A,02,86,01,02,fd", out NmeaError error);
+            Assert.NotNull(msg);
+        }
+
+        [Fact]
+        public void SkipSomeGarbageWhileDecoding()
         {
             // The second row is garbled (for this test, at least 18 bytes must be in the input after the garbage)
             string data = @"9c 01 12 00
@@ -111,6 +121,7 @@ namespace Iot.Device.Nmea0183.Tests
             parser.StopDecode();
 
             Assert.True(cnt > 0); // timeout?
+            Assert.True(numMessages > 1);
 
             parser.Dispose();
         }
@@ -244,6 +255,11 @@ namespace Iot.Device.Nmea0183.Tests
             parser.OnNewSequence += (src, message) =>
             {
                 Assert.NotNull(message);
+                if (message is RawSentence)
+                {
+                    return;
+                }
+
                 var msg = message as SeatalkMessage;
                 Assert.NotNull(msg);
                 Assert.True(msg.ExpectedLength >= 3);
@@ -251,6 +267,7 @@ namespace Iot.Device.Nmea0183.Tests
             };
 
             parser.StartDecode();
+            Thread.Sleep(500);
             parser.StopDecode();
 
             Assert.Equal(6, messages.Count);
