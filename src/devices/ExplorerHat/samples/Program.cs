@@ -62,7 +62,7 @@ for (int reading = 1; reading <= 5; reading++)
 {
     foreach (var input in hat.Inputs)
     {
-        Console.Write($"GPIO {input.Pin}: {input.Read()}  ");
+        Console.Write($"GPIO {input.PinNumber}: {input.Read()}  ");
     }
 
     Console.WriteLine();
@@ -73,7 +73,7 @@ for (int reading = 1; reading <= 5; reading++)
 foreach (var output in hat.Outputs)
 {
     output.On();
-    Console.WriteLine($"Output on GPIO {output.Pin} is {(output.IsOn ? "ON" : "OFF")}");
+    Console.WriteLine($"Output on GPIO {output.PinNumber} is {(output.IsOn ? "ON" : "OFF")}");
     Thread.Sleep(1000);
     output.Off();
 }

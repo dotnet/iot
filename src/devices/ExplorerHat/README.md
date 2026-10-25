@@ -19,7 +19,7 @@ It consists of multiple devices. Currently supported devices:
 
 Capacitive touchpads, analog inputs, and 3.3v breakout not supported yet.
 
-The pins of the inputs and outputs are opened the first time they are used, not when `ExplorerHat` is created. Inputs and outputs that are not used can be used by other bindings, with their `Pin` property (for example, an HC-SR04 distance sensor with its trigger on an output and its echo on an input). When `ExplorerHat` is disposed, it switches off the outputs it used and closes only the pins it opened.
+The pins of the inputs and outputs are opened the first time they are used, not when `ExplorerHat` is created. Inputs and outputs that are not used can be used by other bindings, with their `PinNumber` property (for example, an HC-SR04 distance sensor with its trigger on an output and its echo on an input). Each input and output is a `GpioPin`, so it can also be passed to code that expects one. An input or output never takes over a pin that is already open: it throws `InvalidOperationException`, so pins opened by other code keep working. When `ExplorerHat` is disposed, it switches off the outputs it used and closes only the pins it opened.
 
 ## Usage
 
@@ -106,7 +106,7 @@ Console.WriteLine($"Input 1 is {value}");
 // Read all the inputs
 foreach (var input in hat.Inputs)
 {
-    Console.WriteLine($"Input on GPIO {input.Pin} is {input.Read()}");
+    Console.WriteLine($"Input on GPIO {input.PinNumber} is {input.Read()}");
 }
 ```
 
@@ -126,6 +126,10 @@ The outputs are open collector: when an output is on, it connects the output to 
 hat.Outputs.One.On();
 Thread.Sleep(1000);
 hat.Outputs.One.Off();
+
+// Outputs are also available by position (0 is output 1), and with Write
+hat.Outputs[1].Write(PinValue.High);
+hat.Outputs[1].Off();
 
 // Check the state of an output
 Console.WriteLine($"Output 1 is {(hat.Outputs.One.IsOn ? "ON" : "OFF")}");

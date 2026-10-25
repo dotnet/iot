@@ -14,7 +14,7 @@ namespace Iot.Device.ExplorerHat
     /// <remarks>
     /// No pin is opened until an input is read, so the inputs that are not used can be used by other bindings.
     /// </remarks>
-    public class Inputs : IDisposable, IEnumerable<DigitalInput>
+    public class Inputs : IDisposable, IReadOnlyList<DigitalInput>
     {
         private const int INPUT1_PIN = 23;
         private const int INPUT2_PIN = 22;
@@ -42,6 +42,17 @@ namespace Iot.Device.ExplorerHat
         /// Input #4 (GPIO 25)
         /// </summary>
         public DigitalInput Four => _inputArray[3];
+
+        /// <summary>
+        /// Gets the number of inputs
+        /// </summary>
+        public int Count => _inputArray.Count;
+
+        /// <summary>
+        /// Gets an input by its position, starting at 0: 0 is <see cref="One"/>, 1 is <see cref="Two"/>, and so on
+        /// </summary>
+        /// <param name="index">The position of the input</param>
+        public DigitalInput this[int index] => _inputArray[index];
 
         /// <summary>
         /// Initializes a <see cref="Inputs"/> instance

@@ -15,7 +15,7 @@ namespace Iot.Device.ExplorerHat
     /// No pin is opened until an output is switched on or off, so the outputs that are not used can be used by
     /// other bindings.
     /// </remarks>
-    public class Outputs : IDisposable, IEnumerable<DigitalOutput>
+    public class Outputs : IDisposable, IReadOnlyList<DigitalOutput>
     {
         private const int OUTPUT1_PIN = 6;
         private const int OUTPUT2_PIN = 12;
@@ -43,6 +43,17 @@ namespace Iot.Device.ExplorerHat
         /// Output #4 (GPIO 16)
         /// </summary>
         public DigitalOutput Four => _outputArray[3];
+
+        /// <summary>
+        /// Gets the number of outputs
+        /// </summary>
+        public int Count => _outputArray.Count;
+
+        /// <summary>
+        /// Gets an output by its position, starting at 0: 0 is <see cref="One"/>, 1 is <see cref="Two"/>, and so on
+        /// </summary>
+        /// <param name="index">The position of the output</param>
+        public DigitalOutput this[int index] => _outputArray[index];
 
         /// <summary>
         /// Initializes a <see cref="Outputs"/> instance
