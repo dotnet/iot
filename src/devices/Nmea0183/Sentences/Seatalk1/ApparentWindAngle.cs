@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Iot.Device.Common;
 using UnitsNet;
 
@@ -16,6 +13,11 @@ namespace Iot.Device.Seatalk1.Messages
     /// </summary>
     public class ApparentWindAngle : SeatalkMessage
     {
+        /// <summary>
+        /// The command byte for this message
+        /// </summary>
+        public const byte HexId = 0x10;
+
         private readonly Angle _apparentAngle;
 
         /// <summary>
@@ -35,8 +37,27 @@ namespace Iot.Device.Seatalk1.Messages
             ApparentAngle = apparentAngle;
         }
 
+        /// <summary>
+        /// Construct a new instance from a seatalk sentence
+        /// </summary>
+        /// <param name="fields">The list of fields (here, one entry per byte in the message, as text)</param>
+        /// <param name="time">The current time</param>
+        public ApparentWindAngle(IReadOnlyList<string> fields, DateTimeOffset time)
+            : base(fields, time)
+        {
+            uint angle10u = Convert.ToUInt32(GetField(2) << 8 | GetField(3));
+            if ((angle10u & 0x8000) != 0)
+            {
+                angle10u |= 0xFFFF0000;
+            }
+
+            int angle10 = unchecked((int)angle10u);
+            Angle angle = Angle.FromDegrees(angle10 / 2.0);
+            ApparentAngle = angle.Normalize(false);
+        }
+
         /// <inheritdoc />
-        public override byte CommandByte => 0x10;
+        public override byte CommandByte => HexId;
 
         /// <inheritdoc />
         public override byte ExpectedLength => 0x4;
@@ -62,23 +83,6 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <inheritdoc />
-        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
-        {
-            uint angle10u = Convert.ToUInt32(data[2] << 8 | data[3]);
-            if ((angle10u & 0x8000) != 0)
-            {
-                angle10u |= 0xFFFF0000;
-            }
-
-            int angle10 = unchecked((int)angle10u);
-            Angle angle = Angle.FromDegrees(angle10 / 2.0);
-            return new ApparentWindAngle()
-            {
-                ApparentAngle = angle,
-            };
-        }
-
-        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             short angle10 = (short)Math.Round(ApparentAngle.Degrees * 2);
@@ -86,6 +90,12 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 CommandByte, (byte)(ExpectedLength - 3), (byte)(angle10 >> 8), (byte)(angle10 & 0xFF)
             };
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Apparent Wind angle: {ApparentAngle.Degrees}°";
         }
     }
 }

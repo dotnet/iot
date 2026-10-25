@@ -62,15 +62,23 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <summary>
-        /// Empty constructor
+        /// The format of the message is
+        /// 86  X1  YY  yy, where X is the sender (1 = Remote control, 0 = Autopilot unit)
+        /// and YY is the keycode. yy is the binary inverse of YY.
         /// </summary>
-        public Keystroke()
+        /// <param name="data">The input data</param>
+        /// <returns>A message</returns>
+        public Keystroke(IReadOnlyList<string> data, DateTimeOffset time)
+            : base(data, time)
         {
-            KeyCode = 0;
-            Source = 0;
-        }
+            VerifyPacket(data);
 
-        public override bool ReplacesOlderInstance => false;
+            int source = GetField(1) >> 4;
+            Source = source;
+            // Just as a verification step
+            KeyCode = GetField(2);
+            Valid = true;
+        }
 
         /// <summary>
         /// Create a button command
@@ -103,6 +111,9 @@ namespace Iot.Device.Seatalk1.Messages
             Source = source;
             KeyCode = keyCode;
         }
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => false;
 
         /// <summary>
         /// The command byte for keypresses is 0x86
@@ -143,25 +154,6 @@ namespace Iot.Device.Seatalk1.Messages
         {
             get;
             init;
-        }
-
-        /// <summary>
-        /// The format of the message is
-        /// 86  X1  YY  yy, where X is the sender (1 = Remote control, 0 = Autopilot unit)
-        /// and YY is the keycode. yy is the binary inverse of YY.
-        /// </summary>
-        /// <param name="data">The input data</param>
-        /// <returns>A message</returns>
-        public Keystroke(IReadOnlyList<string> data, DateTimeOffset time)
-            : base(data, time)
-        {
-            VerifyPacket(data);
-
-            int source = GetField(1) >> 4;
-            Source = source;
-            // Just as a verification step
-            KeyCode = GetField(2);
-            Valid = true;
         }
 
         /// <inheritdoc />

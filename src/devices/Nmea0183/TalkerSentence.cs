@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Iot.Device.Nmea0183.Sentences;
+using Iot.Device.Seatalk1.Messages;
 
 namespace Iot.Device.Nmea0183
 {
@@ -70,8 +71,46 @@ namespace Iot.Device.Nmea0183
 
                 return null;
             };
+            knownSentences[SeatalkMessage.Id] = (sentence, time) =>
+            {
+                var specificMessage = sentence.Fields.FirstOrDefault();
+                if (specificMessage != null && byte.TryParse(specificMessage, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte commandByte))
+                {
+                    if (GetKnownSeatalk1Message(commandByte, sentence, time, out SeatalkMessage? seatalkMessage))
+                    {
+                        return seatalkMessage;
+                    }
+                }
+
+                return null;
+            };
 
             return knownSentences;
+        }
+
+        private static bool GetKnownSeatalk1Message(byte commandByte, TalkerSentence sentence, DateTimeOffset time, out SeatalkMessage seatalkMessage)
+        {
+            switch (commandByte)
+            {
+                case ApparentWindAngle.HexId:
+                    seatalkMessage = new ApparentWindAngle(sentence, time);
+                    return true;
+                case 0x11:
+                    seatalkMessage = new AutopilotWindStatus(sentence, time);
+                    return true;
+                case 0x20:
+                    seatalkMessage = new RudderSensorAngle(sentence, time);
+                    return true;
+                case 0x21:
+                    seatalkMessage = new HeadingAndTrackControl(sentence, time);
+                    return true;
+                case 0x22:
+                    seatalkMessage = new HeadingAndTrackControlStatus(sentence, time);
+                    return true;
+                default:
+                    seatalkMessage = null!;
+                    return false;
+            }
         }
 
         private static bool GetKnownNmea2000Sentence(int msgid, TalkerSentence sentence, DateTimeOffset time,
