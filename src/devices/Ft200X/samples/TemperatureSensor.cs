@@ -9,7 +9,7 @@ namespace Iot.Device.Ft200X.Samples
     /// <summary>
     /// Processes FIFO request frames for a simulated temperature sensor with ID, temperature, and configuration registers.
     /// </summary>
-    internal sealed class TemperatureSensor
+    internal sealed class TemperatureSensor : IFifoSensor
     {
         /// <summary>
         /// The size in bytes of each request and response frame.
@@ -30,8 +30,15 @@ namespace Iot.Device.Ft200X.Samples
         private const short TemperatureHundredthsCelsius = 2350;
 
         private readonly byte[] _request = new byte[FrameLength];
+        private readonly byte[] _response = new byte[FrameLength];
         private int _received;
         private bool _enabled = true;
+
+        /// <inheritdoc/>
+        public ReadOnlyMemory<byte> ProcessByte(byte value)
+        {
+            return TryProcessByte(value, _response) ? _response : ReadOnlyMemory<byte>.Empty;
+        }
 
         /// <summary>
         /// Accumulates a request byte and produces a response when a complete frame is available.

@@ -128,9 +128,8 @@ static void RunSensor(Ft200XDevice adapter)
     Console.WriteLine("Do not use WriteRead/repeated START. Allow USB processing time; see README for master code.");
     Console.WriteLine("Send one request at a time and consume the entire reply before the next request. Ctrl+C stops.");
 
-    var sensor = new TemperatureSensor();
-    byte[] incoming = new byte[TemperatureSensor.FrameLength];
-    byte[] response = new byte[TemperatureSensor.FrameLength];
+    var runner = new FifoSensorRunner(
+        adapter, new TemperatureSensor(), response => Console.WriteLine($"Reply: {Convert.ToHexString(response.Span)}"));
     using var cancellation = new CancellationTokenSource();
     ConsoleCancelEventHandler cancelHandler = (_, e) =>
     {
@@ -140,25 +139,7 @@ static void RunSensor(Ft200XDevice adapter)
     Console.CancelKeyPress += cancelHandler;
     try
     {
-        while (!cancellation.IsCancellationRequested)
-        {
-            uint available = adapter.BytesAvailable;
-            if (available == 0)
-            {
-                Thread.Sleep(5);
-                continue;
-            }
-
-            int count = adapter.Read(incoming.AsSpan(0, (int)Math.Min(available, (uint)incoming.Length)));
-            for (int i = 0; i < count; i++)
-            {
-                if (sensor.TryProcessByte(incoming[i], response))
-                {
-                    adapter.Write(response);
-                    Console.WriteLine($"Reply: {Convert.ToHexString(response)}");
-                }
-            }
-        }
+        runner.Run(cancellation.Token);
     }
     finally
     {

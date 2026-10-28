@@ -152,6 +152,8 @@ Examples:
 
 Send **one request at a time** and consume its entire response before sending another. USB read boundaries do not matter: the sample accumulates complete four-byte frames and retains partial requests. There is no automatic resynchronization after dropped bytes or restarting the sample mid-frame. Restart both ends with empty FIFOs after such an error.
 
+The sample-level [FifoSensorRunner](samples/FifoSensorRunner.cs) handles polling, forwarding received bytes, and queuing replies. An [IFifoSensor](samples/IFifoSensor.cs) handler owns request framing and returns a response of any length when ready (or empty memory while accumulating input). Response lengths may depend on the command and need not match request or USB buffer lengths. [TemperatureSensor](samples/TemperatureSensor.cs) implements the existing four-byte protocol; replace that handler to demonstrate another FIFO protocol. This separation does not add I2C transaction boundaries or support immediate register reads. The runner does not own or purge the adapter, and failures propagate without automatic retries.
+
 Here is the corresponding master-side .NET code, using a separate I2C master adapter or a board's native bus:
 
 ```csharp
