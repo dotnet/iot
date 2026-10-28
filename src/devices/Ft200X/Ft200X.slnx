@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/Ft200X.sample.csproj" />
+    <Project Path="tests/Ft200X.Tests.csproj" />
+  </Folder>
+  <Project Path="../../System.Device.Gpio/System.Device.Gpio.csproj" />
+  <Project Path="../Board/Board.csproj" />
+  <Project Path="../Common/Common.csproj" />
+  <Project Path="../System.Device.Model/System.Device.Model.csproj" />
+  <Project Path="Ft200X.csproj" />
+</Solution>

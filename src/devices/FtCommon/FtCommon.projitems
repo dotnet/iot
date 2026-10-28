@@ -14,12 +14,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)FtCommon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtDevice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtDeviceType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FtEepromHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtFlag.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtFlowControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtFunction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtOpcode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtOpenType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtStatus.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FtXSeriesConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FtXSeriesEeprom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FtXSeriesI2cSlaveTransport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IFtI2cSlaveTransport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IFtXSeriesI2cSlaveTransport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SafeFtHandle.cs" />
   </ItemGroup>
 </Project>
