@@ -138,11 +138,11 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Returns true if the PGNs of the two messages match.
         /// </summary>
-        public override bool IsSameMessageAs(NmeaSentence other)
+        public override bool IsSameMessageTypeAs(NmeaSentence other)
         {
             if (other is Nmea2000PackedMessage other2)
             {
-                return base.IsSameMessageAs(other2) && Identifier == other2.Identifier;
+                return base.IsSameMessageTypeAs(other2) && Identifier == other2.Identifier;
             }
 
             return false;

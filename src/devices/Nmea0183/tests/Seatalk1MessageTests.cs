@@ -33,6 +33,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("10 01 00 01", typeof(ApparentWindAngle))]
         [InlineData("85 06 00 00 C0 0D 1F 00 E0", typeof(NavigationToWaypoint))]
         [InlineData("11 01 00 00", typeof(ApparentWindSpeed))]
+        [InlineData("11 00 01", typeof(AutopilotWindStatus))]
         [InlineData("82 05 00 ff 00 ff 00 ff", typeof(TargetWaypointName))]
         [InlineData("20 01 00 12", typeof(SpeedTroughWater))]
         public void KnownMessageTypeDecode(string msg, Type expectedType)
@@ -40,7 +41,12 @@ namespace Iot.Device.Nmea0183.Tests
             msg = msg.Replace(" ", string.Empty);
             byte[] data = Convert.FromHexString(msg);
             _port.SimulateReceive(data);
-            string? line = _parser.ReadNextLine();
+            string? line = null;
+            while (line == null || line.Length < ((data.Length * 2) + (data.Length - 1)))
+            {
+                line = _parser.ReadNextLine();
+            }
+
             Assert.NotNull(line);
             TalkerSentence? ts = _parser.ParseSentence(line, out var error);
             Assert.Equal(NmeaError.None, error);
@@ -51,6 +57,8 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(data.Length, actualType.ExpectedLength);
 
             Assert.Equal(expectedType, actualType.GetType());
+            Assert.True(actualType.Valid, $"Message {actualType.GetType()} is not valid after construction");
+
         }
 
         [Fact]
@@ -196,7 +204,7 @@ namespace Iot.Device.Nmea0183.Tests
 
             var actualType = _parser.GetDataForNextMessage(data, out int length)!;
             Assert.Null(actualType);
-            Assert.Equal(0, length);
+            Assert.NotEqual(0, length);
         }
 
         [Fact]

@@ -54,6 +54,7 @@ namespace Iot.Device.Seatalk1.Messages
             int angle10 = unchecked((int)angle10u);
             Angle angle = Angle.FromDegrees(angle10 / 2.0);
             ApparentAngle = angle.Normalize(false);
+            Valid = true;
         }
 
         /// <inheritdoc />

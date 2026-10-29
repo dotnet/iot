@@ -288,7 +288,7 @@ namespace Iot.Device.Nmea0183
                         // and continue processing.
                         // There's a glitch here, however: If we keep adding items quickly to the queue and processing it takes
                         // time, the newest items are never processed, thus some messages will _never_ be sent.
-                        var newerInstance = _outQueue.FirstOrDefault(x => x.IsSameMessageAs(sentenceToSend));
+                        var newerInstance = _outQueue.FirstOrDefault(x => x.IsSameMessageTypeAs(sentenceToSend));
                         if (newerInstance != null)
                         {
                             continue;

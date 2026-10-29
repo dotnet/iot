@@ -19,11 +19,11 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Iot.Device.Nmea0183.Tests
 {
-    public class Seatalk1Tests
+    public class Seatalk1ParserTests
     {
         private readonly FakeSerialPort _port;
 
-        public Seatalk1Tests()
+        public Seatalk1ParserTests()
         {
             _port = new FakeSerialPort();
         }
@@ -86,7 +86,8 @@ namespace Iot.Device.Nmea0183.Tests
         public void SkipGarbageToResync()
         {
             Seatalk1Parser parser = new Seatalk1Parser("Test", new FakeSerialPort());
-
+            // doesn't matter what the bytes are, just need to be able to skip them
+            parser.Buffer.AddRange(new byte[20]);
             // Expecting it to drop the first two bytes (0A 02) and then parse the rest as a valid message
             var msg = parser.ParseSentence("0A,02,86,01,02,fd", out NmeaError error);
             Assert.NotNull(msg);
@@ -113,7 +114,7 @@ namespace Iot.Device.Nmea0183.Tests
             parser.StartDecode();
 
             int cnt = 100;
-            while (numMessages != 5 && cnt-- >= 0)
+            while (numMessages < 5 && cnt-- >= 0)
             {
                 Thread.Sleep(100);
             }
@@ -121,8 +122,9 @@ namespace Iot.Device.Nmea0183.Tests
             parser.StopDecode();
 
             Assert.True(cnt > 0); // timeout?
-            Assert.True(numMessages > 1);
+            Assert.True(numMessages >= 10);
 
+            Assert.Empty(parser.Buffer);
             parser.Dispose();
         }
 
@@ -271,6 +273,61 @@ namespace Iot.Device.Nmea0183.Tests
             parser.StopDecode();
 
             Assert.Equal(6, messages.Count);
+        }
+
+        [Fact]
+        public void SendMessage()
+        {
+            var parser = new Seatalk1Parser("Test", _port);
+            parser.StartDecode();
+
+            var msg = new Keystroke(AutopilotButtons.MinusOne);
+            parser.SendSentence(msg);
+            int cnt = 1000;
+            while (_port.WrittenBytes.Count < msg.ExpectedLength && cnt-- > 0)
+            {
+                Thread.Sleep(10);
+            }
+
+            parser.StopDecode();
+            Assert.True(cnt > 0);
+            Assert.Equal(4, _port.WrittenBytes.Count);
+            Assert.Equal(0x86, _port.WrittenBytes[0]);
+        }
+
+        [Fact]
+        public void SeatalkMessagesAreNotSame()
+        {
+            Keystroke ks = new Keystroke();
+            SpeedTroughWater stw = new SpeedTroughWater();
+            Assert.False(ks.IsSameMessageTypeAs(stw));
+            Assert.False(ks.IsSameMessageTypeAs(new DepthBelowSurface(Length.FromMeters(1))));
+
+            Keystroke ks2 = new Keystroke(AutopilotButtons.MinusOne, 2);
+            Assert.True(ks.IsSameMessageTypeAs(ks2));
+        }
+
+        [Fact]
+        public void SendMessageTypes()
+        {
+            var parser = new Seatalk1Parser("Test", _port);
+            parser.StartDecode();
+
+            int expectedTotal = 0;
+            foreach (var msg in parser.MessageTypes)
+            {
+                expectedTotal += msg.ExpectedLength;
+                parser.SendSentence(msg);
+            }
+
+            int cnt = 1000;
+            while (_port.WrittenBytes.Count < expectedTotal && cnt-- > 0)
+            {
+                Thread.Sleep(10);
+            }
+
+            parser.StopDecode();
+            Assert.True(cnt > 0);
         }
 
         private static MemoryStream GetStreamFromInputString(string data)

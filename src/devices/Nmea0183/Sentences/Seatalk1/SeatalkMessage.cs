@@ -30,6 +30,7 @@ namespace Iot.Device.Seatalk1.Messages
         protected SeatalkMessage()
         : base(TalkerId.Seatalk, new SentenceId("ALK"), DateTimeOffset.UtcNow)
         {
+            Valid = true;
         }
 
         /// <summary>
@@ -120,6 +121,28 @@ namespace Iot.Device.Seatalk1.Messages
             ////{
             ////    throw new InvalidOperationException($"A custom package verification failed");
             ////}
+        }
+
+        /// <summary>
+        /// Compares whether the two messages are of the same type
+        /// </summary>
+        /// <param name="other">Another message</param>
+        /// <returns>True when the messages are of the same type</returns>
+        public override bool IsSameMessageTypeAs(NmeaSentence other)
+        {
+            if (!base.IsSameMessageTypeAs(other))
+            {
+                return false;
+            }
+
+            SeatalkMessage? otherSeatalkMessage = other as SeatalkMessage;
+            if (otherSeatalkMessage != null)
+            {
+                return otherSeatalkMessage.CommandByte == CommandByte &&
+                       otherSeatalkMessage.ExpectedLength == ExpectedLength;
+            }
+
+            return false;
         }
 
         /// <summary>

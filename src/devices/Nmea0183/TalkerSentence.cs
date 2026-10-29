@@ -14,7 +14,8 @@ using Iot.Device.Seatalk1.Messages;
 namespace Iot.Device.Nmea0183
 {
     /// <summary>
-    /// Represents NMEA0183 talker sentence
+    /// Represents NMEA0183 talker sentence (basically just a string with a talker id and a sentence id, plus a list of fields
+    /// before decoding into a typed object). This is the raw representation of a sentence, before parsing it into a typed object.
     /// </summary>
     public class TalkerSentence
     {
@@ -73,10 +74,17 @@ namespace Iot.Device.Nmea0183
             };
             knownSentences[SeatalkMessage.Id] = (sentence, time) =>
             {
-                var specificMessage = sentence.Fields.FirstOrDefault();
-                if (specificMessage != null && byte.TryParse(specificMessage, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte commandByte))
+                if (sentence.Fields.Count < 3)
                 {
-                    if (GetKnownSeatalk1Message(commandByte, sentence, time, out SeatalkMessage? seatalkMessage))
+                    return null;
+                }
+
+                var specificMessage = sentence.Fields[0];
+                var lengthByte = sentence.Fields[1];
+                if (byte.TryParse(specificMessage, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte commandByte)
+                    && byte.TryParse(lengthByte, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte length))
+                {
+                    if (GetKnownSeatalk1Message(commandByte, length & 0xF, sentence, time, out SeatalkMessage? seatalkMessage))
                     {
                         return seatalkMessage;
                     }
@@ -88,7 +96,8 @@ namespace Iot.Device.Nmea0183
             return knownSentences;
         }
 
-        private static bool GetKnownSeatalk1Message(byte commandByte, TalkerSentence sentence, DateTimeOffset time, out SeatalkMessage seatalkMessage)
+        private static bool GetKnownSeatalk1Message(byte commandByte, int lengthByte, TalkerSentence sentence,
+            DateTimeOffset time, out SeatalkMessage seatalkMessage)
         {
             switch (commandByte)
             {
@@ -96,8 +105,18 @@ namespace Iot.Device.Nmea0183
                     seatalkMessage = new ApparentWindAngle(sentence.Fields, time);
                     return true;
                 case 0x11:
-                    seatalkMessage = new AutopilotWindStatus(sentence, time);
-                    return true;
+                    if (lengthByte == 1)
+                    {
+                        seatalkMessage = new ApparentWindSpeed(sentence, time);
+                        return true;
+                    }
+                    else if (lengthByte == 0)
+                    {
+                        seatalkMessage = new AutopilotWindStatus(sentence, time);
+                        return true;
+                    }
+
+                    break;
                 case 0x20:
                     seatalkMessage = new SpeedTroughWater(sentence, time);
                     return true;
@@ -131,10 +150,10 @@ namespace Iot.Device.Nmea0183
                 case 0xA4:
                     seatalkMessage = new DeviceIdentification(sentence, time);
                     return true;
-                default:
-                    seatalkMessage = null!;
-                    return false;
             }
+
+            seatalkMessage = null!;
+            return false;
         }
 
         private static bool GetKnownNmea2000Sentence(int msgid, TalkerSentence sentence, DateTimeOffset time,

@@ -108,6 +108,8 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 throw new ArgumentException($"The button combination {buttonsToPress} is not a valid button combination");
             }
+
+            Valid = true;
         }
 
         /// <summary>

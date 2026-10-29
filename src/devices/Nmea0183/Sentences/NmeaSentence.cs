@@ -127,7 +127,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         /// <param name="other">The message to compare to</param>
         /// <returns>For most messages, this returns true when both SentenceId and TalkerId are the same</returns>
-        public virtual bool IsSameMessageAs(NmeaSentence other)
+        public virtual bool IsSameMessageTypeAs(NmeaSentence other)
         {
             return SentenceId == other.SentenceId && TalkerId == other.TalkerId;
         }

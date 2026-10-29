@@ -109,6 +109,11 @@ namespace Iot.Device.Seatalk1
         internal List<SeatalkMessage> MessageTypes => _messageFactories;
 
         /// <summary>
+        /// For testing purposes only
+        /// </summary>
+        internal List<byte> Buffer => _buffer;
+
+        /// <summary>
         /// Register a new message type
         /// </summary>
         /// <param name="message">An instance of the new message type</param>
@@ -170,28 +175,12 @@ namespace Iot.Device.Seatalk1
         protected internal override TalkerSentence? ParseSentence(string currentLine, out NmeaError error)
         {
             IEnumerable<byte>? msg = null;
+            byte[] toTest = Convert.FromHexString(currentLine.Replace(",", string.Empty));
+
             while (true)
             {
-                byte[] toTest = Convert.FromHexString(currentLine.Replace(",", string.Empty));
                 msg = GetDataForNextMessage(toTest, out int messageLength);
-                if (msg == null && !_bufferIsInSync)
-                {
-                    // In this case, we also need to check whether a substring of currentLine is a valid message (but still starting at index 0)
-                    // This is because we have only chopped the first byte from an invalid message, but the remaining (up to 17) bytes may now
-                    // form a valid message, but with a different length. GetDataForNextMessage only returns non-null when the message
-                    // length matches exactly.
-                    for (int len = 3; len < toTest.Length; len++)
-                    {
-                        msg = GetDataForNextMessage(toTest.Take(len).ToList(), out messageLength);
-                        if (msg != null)
-                        {
-                            currentLine = BitConverter.ToString(msg.ToArray());
-                            _buffer.RemoveRange(0, len);
-                            break;
-                        }
-                    }
-                }
-                else if (msg != null)
+                if (msg != null)
                 {
                     _buffer.RemoveRange(0, messageLength);
                 }
@@ -215,6 +204,7 @@ namespace Iot.Device.Seatalk1
                         _buffer.RemoveAt(0);
                         // We removed the first byte from the sequence, we need to try again before we add the next byte
                         _bufferIsInSync = false;
+                        toTest = toTest.Skip(1).ToArray();
                         continue;
                     }
                 }
@@ -249,10 +239,12 @@ namespace Iot.Device.Seatalk1
 
             if (input.Count > MaxMessageLength)
             {
-                bytesInMessage = 0;
+                // bytesInMessage must be != 0 to indicate that we need to remove a byte from the buffer, so we just remove the first byte and try again
+                bytesInMessage = 1;
                 return null;
             }
 
+            bool possiblyValidMessage = false;
             foreach (var t in _messageFactories)
             {
                 if (t.MatchesMessageType(input))
@@ -264,9 +256,30 @@ namespace Iot.Device.Seatalk1
                     // not be longer.
                     return input;
                 }
+
+                if (t.CommandByte == input[0])
+                {
+                    possiblyValidMessage = true;
+                }
             }
 
-            bytesInMessage = 0;
+            int lengthByte = (input[1] & 0xF) + 3;
+            if (input.Count >= lengthByte)
+            {
+                possiblyValidMessage = false;
+            }
+
+            // If the message does not start with any known command byte, we are out of sync. We need to remove the first byte and try again.
+            if (!possiblyValidMessage)
+            {
+                // bytesInMessage must be != 0 to indicate that we need to remove a byte from the buffer, so we just remove the first byte and try again
+                bytesInMessage = 1;
+            }
+            else
+            {
+                bytesInMessage = 0;
+            }
+
             return null;
         }
 
