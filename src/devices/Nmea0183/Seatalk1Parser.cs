@@ -30,8 +30,10 @@ namespace Iot.Device.Seatalk1
     public class Seatalk1Parser : NmeaParser
     {
         private const Parity DefaultParity = Parity.Even;
+        private const int MaxRememberedSentDatagrams = 4;
         private readonly string _portName;
         private readonly object _lock;
+        private readonly object _lastSentDatagramsLock;
         private readonly List<byte> _receiveBuffer;
         private readonly Queue<byte[]> _lastSentDatagrams;
 
@@ -60,6 +62,7 @@ namespace Iot.Device.Seatalk1
             _port = port ?? throw new ArgumentNullException(nameof(port));
             _portName = _port.PortName;
             _lock = new object();
+            _lastSentDatagramsLock = new object();
             _receiveBuffer = new List<byte>(20);
             _lastSentDatagrams = new Queue<byte[]>();
 
@@ -120,6 +123,69 @@ namespace Iot.Device.Seatalk1
         /// For testing purposes only
         /// </summary>
         internal List<byte> Buffer => _receiveBuffer;
+
+        private static int BitCount(int b)
+        {
+            int count = 0;
+            while (b != 0)
+            {
+                count++;
+                b &= (b - 1); // walking through all the bits which are set to one
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        /// This calculates the correct parity for each byte in the datagram.
+        /// </summary>
+        /// <param name="data">The datagram to send (first byte is the command byte, remainder are the arguments)</param>
+        /// <returns>A list of bytes with parity information</returns>
+        /// <remarks>
+        /// We need to send the first byte (the command byte) with a parity of "mark" (=1), all the remaining bytes with a parity of "space" (=0),
+        /// but since Linux doesn't seem to properly support Mark or Space parity settings (on the raspberry pi, that setting results in no parity bit to be sent)
+        /// we cheat and count what the parity bit should be and use even or odd to achieve the desired result.
+        /// </remarks>
+        internal static List<(byte B, Parity P, int Index)> CalculateParityForEachByte(byte[] data)
+        {
+            bool isCommandByte = true;
+            List<(byte, Parity, int)> ret = new();
+            for (int i = 0; i < data.Length; i++)
+            {
+                byte b = data[i];
+                bool isEven = BitCount(b) % 2 == 0;
+                Parity parityToSend;
+                if (isEven)
+                {
+                    if (isCommandByte)
+                    {
+                        // command byte so far is even, we need the parity bit to be 1, so use odd parity
+                        // (because the parity setting "odd" means that the data bits including the parity bit count to odd)
+                        parityToSend = Parity.Odd;
+                    }
+                    else
+                    {
+                        parityToSend = Parity.Even;
+                    }
+                }
+                else
+                {
+                    if (isCommandByte)
+                    {
+                        parityToSend = Parity.Even;
+                    }
+                    else
+                    {
+                        parityToSend = Parity.Odd;
+                    }
+                }
+
+                ret.Add((data[i], parityToSend, i));
+                isCommandByte = false;
+            }
+
+            return ret;
+        }
 
         /// <summary>
         /// Register a new message type
@@ -228,19 +294,9 @@ namespace Iot.Device.Seatalk1
             if (msg != null)
             {
                 error = NmeaError.None;
-                foreach (var entry in _lastSentDatagrams)
+                if (WasRecentlySent(msg))
                 {
-                    if (entry.SequenceEqual(msg))
-                    {
-                        _lastSentDatagrams.Remove(entry);
-                        error = NmeaError.None;
-                        return null;
-                    }
-                }
-
-                if (_lastSentDatagrams.Count > 3)
-                {
-                    _lastSentDatagrams.Dequeue();
+                    return null;
                 }
 
                 TalkerSentence ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id,
@@ -315,7 +371,7 @@ namespace Iot.Device.Seatalk1
                 if (sentence is SeatalkMessage seatalkMessage)
                 {
                     byte[] datagram = seatalkMessage.CreateDatagram();
-                    _lastSentDatagrams.Enqueue(datagram);
+                    RememberSentDatagram(datagram);
                     bool success = SendDatagram(datagram);
                     if (!success)
                     {
@@ -330,67 +386,44 @@ namespace Iot.Device.Seatalk1
             }
         }
 
-        private static int BitCount(int b)
+        private void RememberSentDatagram(byte[] datagram)
         {
-            int count = 0;
-            while (b != 0)
+            lock (_lastSentDatagramsLock)
             {
-                count++;
-                b &= (b - 1); // walking through all the bits which are set to one
+                _lastSentDatagrams.Enqueue(datagram);
+                while (_lastSentDatagrams.Count > MaxRememberedSentDatagrams)
+                {
+                    _lastSentDatagrams.Dequeue();
+                }
             }
-
-            return count;
         }
 
-        /// <summary>
-        /// This calculates the correct parity for each byte in the datagram.
-        /// </summary>
-        /// <param name="data">The datagram to send (first byte is the command byte, remainder are the arguments)</param>
-        /// <returns>A list of bytes with parity information</returns>
-        /// <remarks>
-        /// We need to send the first byte (the command byte) with a parity of "mark" (=1), all the remaining bytes with a parity of "space" (=0),
-        /// but since Linux doesn't seem to properly support Mark or Space parity settings (on the raspberry pi, that setting results in no parity bit to be sent)
-        /// we cheat and count what the parity bit should be and use even or odd to achieve the desired result.
-        /// </remarks>
-        internal static List<(byte B, Parity P, int Index)> CalculateParityForEachByte(byte[] data)
+        private bool WasRecentlySent(IEnumerable<byte> receivedDatagram)
         {
-            bool isCommandByte = true;
-            List<(byte, Parity, int)> ret = new();
-            for (int i = 0; i < data.Length; i++)
+            byte[] received = receivedDatagram as byte[] ?? receivedDatagram.ToArray();
+            lock (_lastSentDatagramsLock)
             {
-                byte b = data[i];
-                bool isEven = BitCount(b) % 2 == 0;
-                Parity parityToSend;
-                if (isEven)
+                if (_lastSentDatagrams.Count == 0)
                 {
-                    if (isCommandByte)
-                    {
-                        // command byte so far is even, we need the parity bit to be 1, so use odd parity
-                        // (because the parity setting "odd" means that the data bits including the parity bit count to odd)
-                        parityToSend = Parity.Odd;
-                    }
-                    else
-                    {
-                        parityToSend = Parity.Even;
-                    }
-                }
-                else
-                {
-                    if (isCommandByte)
-                    {
-                        parityToSend = Parity.Even;
-                    }
-                    else
-                    {
-                        parityToSend = Parity.Odd;
-                    }
+                    return false;
                 }
 
-                ret.Add((data[i], parityToSend, i));
-                isCommandByte = false;
+                bool found = false;
+                int count = _lastSentDatagrams.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    byte[] sent = _lastSentDatagrams.Dequeue();
+                    if (!found && sent.SequenceEqual(received))
+                    {
+                        found = true;
+                        continue;
+                    }
+
+                    _lastSentDatagrams.Enqueue(sent);
+                }
+
+                return found;
             }
-
-            return ret;
         }
 
         /// <summary>
