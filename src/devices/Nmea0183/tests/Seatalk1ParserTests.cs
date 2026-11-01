@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Iot.Device.Nmea0183;
@@ -91,6 +92,7 @@ namespace Iot.Device.Nmea0183.Tests
             // Expecting it to drop the first two bytes (0A 02) and then parse the rest as a valid message
             var msg = parser.ParseSentence("0A,02,86,01,02,fd", out NmeaError error);
             Assert.NotNull(msg);
+            Assert.Equal("86", msg.Fields[0]);
         }
 
         [Fact]
@@ -273,6 +275,7 @@ namespace Iot.Device.Nmea0183.Tests
             parser.StopDecode();
 
             Assert.Equal(6, messages.Count);
+            parser.Dispose();
         }
 
         [Fact]
@@ -293,6 +296,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.True(cnt > 0);
             Assert.Equal(4, _port.WrittenBytes.Count);
             Assert.Equal(0x86, _port.WrittenBytes[0]);
+            parser.Dispose();
         }
 
         [Fact]
@@ -305,6 +309,31 @@ namespace Iot.Device.Nmea0183.Tests
 
             Keystroke ks2 = new Keystroke(AutopilotButtons.MinusOne, 2);
             Assert.True(ks.IsSameMessageTypeAs(ks2));
+        }
+
+        [Fact]
+        public void SentMessagesAreNotReceivedAgain()
+        {
+            var parser = new Seatalk1Parser("Test", _port);
+            bool receivedMessage = false;
+            parser.OnNewSequence += (src, message) =>
+            {
+                receivedMessage = true;
+            };
+
+            parser.StartDecode();
+
+            var msg = new Keystroke(AutopilotButtons.MinusOne);
+
+            // Send an outgoing message to the bus, and then immediately try to parse it as if it was received from the bus.
+            // It should not be recognized as a new message.
+            parser.FormatAndSendSentence(msg);
+            Assert.Equal(4, _port.WrittenBytes.Count);
+            _port.SimulateReceive(_port.WrittenBytes.ToArray());
+            Thread.Sleep(100);
+            parser.StopDecode();
+            Assert.False(receivedMessage);
+            parser.Dispose();
         }
 
         [Fact]
