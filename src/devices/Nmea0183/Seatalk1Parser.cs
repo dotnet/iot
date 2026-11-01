@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
@@ -31,7 +32,8 @@ namespace Iot.Device.Seatalk1
         private const Parity DefaultParity = Parity.Even;
         private readonly string _portName;
         private readonly object _lock;
-        private readonly List<byte> _buffer;
+        private readonly List<byte> _receiveBuffer;
+        private readonly Queue<byte[]> _lastSentDatagrams;
 
         private List<SeatalkMessage> _messageFactories;
         private ISerialPort _port;
@@ -58,7 +60,8 @@ namespace Iot.Device.Seatalk1
             _port = port ?? throw new ArgumentNullException(nameof(port));
             _portName = _port.PortName;
             _lock = new object();
-            _buffer = new List<byte>(20);
+            _receiveBuffer = new List<byte>(20);
+            _lastSentDatagrams = new Queue<byte[]>();
 
             _port.BaudRate = 4800;
             _port.Parity = DefaultParity; // Can be anything but none, but "Mark" or "Space" won't have the desired effect on linux, causing garbage to be sent
@@ -101,7 +104,12 @@ namespace Iot.Device.Seatalk1
         /// <summary>
         /// True if the input buffer is currently empty
         /// </summary>
-        public bool IsBufferEmpty => _buffer.Count == 0;
+        public bool IsBufferEmpty => _receiveBuffer.Count == 0;
+
+        /// <summary>
+        /// Gets the name of the port we're talking to
+        /// </summary>
+        public string PortName => _portName;
 
         /// <summary>
         /// List of known messages
@@ -111,7 +119,7 @@ namespace Iot.Device.Seatalk1
         /// <summary>
         /// For testing purposes only
         /// </summary>
-        internal List<byte> Buffer => _buffer;
+        internal List<byte> Buffer => _receiveBuffer;
 
         /// <summary>
         /// Register a new message type
@@ -139,7 +147,7 @@ namespace Iot.Device.Seatalk1
                 _port.Close();
             }
 
-            _buffer.Clear(); // Because clients could wait for an empty buffer
+            _receiveBuffer.Clear(); // Because clients could wait for an empty buffer
 
             base.StopDecode();
         }
@@ -160,8 +168,8 @@ namespace Iot.Device.Seatalk1
                 return null;
             }
 
-            _buffer.Add((byte)nextByte);
-            var contents = _buffer.Take(18).ToArray();
+            _receiveBuffer.Add((byte)nextByte);
+            var contents = _receiveBuffer.Take(18).ToArray();
             return contents.Length > 0 ? String.Join(',', contents.Select(x => x.ToString("X2", CultureInfo.InvariantCulture))) : null;
         }
 
@@ -182,7 +190,7 @@ namespace Iot.Device.Seatalk1
                 msg = GetDataForNextMessage(toTest, out int messageLength);
                 if (msg != null)
                 {
-                    _buffer.RemoveRange(0, messageLength);
+                    _receiveBuffer.RemoveRange(0, messageLength);
                 }
 
                 if (msg == null)
@@ -196,12 +204,12 @@ namespace Iot.Device.Seatalk1
                     {
                         if (_bufferIsInSync)
                         {
-                            var bytesFound = BitConverter.ToString(_buffer.ToArray());
+                            var bytesFound = BitConverter.ToString(_receiveBuffer.ToArray());
                             Logger.LogWarning(
                                 $"Seatalk parser sync lost. Buffer contents: {bytesFound}, trying to resync");
                         }
 
-                        _buffer.RemoveAt(0);
+                        _receiveBuffer.RemoveAt(0);
                         // We removed the first byte from the sequence, we need to try again before we add the next byte
                         _bufferIsInSync = false;
                         toTest = toTest.Skip(1).ToArray();
@@ -209,7 +217,7 @@ namespace Iot.Device.Seatalk1
                     }
                 }
 
-                if (_buffer.Count == 0)
+                if (_receiveBuffer.Count == 0)
                 {
                     _bufferIsInSync = true;
                 }
@@ -220,8 +228,23 @@ namespace Iot.Device.Seatalk1
             if (msg != null)
             {
                 error = NmeaError.None;
+                foreach (var entry in _lastSentDatagrams)
+                {
+                    if (entry.SequenceEqual(msg))
+                    {
+                        _lastSentDatagrams.Remove(entry);
+                        error = NmeaError.None;
+                        return null;
+                    }
+                }
+
+                if (_lastSentDatagrams.Count > 3)
+                {
+                    _lastSentDatagrams.Dequeue();
+                }
+
                 TalkerSentence ts = new TalkerSentence(TalkerId.Seatalk, SeatalkMessage.Id,
-                    currentLine.Split(new[] { '-', ',' }));
+                    msg.Select(x => x.ToString("X2", CultureInfo.InvariantCulture)));
                 return ts;
             }
 
@@ -292,6 +315,7 @@ namespace Iot.Device.Seatalk1
                 if (sentence is SeatalkMessage seatalkMessage)
                 {
                     byte[] datagram = seatalkMessage.CreateDatagram();
+                    _lastSentDatagrams.Enqueue(datagram);
                     bool success = SendDatagram(datagram);
                     if (!success)
                     {
@@ -383,7 +407,7 @@ namespace Iot.Device.Seatalk1
             var dataWithParity = CalculateParityForEachByte(data);
 
             // Only start sending if the buffer is empty. This should hopefully avoid to many collisions
-            while (_buffer.Count > 0)
+            while (_receiveBuffer.Count > 0)
             {
                 // Sending a message takes 1 - 2ms, so wait a bit (knowing that this sleep isn't precise)
                 Thread.Sleep(1);
