@@ -567,18 +567,6 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal((uint)SeaSmartFluidLevel.HexId, msg2.Identifier);
         }
 
-        [Fact]
-        public void StalkEncode()
-        {
-            var talk = new SeatalkNmeaMessage(new byte[]
-            {
-                0x9c, 00, 01
-            });
-
-            var msg = talk.ToNmeaParameterList();
-            Assert.Equal("9C,00,01", msg);
-        }
-
         [Theory]
         [InlineData("$GPRMC,211730.997,A,3511.28000,S,13823.26000,E,7.000,229.000,190120,,*19")]
         [InlineData("$GPRMC,115613.000,A,4729.49750,N,00930.39830,E,1.600,36.200,240520,1.900,E,D*34")]

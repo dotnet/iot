@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183;
@@ -19,7 +20,7 @@ namespace Iot.Device.Seatalk1
     /// This class can be used to translate between Seatalk and NMEA-0183 sentences, and to control an autopilot through a NMEA0183 interface.
     /// Together with <see cref="Nmea2000AutopilotEmulator"/> this class can be used to connect a Seatalk autopilot to a NMEA2000 interface.
     /// </summary>
-    public class SeatalkToNmeaConverter : NmeaSinkAndSource
+    public class SeatalkToNmeaConverter : NmeaComponent
     {
         private readonly AutoPilotRemoteController? _autoPilotRemoteController;
         private readonly List<SentenceId> _sentencesToTranslate;
@@ -76,42 +77,6 @@ namespace Iot.Device.Seatalk1
             set;
         }
 
-        private void SeatalkMessageReceived(SeatalkMessage stalk)
-        {
-            var nmeaMsg = new SeatalkNmeaMessageWithDecoding(stalk.CreateDatagram(), stalk, DateTimeOffset.UtcNow);
-            Logger.LogDebug($"Received Seatalk message: {stalk}");
-            DispatchSentenceEvents(nmeaMsg);
-
-            // Translations Seatalk->Nmea
-            if (stalk is CompassHeadingAutopilotCourse apStatus)
-            {
-                if (SentencesToTranslate.Contains(HeadingAndTrackControlStatus.Id) || SentencesToTranslate.Contains(SentenceId.Any))
-                {
-                    string status = apStatus.AutopilotStatus switch
-                    {
-                        AutopilotStatus.Standby => "M",
-                        AutopilotStatus.Auto => "S",
-                        AutopilotStatus.Track => "T",
-                        AutopilotStatus.Wind => "W", // This one is just guess
-                        _ => "M",
-                    };
-                    var htd = new HeadingAndTrackControlStatus(status, null, string.Empty, "N",
-                        null, null, null, null, apStatus.AutoPilotCourse, null, apStatus.AutoPilotCourse, false, false, false, apStatus.Alarms != 0, apStatus.CompassHeading);
-                    DispatchSentenceEvents(htd);
-                }
-
-                if (SentencesToTranslate.Contains(RudderSensorAngle.Id) || SentencesToTranslate.Contains(SentenceId.Any))
-                {
-                    var angle = apStatus.RudderPosition;
-                    if (UseRudderAngle)
-                    {
-                        var rsa = new RudderSensorAngle(angle, null);
-                        DispatchSentenceEvents(rsa);
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Start receiving data
         /// </summary>
@@ -154,14 +119,14 @@ namespace Iot.Device.Seatalk1
         /// This sends out a message when it is valid and it is a $STALK message and this instance is not the source. Or when the
         /// message is valid and one of the supported messages to send as specified in <see cref="SentencesToTranslate"/>.
         /// </remarks>
-        public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
+        protected override void ProcessInputSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             if (sentence.Valid == false)
             {
                 return;
             }
 
-            if (sentence.SentenceId == SeatalkNmeaMessage.Id)
+            if (sentence.SentenceId == SeatalkMessage.Id)
             {
                 if (SeatalkInterfaceName != null && source.InterfaceName != SeatalkInterfaceName)
                 {
@@ -201,7 +166,7 @@ namespace Iot.Device.Seatalk1
 
             var ap = _autoPilotRemoteController;
 
-            if (DoTranslate(sentence, out HeadingAndTrackControl? htc) && htc != null && ap != null)
+            if (DoTranslate(sentence, out HeadingAndTrackControl? htc) && ap != null)
             {
                 // Empty the queue when this (rare) message arrives, so we can directly issue its commands
                 while (_sendQueue.TryTake(out var dispose))
@@ -255,9 +220,37 @@ namespace Iot.Device.Seatalk1
                     _sendQueue.Add(() => ap.SetDeadbandMode(DeadbandMode.Automatic));
                 }
             }
+
+            if (DoTranslate(sentence, out CompassHeadingAutopilotCourse? apStatus))
+            {
+                if (SentencesToTranslate.Contains(HeadingAndTrackControlStatus.Id) || SentencesToTranslate.Contains(SentenceId.Any))
+                {
+                    string status = apStatus.AutopilotStatus switch
+                    {
+                        AutopilotStatus.Standby => "M",
+                        AutopilotStatus.Auto => "S",
+                        AutopilotStatus.Track => "T",
+                        AutopilotStatus.Wind => "W", // This one is just guess
+                        _ => "M",
+                    };
+                    var htd = new HeadingAndTrackControlStatus(status, null, string.Empty, "N",
+                        null, null, null, null, apStatus.AutoPilotCourse, null, apStatus.AutoPilotCourse, false, false, false, apStatus.Alarms != 0, apStatus.CompassHeading);
+                    DispatchSentenceEvents(htd);
+                }
+
+                if (SentencesToTranslate.Contains(RudderSensorAngle.Id) || SentencesToTranslate.Contains(SentenceId.Any))
+                {
+                    var angle = apStatus.RudderPosition;
+                    if (UseRudderAngle)
+                    {
+                        var rsa = new RudderSensorAngle(angle, null);
+                        DispatchSentenceEvents(rsa);
+                    }
+                }
+            }
         }
 
-        private bool DoTranslate<T>(NmeaSentence sentence, out T? convertedSentence)
+        private bool DoTranslate<T>(NmeaSentence sentence, [NotNullWhen(true)]out T? convertedSentence)
             where T : NmeaSentence
         {
             if (sentence is T converted && (SentencesToTranslate.Contains(sentence.SentenceId) || SentencesToTranslate.Contains(SentenceId.Any)))
