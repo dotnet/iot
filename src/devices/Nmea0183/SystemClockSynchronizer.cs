@@ -17,7 +17,7 @@ namespace Iot.Device.Nmea0183
     /// <summary>
     /// Synchronizes the system clock to the NMEA data stream
     /// </summary>
-    public class SystemClockSynchronizer : NmeaSinkAndSource
+    public class SystemClockSynchronizer : NmeaComponent
     {
         private int _numberOfValidMessagesSeen;
 
@@ -52,7 +52,7 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <inheritdoc />
-        public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
+        protected override void ProcessInputSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             if (sentence is TimeDate zda)
             {
