@@ -45,6 +45,16 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_OpenEx(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle);
 
         /// <summary>
+        /// Opens a device using its serial number or description.
+        /// </summary>
+        /// <param name="identifier">The serial number or description selected by the flags.</param>
+        /// <param name="flags">How to interpret the identifier.</param>
+        /// <param name="ftHandle">The handle of the open device.</param>
+        /// <returns>The status.</returns>
+        [DllImport("ftd2xx", EntryPoint = "FT_OpenEx", CharSet = CharSet.Ansi, ExactSpelling = true)]
+        public static extern FtStatus FT_OpenEx(string identifier, FtOpenType flags, out SafeFtHandle ftHandle);
+
+        /// <summary>
         /// Close the device.
         /// </summary>
         /// <param name="ftHandle">The device handle</param>
@@ -139,6 +149,38 @@ namespace Iot.Device.FtCommon
         /// <returns></returns>
         [DllImport("ftd2xx")]
         public static extern FtStatus FT_Write(SafeFtHandle ftHandle, in byte lpBuffer, uint dwBytesToWrite, ref uint lpdwBytesWritten);
+
+        /// <summary>
+        /// Reads the stored FT-X configuration fields and null-terminated USB descriptor strings.
+        /// </summary>
+        /// <param name="handle">The open D2XX device handle.</param>
+        /// <param name="data">The FT-X configuration, initialized with its device type.</param>
+        /// <param name="dataSize">The native configuration structure size in bytes.</param>
+        /// <param name="manufacturer">The destination manufacturer string buffer.</param>
+        /// <param name="manufacturerId">The destination manufacturer ID string buffer.</param>
+        /// <param name="description">The destination device description string buffer.</param>
+        /// <param name="serialNumber">The destination serial number string buffer.</param>
+        /// <returns>The native D2XX operation status.</returns>
+        [DllImport("ftd2xx", ExactSpelling = true)]
+        public static extern FtStatus FT_EEPROM_Read(
+            SafeFtHandle handle, ref FtXSeriesEeprom data, uint dataSize,
+            [Out] byte[] manufacturer, [Out] byte[] manufacturerId, [Out] byte[] description, [Out] byte[] serialNumber);
+
+        /// <summary>
+        /// Programs the supplied FT-X configuration fields and null-terminated USB descriptor strings.
+        /// </summary>
+        /// <param name="handle">The open D2XX device handle.</param>
+        /// <param name="data">The FT-X configuration to persist.</param>
+        /// <param name="dataSize">The native configuration structure size in bytes.</param>
+        /// <param name="manufacturer">The null-terminated manufacturer string buffer.</param>
+        /// <param name="manufacturerId">The null-terminated manufacturer ID string buffer.</param>
+        /// <param name="description">The null-terminated device description string buffer.</param>
+        /// <param name="serialNumber">The null-terminated serial number string buffer.</param>
+        /// <returns>The native D2XX operation status.</returns>
+        [DllImport("ftd2xx", ExactSpelling = true)]
+        public static extern FtStatus FT_EEPROM_Program(
+            SafeFtHandle handle, ref FtXSeriesEeprom data, uint dataSize,
+            [In] byte[] manufacturer, [In] byte[] manufacturerId, [In] byte[] description, [In] byte[] serialNumber);
 
         /// <summary>
         /// Sets chars for interruption.

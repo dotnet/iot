@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultTestTfms)</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ft200X.csproj" />
+    <Compile Include="..\samples\TemperatureSensor.cs" Link="TemperatureSensor.cs" />
+    <Compile Include="..\samples\IFifoSensor.cs" Link="IFifoSensor.cs" />
+    <Compile Include="..\samples\FifoSensorRunner.cs" Link="FifoSensorRunner.cs" />
+  </ItemGroup>
+</Project>
