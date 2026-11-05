@@ -32,8 +32,9 @@ namespace Iot.Device.ExplorerHat
             _shouldDispose = shouldDispose || controller is null;
             _controller = controller ?? new GpioController();
 
-            Motors = new Motors(_controller);
-            Lights = new Lights(_controller);
+            // The controller belongs to this instance: motors and lights must not dispose it
+            Motors = new Motors(_controller, shouldDispose: false);
+            Lights = new Lights(_controller, shouldDispose: false);
         }
 
         /// <summary>
@@ -41,8 +42,9 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Dispose()
         {
-            Lights.Dispose();
+            // Motors first: their software PWM threads write to the controller until they are disposed
             Motors.Dispose();
+            Lights.Dispose();
 
             if (_shouldDispose)
             {

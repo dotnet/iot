@@ -10,6 +10,10 @@ namespace Iot.Device.Button
     /// GPIO implementation of Button.
     /// Inherits from ButtonBase.
     /// </summary>
+    /// <remarks>
+    /// <see cref="ButtonBase.IsPressed"/> is initialized from the pin level when the button is created,
+    /// so a button that is already held down is reported as pressed. No events are raised for this initial state.
+    /// </remarks>
     public class GpioButton : ButtonBase
     {
         private GpioController _gpioController;
@@ -37,7 +41,7 @@ namespace Iot.Device.Button
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
         public GpioButton(int buttonPin, bool isPullUp = true, bool hasExternalResistor = false,
             GpioController? gpio = null, bool shouldDispose = true, TimeSpan debounceTime = default)
-            : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), isPullUp, hasExternalResistor, gpio, shouldDispose, debounceTime)
+            : this(buttonPin, DefaultDoublePressTime, DefaultHoldingTime, isPullUp, hasExternalResistor, gpio, shouldDispose, debounceTime)
         {
         }
 
@@ -89,6 +93,11 @@ namespace Iot.Device.Button
                     _buttonPin,
                     PinEventTypes.Falling | PinEventTypes.Rising,
                     PinStateChanged);
+
+                // A button already held down at startup produces no edge, so take the initial state from the pin level.
+                // This only sets the state; no events are raised.
+                PinValue initialValue = _gpioController.Read(_buttonPin);
+                IsPressed = _eventPinMode == PinMode.InputPullUp ? initialValue == PinValue.Low : initialValue == PinValue.High;
             }
             catch (Exception)
             {

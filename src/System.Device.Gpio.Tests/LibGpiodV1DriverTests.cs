@@ -4,6 +4,7 @@
 using System.Device.Gpio.Drivers;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -69,6 +70,32 @@ public class LibGpiodV1DriverTests : GpioControllerTestBase
             gc.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising | PinEventTypes.Falling, PinChanged);
             gc.UnregisterCallbackForPinValueChangedEvent(InputPin, PinChanged);
         }
+    }
+
+    /// <summary>
+    /// Disposing a pin that has a value-changed callback registered must not wait for an edge.
+    /// Regression test for the event detection loop only being cancellable when an event arrives.
+    /// </summary>
+    [Fact]
+    public async Task DisposeWithRegisteredCallbackCompletesWithoutAnEdge()
+    {
+        var gc = new GpioController(GetTestDriver());
+        gc.OpenPin(InputPin, PinMode.Input);
+
+        static void PinChanged(object sender, PinValueChangedEventArgs args)
+        {
+        }
+
+        gc.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising | PinEventTypes.Falling, PinChanged);
+
+        // No edge is generated on purpose: cancellation must not depend on one.
+        Task dispose = Task.Run(gc.Dispose);
+        Task finished = await Task.WhenAny(dispose, Task.Delay(TimeSpan.FromSeconds(10)));
+
+        Assert.Same(dispose, finished);
+
+        // Awaiting it surfaces any exception the disposal path threw.
+        await dispose;
     }
 
     /// <summary>

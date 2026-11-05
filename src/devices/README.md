@@ -243,6 +243,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Touch sensors
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [CAP1208 - 8-channel capacitive touch sensor](Cap1xxx/README.md)
 * [GUI Support](Gui/README.md)
 * [Ili934x TFT LCD Controller](Ili934x/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)

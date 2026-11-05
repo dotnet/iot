@@ -74,10 +74,10 @@ namespace Iot.Device.ExplorerHat
 
             LedArray = new List<Led>()
             {
-                new(LED1_PIN, _controller),
-                new(LED2_PIN, _controller),
-                new(LED3_PIN, _controller),
-                new(LED4_PIN, _controller)
+                new(LED1_PIN, _controller, shouldDispose: false),
+                new(LED2_PIN, _controller, shouldDispose: false),
+                new(LED3_PIN, _controller, shouldDispose: false),
+                new(LED4_PIN, _controller, shouldDispose: false)
             };
         }
 
@@ -110,7 +110,11 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Dispose()
         {
-            Off();
+            foreach (Led led in LedArray)
+            {
+                led.Dispose();
+            }
+
             if (_shouldDispose)
             {
                 _controller?.Dispose();

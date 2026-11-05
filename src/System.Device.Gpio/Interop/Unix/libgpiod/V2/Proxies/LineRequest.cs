@@ -19,6 +19,8 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__request.html#details"/>
 internal class LineRequest : LibGpiodProxyBase
 {
+    private const int ERROR_CODE_EINTR = 4; // Interrupted system call
+
     private readonly LineRequestSafeHandle _handle;
 
     private readonly object _signalPipeWriteSideLock = new();
@@ -47,7 +49,7 @@ internal class LineRequest : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public int GetNumRequestedLines()
     {
-        return CallLibgpiod(() => LibgpiodV2.gpiod_line_request_get_num_requested_lines(_handle));
+        return (int)CallLibgpiod(() => LibgpiodV2.gpiod_line_request_get_num_requested_lines(_handle));
     }
 
     /// <summary>
@@ -61,8 +63,8 @@ internal class LineRequest : LibGpiodProxyBase
         {
             int numRequestedLines = GetNumRequestedLines();
             uint[] requestedOffsets = new uint[numRequestedLines];
-            int nStored = LibgpiodV2.gpiod_line_request_get_requested_offsets(_handle, requestedOffsets, requestedOffsets.Length);
-            Array.Resize(ref requestedOffsets, nStored);
+            nuint nStored = LibgpiodV2.gpiod_line_request_get_requested_offsets(_handle, requestedOffsets, (nuint)requestedOffsets.Length);
+            Array.Resize(ref requestedOffsets, (int)nStored);
             return requestedOffsets.Convert();
         });
     }
@@ -88,7 +90,7 @@ internal class LineRequest : LibGpiodProxyBase
         {
             uint[] offsetsArr = offsets.ToArray().Convert();
             var offsetValues = new GpiodLineValue[offsetsArr.Length];
-            int result = LibgpiodV2.gpiod_line_request_get_values_subset(_handle, offsetValues.Length, offsetsArr, offsetValues);
+            int result = LibgpiodV2.gpiod_line_request_get_values_subset(_handle, (nuint)offsetValues.Length, offsetsArr, offsetValues);
             if (result < 0)
             {
                 throw new GpiodException($"Could not get multiple line values from request: {LastErr.GetMsg()}");
@@ -148,7 +150,7 @@ internal class LineRequest : LibGpiodProxyBase
             var tupleArr = valueByOffset.ToArray();
             uint[] offsets = tupleArr.Select(x => x._offset).ToArray().Convert();
             var values = tupleArr.Select(x => x._value).ToArray();
-            int result = LibgpiodV2.gpiod_line_request_set_values_subset(_handle, offsets.Length, offsets, values);
+            int result = LibgpiodV2.gpiod_line_request_set_values_subset(_handle, (nuint)offsets.Length, offsets, values);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set multiple values: {LastErr.GetMsg()}");
@@ -299,10 +301,31 @@ internal class LineRequest : LibGpiodProxyBase
                     }
 
                     using var eventBuffer = new UnmanagedArray<epoll_event>(2);
-                    ret = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 2, (int)timeout.Value.TotalMilliseconds);
-                    if (ret < 0)
+
+                    while (true)
                     {
-                        throw new GpiodException($"Error while waiting for edge events, epoll_wait: {LastErr.GetMsg()}");
+                        ret = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 2, (int)timeout.Value.TotalMilliseconds);
+
+                        if (ret >= 0)
+                        {
+                            break;
+                        }
+
+                        int errorCode = Marshal.GetLastWin32Error();
+
+                        if (errorCode == ERROR_CODE_EINTR)
+                        {
+                            // ignore Interrupted system call error and retry
+                            continue;
+                        }
+
+#if NET7_0_OR_GREATER
+                        string err = Marshal.GetLastPInvokeErrorMessage();
+#else
+                        string err = errorCode.ToString();
+#endif
+                        string errMsg = string.IsNullOrWhiteSpace(err) ? string.Empty : $"Error: '{err}'";
+                        throw new GpiodException($"Error while waiting for edge events, epoll_wait: {errMsg}");
                     }
 
                     bool isTimeout = ret == 0;
@@ -395,7 +418,7 @@ internal class LineRequest : LibGpiodProxyBase
     {
         return CallLibgpiod(() =>
         {
-            int nReadEvents = LibgpiodV2.gpiod_line_request_read_edge_events(_handle, edgeEventBuffer.Handle, edgeEventBuffer.Capacity);
+            int nReadEvents = LibgpiodV2.gpiod_line_request_read_edge_events(_handle, edgeEventBuffer.Handle, (nuint)edgeEventBuffer.Capacity);
             if (nReadEvents < 0)
             {
                 throw new GpiodException($"Could not read edge events: {LastErr.GetMsg()}");

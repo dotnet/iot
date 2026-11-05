@@ -27,6 +27,7 @@
 * [BrickPi3](BrickPi3/README.md)
 * [Button](Button/README.md)
 * [Buzzer - Piezo Buzzer Controller](Buzzer/README.md)
+* [CAP1208 - 8-channel capacitive touch sensor](Cap1xxx/README.md)
 * [CCS811 Gas sensor](Ccs811/README.md)
 * [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
 * [Charlieplex Segment binding](Charlieplex/README.md)

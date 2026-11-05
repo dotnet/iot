@@ -191,7 +191,7 @@ namespace Iot.Device.Adc
                 ushort regValue = ReadRegister(Ina219Register.Configuration);
 
                 regValue &= (ushort)~Ina219ConfigurationFlags.SadcMask;
-                regValue |= (ushort)((ushort)value << 4);
+                regValue |= (ushort)value;
 
                 WriteRegister(Ina219Register.Configuration, regValue);
 
@@ -239,17 +239,17 @@ namespace Iot.Device.Adc
         /// Read the measured shunt voltage.
         /// </summary>
         /// <returns>The shunt potential difference</returns>
-        // read the shunt voltage. LSB = 10uV then convert to Volts
+        // read the shunt voltage. The register is signed (two's complement). LSB = 10uV then convert to Volts
         [Telemetry("ShuntVoltage")]
-        public ElectricPotential ReadShuntVoltage() => ElectricPotential.FromVolts(ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10.0 / 1000000.0);
+        public ElectricPotential ReadShuntVoltage() => ElectricPotential.FromVolts((short)ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10.0 / 1000000.0);
 
         /// <summary>
         /// Read the measured Bus voltage.
         /// </summary>
         /// <returns>The Bus potential (voltage)</returns>
-        // read the bus voltage. LSB = 4mV then convert to Volts
+        // read the bus voltage. The register is unsigned, with the value in bits 15-3. LSB = 4mV then convert to Volts
         [Telemetry("BusVoltage")]
-        public ElectricPotential ReadBusVoltage() => ElectricPotential.FromVolts(((short)ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000.0);
+        public ElectricPotential ReadBusVoltage() => ElectricPotential.FromVolts((ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000.0);
 
         /// <summary>
         /// Read the calculated current through the INA219.
@@ -267,7 +267,8 @@ namespace Iot.Device.Adc
             // whenever needed.
             SetCalibration(_calibrationValue, _currentLsb);
 
-            return ElectricCurrent.FromAmperes(ReadRegister(Ina219Register.Current, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb);
+            // The current register is signed (two's complement): a negative value means the current flows from IN- to IN+
+            return ElectricCurrent.FromAmperes((short)ReadRegister(Ina219Register.Current, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * _currentLsb);
         }
 
         /// <summary>

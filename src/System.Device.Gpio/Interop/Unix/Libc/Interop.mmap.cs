@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 internal partial class Interop
 {
     [DllImport(LibcLibrary, SetLastError = true)]
-    internal static extern IntPtr mmap(IntPtr addr, int length, MemoryMappedProtections prot, MemoryMappedFlags flags, int fd, int offset);
+    internal static extern IntPtr mmap(IntPtr addr, UIntPtr length, MemoryMappedProtections prot, MemoryMappedFlags flags, int fd, int offset);
 }
 
 [Flags]

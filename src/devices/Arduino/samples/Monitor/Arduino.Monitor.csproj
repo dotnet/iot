@@ -8,10 +8,14 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CharacterDisplay.cs" />
     <Compile Include="Arduino.Monitor.cs" />
+    <Compile Include="CommandLineOptions.cs" />
+    <Compile Include="SensorHandling.cs" />
+    <Compile Include="SensorValues.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Bmxx80\Bmxx80.csproj" />
