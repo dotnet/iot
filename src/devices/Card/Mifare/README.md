@@ -2,6 +2,12 @@
 
 This class supports Mifare cards. They are RFID cards responding to ISO 14443 type A. You need a specific card reader like PN532, PN5180 to read, write those kind of cards.
 
+## Access conditions
+
+Use `SectorTailerAccess` with the trailer block number and its 16 bytes to decode the sector's permissions.
+For access bits `111`, the access bits can be read with key A or key B but cannot be written.
+The [NXP datasheet, Table 7](https://www.nxp.com/docs/en/data-sheet/MF1S50YYX_V1.pdf#page=12) lists all eight configurations.
+
 ## Usage
 
 You'll need first to get the card from an RFID reader. The example below shows how to do it with a PN532 and read all the sectors and print all the sector data information.
