@@ -69,6 +69,25 @@ data = pca95x4.Read(Register.InputPort);
 Console.WriteLine($"Input Register: 0x{data:X2}");
 ```
 
+### Use as a GpioController
+
+`Pca95x4` derives from `GpioDriver`, so its pins can also be accessed through a standard `GpioController`. This provides consistent access alongside on-board GPIO pins.
+
+```csharp
+I2cConnectionSettings i2cConnectionSettings = new(1, 0x38);
+I2cDevice i2cDevice = I2cDevice.Create(i2cConnectionSettings);
+Pca95x4 pca95x4 = new Pca95x4(i2cDevice);
+GpioController controller = new GpioController(pca95x4);
+
+// Drive pin 0 as an output.
+controller.OpenPin(0, PinMode.Output);
+controller.Write(0, PinValue.High);
+
+// Read pin 1 as an input.
+controller.OpenPin(1, PinMode.Input);
+PinValue value = controller.Read(1);
+```
+
 ## Binding Notes
 
 PCA9534/PCA9554 and PCA9534A/PCA9554A are identical except for a few differences.
