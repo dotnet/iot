@@ -440,7 +440,7 @@ namespace Iot.Device.Card.Mifare
                     AccessSector.ReadAccessBitsWithKeyB | AccessSector.WriteAccessBitsWithKeyB;
             }
 
-            if ((c1a == 1) && (c2a == 0) && (c3a == 1))
+            if ((c1a == 1) && (c2a == 1) && (c3a == 1))
             {
                 return AccessSector.ReadAccessBitsWithKeyA |
                     AccessSector.ReadAccessBitsWithKeyB;
