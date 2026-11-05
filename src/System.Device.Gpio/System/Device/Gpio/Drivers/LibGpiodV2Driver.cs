@@ -335,9 +335,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
         var eventSubscription = new LibGpiodV2EventObserver.EventSubscription(offset, Translator.Translate(eventTypes));
 
-        LibGpiodV2EventObserver.EventWaitHandle eventWaitHandle = _eventObserver.ObserveSingleEvent(lineRequest, eventSubscription);
-
-        return eventWaitHandle.WaitForEventResult(cancellationToken);
+        return _eventObserver.ObserveSingleEvent(lineRequest, eventSubscription, cancellationToken);
     }
 
     /// <inheritdoc/>

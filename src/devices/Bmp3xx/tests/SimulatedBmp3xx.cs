@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
-using System.Diagnostics;
 
 namespace Iot.Device.Bmp3xx.Tests
 {
@@ -36,12 +35,13 @@ namespace Iot.Device.Bmp3xx.Tests
 
         private readonly byte _chipId;
         private readonly byte[] _calibration;
+        private readonly TimeProvider _timeProvider;
         private uint _rawPressure;
         private uint _rawTemperature;
         private long _modeChangesIgnoredUntil;
         private long _longestNormalModeMeasurementMicroseconds;
 
-        public SimulatedBmp3xx(byte chipId, byte[] calibration)
+        public SimulatedBmp3xx(byte chipId, byte[] calibration, TimeProvider? timeProvider = null)
             : base(new I2cConnectionSettings(1, Bmp3xxBase.DefaultI2cAddress))
         {
             if (calibration.Length != 21)
@@ -51,6 +51,7 @@ namespace Iot.Device.Bmp3xx.Tests
 
             _chipId = chipId;
             _calibration = calibration;
+            _timeProvider = timeProvider ?? TimeProvider.System;
             LoadResetValues();
 
             // After power-on the "power-on reset detected" flag is set (section 3.2).
@@ -235,9 +236,10 @@ namespace Iot.Device.Bmp3xx.Tests
             // case: the longest measurement since normal mode was entered had just started.
             if (mode == 0b00 && previousMode == 0b11)
             {
-                _modeChangesIgnoredUntil = Stopwatch.GetTimestamp() + (_longestNormalModeMeasurementMicroseconds * Stopwatch.Frequency / 1_000_000);
+                _modeChangesIgnoredUntil = _timeProvider.GetTimestamp()
+                    + (_longestNormalModeMeasurementMicroseconds * _timeProvider.TimestampFrequency / 1_000_000);
             }
-            else if (mode != 0b00 && Stopwatch.GetTimestamp() < _modeChangesIgnoredUntil)
+            else if (mode != 0b00 && _timeProvider.GetTimestamp() < _modeChangesIgnoredUntil)
             {
                 SetByte(PowerControlAddress, (byte)(value & ~0b0011_0000));
                 return;
