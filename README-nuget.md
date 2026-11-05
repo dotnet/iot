@@ -8,6 +8,8 @@ This repository contains the [System.Device.Gpio](https://www.nuget.org/packages
 
 The repository also contains [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings), a growing set of community-maintained [device bindings](https://github.com/dotnet/iot/tree/main/src/devices/README.md) for IoT components.
 
+The libraries in this repository are community-maintained and do not have a formal support commitment. Existing versions are not serviced. Fixes may be included in a future minor or major release.
+
 ## Hardware requirements
 
 While most of the bindings and examples in this project require and are designed to support specific hardware (such as [LCD displays](https://github.com/dotnet/iot/tree/main/src/devices/CharacterLcd), [temperature sensors](https://github.com/dotnet/iot/tree/main/src/devices/Dhtxx), [single-board computers](https://github.com/dotnet/iot/tree/main/src/devices/Board/RaspberryPiBoard.cs), [microcontrollers](https://github.com/dotnet/iot/tree/main/src/devices/Arduino), etc.), the library itself tries to be as hardware-independent as possible. Some bindings are even written to showcase the use of IOT interfaces with hardware that is already present in normal desktop computers (such as [keyboards](https://github.com/dotnet/iot/tree/main/src/devices/Board/KeyboardGpioDriver.cs) or [CPU temperature sensors](https://github.com/dotnet/iot/tree/main/src/devices/HardwareMonitor)). So to get started, you do not need expensive hardware. Or you can start out with cheap stuff, such as an Arduino Uno. You can also use [FT232H](https://github.com/dotnet/iot/tree/main/src/devices/Ft232H) or [FT4222](https://github.com/dotnet/iot/tree/main/src/devices/Ft4222) on a Windows, Linux or MacOS traditional laptop or desktop.

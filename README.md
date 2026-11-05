@@ -12,6 +12,8 @@ This repository contains the [System.Device.Gpio](https://www.nuget.org/packages
 
 The repository also contains [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings), a growing set of community-maintained [device bindings](src/devices/README.md) for IoT components.
 
+The libraries in this repository are community-maintained and do not have a formal support commitment. Existing versions are not serviced. Fixes may be included in a future minor or major release.
+
 > [!NOTE]
 > This repository is still in experimental stage and all APIs are subject to changes.
 
