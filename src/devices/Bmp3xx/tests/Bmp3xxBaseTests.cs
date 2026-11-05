@@ -230,6 +230,22 @@ namespace Iot.Device.Bmp3xx.Tests
         }
 
         [Fact]
+        public void SetPowerMode_Normal_AfterAnUnreadConfigurationErrorWasCorrected_EntersNormalMode()
+        {
+            using var chip = new SimulatedBmp3xx(Bmp390ChipId, Calibration);
+            using var sensor = new Bmp390(chip);
+            sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+            chip.ConfigurationErrorOnNormalMode = true;
+            sensor.PressureSampling = Bmp3xxOversampling.X32; // too slow for 5 ms: conf_err, back to sleep
+            sensor.OutputDataRate = Bmp3xxOutputDataRate.Period160Milliseconds;
+            chip.ConfigurationErrorOnNormalMode = false;
+
+            sensor.SetPowerMode(Bmp3xxPowerMode.Normal);
+
+            Assert.Equal(Bmp3xxPowerMode.Normal, sensor.ReadPowerMode());
+        }
+
+        [Fact]
         public void GetMeasurementDuration_X1X1_Is5ms()
         {
             using var chip = new SimulatedBmp3xx(Bmp390ChipId, Calibration);
