@@ -57,7 +57,9 @@ namespace Iot.Device.Nmea0183.Sentences
 
         public override string ToReadableContent()
         {
-            return $"SeatalkNg Pilot internal Heading: {HeadingMagnetic} Mag, {HeadingTrue} True";
+            var mag = HeadingMagnetic.HasValue ? HeadingMagnetic.Value.ToString() : "N/A";
+            var trueValue = HeadingTrue.HasValue ? HeadingTrue.Value.ToString() : "N/A";
+            return $"SeatalkNg Pilot internal Heading: {mag} Mag, {trueValue} True";
         }
 
         public SeatalkNgPilotHeading(Angle? headingTrue, Angle? headingMagnetic)

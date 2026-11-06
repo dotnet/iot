@@ -13,6 +13,7 @@ namespace Iot.Device.Nmea0183.Sentences
 {
     /// <summary>
     /// Represents the state of an array of on/off switches.
+    /// See also <see cref="CzoneChannelState"/>, which seems redundant
     /// </summary>
     public sealed class CzoneCircuitStatus : Nmea2000PackedMessage
     {
@@ -133,6 +134,17 @@ namespace Iot.Device.Nmea0183.Sentences
         public void SetSwitchState(int index, SwitchStatus status)
         {
             _switches[index] = status;
+        }
+
+        /// <summary>
+        /// Returns the status of the given switch
+        /// </summary>
+        /// <param name="index">The switch number</param>
+        /// <returns>The status of a switch</returns>
+        /// <exception cref="IndexOutOfRangeException">Invalid switch index</exception>
+        public SwitchStatus GetSwitchState(int index)
+        {
+            return _switches[index];
         }
 
         /// <inheritdoc/>

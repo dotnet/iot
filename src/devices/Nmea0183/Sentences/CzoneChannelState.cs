@@ -13,6 +13,7 @@ namespace Iot.Device.Nmea0183.Sentences
 {
     /// <summary>
     /// Represents the state of an array of on/off switches.
+    /// See also <see cref="CzoneCircuitStatus"/> which is partially redundant
     /// </summary>
     public sealed class CzoneChannelState : Nmea2000PackedMessage
     {
@@ -36,6 +37,24 @@ namespace Iot.Device.Nmea0183.Sentences
 
         /// <inheritdoc/>
         public override bool ReplacesOlderInstance => true;
+
+        /// <summary>
+        /// Manufacturer code. Must be "BepMarine2"
+        /// </summary>
+        public ManufacturerCode Manufacturer
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Industry code. Must be "Marine"
+        /// </summary>
+        public IndustryCode Industry
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Creates an empty instance of this class. Can be updated later.
@@ -92,7 +111,19 @@ namespace Iot.Device.Nmea0183.Sentences
 
             string data = ReadString(field);
 
-            if (ReadByteFromHexString(data, 0, out byte b))
+            if (ReadManufacturerAndIndustryFromHexString(data, 0, out ManufacturerCode manufacturer,
+                    out IndustryCode industry))
+            {
+                Manufacturer = manufacturer;
+                Industry = industry;
+                if (Manufacturer != ManufacturerCode.BepMarine2 || Industry != IndustryCode.Marine)
+                {
+                    Valid = false;
+                    return;
+                }
+            }
+
+            if (ReadByteFromHexString(data, 4, out byte b))
             {
                 _dipSwitch = b;
             }
@@ -145,6 +176,17 @@ namespace Iot.Device.Nmea0183.Sentences
         public void SetSwitchState(int index, SwitchStatus status)
         {
             _switches[index] = status;
+        }
+
+        /// <summary>
+        /// Returns the status of the given switch
+        /// </summary>
+        /// <param name="index">The switch number</param>
+        /// <returns>The status of a switch</returns>
+        /// <exception cref="IndexOutOfRangeException">Invalid switch index</exception>
+        public SwitchStatus GetSwitchState(int index)
+        {
+            return _switches[index];
         }
 
         /// <inheritdoc/>
