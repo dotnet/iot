@@ -106,7 +106,7 @@ namespace Iot.Device.Nmea0183.Sentences
 
             if (!string.IsNullOrEmpty(data))
             {
-                if (ReadByteFromHexString(data, 1, out byte b))
+                if (ReadByteFromHexString(data, 2, out byte b))
                 {
                     if ((b & 0x3) == 1)
                     {
@@ -124,7 +124,7 @@ namespace Iot.Device.Nmea0183.Sentences
                     gotAny = true;
                 }
 
-                if (ReadShortFromHexString(data, 4, out short cogRaw))
+                if (ReadUshortFromHexString(data, 4, out ushort cogRaw))
                 {
                     // Scale: 0.0001 rad
                     CourseOverGround = Angle.FromRadians(cogRaw * 0.0001);
@@ -165,15 +165,15 @@ namespace Iot.Device.Nmea0183.Sentences
             }
 
             // COG (2 bytes signed) using 0.0001 rad resolution
-            short? cogRaw = null;
+            ushort? cogRaw = null;
             if (CourseOverGround.HasValue)
             {
                 double radians = CourseOverGround.Value.Radians;
                 int raw = (int)Math.Round(radians / 0.0001);
-                cogRaw = unchecked((short)raw);
+                cogRaw = (ushort)raw;
             }
 
-            string cogHex = WriteShortToHex(cogRaw);
+            string cogHex = WriteUshortToHex(cogRaw);
 
             // SOG (2 bytes unsigned) using 0.01 m/s resolution
             ushort? sogRaw = null;
