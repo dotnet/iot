@@ -128,6 +128,29 @@ namespace Iot.Device.Nmea0183.Sentences
                 _dipSwitch = b;
             }
 
+            if (ReadByteFromHexString(data, 6, out byte s))
+            {
+                if ((s & 0x1) != 0)
+                {
+                    _switches[0] = SwitchStatus.On;
+                }
+
+                if ((s & 0x4) != 0)
+                {
+                    _switches[1] = SwitchStatus.On;
+                }
+
+                if ((s & 0x10) != 0)
+                {
+                    _switches[2] = SwitchStatus.On;
+                }
+
+                if ((s & 0x40) != 0)
+                {
+                    _switches[4] = SwitchStatus.On;
+                }
+            }
+
             Valid = true;
         }
 
