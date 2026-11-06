@@ -287,9 +287,9 @@ namespace Iot.Device.Seatalk1
 
             if (disposing)
             {
-                _autopilotController.Dispose();
                 _cancellation.Cancel();
                 _parser.StopDecode();
+                _autopilotController.Dispose();
                 _parser.Dispose();
                 _port.Close();
                 _port.Dispose();

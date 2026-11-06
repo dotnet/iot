@@ -144,6 +144,15 @@ namespace Iot.Device.Nmea0183
                 case SystemTime.HexId:
                     nmea2000PackedMessage = new SystemTime(sentence, time);
                     return true;
+                case VesselHeading.HexId:
+                    nmea2000PackedMessage = new VesselHeading(sentence, time);
+                    return true;
+                case SeatalkNgPilotWindStatus.HexId:
+                    nmea2000PackedMessage = new SeatalkNgPilotWindStatus(sentence, time);
+                    return true;
+                case BinarySwitchStatus.HexId:
+                    nmea2000PackedMessage = new BinarySwitchStatus(sentence, time);
+                    return true;
             }
 
             nmea2000PackedMessage = null;

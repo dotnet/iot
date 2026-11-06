@@ -64,7 +64,7 @@ namespace Iot.Device.Nmea0183
         {
             // Received a sentence (from the component's point of view)
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (now - _lastUpdate > UpdateInterval)
+            if (UpdateInterval > TimeSpan.Zero && now - _lastUpdate > UpdateInterval)
             {
                 DispatchSentenceEvents(new IsoRequest(IsoAddressClaim.HexId));
                 _lastUpdate = now;

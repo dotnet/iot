@@ -60,12 +60,14 @@ namespace Iot.Device.Nmea0183.Sentences
 
             string data = ReadString(field);
 
-            if (ReadSignedFromHexString(data, 0, 8, true, out int latitude))
+            bool hasLatitude = ReadSignedFromHexString(data, 0, 8, true, out int latitude);
+            if (hasLatitude)
             {
                 _latitude = latitude * 1E-7;
             }
 
-            if (ReadSignedFromHexString(data, 8, 8, true, out int longitude))
+            bool hasLongitude = ReadSignedFromHexString(data, 8, 8, true, out int longitude);
+            if (hasLongitude)
             {
                 _longitude = longitude * 1E-7;
             }
@@ -73,7 +75,7 @@ namespace Iot.Device.Nmea0183.Sentences
             _latitude = Math.Clamp(_latitude, -90, 90);
             _longitude = Math.Clamp(_longitude, -360, 360);
 
-            Valid = true;
+            Valid = hasLatitude && hasLongitude;
         }
 
         /// <summary>

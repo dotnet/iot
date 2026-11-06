@@ -149,7 +149,7 @@ namespace Iot.Device.Tests.Seatalk1
                 Thread.Sleep(100);
             }
 
-            Assert.NotEqual(0, i);
+            Assert.False(_testee.IsTurning);
             Assert.True(called);
             _interface.Verify(x => x.SendMessage(ks));
         }

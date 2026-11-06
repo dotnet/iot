@@ -91,6 +91,7 @@ namespace Iot.Device.Nmea0183.Sentences
             NewStatus = newStatus;
             Manufacturer = ManufacturerCode.BepMarine2;
             Industry = IndustryCode.Marine;
+            Valid = true;
         }
 
         /// <summary>
@@ -124,7 +125,7 @@ namespace Iot.Device.Nmea0183.Sentences
                 Industry = industry;
             }
 
-            if (ReadByteFromHexString(data, 4, out var rawChannel))
+            if (ReadUshortFromHexString(data, 4, out var rawChannel))
             {
                 _rawChannel = rawChannel;
             }

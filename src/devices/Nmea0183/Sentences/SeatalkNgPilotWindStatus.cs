@@ -99,14 +99,13 @@ namespace Iot.Device.Nmea0183.Sentences
             DesiredWindAngle = null;
             AverageWindAngle = null;
 
-            short v = 0;
-            if (ReadShortFromHexString(data, 4, out v))
+            if (ReadUshortFromHexString(data, 4, out ushort v))
             {
                 DesiredWindAngle = Angle.FromRadians(v * 0.0001);
             }
 
             ushort angle = 0;
-            if (ReadUshortFromHexString(data, 10, out angle))
+            if (ReadUshortFromHexString(data, 8, out angle))
             {
                 AverageWindAngle = Angle.FromRadians(angle * 0.0001);
             }

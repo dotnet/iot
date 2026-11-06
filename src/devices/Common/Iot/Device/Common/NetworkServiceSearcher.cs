@@ -69,7 +69,7 @@ namespace Iot.Device.Common
             rawaddress = rawaddress & rawsubnetMask;
             List<IPAddress> reply = new List<IPAddress>();
             UInt32 offset = 1;
-            while (true)
+            while (offset < rawsubnetMaskInversed)
             {
                 UInt32 thisAddress = rawaddress + offset;
                 byte[] addrBytes = BitConverter.GetBytes(thisAddress).Reverse().ToArray();

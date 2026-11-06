@@ -231,7 +231,8 @@ namespace Iot.Device.Seatalk1
 
                     if (ap.IsOperating && htc.DesiredHeading.HasValue)
                     {
-                        ap.TurnTo(htc.DesiredHeading.Value, htc.CommandedTurnDirection);
+                        ap.TurnTo(htc.DesiredHeading.Value,
+                            htc.CommandedTurnDirection == TurnDirection.NoCommand ? null : htc.CommandedTurnDirection);
                     }
                 });
 
