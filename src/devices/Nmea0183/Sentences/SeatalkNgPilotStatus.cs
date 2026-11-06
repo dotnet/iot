@@ -26,6 +26,18 @@ namespace Iot.Device.Nmea0183.Sentences
             private set;
         }
 
+        public ManufacturerCode Manufacturer
+        {
+            get;
+            private set;
+        }
+
+        public IndustryCode Industry
+        {
+            get;
+            private set;
+        }
+
         public override uint Identifier => HexId;
 
         public override string ToReadableContent()
@@ -65,9 +77,10 @@ namespace Iot.Device.Nmea0183.Sentences
 
             string data = ReadString(field);
 
-            if (ReadUshortFromHexString(data, 0, out ushort manf))
+            if (ReadManufacturerAndIndustryFromHexString(data, 0, out ManufacturerCode manufacturerCode, out IndustryCode industryCode))
             {
-                _manufacturerAndIndustry = manf;
+                Manufacturer = manufacturerCode;
+                Industry = industryCode;
             }
 
             if (ReadUshortFromHexString(data, 4, out ushort status))
@@ -100,7 +113,7 @@ namespace Iot.Device.Nmea0183.Sentences
 
         public override string ToNmeaParameterList()
         {
-            string manufacturer = _manufacturerAndIndustry.ToString("X4", CultureInfo.InvariantCulture);
+            string manufacturer = WriteManufacturerAndIndustryToHex(Manufacturer, Industry);
             int statusByte = PilotStatus switch
             {
                 AutopilotStatus.Standby => 0,

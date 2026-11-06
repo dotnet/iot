@@ -496,5 +496,63 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(original.ToNmeaParameterList(), roundtrip.ToNmeaParameterList());
             Assert.Equal(original.SerialNumber, roundtrip.SerialNumber);
         }
+
+        [Fact]
+        public void DecodePilotHeading()
+        {
+            string sentence = "$PCDIN,00FF4F,00000000,00,3B9FFFFFFF5C1FFF";
+
+            DateTimeOffset lastPacketTime = DateTimeOffset.MinValue;
+            var inSentence = TalkerSentence.FromSentenceString(sentence, out var error);
+            Assert.Equal(NmeaError.None, error);
+            Assert.NotNull(inSentence);
+            var decoded = inSentence!.TryGetTypedValue(ref lastPacketTime) as SeatalkNgPilotHeading;
+            Assert.NotNull(decoded);
+            Assert.Equal(46, decoded.HeadingMagnetic!.Value.Degrees, 0.1);
+            Assert.False(decoded.HeadingTrue.HasValue);
+            var sentenceNew = decoded.ToNmeaMessage();
+            Assert.StartsWith(sentence, sentenceNew);
+        }
+
+        [Fact]
+        public void DecodePilotStatus()
+        {
+            string sentence = "$PCDIN,00FF63,00000000,00,3B9F0000000007FF";
+
+            DateTimeOffset lastPacketTime = DateTimeOffset.MinValue;
+            var inSentence = TalkerSentence.FromSentenceString(sentence, out var error);
+            Assert.Equal(NmeaError.None, error);
+            Assert.NotNull(inSentence);
+            var decoded = inSentence!.TryGetTypedValue(ref lastPacketTime) as SeatalkNgPilotStatus;
+            Assert.NotNull(decoded);
+            Assert.True(decoded.ReplacesOlderInstance);
+            Assert.Equal(AutopilotStatus.Standby, decoded.PilotStatus);
+            var sentenceNew = decoded.ToNmeaMessage();
+            Assert.StartsWith(sentence, sentenceNew);
+        }
+
+        [Fact]
+        public void DecodeButtonStatus()
+        {
+            string sentence = "$PCDIN,00FF03,00000000,00,27990204000000E0";
+
+            DateTimeOffset lastPacketTime = DateTimeOffset.MinValue;
+            var inSentence = TalkerSentence.FromSentenceString(sentence, out var error);
+            Assert.Equal(NmeaError.None, error);
+            Assert.NotNull(inSentence);
+            var decoded = inSentence!.TryGetTypedValue(ref lastPacketTime) as CzoneChannelState;
+            Assert.NotNull(decoded);
+            Assert.True(decoded.ReplacesOlderInstance);
+            Assert.Equal(0x27, decoded.DipSwitch);
+            Assert.Equal(65283u, decoded.Identifier);
+            Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(0));
+            Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(1));
+            Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(2));
+            Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(3));
+            Assert.Throws<IndexOutOfRangeException>(() => decoded.GetSwitchState(99));
+            var sentenceNew = decoded.ToNmeaMessage();
+            Assert.StartsWith(sentence, sentenceNew);
+            Assert.Contains("On", decoded.ToReadableContent());
+        }
     }
 }
