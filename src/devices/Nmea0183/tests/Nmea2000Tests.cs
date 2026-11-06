@@ -543,10 +543,10 @@ namespace Iot.Device.Nmea0183.Tests
             var decoded = inSentence!.TryGetTypedValue(ref lastPacketTime) as CzoneChannelState;
             Assert.NotNull(decoded);
             Assert.True(decoded.ReplacesOlderInstance);
-            Assert.Equal(0x27, decoded.DipSwitch);
+            Assert.Equal(2, decoded.DipSwitch);
             Assert.Equal(65283u, decoded.Identifier);
             Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(0));
-            Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(1));
+            Assert.Equal(SwitchStatus.On, decoded.GetSwitchState(1));
             Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(2));
             Assert.Equal(SwitchStatus.Off, decoded.GetSwitchState(3));
             Assert.Throws<IndexOutOfRangeException>(() => decoded.GetSwitchState(99));
