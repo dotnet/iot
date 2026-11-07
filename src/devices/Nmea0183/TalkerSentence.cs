@@ -84,6 +84,12 @@ namespace Iot.Device.Nmea0183
                 return true;
             }
 
+            if ((msgid & 0x1EA00) == IsoRequest.HexId)
+            {
+                nmea2000PackedMessage = new IsoRequest(sentence, time);
+                return true;
+            }
+
             // Todo: For proprietary messages, we need to also check the manufacturer/industry bytes
             switch (msgid)
             {

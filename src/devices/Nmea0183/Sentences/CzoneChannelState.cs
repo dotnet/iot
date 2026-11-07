@@ -215,7 +215,13 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <inheritdoc/>
         public override string ToReadableContent()
         {
-            return "Switch status";
+            StringBuilder s = new StringBuilder("Switch status: ");
+            for (int i = 0; i < _switches.Length; i++)
+            {
+                s.AppendLine($"{i}: {_switches[i]}");
+            }
+
+            return s.ToString();
         }
 
         /// <inheritdoc/>

@@ -118,7 +118,17 @@ namespace Iot.Device.Nmea0183.Sentences
         public override string ToNmeaParameterList()
         {
             string instance = Instance.ToString("X2", CultureInfo.InvariantCulture);
-            return base.ToNmeaParameterList() + instance + "00000000000000";
+            StringBuilder switchData = new StringBuilder();
+            for (int i = 0; i < 7; i++)
+            {
+                uint v = ((uint)_switches[i * 4] << 6) |
+                         ((uint)_switches[(i * 4) + 1] << 4) |
+                         ((uint)_switches[(i * 4) + 2] << 2) |
+                         (uint)_switches[(i * 4) + 3];
+                switchData.Append(v.ToString("X2", CultureInfo.InvariantCulture));
+            }
+
+            return base.ToNmeaParameterList() + instance + switchData;
         }
 
         /// <summary>
