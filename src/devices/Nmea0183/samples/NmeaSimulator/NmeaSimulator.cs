@@ -33,6 +33,7 @@ namespace Nmea.Simulator
         private NmeaUdpServer? _udpServer;
         private SeatalkToNmeaConverter? _seatalkInterface;
         private Random _random;
+        private AutoPilotRemoteController? _seatalkAutopilot;
 
         public Simulator(SimulatorArguments arguments)
         {
@@ -158,7 +159,7 @@ namespace Nmea.Simulator
 
                 // Outgoing port is 10110, the incoming port is irrelevant (but we choose it differently here, so that a
                 // receiver can bind to 10110 on the same computer)
-                _udpServer = new NmeaUdpServer("UdpServer", _arguments.UdpPort, _arguments.UdpPort, broadcastAddress);
+                _udpServer = new NmeaUdpServer("UdpServer", _arguments.UdpPort, _arguments.UdpPort, broadcastAddress, new Nmea0183ParserFactory());
                 _udpServer.StartDecode();
                 _udpServer.OnNewSequence += OnNewSequenceFromServer;
 
@@ -166,7 +167,8 @@ namespace Nmea.Simulator
                 // For simplicity, this example is not using a MessageRouter.
                 if (!string.IsNullOrWhiteSpace(_arguments.SeatalkInterface))
                 {
-                    _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", _arguments.SeatalkInterface);
+                    _seatalkAutopilot = new AutoPilotRemoteController("SeatalkAp", null);
+                    _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", _arguments.SeatalkInterface, _seatalkAutopilot);
                     _seatalkInterface.OnNewSequence += SeatalkNewSequence;
                     _seatalkInterface.SentencesToTranslate.Add(SentenceId.Any);
                     _seatalkInterface.StartDecode();
@@ -195,6 +197,7 @@ namespace Nmea.Simulator
             {
                 _seatalkInterface?.StopDecode();
                 _seatalkInterface?.Dispose();
+                _seatalkAutopilot?.Dispose();
                 _tcpServer?.StopDecode();
                 _udpServer?.StopDecode();
                 if (_simulatorThread != null)
@@ -322,7 +325,7 @@ namespace Nmea.Simulator
 
         private void FilePlayback()
         {
-            NmeaLogDataReader rd = new NmeaLogDataReader("LogDataReader", ReplayFiles);
+            NmeaLogDataReader rd = new NmeaLogDataReader("LogDataReader", ReplayFiles, new Nmea0183ParserFactory());
             rd.Loop = _arguments.Loop;
             rd.DecodeInRealtime = true;
             rd.OnNewSequence += (source, sentence) => SendSentence(sentence);

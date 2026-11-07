@@ -49,7 +49,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         [Fact]
         public void FeedWithRealDataAndCheckGeneralAttributes()
         {
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"), new Nmea0183ParserFactory());
             DateTimeOffset latestPacketDate = default;
             reader.OnNewSequence += (source, msg) =>
             {
@@ -96,7 +96,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         [Fact]
         public void CheckSafety1()
         {
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"), new Nmea0183ParserFactory());
             DateTimeOffset latestPacketDate = default;
             reader.OnNewSequence += (source, msg) =>
             {
@@ -168,7 +168,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         public void CheckSafetyPermanently(int warningRepeatSeconds, int warningDistance, int expectedWarningCount)
         {
             // This does a safety check all the time. Very expensive...
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"), new Nmea0183ParserFactory());
             List<string> messages = new List<string>();
             List<AisMessageId> warnings = new List<AisMessageId>();
             _manager.TrackEstimationParameters.AisSafetyCheckInterval = TimeSpan.Zero;
@@ -243,7 +243,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         [Fact]
         public void CheckSpecialTargetDecode()
         {
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-AisSpecialTargets.txt"));
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-AisSpecialTargets.txt"), new Nmea0183ParserFactory());
             int messagesParsed = 0;
             reader.OnNewSequence += (source, msg) =>
             {
@@ -305,7 +305,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         public void CheckDistances()
         {
             const string logToParse = "Nmea-2023-07-29-07-03.txt";
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream(logToParse));
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream(logToParse), new Nmea0183ParserFactory());
             _manager.TrackEstimationParameters.AisSafetyCheckInterval = TimeSpan.Zero;
             _manager.TrackEstimationParameters.MaximumPositionAge = TimeSpan.FromDays(1); // Let's always do this
             bool wasValid = false;

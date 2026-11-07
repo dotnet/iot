@@ -1,0 +1,102 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Collections.Generic;
+using Iot.Device.Common;
+using UnitsNet;
+
+namespace Iot.Device.Seatalk1.Messages
+{
+    /// <summary>
+    /// Apparent wind angle, as provided by the wind instrument in the masthead of a sailboat.
+    /// </summary>
+    public class ApparentWindAngle : SeatalkMessage
+    {
+        /// <summary>
+        /// The command byte for this message
+        /// </summary>
+        public const byte HexId = 0x10;
+
+        private readonly Angle _apparentAngle;
+
+        /// <summary>
+        /// Create a default instance
+        /// </summary>
+        public ApparentWindAngle()
+        {
+            ApparentAngle = Angle.Zero;
+        }
+
+        /// <summary>
+        /// Create a new instance
+        /// </summary>
+        /// <param name="apparentAngle">Apparent wind angle (positive for wind from starboard)</param>
+        public ApparentWindAngle(Angle apparentAngle)
+        {
+            ApparentAngle = apparentAngle;
+        }
+
+        /// <summary>
+        /// Construct a new instance from a seatalk sentence
+        /// </summary>
+        /// <param name="fields">The list of fields (here, one entry per byte in the message, as text)</param>
+        /// <param name="time">The current time</param>
+        public ApparentWindAngle(IReadOnlyList<string> fields, DateTimeOffset time)
+            : base(fields, time)
+        {
+            uint angle10u = Convert.ToUInt32(GetField(2) << 8 | GetField(3));
+            if ((angle10u & 0x8000) != 0)
+            {
+                angle10u |= 0xFFFF0000;
+            }
+
+            int angle10 = unchecked((int)angle10u);
+            Angle angle = Angle.FromDegrees(angle10 / 2.0);
+            ApparentAngle = angle.Normalize(false);
+            Valid = true;
+        }
+
+        /// <inheritdoc />
+        public override byte CommandByte => HexId;
+
+        /// <inheritdoc />
+        public override byte ExpectedLength => 0x4;
+
+        /// <inheritdoc />
+        public override bool ReplacesOlderInstance => true;
+
+        /// <summary>
+        /// Apparent wind angle, relative to bow. 0 means wind comes directly from ahead.
+        /// Positive for right of bow (wind from starboard)
+        /// </summary>
+        public Angle ApparentAngle
+        {
+            get
+            {
+                return _apparentAngle;
+            }
+            init
+            {
+                value = value.Normalize(false);
+                _apparentAngle = value;
+            }
+        }
+
+        /// <inheritdoc />
+        public override byte[] CreateDatagram()
+        {
+            short angle10 = (short)Math.Round(ApparentAngle.Degrees * 2);
+            return new byte[]
+            {
+                CommandByte, (byte)(ExpectedLength - 3), (byte)(angle10 >> 8), (byte)(angle10 & 0xFF)
+            };
+        }
+
+        /// <inheritdoc />
+        public override string ToReadableContent()
+        {
+            return $"Apparent Wind angle: {ApparentAngle.Degrees}°";
+        }
+    }
+}

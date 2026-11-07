@@ -4,15 +4,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using Iot.Device.Nmea0183.Sentences;
+using Iot.Device.Seatalk1.Messages;
 
 namespace Iot.Device.Nmea0183
 {
     /// <summary>
-    /// Represents NMEA0183 talker sentence
+    /// Represents NMEA0183 talker sentence (basically just a string with a talker id and a sentence id, plus a list of fields
+    /// before decoding into a typed object). This is the raw representation of a sentence, before parsing it into a typed object.
     /// </summary>
     public class TalkerSentence
     {
@@ -49,29 +52,40 @@ namespace Iot.Device.Nmea0183
             knownSentences[WindDirectionWithRespectToNorth.Id] =
                 (sentence, time) => new WindDirectionWithRespectToNorth(sentence, time);
             knownSentences[HeadingAndTrackControl.Id] = (sentence, time) => new HeadingAndTrackControl(sentence, time);
-            knownSentences[SeatalkNmeaMessage.Id] = (sentence, time) => new SeatalkNmeaMessage(sentence, time);
             knownSentences[RudderSensorAngle.Id] = (sentence, time) => new RudderSensorAngle(sentence, time);
             knownSentences[HeadingAndTrackControl.Id] = (sentence, time) => new HeadingAndTrackControl(sentence, time);
             knownSentences[HeadingAndTrackControlStatus.Id] = (sentence, time) => new HeadingAndTrackControlStatus(sentence, time);
             knownSentences[EstimatedAccuracy.Id] = (sentence, time) => new EstimatedAccuracy(sentence, time);
             knownSentences[DepthOfWater.Id] = (sentence, time) => new DepthOfWater(sentence, time);
             knownSentences[DistanceTraveledTroughWater.Id] = (sentence, time) => new DistanceTraveledTroughWater(sentence, time);
-            knownSentences[ProprietaryMessage.Id] = (sentence, time) =>
+            knownSentences[Nmea2000PackedMessage.Id] = (sentence, time) =>
             {
                 var specificMessageId = sentence.Fields.FirstOrDefault();
                 if (specificMessageId != null && int.TryParse(specificMessageId, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int msgid))
                 {
-                    if (msgid == SeaSmartEngineFast.HexId)
+                    if (GetKnownNmea2000Sentence(msgid, sentence, time, out Nmea2000PackedMessage? nmea2000Message))
                     {
-                        return new SeaSmartEngineFast(sentence, time);
+                        return nmea2000Message;
                     }
-                    else if (msgid == SeaSmartEngineDetail.HexId)
+                }
+
+                return null;
+            };
+            knownSentences[SeatalkMessage.Id] = (sentence, time) =>
+            {
+                if (sentence.Fields.Count < 3)
+                {
+                    return null;
+                }
+
+                var specificMessage = sentence.Fields[0];
+                var lengthByte = sentence.Fields[1];
+                if (byte.TryParse(specificMessage, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte commandByte)
+                    && byte.TryParse(lengthByte, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte length))
+                {
+                    if (GetKnownSeatalk1Message(commandByte, length & 0xF, sentence, time, out SeatalkMessage? seatalkMessage))
                     {
-                        return new SeaSmartEngineDetail(sentence, time);
-                    }
-                    else if (msgid == SeaSmartFluidLevel.HexId)
-                    {
-                        return new SeaSmartFluidLevel(sentence, time);
+                        return seatalkMessage;
                     }
                 }
 
@@ -79,6 +93,142 @@ namespace Iot.Device.Nmea0183
             };
 
             return knownSentences;
+        }
+
+        private static bool GetKnownSeatalk1Message(byte commandByte, int lengthByte, TalkerSentence sentence,
+            DateTimeOffset time, out SeatalkMessage seatalkMessage)
+        {
+            switch (commandByte)
+            {
+                case ApparentWindAngle.HexId:
+                    seatalkMessage = new ApparentWindAngle(sentence.Fields, time);
+                    return true;
+                case 0x11:
+                    if (lengthByte == 1)
+                    {
+                        seatalkMessage = new ApparentWindSpeed(sentence, time);
+                        return true;
+                    }
+                    else if (lengthByte == 0)
+                    {
+                        seatalkMessage = new AutopilotWindStatus(sentence, time);
+                        return true;
+                    }
+
+                    break;
+                case 0x20:
+                    seatalkMessage = new SpeedTroughWater(sentence, time);
+                    return true;
+                case 0x82:
+                    seatalkMessage = new TargetWaypointName(sentence, time);
+                    return true;
+                case 0x83:
+                    seatalkMessage = new CourseComputerStatus(sentence, time);
+                    return true;
+                case 0x84:
+                    seatalkMessage = new CompassHeadingAutopilotCourse(sentence, time);
+                    return true;
+                case 0x85:
+                    seatalkMessage = new NavigationToWaypoint(sentence, time);
+                    return true;
+                case 0x86:
+                    seatalkMessage = new Keystroke(sentence.Fields, time);
+                    return true;
+                case 0x87:
+                    seatalkMessage = new DeadbandSetting(sentence, time);
+                    return true;
+                case 0x88:
+                    seatalkMessage = new AutopilotCalibrationParameterMessage(sentence, time);
+                    return true;
+                case 0x95:
+                    seatalkMessage = new CompassHeadingAutopilotCourseAlt(sentence, time);
+                    return true;
+                case 0x9C:
+                    seatalkMessage = new CompassHeadingAndRudderPosition(sentence, time);
+                    return true;
+                case 0xA4:
+                    seatalkMessage = new DeviceIdentification(sentence, time);
+                    return true;
+            }
+
+            seatalkMessage = null!;
+            return false;
+        }
+
+        private static bool GetKnownNmea2000Sentence(int msgid, TalkerSentence sentence, DateTimeOffset time,
+            [NotNullWhen(true)]out Nmea2000PackedMessage? nmea2000PackedMessage)
+        {
+            msgid &= 0x1FFFF;
+            if ((msgid & 0x1FF00) == GroupFunctionMessage.HexId)
+            {
+                nmea2000PackedMessage = new GroupFunctionMessage(sentence, time);
+                return true;
+            }
+
+            // Todo: For proprietary messages, we need to also check the manufacturer/industry bytes
+            switch (msgid)
+            {
+                case SeaSmartEngineFast.HexId:
+                    nmea2000PackedMessage = new SeaSmartEngineFast(sentence, time);
+                    return true;
+                case SeaSmartEngineDetail.HexId:
+                    nmea2000PackedMessage = new SeaSmartEngineDetail(sentence, time);
+                    return true;
+                case SeaSmartFluidLevel.HexId:
+                    nmea2000PackedMessage = new SeaSmartFluidLevel(sentence, time);
+                    return true;
+                case FastPositionUpdate.HexId:
+                    nmea2000PackedMessage = new FastPositionUpdate(sentence, time);
+                    return true;
+                case SeatalkNgPilotLockedHeading.HexId:
+                    nmea2000PackedMessage = new SeatalkNgPilotLockedHeading(sentence, time);
+                    return true;
+                case SeatalkNgPilotHeading.HexId:
+                    nmea2000PackedMessage = new SeatalkNgPilotHeading(sentence, time);
+                    return true;
+                case SeatalkNgPilotStatus.HexId:
+                    nmea2000PackedMessage = new SeatalkNgPilotStatus(sentence, time);
+                    return true;
+                case SeatalkNgPilotConfigurationValue.HexId:
+                    nmea2000PackedMessage = new SeatalkNgPilotConfigurationValue(sentence, time);
+                    return true;
+                case Rudder.HexId:
+                    nmea2000PackedMessage = new Rudder(sentence, time);
+                    return true;
+                case CzoneCircuitControl.HexId:
+                    nmea2000PackedMessage = new CzoneCircuitControl(sentence, time);
+                    return true;
+                case CzoneModuleAnnounce.HexId:
+                    nmea2000PackedMessage = new CzoneModuleAnnounce(sentence, time);
+                    return true;
+                case CzoneChannelState.HexId:
+                    nmea2000PackedMessage = new CzoneChannelState(sentence, time);
+                    return true;
+                case CzoneCircuitStatus.HexId:
+                    nmea2000PackedMessage = new CzoneCircuitStatus(sentence, time);
+                    return true;
+                case IsoRequest.HexId:
+                    nmea2000PackedMessage = new IsoRequest(sentence, time);
+                    return true;
+                case IsoAddressClaim.HexId:
+                    nmea2000PackedMessage = new IsoAddressClaim(sentence, time);
+                    return true;
+                case ProductInformation.HexId:
+                    nmea2000PackedMessage = new ProductInformation(sentence, time);
+                    return true;
+                case CogSogRapidUpdate.HexId:
+                    nmea2000PackedMessage = new CogSogRapidUpdate(sentence, time);
+                    return true;
+                case GnssPositionData.HexId:
+                    nmea2000PackedMessage = new GnssPositionData(sentence, time);
+                    return true;
+                case SystemTime.HexId:
+                    nmea2000PackedMessage = new SystemTime(sentence, time);
+                    return true;
+            }
+
+            nmea2000PackedMessage = null;
+            return false;
         }
 
         static TalkerSentence()
@@ -99,7 +249,7 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// Fields of the NMEA0183 sentence
         /// </summary>
-        public IEnumerable<string> Fields => _fields;
+        public IReadOnlyList<string> Fields => _fields;
 
         /// <summary>
         /// Converts the current message to NMEA format
@@ -202,12 +352,6 @@ namespace Iot.Device.Nmea0183
                 return null;
             }
 
-            if (sentence.Length > MaxSentenceLength)
-            {
-                errorCode = NmeaError.MessageToLong;
-                return null;
-            }
-
             // There can't be any nonprintable characters in the stream (such as TAB or NULL)
             if (sentence.Any(x => Char.IsControl(x)))
             {
@@ -232,6 +376,22 @@ namespace Iot.Device.Nmea0183
             string sentenceIdString = sentence.Substring(3, firstComma - 3);
 
             SentenceId sentenceId = new SentenceId(sentenceIdString);
+
+            if (sentenceId == Nmea2000PackedMessage.Id)
+            {
+                // NMEA2000 Messages can have a maximum payload length of 223 bytes, with two ASCII bytes
+                // per byte and a header, that's roughly 500 bytes.
+                if (sentence.Length > 500)
+                {
+                    errorCode = NmeaError.MessageToLong;
+                    return null;
+                }
+            }
+            else if (sentence.Length > MaxSentenceLength)
+            {
+                errorCode = NmeaError.MessageToLong;
+                return null;
+            }
 
             string[] fields = sentence.Substring(firstComma + 1).Split(',');
             int lastFieldIdx = fields.Length - 1;
