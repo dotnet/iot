@@ -43,7 +43,6 @@ namespace Iot.Device.Arduino
         private Stream? _firmataStream;
         private Thread? _inputThread;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
-        private bool _analogPinMappingsReceived = false;
         private BlockingConcurrentBag<byte[]> _pendingResponses;
         private List<PinValue> _lastPinValues;
         private Dictionary<int, uint> _lastAnalogValues;
@@ -88,7 +87,6 @@ namespace Iot.Device.Arduino
             InputThreadShouldExit = false;
             _dataReceived = new AutoResetEvent(false);
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
-            _analogPinMappingsReceived = false;
             _synchronisationLock = new object();
             _lastPinValues = new List<PinValue>();
             _lastPinValueLock = new object();
@@ -109,11 +107,6 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                if (_analogPinMappingsReceived == false)
-                {
-                    return new List<SupportedPinConfiguration>();
-                }
-
                 return _supportedPinConfigurations;
             }
         }
@@ -422,7 +415,7 @@ namespace Iot.Device.Arduino
 
                         case FirmataSysexCommand.CAPABILITY_RESPONSE:
                             {
-                                List<SupportedPinConfiguration> newPinConfigurations = new List<SupportedPinConfiguration>();
+                                _supportedPinConfigurations.Clear();
                                 int idx = 1;
                                 SupportedPinConfiguration currentPin = new SupportedPinConfiguration(0);
                                 int pin = 0;
@@ -431,7 +424,7 @@ namespace Iot.Device.Arduino
                                     int mode = raw_data[idx++];
                                     if (mode == 0x7F)
                                     {
-                                        newPinConfigurations.Add(currentPin);
+                                        _supportedPinConfigurations.Add(currentPin);
                                         currentPin = new SupportedPinConfiguration(++pin);
                                         continue;
                                     }
@@ -459,10 +452,8 @@ namespace Iot.Device.Arduino
                                     }
                                 }
 
-                                _analogPinMappingsReceived = false;
-                                _supportedPinConfigurations = newPinConfigurations;
                                 // Add 8 entries, so that later we do not need to check whether a port (bank) is complete
-                                _lastPinValues = new PinValue[newPinConfigurations.Count + 8].ToList();
+                                _lastPinValues = new PinValue[_supportedPinConfigurations.Count + 8].ToList();
                                 _dataReceived.Set();
                                 // Do not add the last instance, should also be terminated by 0xF7
                             }
@@ -490,7 +481,6 @@ namespace Iot.Device.Arduino
                                     pin++;
                                 }
 
-                                _analogPinMappingsReceived = true;
                                 _dataReceived.Set();
                             }
 
@@ -873,44 +863,28 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
-            while (true)
+            lock (_synchronisationLock)
             {
-                lock (_synchronisationLock)
+                _dataReceived.Reset();
+                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                _firmataStream.WriteByte((byte)FirmataSysexCommand.CAPABILITY_QUERY);
+                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
+                if (result == false)
                 {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.CAPABILITY_QUERY);
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
-                    if (result == false)
-                    {
-                        throw new TimeoutException("Timeout waiting for device capabilities");
-                    }
-
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.ANALOG_MAPPING_QUERY);
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    result = _dataReceived.WaitOne(DefaultReplyTimeout);
-                    if (result == false)
-                    {
-                        throw new TimeoutException("Timeout waiting for PWM port mappings");
-                    }
-
-                    if (PinConfigurations.Count == 0)
-                    {
-                        // The device may be resetting itself as part of opening the serial port (this is the typical
-                        // behavior of the Arduino Uno, but not of most newer boards)
-                        goto wait;
-                    }
-
-                    break;
+                    throw new TimeoutException("Timeout waiting for device capabilities");
                 }
 
-                wait:
-                Thread.Sleep(100);
+                _dataReceived.Reset();
+                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                _firmataStream.WriteByte((byte)FirmataSysexCommand.ANALOG_MAPPING_QUERY);
+                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                result = _dataReceived.WaitOne(DefaultReplyTimeout);
+                if (result == false)
+                {
+                    throw new TimeoutException("Timeout waiting for PWM port mappings");
+                }
             }
-
         }
 
         private void StopThread()
