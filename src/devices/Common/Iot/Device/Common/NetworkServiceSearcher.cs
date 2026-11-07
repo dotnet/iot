@@ -122,43 +122,5 @@ namespace Iot.Device.Common
 
             return (IPAddress.Loopback, IPAddress.Parse("255.255.255.0"));
         }
-
-        /// <summary>
-        /// Returns true if the candidate IP address responds to an HTTP request with a specific header value, indicating it is a Yacht Devices interface.
-        /// </summary>
-        /// <param name="client">The HttpClient to use for the request</param>
-        /// <param name="candidate">The candidate IP address to check</param>
-        /// <param name="logger">An optional logger for logging information</param>
-        /// <param name="expectedIdentifier">The expected identifier value in the HTTP header</param>
-        /// <returns>True if the candidate IP address is a Yacht Devices interface, false otherwise</returns>
-        public static async Task<bool> IsYachtDevicesInterface(HttpClient client, IPAddress candidate, ILogger? logger, string expectedIdentifier)
-        {
-            try
-            {
-                using CancellationTokenSource ts = new CancellationTokenSource(1000);
-                var uri = new Uri($"http://{candidate.ToString()}/", UriKind.Absolute);
-                var reply = await client.GetAsync(uri, ts.Token);
-                // The header contains a single entry with the declaration "YDWG", which should
-                // be enough to identify the device
-                if (reply.IsSuccessStatusCode && reply.Headers.Any(x =>
-                        x.Value.Any(y => y.Equals(expectedIdentifier, StringComparison.OrdinalIgnoreCase))))
-                {
-                    return true;
-                }
-            }
-            catch (Exception x) when (x is UnauthorizedAccessException or SocketException or OperationCanceledException
-                                          or AggregateException or HttpRequestException)
-            {
-                logger?.LogInformation($"{candidate} doesn't work: {x.Message}");
-                return false;
-            }
-            catch (Exception y)
-            {
-                logger?.LogInformation($"Unexpected error trying: {y.Message}");
-                return false;
-            }
-
-            return false;
-        }
     }
 }

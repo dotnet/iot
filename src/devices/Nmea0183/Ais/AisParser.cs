@@ -55,7 +55,6 @@ namespace Iot.Device.Nmea0183.Ais
             GeneratedSentencesId = SentenceId.Vdo;
             _generatedReceiverChannel = 'A';
             _logger = this.GetCurrentClassLogger();
-            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
