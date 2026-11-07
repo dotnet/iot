@@ -84,14 +84,16 @@ namespace Iot.Device.Common
             return Enabled;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Logging method, not usually called directly, but via the <see cref="ILogger"/> interface
+        /// </summary>
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (Enabled)
             {
                 string msg = formatter(state, exception);
                 var time = UseUtc ? DateTime.UtcNow : DateTime.Now;
-                _writer.WriteLine($"{time.ToShortDateString()} {time.ToLongTimeString()} - {_category} - {logLevel} - {msg}");
+                _writer.WriteLine($"{time:O}|{_category}|{logLevel}|{msg}");
             }
         }
     }
