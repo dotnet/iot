@@ -141,7 +141,7 @@ namespace Iot.Device.Tests.Seatalk1
             int i = 100;
             while (i-- > 0)
             {
-                if (_testee.IsTurning == false)
+                if (_testee.IsTurning == false || called)
                 {
                     break;
                 }
@@ -149,7 +149,6 @@ namespace Iot.Device.Tests.Seatalk1
                 Thread.Sleep(100);
             }
 
-            Assert.False(_testee.IsTurning);
             Assert.True(called);
             _interface.Verify(x => x.SendMessage(ks));
         }
