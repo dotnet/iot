@@ -308,7 +308,10 @@ namespace Iot.Device.Nmea0183.Samples
                 cc.ButtonOffset = 5;
                 if (cc.NewStatus != SwitchStatus.NoAction)
                 {
-                    _switches[cc.Channel] = cc.NewStatus;
+                    if (cc.GetChannelNumber(out int channel) && channel < 4)
+                    {
+                        _switches[channel] = cc.NewStatus;
+                    }
                 }
             }
         }

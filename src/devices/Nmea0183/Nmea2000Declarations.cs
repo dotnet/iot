@@ -94,8 +94,11 @@ namespace Iot.Device.Nmea0183
             s_data.Add(CogSogRapidUpdate.HexId, new Nmea2000PgnDeclaration(CogSogRapidUpdate.HexId, "COG & SOG, Rapid Update", 2, 8, false, false));
             s_data.Add(ProductInformation.HexId, new Nmea2000PgnDeclaration(ProductInformation.HexId, "Product Information", 6, -1, true, false));
             s_data.Add(IsoAddressClaim.HexId, new Nmea2000PgnDeclaration(IsoAddressClaim.HexId, "ISO Address Claim", 6, 8, false, false));
-            s_data.Add(IsoRequest.HexId, new Nmea2000PgnDeclaration(IsoRequest.HexId, "ISO Request", 6, 3, false, false));
+            s_data.Add(IsoRequest.HexId, new Nmea2000PgnDeclaration(IsoRequest.HexId, "ISO Request", 6, 3, false, true));
             s_data.Add(GnssPositionData.HexId, new Nmea2000PgnDeclaration(GnssPositionData.HexId, "GNSS Position Data", 3, -1, true, false));
+            s_data.Add(VesselHeading.HexId, new Nmea2000PgnDeclaration(VesselHeading.HexId, "Vessel Heading", 2, 8, false, false));
+            s_data.Add(SeaSmartFluidLevel.HexId, new Nmea2000PgnDeclaration(SeaSmartFluidLevel.HexId, "Fluid Level", 6, 8, false, false));
+            s_data.Add(BinarySwitchStatus.HexId, new Nmea2000PgnDeclaration(BinarySwitchStatus.HexId, "Binary Switch Status", 3, 8, false, false));
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace Iot.Device.Nmea0183.Tests
             // Create an ISO Request for PGN 127250 (Vessel Heading)
             var originalRequest = new IsoRequest(127250);
             originalRequest.MessageSource = 0x42;
-            // Will be ignored, this is not an addressed message, so this should do nothing.
+            // This is an addressed message, so this should do something.
             originalRequest.DestinationAddress = 0x50;
 
             // Convert to NMEA message

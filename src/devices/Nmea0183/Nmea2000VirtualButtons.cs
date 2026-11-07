@@ -147,11 +147,11 @@ namespace Iot.Device.Nmea0183
                 if (sentence is CzoneCircuitControl cc)
                 {
                     cc.ButtonOffset = _buttonOffset;
-                    if (cc.NewStatus != SwitchStatus.NoAction && cc.Channel < 4)
+                    if (cc.NewStatus != SwitchStatus.NoAction && cc.GetChannelNumber(out int channel) && channel < 4)
                     {
-                        Logger.LogInformation($"Switch {cc.Channel} changes to {cc.NewStatus}");
-                        _switches[cc.Channel] = cc.NewStatus;
-                        SwitchStatusChanged?.Invoke(cc.Channel, cc.NewStatus);
+                        Logger.LogInformation($"Switch {channel} changes to {cc.NewStatus}");
+                        _switches[channel] = cc.NewStatus;
+                        SwitchStatusChanged?.Invoke(channel, cc.NewStatus);
                     }
                 }
             }

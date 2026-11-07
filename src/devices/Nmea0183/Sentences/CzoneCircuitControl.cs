@@ -64,19 +64,19 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// The channel that was toggled. Corrected with the offset, if properly supplied.
         /// </summary>
-        public int Channel
+        public bool GetChannelNumber(out int channel)
         {
-            get
+            // Can't be negative. Should preferably throw here, but since this
+            // can also happen due to corrupted data, we handle it gracefully.
+            if (_rawChannel < ButtonOffset)
             {
-                // Can't be negative. Should preferably throw here, but since this
-                // can also happen due to corrupted data, we handle it gracefully.
-                if (_rawChannel < ButtonOffset)
-                {
-                    return 0;
-                }
-
-                return _rawChannel - ButtonOffset;
+                channel = 0;
+                return false;
             }
+
+            channel = _rawChannel - ButtonOffset;
+
+            return true;
         }
 
         /// <summary>
@@ -167,7 +167,12 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <inheritdoc/>
         public override string ToReadableContent()
         {
-            return $"Switch control message: Button {Channel} set to {NewStatus}";
+            if (GetChannelNumber(out int channel))
+            {
+                return $"Switch control message: Button {channel} set to {NewStatus}";
+            }
+
+            return $"Switch control message for raw channel {_rawChannel} set to {NewStatus}";
         }
 
         /// <inheritdoc/>

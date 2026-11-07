@@ -99,7 +99,7 @@ namespace Iot.Device.Nmea0183.Sentences
 
             for (int i = 0; i < 7; i++)
             {
-                ReadUnsignedFromHexString(data, i + 2, 2, false, out uint v);
+                ReadUnsignedFromHexString(data, (i * 2) + 2, 2, false, out uint v);
                 // v now contains the bits for 4 switches
                 uint bits = (v >> 6) & 0x3;
                 _switches[i * 4] = (SwitchStatus)bits;
@@ -127,6 +127,17 @@ namespace Iot.Device.Nmea0183.Sentences
         public void SetSwitchState(int index, SwitchStatus status)
         {
             _switches[index] = status;
+        }
+
+        /// <summary>
+        /// Read state of a particular switch
+        /// </summary>
+        /// <param name="index">The index of the switch</param>
+        /// <returns>The status of the switch</returns>
+        /// <exception cref="IndexOutOfRangeException">Thrown when the index is out of range</exception>
+        public SwitchStatus GetSwitchState(int index)
+        {
+            return _switches[index];
         }
 
         /// <inheritdoc/>
