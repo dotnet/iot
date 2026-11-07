@@ -16,7 +16,7 @@ namespace Iot.Device.Nmea0183.Tests
 {
     public sealed class AutopilotControllerTest : IDisposable
     {
-        private AutopilotController _autopilot;
+        private NavigationRefiner _autopilot;
         private Mock<NmeaSinkAndSource> _source;
         private Mock<NmeaSinkAndSource> _output;
 
@@ -24,7 +24,7 @@ namespace Iot.Device.Nmea0183.Tests
         {
             _source = new Mock<NmeaSinkAndSource>(MockBehavior.Loose, "Input");
             _output = new Mock<NmeaSinkAndSource>(MockBehavior.Strict, "Output");
-            _autopilot = new AutopilotController(_source.Object, _output.Object);
+            _autopilot = new NavigationRefiner(_source.Object, _output.Object);
         }
 
         public void Dispose()

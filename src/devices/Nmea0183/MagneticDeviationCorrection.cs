@@ -218,7 +218,7 @@ namespace Iot.Device.Nmea0183
                 }
             }
 
-            NmeaLogDataReader reader = new NmeaLogDataReader("Reader", fileSet);
+            NmeaLogDataReader reader = new NmeaLogDataReader("Reader", fileSet, new Nmea0183ParserFactory());
             reader.DecodeInRealtime = false;
             reader.OnNewSequence += MessageFilter;
             reader.StartDecode();

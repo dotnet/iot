@@ -288,7 +288,7 @@ namespace Iot.Device.Tests.Seatalk1
                 AutoPilotType = 0,
                 CompassHeading = Angle.FromDegrees(220),
                 RudderPosition = Angle.FromDegrees(-10),
-                TurnDirection = TurnDirection.Port,
+                TurnDirection = TurnDirection.TurnToPort,
             };
             var data = hdg.CreateDatagram();
             CompassHeadingAutopilotCourse hdg2 = (CompassHeadingAutopilotCourse)hdg.CreateNewMessage(data);
