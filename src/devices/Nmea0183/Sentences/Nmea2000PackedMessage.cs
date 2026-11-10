@@ -12,8 +12,7 @@ using System.Runtime.CompilerServices;
 namespace Iot.Device.Nmea0183.Sentences
 {
     /// <summary>
-    /// Special NMEA0183 message used to pass NMEA2000 messages over NMEA0183, only supported
-    /// by some converters and for some messages. We also use it if we have a raw NMEA2000 input interface.
+    /// Special NMEA0183 message used to pass NMEA2000 messages over NMEA0183.
     /// The messages are usually not fully documented, but the SeaSmart (v1.6.0) protocol
     /// specification may help (and some trying around)
     /// Another great source for NMEA2000 commands is https://canboat.github.io/canboat/canboat.html

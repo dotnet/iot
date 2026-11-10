@@ -9,6 +9,7 @@ using System.Threading;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
@@ -19,7 +20,8 @@ namespace Seatalk1Sample
 {
     internal class Program
     {
-        private SeatalkInterface? _seatalk;
+        private NmeaParser? _seatalk;
+        private AutoPilotRemoteController? _controller;
 
         internal static int Main(string[] args)
         {
@@ -40,13 +42,13 @@ namespace Seatalk1Sample
         {
             LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory(LogLevel.Trace);
 
-            _seatalk = new SeatalkInterface(args[0]);
+            _seatalk = new Seatalk1Parser("Seatalk1", args[0]);
 
-            _seatalk.MessageReceived += ParserOnNewMessageDecoded;
+            _controller = new AutoPilotRemoteController("Autopilot", "Seatalk1");
+
+            _seatalk.OnNewSequence += ParserOnNewMessageDecoded;
 
             _seatalk.StartDecode();
-
-            var ctrl = _seatalk.GetAutopilotRemoteController();
 
             WriteCurrentState();
 
@@ -81,7 +83,7 @@ namespace Seatalk1Sample
                             break;
                         case ConsoleKey.W:
                         {
-                            if (ctrl.SetStatus(AutopilotStatus.Auto, ref directionConfirmation))
+                            if (_controller.SetStatus(AutopilotStatus.Auto, ref directionConfirmation))
                             {
                                 Console.WriteLine("Autopilot set to AUTO mode");
                             }
@@ -96,7 +98,7 @@ namespace Seatalk1Sample
                         case ConsoleKey.X:
                         {
                             // This is expected to fail if the AP has no wind data
-                            if (ctrl.SetStatus(AutopilotStatus.Wind, ref directionConfirmation))
+                            if (_controller.SetStatus(AutopilotStatus.Wind, ref directionConfirmation))
                             {
                                 Console.WriteLine("Autopilot set to WIND mode");
                             }
@@ -110,26 +112,26 @@ namespace Seatalk1Sample
 
                         case ConsoleKey.U:
                         {
-                            ctrl.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToStarboard, CancellationToken.None);
+                            _controller.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToStarboard);
 
                             break;
                         }
 
                         case ConsoleKey.Z:
                         {
-                            ctrl.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort, CancellationToken.None);
+                            _controller.TurnBy(Angle.FromDegrees(90), TurnDirection.TurnToPort);
 
                             break;
                         }
 
                         case ConsoleKey.K:
-                            if (ctrl.DeadbandMode == DeadbandMode.Automatic)
+                            if (_controller.DeadbandMode == DeadbandMode.Automatic)
                             {
-                                ctrl.SetDeadbandMode(DeadbandMode.Minimal);
+                                _controller.SetDeadbandMode(DeadbandMode.Minimal);
                             }
                             else
                             {
-                                ctrl.SetDeadbandMode(DeadbandMode.Automatic);
+                                _controller.SetDeadbandMode(DeadbandMode.Automatic);
                             }
 
                             break;
@@ -137,7 +139,7 @@ namespace Seatalk1Sample
                         case ConsoleKey.T:
                         {
                             // This is expected to fail if the AP has no wind data
-                            if (ctrl.SetStatus(AutopilotStatus.Track, ref directionConfirmation))
+                            if (_controller.SetStatus(AutopilotStatus.Track, ref directionConfirmation))
                             {
                                 Console.WriteLine("Autopilot set to TRACK mode");
                                 directionConfirmation = null;
@@ -160,7 +162,7 @@ namespace Seatalk1Sample
 
                         case ConsoleKey.S:
                             directionConfirmation = null;
-                            if (ctrl.SetStatus(AutopilotStatus.Standby, ref directionConfirmation))
+                            if (_controller.SetStatus(AutopilotStatus.Standby, ref directionConfirmation))
                             {
                                 Console.WriteLine("Autopilot set to STANDBY mode");
                             }
@@ -169,11 +171,13 @@ namespace Seatalk1Sample
                         case ConsoleKey.L:
                             if (key.Modifiers == ConsoleModifiers.Shift)
                             {
-                                _seatalk.SetLampIntensity(DisplayBacklightLevel.Off);
+                                var intensity = new SetLampIntensity(DisplayBacklightLevel.Off);
+                                _seatalk.SendSentence(intensity);
                             }
                             else
                             {
-                                _seatalk.SetLampIntensity(DisplayBacklightLevel.Level3);
+                                var intensity = new SetLampIntensity(DisplayBacklightLevel.Level3);
+                                _seatalk.SendSentence(intensity);
                             }
 
                             break;
@@ -182,7 +186,7 @@ namespace Seatalk1Sample
 
                     if (ks.ButtonsPressed != AutopilotButtons.None)
                     {
-                        _seatalk.SendMessage(ks);
+                        _seatalk.SendSentence(ks);
                     }
                 }
 
@@ -195,7 +199,7 @@ namespace Seatalk1Sample
                     DistanceToDestination = Length.FromNauticalMiles(51.3),
                 };
 
-                _seatalk.SendMessage(wp);
+                _seatalk.SendSentence(wp);
 
                 windAngle = windAngle + Angle.FromDegrees(1.5);
                 // SendRandomWindAngle(windAngle);
@@ -208,29 +212,24 @@ namespace Seatalk1Sample
             Console.WriteLine("Program is terminating");
         }
 
-        private void SendRandomWindAngle(Angle angle)
-        {
-            var windMsg = new ApparentWindAngle(angle);
-            _seatalk?.SendMessage(windMsg);
-        }
-
         private void WriteCurrentState()
         {
-            var ctrl = _seatalk?.GetAutopilotRemoteController();
-            if (ctrl != null)
+            if (_controller != null)
             {
                 Console.Write("\r");
-                Console.Write(ctrl.ToString());
+                Console.Write(_controller.ToString());
             }
         }
 
-        private void ParserOnNewMessageDecoded(SeatalkMessage obj)
+        private void ParserOnNewMessageDecoded(NmeaSinkAndSource nmeaSinkAndSource, NmeaSentence nmeaSentence)
         {
-            if (obj is Keystroke keystroke)
+            if (nmeaSentence is Keystroke keystroke)
             {
                 Console.WriteLine();
                 Console.WriteLine($"Pressed key(s): {keystroke}");
             }
+
+            _controller?.SendSentence(nmeaSentence);
         }
     }
 }
