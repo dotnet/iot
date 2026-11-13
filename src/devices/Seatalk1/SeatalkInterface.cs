@@ -174,6 +174,9 @@ namespace Iot.Device.Seatalk1
         protected virtual void WatchDog()
         {
             _autopilotController.UpdateStatus();
+            // For testing purposes
+            ////var test = new DeviceIdentification();
+            ////SendMessage(test);
         }
 
         internal void OnNewMessage(SeatalkMessage obj)
@@ -286,6 +289,7 @@ namespace Iot.Device.Seatalk1
             {
                 _cancellation.Cancel();
                 _parser.StopDecode();
+                _autopilotController.Dispose();
                 _parser.Dispose();
                 _port.Close();
                 _port.Dispose();

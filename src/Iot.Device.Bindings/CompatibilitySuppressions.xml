@@ -2,6 +2,27 @@
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Nmea0183.AutopilotController</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Nmea0183.Sentences.ProprietaryMessage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Seatalk1.Messages.TurnDirection</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Common.WeatherHelper.MeanSeaLevel</Target>
     <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
@@ -94,7 +115,140 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaLogDataReader.#ctor(System.String,System.Collections.Generic.IEnumerable{System.IO.Stream})</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaLogDataReader.#ctor(System.String,System.Collections.Generic.IEnumerable{System.String})</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaLogDataReader.#ctor(System.String,System.IO.Stream)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaLogDataReader.#ctor(System.String,System.String)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaParser.#ctor(System.String,System.IO.Stream,System.IO.Stream)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaUdpServer.#ctor(System.String,System.Int32,System.Int32,System.String)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaUdpServer.#ctor(System.String,System.Int32,System.Int32)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaUdpServer.GetLocalIPAddress</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Nmea0183.SentenceCache.Add(Iot.Device.Nmea0183.Sentences.NmeaSentence)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetLastDinSentence``1(System.Int32,``0@)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.get_TurnDirection</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.SetStatus(Iot.Device.Nmea0183.Sentences.AutopilotStatus,System.Nullable{Iot.Device.Seatalk1.Messages.TurnDirection}@)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.SetStatus(Iot.Device.Nmea0183.Sentences.AutopilotStatus,System.TimeSpan,System.Nullable{Iot.Device.Seatalk1.Messages.TurnDirection}@)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.TurnBy(UnitsNet.Angle,Iot.Device.Seatalk1.Messages.TurnDirection,System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.TurnByAsync(UnitsNet.Angle,Iot.Device.Seatalk1.Messages.TurnDirection,System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.TurnTo(UnitsNet.Angle,System.Nullable{Iot.Device.Seatalk1.Messages.TurnDirection},System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.TurnTo(UnitsNet.Angle,System.Nullable{Iot.Device.Seatalk1.Messages.TurnDirection})</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.AutoPilotRemoteController.TurnToAsync(UnitsNet.Angle,System.Nullable{Iot.Device.Seatalk1.Messages.TurnDirection},System.Threading.CancellationToken)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.Messages.CompassHeadingAndRudderPosition.get_TurnDirection</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Seatalk1.Messages.CompassHeadingAutopilotCourse.get_TurnDirection</Target>
     <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -165,6 +319,41 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Usb.VariableSupplyObject.get_MinimalVoltage</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0005</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaParser.FormatAndSendSentence(Iot.Device.Nmea0183.Sentences.NmeaSentence)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0005</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.NmeaParser.ParseSentence(System.String,Iot.Device.Nmea0183.NmeaError@)</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Nmea0183.Sentences.SeaSmartEngineDetail</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Nmea0183.Sentences.SeaSmartEngineFast</Target>
+    <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Nmea0183.Sentences.SeaSmartFluidLevel</Target>
     <Left>lib/net8.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net8.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

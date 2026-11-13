@@ -158,7 +158,7 @@ namespace Nmea.Simulator
 
                 // Outgoing port is 10110, the incoming port is irrelevant (but we choose it differently here, so that a
                 // receiver can bind to 10110 on the same computer)
-                _udpServer = new NmeaUdpServer("UdpServer", _arguments.UdpPort, _arguments.UdpPort, broadcastAddress);
+                _udpServer = new NmeaUdpServer("UdpServer", _arguments.UdpPort, _arguments.UdpPort, broadcastAddress, new Nmea0183ParserFactory());
                 _udpServer.StartDecode();
                 _udpServer.OnNewSequence += OnNewSequenceFromServer;
 
@@ -322,7 +322,7 @@ namespace Nmea.Simulator
 
         private void FilePlayback()
         {
-            NmeaLogDataReader rd = new NmeaLogDataReader("LogDataReader", ReplayFiles);
+            NmeaLogDataReader rd = new NmeaLogDataReader("LogDataReader", ReplayFiles, new Nmea0183ParserFactory());
             rd.Loop = _arguments.Loop;
             rd.DecodeInRealtime = true;
             rd.OnNewSequence += (source, sentence) => SendSentence(sentence);

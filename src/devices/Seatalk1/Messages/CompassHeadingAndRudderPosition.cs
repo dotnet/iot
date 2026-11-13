@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183.Sentences;
 using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
@@ -16,6 +17,16 @@ namespace Iot.Device.Seatalk1.Messages
     /// </summary>
     public record CompassHeadingAndRudderPosition : SeatalkMessage
     {
+        /// <summary>
+        /// Standard constructor
+        /// </summary>
+        public CompassHeadingAndRudderPosition()
+        {
+            CompassHeading = Angle.FromDegrees(0);
+            RudderPosition = Angle.FromDegrees(0);
+            TurnDirection = TurnDirection.TurnToPort;
+        }
+
         /// <inheritdoc />
         public override byte CommandByte => 0x9c;
 
@@ -63,7 +74,7 @@ namespace Iot.Device.Seatalk1.Messages
             long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + ((u & 0x4) == 0x4 ? 1 : 0);
             Angle headingA = Angle.FromDegrees(heading);
 
-            Messages.TurnDirection td = (u & 0x8) == 0x8 ? TurnDirection.Starboard : TurnDirection.Port;
+            TurnDirection td = (u & 0x8) == 0x8 ? TurnDirection.TurnToStarboard : TurnDirection.TurnToPort;
             sbyte rudder = (sbyte)data[3];
 
             return new CompassHeadingAndRudderPosition()
@@ -97,7 +108,7 @@ namespace Iot.Device.Seatalk1.Messages
                 heading -= 90;
             }
 
-            if (TurnDirection == TurnDirection.Starboard)
+            if (TurnDirection == TurnDirection.TurnToStarboard)
             {
                 u |= 0x8;
             }

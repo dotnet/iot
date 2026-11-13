@@ -4,12 +4,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Nmea0183
@@ -23,9 +25,9 @@ namespace Iot.Device.Nmea0183
     public delegate void PositionUpdate(GeographicPosition position, Angle? track, Speed? speed);
 
     /// <summary>
-    /// Parses Nmea Sequences
+    /// Parses Nmea 0183 Sequences
     /// </summary>
-    public class NmeaParser : NmeaSinkAndSource, IDisposable
+    public abstract class NmeaParser : NmeaSinkAndSource, IDisposable
     {
         private readonly object _lock;
         private Stream _dataSource;
@@ -33,7 +35,7 @@ namespace Iot.Device.Nmea0183
         private Thread? _parserThread;
         private CancellationTokenSource? _cancellationTokenSource;
         private StreamReader _reader;
-        private Raw8BitEncoding _encoding;
+        private Encoding _encoding;
         private Thread? _sendQueueThread;
         private BlockingCollection<NmeaSentence> _outQueue;
         private Exception? _ioExceptionOnSend;
@@ -46,10 +48,11 @@ namespace Iot.Device.Nmea0183
         /// <param name="dataSource">Data source (may be connected to a serial port, a network interface, or whatever). It is recommended to use a blocking Stream,
         /// to prevent unnecessary polling</param>
         /// <param name="dataSink">Optional data sink, to send information. Can be null, and can be identical to the source stream</param>
-        public NmeaParser(String interfaceName, Stream dataSource, Stream? dataSink)
+        /// <param name="streamEncoding">The encoding of the underlying stream. Use <see cref="Raw8BitEncoding"/> if unsure.</param>
+        protected NmeaParser(String interfaceName, Stream dataSource, Stream? dataSink, Encoding streamEncoding)
         : base(interfaceName)
         {
-            _encoding = new Raw8BitEncoding();
+            _encoding = streamEncoding;
             _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
             _reader = new StreamReader(_dataSource, _encoding); // Nmea sentences are text
             _dataSink = dataSink;
@@ -104,6 +107,25 @@ namespace Iot.Device.Nmea0183
             set;
         }
 
+        /// <summary>
+        /// Gets the encoding of the underlying stream.
+        /// By default, this uses a <see cref="Raw8BitEncoding"/>, a variant of the ASCII encoding.
+        /// </summary>
+        protected Encoding StreamEncoding
+        {
+            get => _encoding;
+        }
+
+        /// <summary>
+        /// Source stream.
+        /// </summary>
+        protected Stream Source => _dataSource;
+
+        /// <summary>
+        /// Destination Stream. May be null to discard any output.
+        /// </summary>
+        protected Stream? Sink => _dataSink;
+
         /// <inheritdoc />
         public override void StartDecode()
         {
@@ -128,12 +150,14 @@ namespace Iot.Device.Nmea0183
 
         private void Parser()
         {
+            Stopwatch sw = Stopwatch.StartNew();
             while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 string? currentLine;
                 try
                 {
                     currentLine = _reader.ReadLine();
+                    sw.Restart();
                 }
                 catch (IOException x)
                 {
@@ -192,7 +216,7 @@ namespace Iot.Device.Nmea0183
                     }
                 }
 
-                TalkerSentence? sentence = TalkerSentence.FromSentenceString(currentLine, ExclusiveTalkerId, out var error);
+                TalkerSentence? sentence = ParseSentence(currentLine, out NmeaError error);
                 if (sentence == null)
                 {
                     // If error is none, but the return value is null, we just ignored that message.
@@ -219,20 +243,40 @@ namespace Iot.Device.Nmea0183
                     RawSentence raw = sentence.GetAsRawSentence(ref _lastPacketTime);
                     DispatchSentenceEvents(raw);
                 }
+
+                if (sw.ElapsedMilliseconds > 30)
+                {
+                    Logger.LogWarning($"Processing a message took {sw.ElapsedMilliseconds}ms");
+                }
             }
         }
+
+        /// <summary>
+        /// Reads an input string and packs it into a TalkerSentence instance, which can then be further decoded.
+        /// </summary>
+        /// <param name="currentLine">The current line</param>
+        /// <param name="error">An error message</param>
+        /// <returns>A sentence object or null if the message was ignored or unparseable</returns>
+        protected internal abstract TalkerSentence? ParseSentence(string currentLine, out NmeaError error);
 
         private void Sender()
         {
             while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
+                if (_outQueue.Count > 30)
+                {
+                    Logger.LogWarning($"Many items in send queue for '{InterfaceName}': {_outQueue.Count}");
+                }
+
                 if (_outQueue.TryTake(out var sentenceToSend, TimeSpan.FromSeconds(10)))
                 {
                     if (sentenceToSend.ReplacesOlderInstance && SuppressOutdatedMessages)
                     {
                         // If there are other instances of the same message in the queue, we drop the current one (as it's not the newest)
                         // and continue processing.
-                        var newerInstance = _outQueue.FirstOrDefault(x => x.SentenceId == sentenceToSend.SentenceId && x.TalkerId == sentenceToSend.TalkerId);
+                        // There's a glitch here, however: If we keep adding items quickly to the queue and processing it takes
+                        // time, the newest items are never processed, thus some messages will _never_ be sent.
+                        var newerInstance = _outQueue.FirstOrDefault(x => x.IsSameMessageAs(sentenceToSend));
                         if (newerInstance != null)
                         {
                             continue;
@@ -244,13 +288,9 @@ namespace Iot.Device.Nmea0183
                         continue;
                     }
 
-                    TalkerSentence ts = new TalkerSentence(sentenceToSend);
-                    string dataToSend = ts.ToString() + "\r\n";
-                    byte[] buffer = _encoding.GetBytes(dataToSend);
-
                     try
                     {
-                        _dataSink?.Write(buffer, 0, buffer.Length);
+                        FormatAndSendSentence(sentenceToSend);
                     }
                     catch (IOException x)
                     {
@@ -264,6 +304,12 @@ namespace Iot.Device.Nmea0183
                 }
             }
         }
+
+        /// <summary>
+        /// Formats and sends the sentence according to the underlying transport.
+        /// </summary>
+        /// <param name="sentence">The sentence to send</param>
+        protected internal abstract void FormatAndSendSentence(NmeaSentence sentence);
 
         /// <inheritdoc />
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
