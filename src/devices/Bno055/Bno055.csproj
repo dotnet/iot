@@ -6,6 +6,5 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="Models/*.cs" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
   </ItemGroup>
 </Project>

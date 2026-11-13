@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <None Include="README.md" />
   </ItemGroup>
 </Project>

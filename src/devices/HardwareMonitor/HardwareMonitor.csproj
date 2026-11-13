@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
-    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
   </ItemGroup>
 
 </Project>

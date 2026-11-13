@@ -8,7 +8,7 @@ This repository contains the .NET IoT libraries: **System.Device.Gpio** (low-lev
 
 ### Required Dependencies and Setup
 - **CRITICAL**: This repository requires **Azure DevOps feeds access** to build. If you get SDK resolution errors, this is due to network restrictions.
-- **Install .NET 8.0.300 SDK**: Use `./dotnet.sh --version` to verify the exact version from global.json is available
+- **Install .NET 10.0.204 SDK**: Use `./dotnet.sh --version` to verify the exact version from global.json is available
 - **Build command**: `./build.sh --restore --build` (Linux/macOS) or `Build.cmd` (Windows)
 - **NEVER CANCEL**: Full repository build takes **30-45 minutes**. Set timeout to **60+ minutes**.
 
@@ -55,7 +55,7 @@ cd test-project
 - **`tools/`** - Build tools, Arduino C# compiler, code generators
 
 ### Important Files
-- **`global.json`** - Specifies required .NET SDK version (8.0.300)
+- **`global.json`** - Specifies required .NET SDK version (10.0.204)
 - **`build.sh`/`Build.cmd`** - Main build scripts using Microsoft Arcade SDK
 - **`azure-pipelines.yml`** - Official CI/CD pipeline configuration
 - **`Directory.Build.props`** - Shared MSBuild properties and package references
