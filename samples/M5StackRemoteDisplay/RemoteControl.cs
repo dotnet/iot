@@ -61,7 +61,7 @@ namespace Iot.Device.Ili934x.Samples
 
         private bool _forceUpdate;
         private PositionProvider _positionProvider;
-        private AutopilotController _autopilotController;
+        private NavigationRefiner _autopilotController;
         private MessageRouter _messageRouter;
 
         private List<MenuItem> _menuItems;
@@ -96,7 +96,7 @@ namespace Iot.Device.Ili934x.Samples
             _cache = new SentenceCache(_messageRouter);
             _positionProvider = new PositionProvider(_cache);
 
-            _autopilotController = new AutopilotController(_messageRouter, _messageRouter, _cache);
+            _autopilotController = new NavigationRefiner(_messageRouter, _messageRouter, _cache);
 
             _messageRouter.AddEndPoint(_tcpClient);
 

@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Nmea0183
 {
@@ -99,6 +101,12 @@ namespace Iot.Device.Nmea0183
             return false;
         }
 
+        /// <summary>
+        /// This is the main routing method. It is called when a new NMEA sentence has been received from a source.
+        /// The method will check the filter rules and forward the message to the appropriate sinks.
+        /// </summary>
+        /// <param name="source">The source where the current sentence originates</param>
+        /// <param name="sentence">The NMEA sentence that was received</param>
         private void OnSequenceReceived(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             // Get name of source for this message
