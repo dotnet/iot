@@ -73,7 +73,7 @@ namespace Iot.Device.Media
             int shift, vShift = total / 4;
 
             byte[] yuv = new byte[stream.Length];
-            stream.Read(yuv, 0, yuv.Length);
+            stream.ReadExactly(yuv);
 
             List<Color> colors = new List<Color>();
             for (int y = 0; y < height; y++)
@@ -107,7 +107,7 @@ namespace Iot.Device.Media
             int shift;
 
             byte[] yuv = new byte[stream.Length];
-            stream.Read(yuv, 0, yuv.Length);
+            stream.ReadExactly(yuv);
 
             List<Color> colors = new List<Color>();
             for (int y = 0; y < height; y++)

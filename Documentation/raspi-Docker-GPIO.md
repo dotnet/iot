@@ -35,7 +35,7 @@ The project file `BlinkLedSample\BlinkLedSample.csproj` looks like this:
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -45,46 +45,27 @@ The project file `BlinkLedSample\BlinkLedSample.csproj` looks like this:
 </Project>
 ```
 
-As you can see, it is a .NET 8 console app which references the NuGet package `System.Device.Gpio`.
+As you can see, it is a .NET 10 console app which references the NuGet package `System.Device.Gpio`.
 
-First of all, let's make sure that this compiles nicely by running `dotnet build`:
-
-```shell
-MSBuild version 17.8.3+195e7f5a3 for .NET
-  Determining projects to restore...
-  Restored C:\work\temp\BlinkLedSample\BlinkLedSample.csproj (in 125 ms).
-  BlinkLedSample -> C:\work\temp\BlinkLedSample\bin\Debug\net8.0\BlinkLedSample.dll
-
-Build succeeded.
-    0 Warning(s)
-    0 Error(s)
-
-Time Elapsed 00:00:00.88
-```
-
-The .NET SDK has built-in support for containerizing a .NET app ([see here][3]). All we have to do is to add a NuGet package reference to `Microsoft.NET.Build.Containers` so that the necessary build components are available (note: this step won't be necessary from .NET `8.0.200` on or when working with ASP.NET Core):
+First of all, let's make sure that this compiles nicely:
 
 ```shell
-dotnet add package Microsoft.NET.Build.Containers
+dotnet build
 ```
+
+The .NET SDK has built-in support for containerizing a .NET app ([see here][3]).
 
 Now we can create a Docker image of our app by calling `dotnet publish --os linux --arch arm64 /t:PublishContainer -c Release`:
 
 ```shell
-MSBuild version 17.8.3+195e7f5a3 for .NET
-  Determining projects to restore...
-  Restored C:\work\temp\BlinkLedSample\BlinkLedSample.csproj (in 115 ms).
-  BlinkLedSample -> C:\work\temp\BlinkLedSample\bin\Release\net8.0\linux-arm64\BlinkLedSample.dll
-  BlinkLedSample -> C:\work\temp\BlinkLedSample\bin\Release\net8.0\linux-arm64\publish\
-  Building image 'blinkledsample' with tags 'latest' on top of base image 'mcr.microsoft.com/dotnet/runtime:8.0'.
-  Pushed image 'blinkledsample:latest' to local registry via 'docker'.
+dotnet publish --os linux --arch arm64 /t:PublishContainer -c Release
 ```
 
 This does the following:
 
 - `dotnet publish` is instructed to publish a Docker image which targets Linux and Raspi's `arm64` architecture.
 - The project is restored and built using the `Release` configuration.
-- The Docker base image `mcr.microsoft.com/dotnet/runtime:8.0` is resolved automatically by taking the type of app (console, ASP.NET Core, worker, etc.) and target framework (`7.0`, `8.0`, etc.) into account.
+- The Docker base image `mcr.microsoft.com/dotnet/runtime:10.0` is resolved automatically by taking the type of app (console, ASP.NET Core, worker, etc.) and target framework into account.
 - The Docker image of our app is built, using the `latest` tag by default, i. e. the local Docker registry now contains the image `blinkledsample:latest`.
 
 This image can now be transferred onto the Raspberry Pi, e. g. via using a Docker registry like Docker Hub or `docker save` and `docker load`.

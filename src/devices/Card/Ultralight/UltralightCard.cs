@@ -3,6 +3,8 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iot.Device.Common;
 using Iot.Device.Ndef;
 using Microsoft.Extensions.Logging;
@@ -592,7 +594,7 @@ namespace Iot.Device.Card.Ultralight
             // 03 00 FE 00
             // Early NTAG should be formated a bit differently but this is enough
             // CP = NdefCapacity / 8
-            if (authenticationKey != default)
+            if (!Unsafe.IsNullRef(ref MemoryMarshal.GetReference(authenticationKey)))
             {
                 var authOK = ProcessAuthentication(authenticationKey);
                 if (!authOK)

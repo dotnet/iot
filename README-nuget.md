@@ -14,7 +14,7 @@ While most of the bindings and examples in this project require and are designed
 
 ## .NET Versions
 
-Both libraries `System.Device.Gpio` (this one) and [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) are targeting .NET 8.0. They can be used from any project targeting .NET 8.0. If you are looking at a Micro Controller Unit (MCU) support, check [.NET nanoFramework](https://github.com/nanoframework/). If you need to support Mono or .NET Standard 2.0, you can use the 3.X versions of these libraries.
+Both libraries `System.Device.Gpio` (this one) and [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings) target .NET 10.0. If you are looking at a Micro Controller Unit (MCU) support, check [.NET nanoFramework](https://github.com/nanoframework/). If you need to support Mono or .NET Standard 2.0, you can use the 3.X versions of these libraries.
 
 The sample projects target the latest stable .NET Version. This applies to the sample projects with each device as well as the [example projects](https://github.com/dotnet/iot/tree/main/samples).
 

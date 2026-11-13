@@ -314,7 +314,7 @@ namespace Iot.Device.Ili934x
 
             SendSPI(commandSpan, true);
 
-            if (data != null && data.Length > 0)
+            if (!data.IsEmpty)
             {
                 SendSPI(data);
             }
