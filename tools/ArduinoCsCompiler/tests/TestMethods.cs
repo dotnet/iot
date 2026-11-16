@@ -1461,6 +1461,39 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public static int UnsafeBitCast(int arg1, int arg2)
+        {
+            MiniAssert.That(Unsafe.BitCast<int, float>(0x3f800000) == 1.0f);
+            MiniAssert.That(Unsafe.BitCast<float, int>(1.0f) == 0x3f800000);
+
+            ReadOnlySpan<char> source = "abc".AsSpan();
+            ReadOnlySpan<char> result = Unsafe.BitCast<ReadOnlySpan<char>, ReadOnlySpan<char>>(source);
+            MiniAssert.That(result.Length == 3 && result[1] == 'b');
+
+            bool rejected = false;
+            try
+            {
+                Unsafe.BitCast<int, long>(arg1);
+            }
+            catch (NotSupportedException)
+            {
+                rejected = true;
+            }
+
+            MiniAssert.That(rejected);
+            return 1;
+        }
+
+        public static int NativeIntegerArrayStore(int arg1, int arg2)
+        {
+            nint[] values = new nint[2];
+            values[0] = arg1;
+            values[1] = -1;
+            MiniAssert.That(values[0] == arg1);
+            MiniAssert.That(values[1] == -1);
+            return 1;
+        }
+
         /// <summary>
         /// The IPAddress class uses class "PrivateImplementationDetails" directly to construct its static fields (IPAddress.Loopback, etc.)
         /// Not sure when the compiler does this in contrast to using LD_TOKEN together with RuntimeHelpers.InitializeArray
@@ -1476,6 +1509,15 @@ namespace Iot.Device.Arduino.Tests
             MiniAssert.That("abcd".Contains("bc", StringComparison.CurrentCulture));
             MiniAssert.False("abcd".Contains("BC", StringComparison.CurrentCulture));
             MiniAssert.That("abcd".Contains("AB", StringComparison.InvariantCultureIgnoreCase));
+            return 1;
+        }
+
+        public static int StringContainsOrdinal(int arg1, int arg2)
+        {
+            string value = arg1 == 0 ? "bc" : "BC";
+            MiniAssert.That("abcd".Contains(value));
+            MiniAssert.False("abcd".Contains("BC"));
+            MiniAssert.That("abcd".Contains(string.Empty));
             return 1;
         }
 

@@ -15,7 +15,7 @@ namespace ArduinoCsCompiler.Runtime
     internal struct MiniDependentHandle
     {
         [ArduinoImplementation("DependentHandle_InternalInitialize")]
-        public static IntPtr InternalInitialize(object target, object dependent)
+        public static IntPtr InternalAlloc(object target, object dependent)
         {
             throw new NotImplementedException();
         }
@@ -41,19 +41,26 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation("DependentHandle_InternalSetDependent")]
-        private static void InternalSetDependent(IntPtr dependentHandle, object dependent)
+        public static void InternalSetDependent(IntPtr dependentHandle, object dependent)
         {
             throw new NotImplementedException();
         }
 
         [ArduinoImplementation("DependentHandle_InternalSetTarget")]
-        private static void InternalSetTargetToNull(IntPtr dependentHandle)
+        public static void InternalSetTargetToNull(IntPtr dependentHandle)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("DependentHandle_InternalFree")]
-        public static void InternalFree(IntPtr dependentHandle)
+        [ArduinoImplementation]
+        public static bool InternalFree(IntPtr dependentHandle)
+        {
+            FreeHandle(dependentHandle);
+            return true;
+        }
+
+        [ArduinoImplementation("DependentHandle_InternalFree", InternalCall = true)]
+        public static void FreeHandle(IntPtr dependentHandle)
         {
             throw new NotImplementedException();
         }

@@ -13,8 +13,14 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(WaitHandle), IncludingPrivates = true)]
     internal class MiniWaitHandle
     {
-        [ArduinoImplementation("WaitHandleWaitOneCore")]
-        public static int WaitOneCore(IntPtr waitHandle, int millisecondsTimeout)
+        [ArduinoImplementation]
+        public static int WaitOneCore(IntPtr waitHandle, int millisecondsTimeout, bool useTrivialWaits)
+        {
+            return WaitOneNative(waitHandle, millisecondsTimeout);
+        }
+
+        [ArduinoImplementation("WaitHandleWaitOneCore", InternalCall = true)]
+        public static int WaitOneNative(IntPtr waitHandle, int millisecondsTimeout)
         {
             throw new NotImplementedException();
         }

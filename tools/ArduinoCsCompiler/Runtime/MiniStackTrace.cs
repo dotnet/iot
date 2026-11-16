@@ -11,6 +11,9 @@ namespace ArduinoCsCompiler.Runtime
     internal class MiniStackTrace
     {
         private Exception _exception;
+
+        public static bool IsSupported => false;
+
         public MiniStackTrace(Exception e, bool fNeedsFileInfo)
         {
             _exception = e;

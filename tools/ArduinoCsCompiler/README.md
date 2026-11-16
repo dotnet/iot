@@ -122,7 +122,8 @@ The microcontroller has very limited memory, therefore some compromises are requ
 
 - If WIFI is disabled, calls to `DateTime.UtcNow` and `DateTime.Now` will return a constant. It is possible to attach an external real-time-clock, though.
 - Only one culture is supported at a time. The compiler switch `-c` can be used to specify the culture to use (default is the current culture). This will affect number formatting as well as printing of date and time strings.
-- Only a single thread can run at once. Starting threads and tasks is not supported.
+- Threading support is experimental. Simulator tests exercise basic thread start and join, but do not establish hardware behavior.
+- The Firmata interpreter revision pinned in `eng\ArduinoCsCI.cmd` has additional threading limitations: its thread-static storage can copy values from the initial thread, and timed event waits do not reliably complete at the requested deadline. Contended monitor operations and `Task.Delay` are not currently reliable; the corresponding compiler tests remain disabled.
 - SPI and PWM drivers are not available. (I2C works, and so should any binding that uses I2C communication)
 - The garbage collector of the runtime uses a very simplistic algorithm that could lead to memory exhaustion even though there would still be enough free blocks.
 - Exceptions handling mostly works, however some system errors might not return meaningful error messages.

@@ -54,6 +54,30 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
+        public bool IsActualEnum
+        {
+            [ArduinoImplementation]
+            get
+            {
+                return IsEnum;
+            }
+
+        }
+
+        public bool IsPrimitive
+        {
+            [ArduinoImplementation]
+            get
+            {
+                Type type = MiniUnsafe.As<Type>(this);
+                return type == typeof(bool) || type == typeof(byte) || type == typeof(sbyte) ||
+                    type == typeof(char) || type == typeof(short) || type == typeof(ushort) ||
+                    type == typeof(int) || type == typeof(uint) || type == typeof(long) ||
+                    type == typeof(ulong) || type == typeof(float) || type == typeof(double) ||
+                    type == typeof(IntPtr) || type == typeof(UIntPtr);
+            }
+        }
+
         public virtual bool IsArray
         {
             [ArduinoImplementation("TypeIsArray", 0x52)]
@@ -155,6 +179,12 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation(CompareByParameterNames = true)]
         internal static System.Reflection.MethodBase GetMethodBase(Type reflectedType, MethodInfo methodHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public static MethodBase GetMethodBase(MethodInfo methodHandle)
         {
             throw new NotImplementedException();
         }

@@ -15,34 +15,34 @@ namespace ArduinoCsCompiler.Runtime
     internal class MiniEnum
     {
         public static object ToObject(Type enumType, sbyte value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, short value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, int value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, byte value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, ushort value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, uint value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, long value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, ulong value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), unchecked((long)value));
+            BoxEnum(ValidateRuntimeType(enumType), unchecked((long)value));
 
         public static object ToObject(Type enumType, char value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+            BoxEnum(ValidateRuntimeType(enumType), value);
 
         public static object ToObject(Type enumType, bool value) =>
-            InternalBoxEnum(ValidateRuntimeType(enumType), value ? 1 : 0);
+            BoxEnum(ValidateRuntimeType(enumType), value ? 1 : 0);
 
         private static MiniType ValidateRuntimeType(Type enumType)
         {
@@ -59,8 +59,14 @@ namespace ArduinoCsCompiler.Runtime
             return MiniUnsafe.As<MiniType>(enumType);
         }
 
-        [ArduinoImplementation("EnumInternalBoxEnum", CompareByParameterNames = true)]
-        public static object InternalBoxEnum(MiniType enumType, long value)
+        [ArduinoImplementation]
+        public static object InternalBoxEnum(RuntimeTypeHandle type, long value)
+        {
+            return BoxEnum(ValidateRuntimeType(Type.GetTypeFromHandle(type)!), value);
+        }
+
+        [ArduinoImplementation("EnumInternalBoxEnum", InternalCall = true)]
+        public static object BoxEnum(MiniType enumType, long value)
         {
             throw new NotImplementedException();
         }

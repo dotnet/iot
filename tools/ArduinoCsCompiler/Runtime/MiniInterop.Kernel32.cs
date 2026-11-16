@@ -46,6 +46,12 @@ namespace ArduinoCsCompiler.Runtime
                 return 1;
             }
 
+            [ArduinoImplementation]
+            public static int GetCurrentThreadId()
+            {
+                return Thread.CurrentThread.ManagedThreadId;
+            }
+
             public static unsafe uint GetFullPathNameW(ref Char lpFileName, UInt32 nBufferLength, ref Char lpBuffer, IntPtr lpFilePart)
             {
                 throw new NotImplementedException();

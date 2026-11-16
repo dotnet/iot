@@ -9,13 +9,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ArduinoCsCompiler.Runtime;
-using Xunit;
 
 namespace Iot.Device.Arduino.Tests
 {
     public class ThreadingTests
     {
         private static int s_data = 0;
+        private static int s_workerThreadId;
 
         [ThreadStatic]
         private static int s_threadStatic = 0;
@@ -24,10 +24,31 @@ namespace Iot.Device.Arduino.Tests
         {
             s_data = 0;
             Thread t = new Thread(MyStaticThreadStart1);
+            MiniAssert.False(t.IsThreadPoolThread);
             t.Start();
             t.Join();
-            Assert.False(t.IsThreadPoolThread);
             return s_data;
+        }
+
+        public static int ManagedThreadIds(int a, int b)
+        {
+            int current = Thread.CurrentThread.ManagedThreadId;
+            MiniAssert.That(current > 0);
+            MiniAssert.That(current == Environment.CurrentManagedThreadId);
+            Thread worker = new Thread(CaptureThreadId);
+            int workerId = worker.ManagedThreadId;
+            MiniAssert.That(workerId > 0 && workerId != current);
+            s_workerThreadId = 0;
+            worker.Start();
+            worker.Join();
+            MiniAssert.That(s_workerThreadId == workerId);
+            MiniAssert.That(Thread.CurrentThread.ManagedThreadId == current);
+            return 1;
+        }
+
+        private static void CaptureThreadId()
+        {
+            s_workerThreadId = Environment.CurrentManagedThreadId;
         }
 
         public static int UseThreadStatic(int a, int b)
@@ -135,6 +156,38 @@ namespace Iot.Device.Arduino.Tests
             int b = 2 - 1;
             await Task.Delay(1000);
             return b;
+        }
+
+        public class LockThreadingTests
+        {
+            private static readonly Lock s_identityLock = new Lock();
+            private static int s_data;
+
+            public static int LockThreadIdentity(int a, int b)
+            {
+                s_data = 0;
+                s_identityLock.Enter();
+                s_identityLock.Enter();
+                Thread worker = new Thread(TryIdentityLock);
+                worker.Start();
+                worker.Join();
+                s_identityLock.Exit();
+                s_identityLock.Exit();
+                MiniAssert.That(s_data == 1);
+                MiniAssert.False(s_identityLock.IsHeldByCurrentThread);
+                return 1;
+            }
+
+            private static void TryIdentityLock()
+            {
+                if (!s_identityLock.TryEnter())
+                {
+                    s_data = 1;
+                    return;
+                }
+
+                s_identityLock.Exit();
+            }
         }
     }
 }

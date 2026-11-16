@@ -19,13 +19,7 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation]
-        public static bool IsValidTimeWithLeapSeconds(
-            int year,
-            int month,
-            int day,
-            int hour,
-            int minute,
-            DateTimeKind kind)
+        public static bool IsValidTimeWithLeapSeconds(DateTime dateTime)
         {
             return true;
         }

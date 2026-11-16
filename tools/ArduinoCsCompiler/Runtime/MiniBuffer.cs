@@ -61,6 +61,13 @@ namespace ArduinoCsCompiler.Runtime
             {
                 __ZeroMemory((void*)bytePointer, byteLength);
             }
+
+        }
+
+        [ArduinoImplementation]
+        public static void ZeroMemoryInternal(ref byte b, UIntPtr byteLength)
+        {
+            _ZeroMemory(ref b, (uint)byteLength);
         }
 
         [ArduinoImplementation("BufferZeroMemory")]

@@ -180,5 +180,17 @@ namespace ArduinoCsCompiler.Runtime
         {
             return false;
         }
+
+        [ArduinoImplementation]
+        public static bool IsKnownConstant(string? t)
+        {
+            return false;
+        }
+
+        [ArduinoImplementation]
+        public static bool IsKnownConstant<T>(T t)
+        {
+            return false;
+        }
     }
 }

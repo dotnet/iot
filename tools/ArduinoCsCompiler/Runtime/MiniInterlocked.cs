@@ -62,10 +62,5 @@ namespace ArduinoCsCompiler.Runtime
             // Nothing to do here
         }
 
-        [ArduinoImplementation]
-        public static void ReadMemoryBarrier()
-        {
-            // Nothing to do here
-        }
     }
 }
