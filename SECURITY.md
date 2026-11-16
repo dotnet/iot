@@ -2,14 +2,12 @@
 
 ## Supported Versions
 
-The .NET Core and ASP.NET Core support policy, including supported versions can be found at the [.NET Core Support Policy Page](https://dotnet.microsoft.com/platform/support/policy/dotnet-core).
+This repository and its packages are community-maintained and are not officially supported by Microsoft.
 
 ## Reporting a Vulnerability
 
-Security issues and bugs should be reported privately to the Microsoft Security Response Center (MSRC), either by emailing [secure@microsoft.com](mailto:secure@microsoft.com) or via the portal at <https://msrc.microsoft.com>.
-You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your
-original message. Further information, including the MSRC PGP key, can be found in the [MSRC Report an Issue FAQ](https://www.microsoft.com/en-us/msrc/faqs-report-an-issue).
+Please report suspected security vulnerabilities privately using [GitHub's private vulnerability reporting](https://github.com/dotnet/iot/security/advisories). Select **Report a vulnerability** to submit a report to the maintainers.
 
-Reports via MSRC may qualify for the .NET Core Bug Bounty. Details of the .NET Core Bug Bounty including terms and conditions are at [https://aka.ms/corebounty](https://aka.ms/corebounty).
+Security reports are handled on a best-effort basis, with no guaranteed response time or fix.
 
-Please do not open issues for anything you think might have a security implication.
+Please do not open public issues for suspected vulnerabilities. For other bugs, use the [issue tracker](https://github.com/dotnet/iot/issues).
