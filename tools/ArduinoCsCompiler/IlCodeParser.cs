@@ -240,10 +240,17 @@ namespace ArduinoCsCompiler
             TypeInfo? staticAbstractType = null;
 
             var m = method.Method;
-            while (idx < byteCode.Length - 5) // If less than 5 byte remain, there can't be a token within it
+            while (idx < byteCode.Length)
             {
                 int codeLocation = idx;
                 OpCode opCode = DecodeOpcode(byteCode, ref idx);
+                if (opCode == OpCode.CEE_STELEM_I || opCode == OpCode.CEE_LDELEM_I)
+                {
+                    // The interpreter targets 32-bit native integers.
+                    opCode = opCode == OpCode.CEE_STELEM_I ? OpCode.CEE_STELEM_I4 : OpCode.CEE_LDELEM_I4;
+                    byteCode[codeLocation] = (byte)opCode;
+                }
+
                 OpCodeType type = OpCodeDefinitions.OpcodeDef[(int)opCode].Type;
                 if (methodStart == null || current == null)
                 {

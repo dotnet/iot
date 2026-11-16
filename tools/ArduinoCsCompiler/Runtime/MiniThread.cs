@@ -78,7 +78,18 @@ namespace ArduinoCsCompiler.Runtime
             [ArduinoImplementation]
             get
             {
-                return _managedThreadId;
+                int id = _managedThreadId;
+                if (id == 0)
+                {
+                    int next = ThreadIdAllocator.Allocate();
+                    id = Interlocked.CompareExchange(ref _managedThreadId, next, 0);
+                    if (id == 0)
+                    {
+                        id = next;
+                    }
+                }
+
+                return id;
             }
         }
 
@@ -142,17 +153,26 @@ namespace ArduinoCsCompiler.Runtime
             return 0;
         }
 
-        [ArduinoImplementation("ThreadGetCurrentThreadNative")]
-        public static Thread GetCurrentThreadNative()
+        public static Thread CurrentThread
         {
-            throw new NotImplementedException();
+            [ArduinoImplementation("ThreadGetCurrentThreadNative")]
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
         /// First arg is of type ThreadHandle, but this is a value type over an IntPtr, so their layout is identical
         /// </summary>
-        [ArduinoImplementation("ThreadStartInternal", CompareByParameterNames = true)]
-        public static unsafe void StartInternal(IntPtr t, int stackSize, int priority, char* pThreadName)
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public static unsafe void StartInternal(IntPtr t, int stackSize, int priority, int isThreadPool, char* pThreadName)
+        {
+            StartThread(t, stackSize, priority, pThreadName);
+        }
+
+        [ArduinoImplementation("ThreadStartInternal", InternalCall = true)]
+        public static unsafe void StartThread(IntPtr t, int stackSize, int priority, char* pThreadName)
         {
             throw new NotImplementedException();
         }

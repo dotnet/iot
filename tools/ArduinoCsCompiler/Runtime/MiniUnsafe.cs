@@ -26,6 +26,8 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation("UnsafeAs2", 0x20, MergeGenericImplementations = true)]
         public static ref TTo As<TFrom, TTo>(ref TFrom source)
+            where TFrom : allows ref struct
+            where TTo : allows ref struct
         {
             throw new PlatformNotSupportedException();
 
@@ -35,12 +37,19 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation("UnsafeAsPointer", 0x21, MergeGenericImplementations = true)]
         public static void* AsPointer<T>(ref T value)
+            where T : allows ref struct
         {
             throw new PlatformNotSupportedException();
 
             // ldarg.0
             // conv.u
             // ret
+        }
+
+        [ArduinoImplementation]
+        public static nuint OpportunisticMisalignment<T>(ref T address, nuint alignment)
+        {
+            return (nuint)AsPointer(ref address) & (alignment - 1);
         }
 
         /// <summary>
@@ -69,17 +78,15 @@ namespace ArduinoCsCompiler.Runtime
         /// <exception cref="NotSupportedException">The size of <typeparamref name="TFrom" /> and <typeparamref name="TTo" /> are not the same.</exception>
         [ArduinoImplementation]
         public static TTo BitCast<TFrom, TTo>(TFrom source)
-            where TFrom : struct
-            where TTo : struct
+            where TFrom : allows ref struct
+            where TTo : allows ref struct
         {
-#pragma warning disable CS8500 // Erfasst die Adresse, ermittelt die Größe oder deklariert einen Zeiger auf einen verwalteten Typ.
-            if (sizeof(TFrom) != sizeof(TTo))
+            if (SizeOf<TFrom>() != SizeOf<TTo>())
             {
                 throw new NotSupportedException();
             }
-#pragma warning restore CS8500 // Erfasst die Adresse, ermittelt die Größe oder deklariert einen Zeiger auf einen verwalteten Typ.
 
-            return ReadUnaligned<TTo>(ref As<TFrom, byte>(ref source));
+            return Unsafe.ReadUnaligned<TTo>(ref Unsafe.As<TFrom, byte>(ref source));
         }
 
         [ArduinoImplementation(CompareByParameterNames = true, MergeGenericImplementations = true)]
@@ -113,6 +120,12 @@ namespace ArduinoCsCompiler.Runtime
         public static ref T Add<T>(ref T source, IntPtr elementOffset)
         {
             return ref AddByteOffset(ref source, (IntPtr)((uint)elementOffset * (uint)SizeOf<T>()));
+        }
+
+        [ArduinoImplementation]
+        public static ref T Subtract<T>(ref T source, int elementOffset)
+        {
+            return ref Add(ref source, -elementOffset);
         }
 
         public static ref T Subtract<T>(ref T source, UIntPtr elementOffset)
@@ -162,6 +175,7 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation]
         public static int SizeOf<T>()
+            where T : allows ref struct
         {
             return SizeOfType(typeof(T));
             // sizeof !!0
@@ -239,6 +253,18 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation]
+        public static bool IsAddressLessThanOrEqualTo<T>(ref T left, ref T right)
+        {
+            return !IsAddressGreaterThan(ref left, ref right);
+        }
+
+        [ArduinoImplementation]
+        public static bool IsAddressGreaterThanOrEqualTo<T>(ref T left, ref T right)
+        {
+            return !IsAddressLessThan(ref left, ref right);
+        }
+
+        [ArduinoImplementation]
         public static void InitBlockUnaligned(ref byte startAddress, byte value, uint byteCount)
         {
             for (uint i = 0; i < byteCount; i++)
@@ -267,12 +293,14 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation]
         public static T ReadUnaligned<T>(void* source)
+            where T : allows ref struct
         {
             return As<byte, T>(ref *(byte*)source);
         }
 
         [ArduinoImplementation]
         public static T ReadUnaligned<T>(ref byte source)
+            where T : allows ref struct
         {
             return As<byte, T>(ref source);
         }

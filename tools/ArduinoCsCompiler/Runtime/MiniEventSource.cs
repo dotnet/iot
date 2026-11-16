@@ -116,6 +116,12 @@ namespace ArduinoCsCompiler.Runtime
             oldActivityThatWillContinue = default;
         }
 
+        [ArduinoImplementation]
+        public static IntPtr ObjectIDForEvents(object o)
+        {
+            return IntPtr.Zero;
+        }
+
         protected virtual void Dispose(bool disposing)
         {
         }

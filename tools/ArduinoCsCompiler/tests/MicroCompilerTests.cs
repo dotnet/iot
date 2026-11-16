@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ArduinoCsCompiler;
+using ArduinoCsCompiler.Runtime;
 using UnitsNet.Units;
 using Xunit;
 
@@ -17,6 +19,56 @@ namespace Iot.Device.Arduino.Tests
     /// </summary>
     public class MicroCompilerTests
     {
+        public static int SimpleProgram() => 42;
+
+        [Fact]
+        public void TaskDiagnosticMethodNameUsesUnsupportedStackTraceFallback()
+        {
+            Assert.Equal("<unknown>", MiniTaskLoggingExtensions.GetMethodName((Func<int>)SimpleProgram));
+            Assert.Throws<ArgumentNullException>(() => MiniTaskLoggingExtensions.GetMethodName(null!));
+        }
+
+        [Fact]
+        public void PrepareProgramWithoutHardware()
+        {
+            using var board = new ArduinoBoard(new MemoryStream());
+            using var compiler = new MicroCompiler(board, false);
+            compiler.PrepareProgram(typeof(MicroCompilerTests).GetMethod(nameof(SimpleProgram))!, new CompilerSettings());
+        }
+
+        [Theory]
+        [InlineData("0.0.0.0")]
+        [InlineData("192.168.1.42")]
+        [InlineData("255.255.255.255")]
+        public void ParseIpv4(string text)
+        {
+            string expected = System.Net.IPAddress.Parse(text).ToString();
+            Assert.Equal(expected, MiniIPAddressParser.Parse<char>(text.AsSpan(), false)!.ToString());
+            Assert.Equal(expected, MiniIPAddressParser.Parse<byte>(Encoding.UTF8.GetBytes(text), false)!.ToString());
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("1.2.3")]
+        [InlineData("1.2.3.256")]
+        [InlineData("1.2.3.4x")]
+        [InlineData("1111111111111111111111111111111111111")]
+        public void RejectInvalidIpv4(string text)
+        {
+            Assert.Null(MiniIPAddressParser.Parse<char>(text.AsSpan(), true));
+            Assert.Null(MiniIPAddressParser.Parse<byte>(Encoding.UTF8.GetBytes(text), true));
+            Assert.Throws<FormatException>(() => MiniIPAddressParser.Parse<char>(text.AsSpan(), false));
+            Assert.Throws<FormatException>(() => MiniIPAddressParser.Parse<byte>(Encoding.UTF8.GetBytes(text), false));
+        }
+
+        [Fact]
+        public void RejectIpv6()
+        {
+            const string text = "2001:db8:0:0:0:0:0:1";
+            Assert.Throws<NotSupportedException>(() => MiniIPAddressParser.Parse<char>(text.AsSpan(), true));
+            Assert.Throws<NotSupportedException>(() => MiniIPAddressParser.Parse<byte>(Encoding.UTF8.GetBytes(text), true));
+        }
+
         [Fact]
         public void TestClassComparator()
         {

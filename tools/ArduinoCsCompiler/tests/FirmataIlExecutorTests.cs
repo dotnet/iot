@@ -486,6 +486,8 @@ namespace Iot.Device.Arduino.Tests
         [Theory]
         [InlineData(nameof(TestMethods.UnsafeAsCanBeMerged), 1)]
         [InlineData(nameof(TestMethods.UnsafeSizeOf), 1)]
+        [InlineData(nameof(TestMethods.UnsafeBitCast), 1)]
+        [InlineData(nameof(TestMethods.NativeIntegerArrayStore), 1)]
         public void CanMergeSimilarGenericMethods(string methodName, int arg1)
         {
             var compilerSettings = new CompilerSettings()
@@ -543,6 +545,7 @@ namespace Iot.Device.Arduino.Tests
 
         [Theory]
         [InlineData(nameof(TestMethods.StringContains), 1)]
+        [InlineData(nameof(TestMethods.StringContainsOrdinal), 1)]
         [InlineData(nameof(TestMethods.StringStartsWith), 1)]
         public void StringTest(string methodName, Int32 expected)
         {
@@ -551,6 +554,7 @@ namespace Iot.Device.Arduino.Tests
 
         [Theory]
         [InlineData(nameof(ThreadingTests.StartAndStopThread), 0, 0, 1)]
+        [InlineData(nameof(ThreadingTests.ManagedThreadIds), 0, 0, 1)]
         // Not yet reliable - EqualityComparer<UInt32>..cctor() triggers an internal firmware error
         // when multiple threads are running with Monitor.TryEnter/Exit.
         // [InlineData(nameof(ThreadingTests.DiningPhilosophers), 0, 0, 1)]
@@ -571,6 +575,17 @@ namespace Iot.Device.Arduino.Tests
             };
 
             LoadCodeMethod(typeof(ThreadingTests), methodName, a, b, expected, settings);
+        }
+
+        [Fact]
+        public void LockThreadIdentity()
+        {
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false
+            };
+            LoadCodeMethod(typeof(ThreadingTests.LockThreadingTests), nameof(ThreadingTests.LockThreadingTests.LockThreadIdentity), 0, 0, 1, settings);
         }
 
         /// <summary>
