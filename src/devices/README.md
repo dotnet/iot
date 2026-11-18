@@ -67,6 +67,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Barometers
 
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMP390/BMP388 - barometric pressure, altitude and temperature sensor](Bmp3xx/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [LPS22HB - Piezoresistive pressure and thermometer sensor](Lps22hb/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
@@ -77,6 +78,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Altimeters
 
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMP390/BMP388 - barometric pressure, altitude and temperature sensor](Bmp3xx/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 
 ### Thermometers
@@ -84,6 +86,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [AHT10/15/20 - Temperature and humidity sensor modules](Ahtxx/README.md)
 * [AM2320 - Temperature and Humidity sensor](Am2320/README.md)
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
+* [BMP390/BMP388 - barometric pressure, altitude and temperature sensor](Bmp3xx/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [Cpu Temperature](CpuTemperature/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
@@ -292,6 +295,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### USB devices
 
+* [FT200X - USB to I2C slave FIFO](Ft200X/README.md)
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
 * [SPI, GPIO and I2C drivers for FT232H, FT232HP, FT2232H, FT2232HP, FT2232HA, FT4232H, FT4232HA, FT4232HP](Ft232H/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
@@ -325,6 +329,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [1-wire](OneWire/README.md)
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [Board abstraction](Board/README.md)
+* [FT200X - USB to I2C slave FIFO](Ft200X/README.md)
 * [GpioDriver for other boards and virtual GpioController and virtual GpioPin](Gpio/README.md)
 * [MotorHat](MotorHat/README.md)
 * [NMEA 0183 Protocol](Nmea0183/README.md)
