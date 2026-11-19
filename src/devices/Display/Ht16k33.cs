@@ -115,7 +115,10 @@ namespace Iot.Device.Display
         /// </remarks>
         public bool BufferingEnabled
         {
-            get => _bufferingEnabled;
+            get
+            {
+                return _bufferingEnabled;
+            }
             set
             {
                 _bufferingEnabled = value;
@@ -129,7 +132,10 @@ namespace Iot.Device.Display
         /// <exception cref="ArgumentOutOfRangeException">Brightness must be between 0 and <see cref="MaxBrightness"/></exception>
         public byte Brightness
         {
-            get => _brightness;
+            get
+            {
+                return _brightness;
+            }
             set
             {
                 if (value == _brightness)
@@ -154,7 +160,10 @@ namespace Iot.Device.Display
         /// <exception cref="ArgumentOutOfRangeException" />
         public BlinkRate BlinkRate
         {
-            get => _blinkRate;
+            get
+            {
+                return _blinkRate;
+            }
             set
             {
                 if (value == _blinkRate)
@@ -178,7 +187,10 @@ namespace Iot.Device.Display
         /// </summary>
         public bool DisplayOn
         {
-            get => _displayOn;
+            get
+            {
+                return _displayOn;
+            }
             set
             {
                 if (_displayOn = value)

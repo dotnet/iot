@@ -81,11 +81,11 @@ namespace Iot.Device.Gui
         }
 
         /// <inheritdoc />
-        public void Click(MouseButton button)
+        public void Click(MouseButton buttons)
         {
             var pt = GetPosition();
-            MouseDownWindows(pt, button);
-            MouseUpWindows(pt, button);
+            MouseDownWindows(pt, buttons);
+            MouseUpWindows(pt, buttons);
         }
 
         /// <inheritdoc />
@@ -96,17 +96,17 @@ namespace Iot.Device.Gui
         }
 
         /// <inheritdoc />
-        public void ButtonDown(MouseButton button)
+        public void ButtonDown(MouseButton buttons)
         {
             var pt = GetPosition();
-            MouseDownWindows(pt, button);
+            MouseDownWindows(pt, buttons);
         }
 
         /// <inheritdoc />
-        public void ButtonUp(MouseButton button)
+        public void ButtonUp(MouseButton buttons)
         {
             var pt = GetPosition();
-            MouseUpWindows(pt, button);
+            MouseUpWindows(pt, buttons);
         }
 
         public void Dispose()
