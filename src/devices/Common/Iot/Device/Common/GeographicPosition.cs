@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
@@ -337,6 +338,7 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="position">The other position</param>
         /// <returns>True if the two positions are almost identical</returns>
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1315", Justification = "Preserve the public parameter name for named arguments.")]
         public bool Equals(GeographicPosition? position)
         {
             if (ReferenceEquals(position, null))

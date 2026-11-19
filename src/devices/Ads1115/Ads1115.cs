@@ -100,7 +100,10 @@ namespace Iot.Device.Ads1115
         /// </summary>
         public InputMultiplexer InputMultiplexer
         {
-            get => _inputMultiplexer;
+            get
+            {
+                return _inputMultiplexer;
+            }
             set
             {
                 _inputMultiplexer = value;
@@ -116,7 +119,10 @@ namespace Iot.Device.Ads1115
         /// </summary>
         public MeasuringRange MeasuringRange
         {
-            get => _measuringRange;
+            get
+            {
+                return _measuringRange;
+            }
             set
             {
                 _measuringRange = value;
@@ -132,7 +138,10 @@ namespace Iot.Device.Ads1115
         /// </summary>
         public DataRate DataRate
         {
-            get => _dataRate;
+            get
+            {
+                return _dataRate;
+            }
             set
             {
                 _dataRate = value;

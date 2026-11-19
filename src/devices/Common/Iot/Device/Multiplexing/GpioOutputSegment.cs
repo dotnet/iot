@@ -4,6 +4,7 @@
 using System;
 using System.Device.Gpio;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Multiplexing.Utility;
@@ -57,6 +58,7 @@ namespace Iot.Device.Multiplexing
         /// Writes a PinValue to a virtual segment.
         /// Does not display output.
         /// </summary>
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1315", Justification = "Preserve the public parameter name for named arguments.")]
         public void Write(int pin, PinValue value)
         {
             _segment.Write(pin, value);
