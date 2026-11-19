@@ -104,9 +104,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
     /// <remarks>This only requests the line for it to be reserved and the consumer to be set.</remarks>
-    protected internal override void OpenPin(int lineOffset)
+    protected internal override void OpenPin(int pinNumber)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
         lock (_lockObject)
         {
             if (_requestedLineByLineOffset.TryGetValue(offset, out _))
@@ -120,9 +120,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
     /// <remarks>Un-reserves a line by closing a present line request.</remarks>
-    protected internal override void ClosePin(int lineOffset)
+    protected internal override void ClosePin(int pinNumber)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
 
         lock (_lockObject)
         {
@@ -139,9 +139,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
     /// <remarks>Sets direction of line by reconfiguring a present line request or creating new line request.</remarks>
-    protected internal override void SetPinMode(int lineOffset, PinMode mode)
+    protected internal override void SetPinMode(int pinNumber, PinMode mode)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
 
         (GpiodLineDirection? direction, GpiodLineBias? bias) = Translator.Translate(mode);
 
@@ -181,9 +181,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
     }
 
     /// <inheritdoc/>
-    protected internal override PinMode GetPinMode(int lineOffset)
+    protected internal override PinMode GetPinMode(int pinNumber)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
 
         LineInfo lineInfo;
 
@@ -218,16 +218,16 @@ public sealed class LibGpiodV2Driver : UnixDriver
     }
 
     /// <inheritdoc/>
-    protected internal override bool IsPinModeSupported(int lineOffset, PinMode mode)
+    protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
     {
         return mode is PinMode.Input or PinMode.Output or PinMode.InputPullDown or PinMode.InputPullUp;
     }
 
     /// <inheritdoc/>
     /// <remarks>Gets value by asking present line request or creating a new line request.</remarks>
-    protected internal override PinValue Read(int lineOffset)
+    protected internal override PinValue Read(int pinNumber)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
 
         lock (_lockObject)
         {
@@ -257,9 +257,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
     /// <remarks>Writes value by accessing present line request or creating a new line request.</remarks>
-    protected internal override void Write(int lineOffset, PinValue value)
+    protected internal override void Write(int pinNumber, PinValue value)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
         GpiodLineValue lineValue = Translator.Translate(value);
 
         lock (_lockObject)
@@ -297,9 +297,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
     /// <remarks>Waits for an edge event to happen on a line request. If line request does not exist it gets created.</remarks>
-    protected internal override WaitForEventResult WaitForEvent(int lineOffset, PinEventTypes eventTypes, CancellationToken cancellationToken)
+    protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
 
         var adjustLineSettings = (LineSettings lineSettings) =>
         {
@@ -342,9 +342,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
     /// <remarks>Adds a callback for edge events. If a line request is present for the specified line offset, it is adjusted.</remarks>
-    protected internal override void AddCallbackForPinValueChangedEvent(int lineOffset, PinEventTypes eventTypes, PinChangeEventHandler callback)
+    protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
 
         void AdjustEdgeDetection(LineSettings lineSettings)
         {
@@ -381,9 +381,9 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
     /// <inheritdoc/>
     /// <remarks>Removes a callback for edge events. If a line request is present for the specified line offset, it is adjusted.</remarks>
-    protected internal override void RemoveCallbackForPinValueChangedEvent(int lineOffset, PinChangeEventHandler callback)
+    protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
     {
-        Offset offset = lineOffset;
+        Offset offset = pinNumber;
 
         lock (_lockObject)
         {
