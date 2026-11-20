@@ -3,9 +3,9 @@
   
   <PropertyGroup>
     <!-- Most projects should use this value to build for all possible target frameworks -->
-    <DefaultBindingTfms>net8.0</DefaultBindingTfms>
-    <DefaultSampleTfms>net8.0</DefaultSampleTfms>
-    <DefaultTestTfms>net8.0</DefaultTestTfms>
+    <DefaultBindingTfms>net10.0</DefaultBindingTfms>
+    <DefaultSampleTfms>net10.0</DefaultSampleTfms>
+    <DefaultTestTfms>net10.0</DefaultTestTfms>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>

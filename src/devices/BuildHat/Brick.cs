@@ -815,7 +815,7 @@ namespace Iot.Device.BuildHat
                 using (Stream stream = assembly.GetManifestResourceStream(firmwareName)!)
                 {
                     firmware = new byte[stream.Length];
-                    stream.Read(firmware, 0, firmware.Length);
+                    stream.ReadExactly(firmware);
                 }
 
                 // Similar to: byte[] signature = Resource.signature;
@@ -824,7 +824,7 @@ namespace Iot.Device.BuildHat
                 using (Stream stream = assembly.GetManifestResourceStream(signatureName)!)
                 {
                     signature = new byte[stream.Length];
-                    stream.Read(signature, 0, signature.Length);
+                    stream.ReadExactly(signature);
                 }
 
                 // Step 1: clear and get the prompt

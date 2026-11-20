@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
     <Copyright>The .NET Foundation</Copyright>
     <Company>The .NET Foundation</Company>

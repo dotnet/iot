@@ -319,43 +319,43 @@ namespace Iot.Device.Media
 
             WavHeader header = new WavHeader();
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             chunk.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             chunk.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             header.Format = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             subChunk1.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             subChunk1.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-            wavStream.Read(readBuffer2, 0, readBuffer2.Length);
+            wavStream.ReadExactly(readBuffer2);
             header.AudioFormat = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-            wavStream.Read(readBuffer2, 0, readBuffer2.Length);
+            wavStream.ReadExactly(readBuffer2);
             header.NumChannels = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             header.SampleRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             header.ByteRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
-            wavStream.Read(readBuffer2, 0, readBuffer2.Length);
+            wavStream.ReadExactly(readBuffer2);
             header.BlockAlign = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-            wavStream.Read(readBuffer2, 0, readBuffer2.Length);
+            wavStream.ReadExactly(readBuffer2);
             header.BitsPerSample = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             subChunk2.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
 
-            wavStream.Read(readBuffer4, 0, readBuffer4.Length);
+            wavStream.ReadExactly(readBuffer4);
             subChunk2.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
 
             header.Chunk = chunk;
