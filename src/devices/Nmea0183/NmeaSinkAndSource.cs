@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Nmea0183
@@ -15,6 +17,8 @@ namespace Iot.Device.Nmea0183
     /// </summary>
     public abstract class NmeaSinkAndSource : IDisposable
     {
+        private ILogger _logger;
+
         /// <summary>
         /// This is fired when a new position is available
         /// </summary>
@@ -44,6 +48,7 @@ namespace Iot.Device.Nmea0183
             InterfaceName = interfaceName;
             LogReceive = true;
             LogSend = false;
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -71,6 +76,11 @@ namespace Iot.Device.Nmea0183
             get;
             set;
         }
+
+        /// <summary>
+        /// A logger for debug or diagnostic messages
+        /// </summary>
+        protected ILogger Logger => _logger;
 
         /// <summary>
         /// Start receiving messages from this interface.

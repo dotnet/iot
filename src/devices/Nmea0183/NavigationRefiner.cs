@@ -14,12 +14,13 @@ using UnitsNet;
 namespace Iot.Device.Nmea0183
 {
     /// <summary>
-    /// This class controls an auto pilot, given an input and an output stream.
+    /// This class optimizes the navigation sequences, given an input and an output stream.
     /// Depending on the input, it either refines the sequences to a higher resolution (many navigation programs will e.g. only
     /// output XTE messages with a cross track error accuracy of 0.1nm, which is useless for precise navigation) or create the
     /// sequences based on input waypoints.
+    /// It can be used to control an autopilot, or to feed a display with more accurate navigation data.
     /// </summary>
-    public sealed class AutopilotController : IDisposable
+    public sealed class NavigationRefiner : IDisposable
     {
         // Every nth iteration log the output (i.e. no route. This will repeat frequently, since normally
         // a specific state rests for longer)
@@ -56,7 +57,7 @@ namespace Iot.Device.Nmea0183
         /// <param name="input">Input stream (GPS device and plotter)</param>
         /// <param name="output">Output stream (emits rmb, xte, vtg, bwc, bod)</param>
         /// <param name="cache">Sentence cache, optional</param>
-        public AutopilotController(NmeaSinkAndSource input, NmeaSinkAndSource output, SentenceCache? cache = null)
+        public NavigationRefiner(NmeaSinkAndSource input, NmeaSinkAndSource output, SentenceCache? cache = null)
         {
             _output = output;
             if (cache == null)
@@ -220,6 +221,14 @@ namespace Iot.Device.Nmea0183
             }
         }
 
+        private void LogSometimes(int loops, string msg)
+        {
+            if (loops % LogSkip == 0)
+            {
+                _logger.LogWarning(msg);
+            }
+        }
+
         /// <summary>
         /// Navigation loop.
         /// </summary>
@@ -258,11 +267,7 @@ namespace Iot.Device.Nmea0183
                     var variation = _cache.MagneticVariation;
                     if (!variation.HasValue)
                     {
-                        if (loops % LogSkip == 0)
-                        {
-                            _logger.LogWarning("Autopilot: No magnetic variance");
-                        }
-
+                        LogSometimes(loops, "Autopilot: No magnetic variance");
                         return;
                     }
 
@@ -278,6 +283,12 @@ namespace Iot.Device.Nmea0183
                 if (_activeRoute != null)
                 {
                     currentRoute = _activeRoute.Points;
+                    LogSometimes(loops, $"Autopilot: Route present. Prev WP: {currentLeg?.PreviousWayPointName}, next WP: {currentLeg?.NextWayPointName}");
+                }
+                else
+                {
+                    LogSometimes(loops,
+                        $"Autopilot: No route present. Prev WP: {currentLeg?.PreviousWayPointName}, next WP: {currentLeg?.NextWayPointName}");
                 }
 
                 RoutePoint? next;
@@ -421,6 +432,12 @@ namespace Iot.Device.Nmea0183
                     }
                 }
 
+                if (previous != null)
+                {
+                   LogSometimes(loops,
+                        $"Autopilot: Navigation is from {previous.WaypointName} at {previous.Position} to {next.WaypointName} at {next.Position}");
+                }
+
                 NextWaypoint = next;
                 PreviousWaypoint = previous;
                 List<NmeaSentence> sentencesToSend = new List<NmeaSentence>();
@@ -489,6 +506,15 @@ namespace Iot.Device.Nmea0183
 
                 _output.SendSentences(sentencesToSend);
             }
+        }
+
+        /// <summary>
+        /// Resets the origin of a go-to-route. This should normally cause XTE to reset to zero
+        /// if the autopilot had a wrong segment picked up
+        /// </summary>
+        public void ResetOrigin()
+        {
+            _currentOrigin = null;
         }
 
         private bool HasPassedWaypoint(GeographicPosition position, Angle courseOverGround, ref RoutePoint? nextWaypoint, List<RoutePoint> currentRoute)

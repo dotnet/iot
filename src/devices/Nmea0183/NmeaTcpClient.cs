@@ -22,31 +22,71 @@ namespace Iot.Device.Nmea0183
     /// </summary>
     public class NmeaTcpClient : NmeaSinkAndSource
     {
-        private readonly string _destination;
-        private readonly int _port;
+        private readonly Func<(string Destination, int Port)>? _discoveryFunc;
+        private readonly INmeaParserFactory _parserFactory;
 
+        private string? _destination;
+        private int _port;
         private TcpClient? _client;
         private NmeaParser? _parser;
         private Thread? _connectionThread;
-        private bool _terminated;
-        private ILogger _logger;
+        private CancellationTokenSource _cancellationTokenSource;
         private bool _connectionActive;
 
         /// <summary>
-        /// Creates a server with the given source name bound to the given local IP and port.
-        /// This will not open the server yet. Use <see cref="StartDecode"/> to open the network port.
+        /// Creates a client that connects to the given destination and port. If the connection is not
+        /// possible or is lost intermittently, it will be retried repeatedly.
+        /// You need to call <see cref="StartDecode"/> to actually start receiving data.
         /// </summary>
         /// <param name="name">Source name</param>
         /// <param name="destination">Remote host to connect to</param>
         /// <param name="port">The network port to use</param>
         public NmeaTcpClient(string name, string destination, int port = 10110)
-        : base(name)
+        : this(name, destination, port, new Nmea0183ParserFactory())
+        {
+        }
+
+        /// <summary>
+        /// Creates a client that connects to the given destination and port. If the connection is not
+        /// possible or is lost intermittently, it will be retried repeatedly.
+        /// You need to call <see cref="StartDecode"/> to actually start receiving data.
+        /// </summary>
+        /// <param name="name">Source name</param>
+        /// <param name="destination">Remote host to connect to</param>
+        /// <param name="port">The network port to use</param>
+        /// <param name="parserFactory">The parser to use for this connection</param>
+        public NmeaTcpClient(string name, string destination, int port, INmeaParserFactory parserFactory)
+            : base(name)
         {
             _destination = destination;
             _port = port;
+            _parserFactory = parserFactory;
             _connectionActive = false;
+            _cancellationTokenSource = new CancellationTokenSource();
             RetryInterval = TimeSpan.FromSeconds(5);
-            _logger = this.GetCurrentClassLogger();
+        }
+
+        /// <summary>
+        /// Creates a client that connects to a destination and port. This constructor
+        /// allows specifying a discovery function that will be called to obtain the destination address/port before
+        /// an attempt to connect.
+        /// If the connection is not
+        /// possible or is lost intermittently, it will be retried repeatedly.
+        /// You need to call <see cref="StartDecode"/> to actually start receiving data.
+        /// </summary>
+        /// <param name="name">Source name</param>
+        /// <param name="discoveryFunc">Function that should deliver the address of the destination.
+        /// Returning an empty string will just cause another try later.</param>
+        /// <param name="parserFactory">The parser to use</param>
+        public NmeaTcpClient(string name, Func<(string Destination, int Port)> discoveryFunc,
+            INmeaParserFactory parserFactory)
+            : base(name)
+        {
+            _discoveryFunc = discoveryFunc;
+            _parserFactory = parserFactory;
+            _connectionActive = false;
+            _cancellationTokenSource = new CancellationTokenSource();
+            RetryInterval = TimeSpan.FromSeconds(5);
         }
 
         /// <summary>
@@ -75,30 +115,45 @@ namespace Iot.Device.Nmea0183
                 throw new InvalidOperationException("Server already started");
             }
 
-            _terminated = false;
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                throw new InvalidOperationException("This client is already terminated");
+            }
+
             _connectionThread = new Thread(ConnectionWatcher);
             _connectionThread.Start();
         }
 
         private void ConnectionWatcher()
         {
-            while (!_terminated && _connectionThread != null)
+            while (!_cancellationTokenSource.IsCancellationRequested && _connectionThread != null)
             {
+                if (_discoveryFunc != null)
+                {
+                    (_destination, _port) = _discoveryFunc();
+                }
+
                 try
                 {
+                    if (string.IsNullOrEmpty(_destination))
+                    {
+                        _cancellationTokenSource.Token.WaitHandle.WaitOne(RetryInterval);
+                        continue;
+                    }
+
                     var client = new TcpClient(_destination, _port);
                     _connectionActive = true;
-                    _logger.LogInformation($"{InterfaceName}: Connected to {_destination}:{_port}");
-                    var parser = new NmeaParser($"{InterfaceName}: Connected to {_destination}:{_port}", client.GetStream(), client.GetStream());
+                    Logger.LogInformation($"{InterfaceName}: Connected to {_destination}:{_port}");
+                    var parser = _parserFactory.CreateParser($"{InterfaceName}: Connected to {_destination}:{_port}", client.GetStream(), client.GetStream());
                     parser.OnNewSequence += OnSentenceReceivedFromServer;
                     parser.OnParserError += ParserOnParserError;
                     _client = client;
                     _parser = parser;
                     parser.StartDecode();
 
-                    while (Connected && !_terminated)
+                    while (Connected && !_cancellationTokenSource.IsCancellationRequested)
                     {
-                        Thread.Sleep(RetryInterval);
+                        _cancellationTokenSource.Token.WaitHandle.WaitOne(RetryInterval);
                     }
 
                     if (_parser != null)
@@ -112,7 +167,7 @@ namespace Iot.Device.Nmea0183
                 catch (SocketException)
                 {
                     // Retry
-                    Thread.Sleep(RetryInterval);
+                    _cancellationTokenSource.Token.WaitHandle.WaitOne(RetryInterval);
                     _connectionActive = false;
                 }
             }
@@ -155,7 +210,8 @@ namespace Iot.Device.Nmea0183
         /// <inheritdoc />
         public override void StopDecode()
         {
-            _terminated = true;
+            Logger.LogInformation($"Tcp Client {InterfaceName} is terminating");
+            _cancellationTokenSource.Cancel();
             if (_connectionThread != null)
             {
                 _connectionThread.Join();

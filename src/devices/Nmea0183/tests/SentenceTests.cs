@@ -550,19 +550,21 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void SeaSmartFluidLevelEncode()
         {
-            var msg = new SeaSmartFluidLevel(new FluidData(FluidType.BlackWater, Ratio.FromPercent(20),
-                Volume.FromLiters(100), 7, false));
+            var originalData = new FluidData(FluidType.BlackWater, Ratio.FromPercent(20),
+                Volume.FromLiters(100), 7, false);
+            var msg = new SeaSmartFluidLevel(originalData);
             var text = msg.ToNmeaParameterList();
-            Assert.Equal("01F211,00000000,02,570014E8030000FF", text);
+            Assert.Equal("01F211,00000000,02,578813E8030000FF", text);
 
-            var sentence = TalkerSentence.FromSentenceString("$PCDIN,01F211,00000000,02,570014E8030000FF", out var error);
+            var sentence = TalkerSentence.FromSentenceString("$PCDIN,01F211,00000000,02,578813E8030000FF", out var error);
             Assert.Equal(NmeaError.None, error);
             DateTimeOffset time = DateTimeOffset.UtcNow;
             var msg2 = (SeaSmartFluidLevel)sentence!.TryGetTypedValue(ref time)!;
+            Assert.Equal(originalData, msg2.AsFluidData());
             var param1 = msg.ToNmeaParameterList();
             var param2 = msg2.ToNmeaParameterList();
             Assert.Equal(param1, param2);
-            Assert.Equal(SeaSmartFluidLevel.HexId, msg2.Identifier);
+            Assert.Equal((uint)SeaSmartFluidLevel.HexId, msg2.Identifier);
         }
 
         [Fact]

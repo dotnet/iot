@@ -1,27 +1,26 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Iot.Device.Seatalk1.Messages
+namespace Iot.Device.Nmea0183.Sentences
 {
     /// <summary>
-    /// Turn direction, for Autopilot operation
+    /// Turn direction, for Autopilot and Rudder operation
     /// </summary>
     public enum TurnDirection
     {
         /// <summary>
+        /// No direction command given
+        /// </summary>
+        NoCommand = 0,
+
+        /// <summary>
         /// Turn or turning to port (left)
         /// </summary>
-        Port = 0,
+        TurnToPort = 1,
 
         /// <summary>
         /// Turn or turning to starboard (right)
         /// </summary>
-        Starboard = 1,
+        TurnToStarboard = 2,
     }
 }

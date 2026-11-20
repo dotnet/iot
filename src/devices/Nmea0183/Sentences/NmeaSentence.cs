@@ -122,6 +122,17 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <summary>
+        /// Returns true if these messages are of the same type.
+        /// The operation is in particular meaningful when <see cref="ReplacesOlderInstance"/> is true.
+        /// </summary>
+        /// <param name="other">The message to compare to</param>
+        /// <returns>For most messages, this returns true when both SentenceId and TalkerId are the same</returns>
+        public virtual bool IsSameMessageAs(NmeaSentence other)
+        {
+            return SentenceId == other.SentenceId && TalkerId == other.TalkerId;
+        }
+
+        /// <summary>
         /// The relative age of this sentence against a time stamp.
         /// Useful when analyzing recorded data, where "now" should also be a time in the past.
         /// </summary>
