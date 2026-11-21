@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Nmea0183
@@ -124,9 +125,16 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         private void LogMessage(string sourceName, NmeaSentence sentence)
         {
-            string msg = FormattableString.Invariant(
-                $"{DateTime.UtcNow:s}|{sourceName}|${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaParameterList()}|{sentence.ToReadableContent()}");
-            _textWriter?.WriteLine(msg);
+            try
+            {
+                string msg = FormattableString.Invariant(
+                    $"{DateTime.UtcNow:s}|{sourceName}|${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaParameterList()}|{sentence.ToReadableContent()}");
+                _textWriter?.WriteLine(msg);
+            }
+            catch (Exception e) when (e is NotImplementedException)
+            {
+                Logger.LogInformation("Cannot log a message, because it's construction is not implemented");
+            }
         }
 
         /// <summary>

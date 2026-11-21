@@ -17,6 +17,7 @@ namespace Iot.Device.Common
     /// </summary>
     public class SimpleFileLoggerFactory : ILoggerFactory, IDisposable
     {
+        private readonly bool _useUtc;
         private TextWriter? _writer;
         private List<SimpleFileLogger> _createdLoggers;
 
@@ -26,6 +27,18 @@ namespace Iot.Device.Common
         /// <param name="fileName">File name to log to (full path)</param>
         public SimpleFileLoggerFactory(string fileName)
         {
+            _writer = TextWriter.Synchronized(new StreamWriter(fileName, true, Encoding.UTF8));
+            _createdLoggers = new List<SimpleFileLogger>();
+        }
+
+        /// <summary>
+        /// Create a logger factory that creates loggers to logs to the specified file
+        /// </summary>
+        /// <param name="fileName">File name to log to (full path)</param>
+        /// <param name="useUtc">True to use UTC time stamps in the log file(s)</param>
+        public SimpleFileLoggerFactory(string fileName, bool useUtc)
+        {
+            _useUtc = useUtc;
             _writer = TextWriter.Synchronized(new StreamWriter(fileName, true, Encoding.UTF8));
             _createdLoggers = new List<SimpleFileLogger>();
         }
@@ -46,7 +59,7 @@ namespace Iot.Device.Common
                 return NullLogger.Instance;
             }
 
-            var newLogger = new SimpleFileLogger(categoryName, _writer);
+            var newLogger = new SimpleFileLogger(categoryName, _writer, _useUtc);
             _createdLoggers.Add(newLogger);
             return newLogger;
         }

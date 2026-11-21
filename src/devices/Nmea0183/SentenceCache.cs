@@ -16,16 +16,16 @@ namespace Iot.Device.Nmea0183
 {
     /// <summary>
     /// Caches the last sentence(s) of each type for later retrieval.
-    /// This is a helper class for <see cref="AutopilotController"/> and <see cref="PositionProvider"/>. Use <see cref="PositionProvider"/> to query the position from
+    /// This is a helper class for <see cref="NavigationRefiner"/> and <see cref="PositionProvider"/>. Use <see cref="PositionProvider"/> to query the position from
     /// the most appropriate messages.
     /// It internally keeps two kinds of lists: The last sentence of each type and the last sentence of each type _by source_.
     /// </summary>
     public sealed class SentenceCache : IDisposable
     {
-        private readonly NmeaSinkAndSource _source;
+        private readonly NmeaSinkAndSource? _source;
         private readonly object _lock;
 
-        private readonly Dictionary<int, NmeaSentence> _dinData;
+        private readonly Dictionary<uint, NmeaSentence> _dinData;
         private readonly Dictionary<SentenceId, NmeaSentence> _sentences;
         private readonly Dictionary<String, Dictionary<SentenceId, NmeaSentence>> _sentencesBySource;
         private readonly ILogger _logger;
@@ -49,8 +49,8 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// Creates an new cache using the given source
         /// </summary>
-        /// <param name="source">The source to monitor</param>
-        public SentenceCache(NmeaSinkAndSource source)
+        /// <param name="source">The source to monitor. Can be null if the cache is filled explicitly</param>
+        public SentenceCache(NmeaSinkAndSource? source)
         {
             _source = source;
             _lock = new object();
@@ -60,10 +60,14 @@ namespace Iot.Device.Nmea0183
             _lastSatelliteInfos = new Queue<SatellitesInView>();
             _wayPoints = new Dictionary<string, Waypoint>();
             _xdrData = new Dictionary<string, TransducerDataSet>();
-            _dinData = new Dictionary<int, NmeaSentence>();
+            _dinData = new Dictionary<uint, NmeaSentence>();
             StoreRawSentences = false;
             _logger = this.GetCurrentClassLogger();
-            _source.OnNewSequence += OnNewSequence;
+            if (_source != null)
+            {
+                _source.OnNewSequence += OnNewSequence;
+            }
+
             MaxDataAge = TimeSpan.FromSeconds(30);
         }
 
@@ -296,9 +300,9 @@ namespace Iot.Device.Nmea0183
                         _xdrData[measurement.DataName] = measurement;
                     }
                 }
-                else if (sentence.SentenceId == ProprietaryMessage.Id && (sentence is ProprietaryMessage din))
+                else if (sentence.SentenceId == Nmea2000PackedMessage.Id && (sentence is Nmea2000PackedMessage din))
                 {
-                    _dinData[din.Identifier] = din;
+                    _dinData[(din.Identifier & 0x1FFFF)] = din;
                 }
                 else if (sentence.SentenceId == RecommendedMinimumNavigationInformation.Id && (sentence is RecommendedMinimumNavigationInformation rmc))
                 {
@@ -318,7 +322,11 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         public void Dispose()
         {
-            _source.OnNewSequence -= OnNewSequence;
+            if (_source != null)
+            {
+                _source.OnNewSequence -= OnNewSequence;
+            }
+
             _sentences.Clear();
         }
 
@@ -366,14 +374,14 @@ namespace Iot.Device.Nmea0183
         /// <param name="hexId">The hexadecimal identifier for this sub-message</param>
         /// <param name="sentence">Receives the sentence, if any was found</param>
         /// <returns>True on success, false if no such message was received</returns>
-        public bool TryGetLastDinSentence<T>(int hexId,
+        public bool TryGetLastDinSentence<T>(uint hexId,
             [NotNullWhen(true)]
             out T? sentence)
             where T : NmeaSentence
         {
             CleanOutdatedEntries();
             // The second condition should always be true, because this list only contains din messages
-            if (!_dinData.TryGetValue(hexId, out var s) || s.SentenceId != ProprietaryMessage.Id)
+            if (!_dinData.TryGetValue((hexId & 0x1FFFF), out var s) || s.SentenceId != Nmea2000PackedMessage.Id)
             {
                 sentence = null;
                 return false;

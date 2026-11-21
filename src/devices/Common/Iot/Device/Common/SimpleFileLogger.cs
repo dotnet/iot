@@ -32,7 +32,30 @@ namespace Iot.Device.Common
             _category = category;
             _writer = writer;
             Enabled = true;
+            UseUtc = false;
         }
+
+        /// <summary>
+        /// Creates a new logger
+        /// </summary>
+        /// <param name="category">Logger category name</param>
+        /// <param name="writer">The text writer for logging.</param>
+        /// <param name="useUtc">True to use UTC time in log files</param>
+        /// <remarks>
+        /// The <paramref name="writer"/> must be a thread-safe file writer!
+        /// </remarks>
+        public SimpleFileLogger(string category, TextWriter writer, bool useUtc)
+        {
+            UseUtc = useUtc;
+            _category = category;
+            _writer = writer;
+            Enabled = true;
+        }
+
+        /// <summary>
+        /// True if this logger uses UTC for log entries
+        /// </summary>
+        public bool UseUtc { get; }
 
         /// <summary>
         /// Used by the factory to terminate all its loggers
@@ -61,14 +84,16 @@ namespace Iot.Device.Common
             return Enabled;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Logging method, not usually called directly, but via the <see cref="ILogger"/> interface
+        /// </summary>
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             if (Enabled)
             {
                 string msg = formatter(state, exception);
-                var time = DateTime.Now;
-                _writer.WriteLine($"{time.ToShortDateString()} {time.ToLongTimeString()} - {_category} - {logLevel} - {msg}");
+                var time = UseUtc ? DateTime.UtcNow : DateTime.Now;
+                _writer.WriteLine($"{time:O}|{_category}|{logLevel}|{msg}");
             }
         }
     }
