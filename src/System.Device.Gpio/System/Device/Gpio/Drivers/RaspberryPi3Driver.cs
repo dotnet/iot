@@ -278,7 +278,15 @@ public class RaspberryPi3Driver : GpioDriver
     {
         var ret = new ComponentInformation(this, "Generic Raspberry Pi Wrapper driver");
         ret.AddSubComponent(_internalDriver.QueryComponentInformation());
-        ret.Properties["ChipInfo"] = _internalDriver.GetChipInfo().ToString();
+        try
+        {
+            ret.Properties["ChipInfo"] = _internalDriver.GetChipInfo().ToString();
+        }
+        catch (NotSupportedException)
+        {
+            // The memory-mapped Raspberry Pi driver has no chip info, see https://github.com/dotnet/iot/issues/2615
+        }
+
         return ret;
     }
 }
