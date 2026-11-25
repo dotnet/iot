@@ -272,7 +272,7 @@ Use -1 to allow breaking on all threads.")
                 }
                 else
                 {
-                    remoteStack.Add(new RemoteStackFrame(methodToken, taskId));
+                    remoteStack.Add(new RemoteStackFrame(taskId, methodToken));
                 }
             }
 
