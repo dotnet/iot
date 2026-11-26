@@ -7,8 +7,9 @@ This repository contains the .NET IoT libraries: **System.Device.Gpio** (low-lev
 ## Working Effectively with Fresh Clone
 
 ### Required Dependencies and Setup
-- **CRITICAL**: This repository requires **Azure DevOps feeds access** to build. If you get SDK resolution errors, this is due to network restrictions.
-- **Install .NET 8.0.300 SDK**: Use `./dotnet.sh --version` to verify the exact version from global.json is available
+- **Packages are pre-restored**: Before you start, `.github/workflows/copilot-setup-steps.yml` downloads the .NET SDK, the Arcade SDK and all NuGet packages, so `./build.sh --restore --build` works even though the Copilot agent's firewall blocks the Azure DevOps feeds in NuGet.config. Adding or updating a package version may still need feed access; if restore fails, say so in the PR.
+- **Run `build.sh` without `--ci` or `--configuration Release`**: The setup steps fill `~/.nuget/packages` for the default Debug configuration. `--ci` switches to an empty repo-local cache (`.packages/`), and Release makes NuGet restore the `tools/ArduinoCsCompiler` projects again (they reference different projects in Release), which fails while the feeds are blocked.
+- **.NET SDK**: The version comes from global.json, and the build scripts install it into `.dotnet/`. Use `./dotnet.sh --version` to check it.
 - **Build command**: `./build.sh --restore --build` (Linux/macOS) or `Build.cmd` (Windows)
 - **NEVER CANCEL**: Full repository build takes **30-45 minutes**. Set timeout to **60+ minutes**.
 
@@ -19,16 +20,16 @@ Run these commands in order:
 ./dotnet.sh --version
 
 # 2. Full repository build - NEVER CANCEL, takes 30-45 minutes
-./build.sh --restore --build --configuration Release
+./build.sh --restore --build
 
 # 3. Build with packages (for testing distribution)
-./build.sh --restore --build --pack --configuration Release
+./build.sh --restore --build --pack
 
 # 4. Run tests - NEVER CANCEL, takes 15-30 minutes  
-./build.sh --test --configuration Release
+./build.sh --test
 ```
 
-**If Azure DevOps feeds are inaccessible**: Build will fail with "Could not resolve SDK Microsoft.DotNet.Arcade.Sdk" errors. Document this as a known limitation requiring network access to Azure DevOps.
+**Before finishing**: Run the full `./build.sh --restore --build` and repeat until it ends with 0 errors; the PR pipeline (azure-pipelines.yml) runs the same script. Analyzer (StyleCop) warnings are errors here (`TreatWarningsAsErrors`), and an error in `System.Device.Gpio` stops every project that depends on it, so fixing the first batch of errors isn't enough.
 
 ### Alternative Build Approaches
 When main build fails due to network restrictions:
@@ -77,7 +78,7 @@ ls src/devices/Dhtxx/  # Example: DHT temperature sensor
 ### Running Tests
 ```bash
 # Run all tests - NEVER CANCEL, takes 15-30 minutes
-./build.sh --test --configuration Release
+./build.sh --test
 
 # Run specific test project
 ./dotnet.sh test src/devices/Dhtxx/tests/
@@ -132,7 +133,7 @@ markdownlint -c .markdownlint.json .
 ## Debugging Build Issues
 
 ### Common Issues and Solutions
-1. **SDK resolution errors**: Azure DevOps feeds inaccessible - document as network limitation
+1. **SDK or package restore errors**: The Azure DevOps feeds are blocked for the Copilot agent, and only the existing packages are pre-restored. Make sure you didn't pass `--ci` or `--configuration Release`; if you added or updated a package version, say in the PR that restore needs feed access
 2. **Package not found**: Check if using correct NuGet sources in NuGet.config
 3. **Memory issues**: Use `/maxCpuCount:1` to disable parallel builds if needed
 4. **Cross-platform issues**: Device bindings should use System.Device.* abstractions only
@@ -195,7 +196,7 @@ cd src/devices
 - **Use P/Invoke or OS-specific APIs** - defeats hardware abstraction purpose
 
 ### Critical Success Factors
-1. **Network Access**: Azure DevOps feeds required for full build capability
+1. **Full build**: Packages are pre-restored, so run `./build.sh --restore --build` until it reports 0 errors
 2. **Patience**: Builds are lengthy due to large codebase (130+ bindings)
 3. **Hardware Awareness**: Code should work without hardware for testing
 4. **Cross-platform Mindset**: Support Linux, Windows, embedded systems equally

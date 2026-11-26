@@ -1,0 +1,38 @@
+name: "Copilot Setup Steps"
+
+# Prepares the environment for the Copilot cloud agent before it starts working.
+# The agent's firewall blocks the Azure DevOps feeds in NuGet.config, but it
+# doesn't apply to these steps. Restoring here downloads the .NET SDK, the
+# Arcade SDK and all NuGet packages up front, so the agent can run ./build.sh
+# and see the same build errors as the PR pipeline (azure-pipelines.yml).
+#
+# Runs automatically when this file changes, and can be run manually from the
+# Actions tab.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job must be called `copilot-setup-steps`, otherwise Copilot won't use it.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # Restore only: ./build.sh always adds --build, so call the Arcade script
+      # directly. Use the same defaults as the agent's later ./build.sh runs:
+      # - no --ci: it restores into a repo-local .packages folder instead of
+      #   ~/.nuget/packages
+      # - the default Debug configuration: tools/ArduinoCsCompiler references
+      #   different projects in Release, so Release needs its own restore
+      - name: Restore .NET SDK, Arcade SDK and NuGet packages
+        run: ./eng/common/build.sh --restore
