@@ -8,9 +8,6 @@ using Iot.Device.Graphics;
 
 namespace Iot.Device.Media
 {
-    /// <content>
-    /// The communications channel to a video device.
-    /// </content>
     public abstract partial class VideoDevice
     {
         /// <summary>

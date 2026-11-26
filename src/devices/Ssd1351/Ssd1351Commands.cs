@@ -187,9 +187,6 @@ namespace Iot.Device.Ssd1351
         Slowest = 0x03
     }
 
-    /// <content>
-    /// Constructs Ssd1351 instance
-    /// </content>
     public partial class Ssd1351 : IDisposable
     {
         /// <summary>
