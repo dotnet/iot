@@ -20,7 +20,7 @@ The following samples demonstrate various scenarios:
 
 ## Requirements
 
-The .NET IoT APIs require using at least .NET 8.0.
+The .NET IoT APIs require using at least .NET 10.0.
 
 Many of these samples use the [Raspberry Pi](https://www.raspberrypi.org/), however, .NET Core can be used with other devices. .NET is supported on Raspberry Pi 2B as well as 3 and 4 models (ARMv7/v8). .NET is not supported on Raspberry Pi Zero or Arduino. For the later ones, there are alternatives like [NanoFramework](https://nanoframework.net/) or our own [Arduino Compiler](../tools/ArduinoCsCompiler/README.md).
 

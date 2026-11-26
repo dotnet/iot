@@ -9,6 +9,8 @@ using System.Device.Spi;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Iot.Device.Card;
 using Iot.Device.Rfid;
@@ -494,7 +496,7 @@ namespace Iot.Device.Mfrc522
             }
 
             // Read if there is something to read
-            if (receiveData != null)
+            if (!Unsafe.IsNullRef(ref MemoryMarshal.GetReference(receiveData)))
             {
                 var bytesRead = ReadRegister(Register.FifoLevel);
                 if (bytesRead == 0 && receiveData.Length > 0)

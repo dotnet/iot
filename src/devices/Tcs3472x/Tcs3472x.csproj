@@ -5,6 +5,5 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
   </ItemGroup>
 </Project>

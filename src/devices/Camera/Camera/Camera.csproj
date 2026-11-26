@@ -6,10 +6,6 @@
     <RootNamespace>Iot.Device.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.IO.Pipelines" Version="$(SystemIOPipelinesVersion)" />
-  </ItemGroup>
-
   <!-- Make the internal members visible to the unit test assembly -->
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">

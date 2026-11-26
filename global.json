@@ -1,17 +1,17 @@
 {
   "tools": {
-    "dotnet": "9.0.306",
+    "dotnet": "10.0.204",
     "runtimes": {
       "dotnet/x64": [
-        "8.0.5"
+        "10.0.8"
       ],
       "dotnet/arm64": [
-        "8.0.5"
+        "10.0.8"
       ]
     }
   },
   "sdk": {
-    "version": "9.0.306",
+    "version": "10.0.204",
     "allowPrerelease": true,
     "rollForward": "major"
   },

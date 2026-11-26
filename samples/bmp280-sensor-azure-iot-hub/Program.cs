@@ -42,7 +42,7 @@ namespace DNSensorAzureIoTHub
             using var i2CBmp280 = new Bmp280(i2cDevice);
 
             // Create an X.509 certificate object.
-            var cert = new X509Certificate2($"{DeviceID}.pfx", "1234");
+            var cert = X509CertificateLoader.LoadPkcs12FromFile($"{DeviceID}.pfx", "1234");
             var auth = new DeviceAuthenticationWithX509Certificate(DeviceID, cert);
             DeviceClient? azureIoTClient = DeviceClient.Create(IotBrokerAddress, auth, TransportType.Mqtt);
 

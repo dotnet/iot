@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <Compile Include="*.cs" />
     <Compile Include="RfConfiguration\*.cs" />
     <Compile Include="ListPassive\*.cs" />

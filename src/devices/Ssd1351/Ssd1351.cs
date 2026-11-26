@@ -5,6 +5,8 @@ using System;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Drawing;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Iot.Device.Ssd1351
@@ -213,7 +215,7 @@ namespace Iot.Device.Ssd1351
 
             SendSPI(commandSpan, true);
 
-            if (data != null && data.Length > 0)
+            if (!data.IsEmpty)
             {
                 SendSPI(data);
 
@@ -236,7 +238,7 @@ namespace Iot.Device.Ssd1351
         /// <param name="data">The data to send to the display controller.</param>
         public void SendData(Span<byte> data)
         {
-            if (data == null)
+            if (Unsafe.IsNullRef(ref MemoryMarshal.GetReference(data)))
             {
                 throw new ArgumentNullException(nameof(data));
             }

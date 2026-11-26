@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);BUILDING_IOT_DEVICE_BINDINGS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -32,11 +32,9 @@
 
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
-    <PackageReference Include="System.IO.Pipelines" Version="$(SystemIOPipelinesVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
-    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
     <!-- This package is only used for windows specific stuff. -->
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
   </ItemGroup>
