@@ -297,9 +297,9 @@ namespace ArduinoCsCompiler.Runtime
             => path.Length > 0 && IsDirectorySeparator(path[path.Length - 1]);
 
         public static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
-            EndsInDirectorySeparator(path) && !IsRoot(path) ?
-                path.Slice(0, path.Length - 1) :
-                path;
+            EndsInDirectorySeparator(path) && !IsRoot(path)
+                ? path.Slice(0, path.Length - 1)
+                : path;
 
         [ArduinoImplementation]
         public static bool IsRoot(ReadOnlySpan<char> path)

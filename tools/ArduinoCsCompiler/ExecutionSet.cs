@@ -1846,7 +1846,7 @@ namespace ArduinoCsCompiler
             _logger.LogDebug($"Got {fieldOrCtorTokenToClass.Count} members in reverse lookup index");
         }
 
-        internal bool TryGetCachedCode(EquatableMethod method, [NotNullWhen(true)]out IlCode? ilCode)
+        internal bool TryGetCachedCode(EquatableMethod method, [NotNullWhen(true)] out IlCode? ilCode)
         {
             if (_codeCache.TryGetValue(method, out ilCode))
             {

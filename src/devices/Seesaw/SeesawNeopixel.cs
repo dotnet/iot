@@ -11,9 +11,9 @@ using System.Threading;
 
 namespace Iot.Device.Seesaw
 {
-    /// <summary>
+    /// <content>
     /// Seesaw GPIO driver
-    /// </summary>
+    /// </content>
     public partial class Seesaw : IDisposable
     {
         /// <summary>

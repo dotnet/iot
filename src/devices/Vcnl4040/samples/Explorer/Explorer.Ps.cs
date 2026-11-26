@@ -239,7 +239,9 @@ internal partial class Explorer
             }
 
             mode = awayEventEnabled && closeEventEnabled ? ProximityInterruptMode.CloseOrAwayInterrupt :
-            awayEventEnabled ? ProximityInterruptMode.AwayInterrupt : closeEventEnabled ? ProximityInterruptMode.CloseInterrupt : ProximityInterruptMode.Nothing;
+                   awayEventEnabled ? ProximityInterruptMode.AwayInterrupt :
+                   closeEventEnabled ? ProximityInterruptMode.CloseInterrupt :
+                   ProximityInterruptMode.Nothing;
         }
 
         if (mode == ProximityInterruptMode.Nothing)
