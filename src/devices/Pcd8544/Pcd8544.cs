@@ -324,9 +324,9 @@ namespace Iot.Device.Display
                 throw new ArgumentException($"Character can only be 8 or 5 bytes array");
             }
 
-            byte[] character = characterMap.Length == 8 ?
-               LcdCharacterEncodingFactory.ConvertFont8to5bytes(characterMap.ToArray()) :
-               characterMap.ToArray();
+            byte[] character = characterMap.Length == 8
+                ? LcdCharacterEncodingFactory.ConvertFont8to5bytes(characterMap.ToArray())
+                : characterMap.ToArray();
 
             if (_font.ContainsKey((char)location))
             {

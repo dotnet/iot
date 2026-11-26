@@ -262,7 +262,8 @@ namespace Iot.Device.CharacterLcd
         public bool DisplayOn
         {
             get => (_displayControl & DisplayControl.DisplayOn) > 0;
-            set => SendCommandAndWait((byte)(value ? _displayControl |= DisplayControl.DisplayOn
+            set => SendCommandAndWait((byte)(value
+                ? _displayControl |= DisplayControl.DisplayOn
                 : _displayControl &= ~DisplayControl.DisplayOn));
         }
 
@@ -272,7 +273,8 @@ namespace Iot.Device.CharacterLcd
         public bool UnderlineCursorVisible
         {
             get => (_displayControl & DisplayControl.CursorOn) > 0;
-            set => SendCommandAndWait((byte)(value ? _displayControl |= DisplayControl.CursorOn
+            set => SendCommandAndWait((byte)(value
+                ? _displayControl |= DisplayControl.CursorOn
                 : _displayControl &= ~DisplayControl.CursorOn));
         }
 
@@ -282,7 +284,8 @@ namespace Iot.Device.CharacterLcd
         public bool BlinkingCursorVisible
         {
             get => (_displayControl & DisplayControl.BlinkOn) > 0;
-            set => SendCommandAndWait((byte)(value ? _displayControl |= DisplayControl.BlinkOn
+            set => SendCommandAndWait((byte)(value
+                ? _displayControl |= DisplayControl.BlinkOn
                 : _displayControl &= ~DisplayControl.BlinkOn));
         }
 
@@ -292,7 +295,8 @@ namespace Iot.Device.CharacterLcd
         public bool AutoShift
         {
             get => (_displayMode & DisplayEntryMode.DisplayShift) > 0;
-            set => SendCommandAndWait((byte)(value ? _displayMode |= DisplayEntryMode.DisplayShift
+            set => SendCommandAndWait((byte)(value
+                ? _displayMode |= DisplayEntryMode.DisplayShift
                 : _displayMode &= ~DisplayEntryMode.DisplayShift));
         }
 
@@ -302,7 +306,8 @@ namespace Iot.Device.CharacterLcd
         public bool Increment
         {
             get => (_displayMode & DisplayEntryMode.Increment) > 0;
-            set => SendCommandAndWait((byte)(value ? _displayMode |= DisplayEntryMode.Increment
+            set => SendCommandAndWait((byte)(value
+                ? _displayMode |= DisplayEntryMode.Increment
                 : _displayMode &= ~DisplayEntryMode.Increment));
         }
 

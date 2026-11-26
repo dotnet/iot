@@ -7,9 +7,6 @@ using System.Device.Spi;
 
 namespace Iot.Device.Mcp23xxx
 {
-    /// <summary>
-    /// Base class for Mcp23xxx GPIO expanders
-    /// </summary>
     public abstract partial class Mcp23xxx
     {
         /// <summary>

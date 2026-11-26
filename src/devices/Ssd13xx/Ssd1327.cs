@@ -114,7 +114,7 @@ namespace Iot.Device.Ssd13xx
         {
             byte[]? commandBytes = command?.GetBytes();
 
-            if (commandBytes is not { Length: >0 })
+            if (commandBytes is not { Length: > 0 })
             {
                 throw new ArgumentException("Argument is either null or there were no bytes to send.", nameof(command));
             }

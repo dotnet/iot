@@ -437,7 +437,7 @@ namespace Iot.Device.Tca955x
             byte register = GetRegisterIndex(pinNumber, Register.ConfigurationPort);
             return IsBitSet(InternalReadByte(register), GetBitNumber(pinNumber))
                 ? PinMode.Input
-                    : PinMode.Output;
+                : PinMode.Output;
         }
 
         private void InterruptHandler(object sender, PinValueChangedEventArgs e)

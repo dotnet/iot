@@ -20,7 +20,7 @@ Console.WriteLine();
 while (true)
 {
     string[]? command = Console.ReadLine()?.ToLower()?.Split(' ');
-    if (command?[0] is not { Length: >0 })
+    if (command?[0] is not { Length: > 0 })
     {
         return;
     }
